@@ -33,10 +33,10 @@ Issuers have the freedom to decide how to verify that the user actually owns the
 | Participant | Description |
 |-----------|--------|
 | user | User that owns the off-chain identifier and account
-| issuer | Anyone who is verifying identifiers and creating on-chain attestations, this will most likely be a wallet  
-| Oblivious Decentralised Identity Service (ODIS) | An API that produces secrets used for obfuscating the identifiers, more details [here](privacy.md) |
+| issuer | Anyone who is verifying identifiers and creating on-chain attestations, this will most likely be a wallet
+| Oblivious Decentralised Identity Service (ODIS) | An API that produces secrets used for obfuscating the identifiers, more details [here](docs/privacy.md) |
 | `FederatedAttestations.sol` | On-chain registry of attestation mappings between identifiers and addresses |
-| `OdisPayments.sol` |  Smart contract used to pay for [ODIS quota](privacy.md#rate-limit) |
+| `OdisPayments.sol` |  Smart contract used to pay for [ODIS quota](docs/privacy.md#rate-limit) |
 
 </details>
 
@@ -50,7 +50,7 @@ The user provides their phone number to the application, who is acting as an iss
 
 <img width="1200" alt="image" src="https://user-images.githubusercontent.com/46296830/201714875-c73d8417-0e0c-47b4-9b41-8529689f0607.png">
 
-### Look up phone number 
+### Look up phone number
 
 The wallet queries ODIS for the obfuscated identifier of the phone number. Using the obfuscated identifier, the wallet looks up the on-chain registry to see which account is mapped to that identifier, specifying itself as the trusted issuer.
 
@@ -73,11 +73,11 @@ sequenceDiagram
     participant SocialConnect as FederatedAttestations.sol
 
     rect rgb(230,200,240, .3)
-    note right of user1: publish attestation 
+    note right of user1: publish attestation
     user1 -->> wallet1: verify user owns phone number
-    wallet1 -->> user1: 
+    wallet1 -->> user1:
     wallet1 -->> ODIS: get obfuscated identifier of phone number
-    ODIS -->> wallet1: 
+    ODIS -->> wallet1:
     wallet1 -->> SocialConnect: publish attestation with obfuscated idnetifier
     end
 
@@ -86,9 +86,9 @@ sequenceDiagram
     user1 -->> user2: share phone number with friend
     user2 -->> wallet2: request to send money to user1's phone number
     wallet2 -->> ODIS: get obfuscated identifier of phone number
-    ODIS -->> wallet2: 
+    ODIS -->> wallet2:
     wallet2 -->> SocialConnect: lookup address mapped to obfuscated identifier, with wallet1 as a trusted issuer
-    SocialConnect -->> wallet2: 
+    SocialConnect -->> wallet2:
     wallet2 -->> user1: send money to user1's account
 end
 ```
@@ -153,8 +153,8 @@ const getSignatureForAttestation = async (
       EIP712Domain: [
         { name: 'name', type: 'string' },
         { name: 'version', type: 'string' },
-        { name: 'chainId', type: 'uint256'}, 
-        { name: 'verifyingContract', type: 'address'}, 
+        { name: 'chainId', type: 'uint256'},
+        { name: 'verifyingContract', type: 'address'},
       ],
       OwnershipAttestation: [
           { name: 'identifier', type: 'bytes32' },
@@ -171,11 +171,11 @@ const getSignatureForAttestation = async (
       chainId,
       verifyingContract: contractAddress
     },
-    message:{ 
+    message:{
       identifier,
       issuer,
-      account, 
-      signer, 
+      account,
+      signer,
       issuedOn
     }
   }
@@ -206,12 +206,12 @@ Anyone who has posession of this signature can register the attestation to the o
 
 ```typescript
 const {v,r,s} = getSignatureForAttestation(
-    obfuscatedIdentifier, 
-    issuerAddress, 
-    accountAddress, 
-    verificationTimestamp, 
-    signerAddress, 
-    chainId, 
+    obfuscatedIdentifier,
+    issuerAddress,
+    accountAddress,
+    verificationTimestamp,
+    signerAddress,
+    chainId,
     federatedAttestationsContract.address
 )
 await federatedAttestationsContract.registerAttestation(
@@ -248,7 +248,7 @@ console.log(attestations.accounts)
 const attestations = await federatedAttestationsInstance
     .lookupIdentifiers(accountAddress, [trustedIssuer1Address, trustedIssuer2Address])
     .call();
-    
+
 // Returns:
 // {
 //     countsPerIssuer: string[]

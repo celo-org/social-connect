@@ -21,7 +21,7 @@ Here are some active issuers verifying and registering attestations:
 | Kaala       | `0x6549aF2688e07907C1b821cA44d6d65872737f05` (mainnet)                                                          |
 | Libera      | `0x388612590F8cC6577F19c9b61811475Aa432CB44` (mainnet) `0xe3475047EF9F9231CD6fAe02B3cBc5148E8eB2c8` (alfajores) |
 
-Off-chain identifiers, originally in plaintext, are obfuscated before they are used in on-chain attestations to ensure user privacy and security. This is done with the help of the [Oblivious Decentralized Identifier Service (**ODIS**)](https://docs.celo.org/protocol/identity/odis). The details of the obfuscation process and how to interact with ODIS are described in the [docs about privacy](privacy.md).
+Off-chain identifiers, originally in plaintext, are obfuscated before they are used in on-chain attestations to ensure user privacy and security. This is done with the help of the [Oblivious Decentralized Identifier Service (**ODIS**)](https://docs.celo.org/protocol/identity/odis). The details of the obfuscation process and how to interact with ODIS are described in the [docs about privacy](docs/privacy.md).
 
 ### Want a more profound understanding?
 
@@ -41,7 +41,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
     npm install @celo/identity
     ```
 
-2. Set up your issuer (read "Authentication" section in [privacy.md](privacy.md#authentication)), which is the account registering attestations. When a user requests for the issuer to register an attestation, the issuer should [verify](protocol.md#verification) somehow that the user owns their identifier (ex. SMS verification for phone number identifiers).
+2. Set up your issuer (read "Authentication" section in [privacy.md](docs/docs/privacy.md#authentication)), which is the account registering attestations. When a user requests for the issuer to register an attestation, the issuer should [verify](docs/protocol.md#verification) somehow that the user owns their identifier (ex. SMS verification for phone number identifiers).
 
     ```ts
     import { newKit } from "@celo/contractkit";
@@ -64,7 +64,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
     const attestationVerifiedTime = Date.now();
     ```
 
-3. Check and top up [quota for querying ODIS](privacy.md#rate-limit) if necessary.
+3. Check and top up [quota for querying ODIS](docs/privacy.md#rate-limit) if necessary.
 
     ```ts
     import { OdisUtils } from "@celo/identity";
@@ -101,7 +101,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
     }
     ```
 
-4. Derive the obfuscated identifier from your plaintext identifier. Refer to documentation on the [ODIS SDK](privacy.md#using-the-sdk) for detailed explanations on these parameters and steps.
+4. Derive the obfuscated identifier from your plaintext identifier. Refer to documentation on the [ODIS SDK](docs/privacy.md#using-the-sdk) for detailed explanations on these parameters and steps.
 
     ```typescript
     // get obfuscated identifier from plaintext identifier by querying ODIS
@@ -115,7 +115,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
         );
     ```
 
-5. Register an attestation mapping between the obfuscated identifier and an account address in the `FederatedAttestations` contract. This attestation is associated under the issuer. See [docs](protocol.md#registration) for more info.
+5. Register an attestation mapping between the obfuscated identifier and an account address in the `FederatedAttestations` contract. This attestation is associated under the issuer. See [docs](docs/protocol.md#registration) for more info.
 
     ```typescript
     const federatedAttestationsContract =
@@ -131,7 +131,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
         .send();
     ```
 
-6. Look up the account addresses owned by an identifier, as attested by the issuers that you trust (in this example only your own issuer), by querying the `FederatedAttestations` contract. See [docs](protocol.md#lookups) for more info.
+6. Look up the account addresses owned by an identifier, as attested by the issuers that you trust (in this example only your own issuer), by querying the `FederatedAttestations` contract. See [docs](docs/protocol.md#lookups) for more info.
 
     ```ts
     const attestations = await federatedAttestationsContract.lookupAttestations(
@@ -158,10 +158,10 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 -   [ethers.js](https://ethers.org/) (see [`examples/ethers.ts`](examples/ethers.ts)), and
 -   [web3.js](https://web3js.readthedocs.io/en/v1.8.1/) (see [`examples/web3.ts`](examples/web3.ts)). -->
 
-The [Runtime Environments section](privacy.md#runtime-environments) shows instructions for using SocialConnect with:
+The [Runtime Environments section](docs/privacy.md#runtime-environments) shows instructions for using SocialConnect with:
 
--   [NodeJS](https://nodejs.org) (see [Runtime Environments > Node](privacy.md#node)),
--   [React Native](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiK9paNjYH9AhUIesAKHQZ1CvYQFnoECA0QAQ&url=https%3A%2F%2Freactnative.dev%2F&usg=AOvVaw3N725EvNXK2_crezzoIs9d) (see [Runtime Environments > React Native](privacy.md#react-native)), and
+-   [NodeJS](https://nodejs.org) (see [Runtime Environments > Node](docs/privacy.md#node)),
+-   [React Native](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiK9paNjYH9AhUIesAKHQZ1CvYQFnoECA0QAQ&url=https%3A%2F%2Freactnative.dev%2F&usg=AOvVaw3N725EvNXK2_crezzoIs9d) (see [Runtime Environments > React Native](docs/privacy.md#react-native)), and
 -   Web (see [Runtime Environments > Web](privacy.md#web))
 <!--
 The [emisianto web app](https://emisianto.vercel.app/) is a sample implementation of a phone number issuer. The code is hosted at [celo-org/emisianto](https://github.com/celo-org/emisianto). -->
@@ -170,7 +170,7 @@ The [emisianto web app](https://emisianto.vercel.app/) is a sample implementatio
 
 ## 📄 Documentation
 
-For a deeper dive under the hood and specific implementation details, check out the documentation of the [protocol](protocol.md) for details on how to interact with the on-chain registry, [privacy](privacy.md) for how identifiers are obfuscated, and [key-setup](key-setup.md) to setup your role keys to interact with the protocol.
+For a deeper dive under the hood and specific implementation details, check out the documentation of the [protocol](docs/protocol.md) for details on how to interact with the on-chain registry, [privacy](docs/privacy.md) for how identifiers are obfuscated, and [key-setup](docs/key-setup.md) to setup your role keys to interact with the protocol.
 
 ## 🤝 Get In Touch
 
