@@ -18,8 +18,6 @@
     "build": "tsc -b .",
     "clean": "tsc -b . --clean",
     "docs": "typedoc",
-    "test:reset": "yarn --cwd ../../protocol devchain generate-tar .tmp/devchain.tar.gz --migration_override ../../dev-utils/src/migration-override.json --upto 27",
-    "test:livechain": "yarn --cwd ../../protocol devchain run-tar .tmp/devchain.tar.gz",
     "test": "jest --runInBand --testPathIgnorePatterns src/odis/identifier-backwards-compatibility.test.ts",
     "lint": "tslint -c tslint.json --project .",
     "prepublishOnly": "yarn build"
@@ -40,7 +38,8 @@
     "io-ts": "2.0.1"
   },
   "devDependencies": {
-    "@celo/dev-utils": "0.0.1",
+    "@celo/celo-devchain": "6.0.0",
+    "@celo/dev-utils": "0.0.1-beta.1",
     "@celo/wallet-local": "5.0.4",
     "@types/elliptic": "^6.4.12",
     "fetch-mock": "9.10.4",
@@ -48,6 +47,6 @@
     "old-identity-sdk": "npm:@celo/identity@1.5.2"
   },
   "engines": {
-    "node": ">=12.9.0"
+    "node": ">=16"
   }
 }
