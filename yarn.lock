@@ -589,7 +589,7 @@
     debug "^4.1.1"
     utf8 "3.0.0"
 
-"@celo/connect@5.0.4":
+"@celo/connect@5.0.4", "@celo/connect@^5.0.4":
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/@celo/connect/-/connect-5.0.4.tgz#9dab3022f2619701b9e9d06e7325d44e33c4ac2c"
   integrity sha512-EViV5lxmR0vvtcs+kjazw5d/ITDSD1XbmvHND+oFjNwAKO3DVZ6fsrP1j7Y0ZiWhajP86TWjXfUHuDJTnbJZFQ==
@@ -620,7 +620,7 @@
     semver "^7.3.5"
     web3 "1.3.6"
 
-"@celo/contractkit@5.0.4", "@celo/contractkit@^5.0.4":
+"@celo/contractkit@^5.0.4":
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/@celo/contractkit/-/contractkit-5.0.4.tgz#00fd583d373761e3b5c46f2006f4bb0372b04f84"
   integrity sha512-/IxnngKMBUoA2G0IaZ/Xoq4dKJe140oov1C0qPwHwxVlO80cgwbPZvV/E7GlKNWBi0n6ZTmYkGt5Zs1OiCdyVQ==
