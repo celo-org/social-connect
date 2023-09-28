@@ -1,9 +1,9 @@
 {
-  "extends": "@celo/typescript/tsconfig.library.json",
+  "extends": "../../../tsconfig.library.json",
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "lib"
   },
-  "include": ["src/**/*", "types/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["**/*.test.ts"]
 }

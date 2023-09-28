@@ -106,3 +106,4 @@ packages/react-components/*
 scripts/failedSDKs.json
 
 packages/protocol/types/typechain-mento/*.d.ts
+tmp
