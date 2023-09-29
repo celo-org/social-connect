@@ -5,18 +5,9 @@ coverage:
         target: auto
         threshold: null
         removed_code_behavior: adjust_base
-      celotool:
-        paths:
-          - packages/celotool
-      celocli:
-        paths:
-          - packages/cli
       odis:
         paths:
           - packages/phone-number-privacy
-      protocol:
-        paths:
-          - packages/protocol
       sdk:
         paths:
           - packages/sdk
