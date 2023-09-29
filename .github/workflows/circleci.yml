@@ -1,5 +1,5 @@
-name: celo-monorepo
-run-name: celo-monorepo tests
+name: social connect
+run-name: social connect tests
 
 # Dockefile for the self-hosted runner:
 # https://github.com/celo-org/infrastructure/blob/master/terraform/root-modules/gcp/integration-tests-gke/files/github-arc/Dockerfile-monorepo
@@ -7,10 +7,14 @@ run-name: celo-monorepo tests
 on:
   push:
     branches:
-      - master
+      - main
+    paths-ignore:
+      - '**/*.md'
   pull_request:
     branches:
-      - master
+      - main
+    paths-ignore:
+      - '**/*.md'
 
 concurrency:
   group: circle-ci-${{ github.ref }}
