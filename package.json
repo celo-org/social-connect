@@ -19,6 +19,8 @@
     "clean": "yarn run lerna run clean",
     "check-licenses": "yarn licenses list --prod | grep '\\(─ GPL\\|─ (GPL-[1-9]\\.[0-9]\\+ OR GPL-[1-9]\\.[0-9]\\+)\\)' && echo 'Found GPL license(s). Use 'yarn licenses list --prod' to look up the offending package' || echo 'No GPL licenses found'",
     "test:watch": "node node_modules/jest/bin/jest.js --watch",
+    "cs": "yarn changeset add",
+    "bump": "yarn changeset version",
     "postinstall": "yarn run lerna run postinstall"
   },
   "husky": {
@@ -30,12 +32,14 @@
     "packages": [
       "packages/*",
       "packages/phone-number-privacy/*",
-      "packages/sdk/*"
+      "packages/sdk/*",
+      "docs/examples/*"
     ]
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
     "@babel/runtime": "^7.8.4",
+    "@changesets/cli": "^2.26.2",
     "@types/jest": "^29.1.1",
     "@types/node": "18.7.16",
     "@types/prompt": "1.1.1",
