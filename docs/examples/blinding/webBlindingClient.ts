@@ -17,8 +17,8 @@ export class WebBlsBlindingClient implements BlsBlindingClient {
     this.init()
   }
 
-  async init(){
-    await thresholdBls.init("/blind_threshold_bls_bg.wasm")
+  async init() {
+    await thresholdBls.init('/blind_threshold_bls_bg.wasm')
   }
 
   async blindMessage(base64PhoneNumber: string, seed?: Buffer): Promise<string> {
