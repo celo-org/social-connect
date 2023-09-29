@@ -31,12 +31,12 @@ Below describes the steps to derive the *obfuscated identifier*, which is public
 |**pepper**| Unique secret, obtained by taking the first 13 characters of the sha256 hash of the *unblinded signature*|
 |**obfuscated identifier**| Identifier used for on-chain attestations, obtained by hashing the *plaintext identifier*, *identifier prefix*, and *pepper* using this schema: `sha3(sha3({prefix}://{plaintextIdentifier})__{pepper})`. For backwards compatibility, identifiers that are phone numbers use this schema: `sha3({prefix}://{plaintextIdentifier}__{pepper})`|
 
-You can see these steps implemented in the `@celo/identity` sdk [here](https://github.com/celo-org/celo-monorepo/blob/master/packages/sdk/identity/src/odis/identifier.ts).
+You can see these steps implemented in the `@celo/identity` sdk [here](https://github.com/celo-org/socialconnect/blob/main/packages/sdk/identity/src/odis/identifier.ts).
 
 Here is a concrete example:
 
 - **Alice's phone number**: `+12345678901`
-- The ODIS pepper for Alice's phone number: `SqXDxoTdBpKH2` 
+- The ODIS pepper for Alice's phone number: `SqXDxoTdBpKH2`
 - The obfuscation pattern: `sha3({prefix}://{plaintextIdentifier}__{pepper})`
 - The actual obfuscation: `sha3('tel://+123456789__SqXDxoTdBpKH2')` = `0x8b578f2053a41113066b8410ca2d952a27b5f4531838ff54ca68e7c5cc7caf47`
 - **Alice's obfuscated phone number**: `0x8b578f2053a41113066b8410ca2d952a27b5f4531838ff54ca68e7c5cc7caf47`
@@ -47,7 +47,7 @@ Each identifier type has a corresponding prefix that is appended before the blin
 
 These are the prefixes currently defined in the SDK. We are using [DID methods](https://w3c.github.io/did-spec-registries/#did-methods) as prefixes when they exist. We welcome PRs here and [in the SDK](https://github.com/celo-org/celo-monorepo/blob/master/packages/sdk/identity/src/odis/identifier.ts#L27-L34) if you'd like to add a new identifier type and prefix! You can also cast an arbitrary string as your prefix if you would like.
 
-| Type | Prefix |  
+| Type | Prefix |
 |---------|--------|
 | Phone numbers | `tel` |
 | Twitter handles | `twit` |
@@ -78,11 +78,11 @@ sequenceDiagram
   actor user
   participant issuer
 	participant ODIS
-	
+
   user -->> issuer: provide plaintext identifier
 	issuer -->> issuer: blind plaintext identifier
   issuer -->> ODIS: get blinded signature
-	ODIS -->> issuer: 
+	ODIS -->> issuer:
   issuer -->> issuer: unblind signature and derive pepper and obfuscated identifier
 ```
 </details>
@@ -95,14 +95,14 @@ However, for extra privacy, the user can also blind the identifier before they s
 ```mermaid
 %%{init: { "sequence": { "useMaxWidth": true } } }%%
 sequenceDiagram
-  actor user 
-  participant issuer 
-	participant ODIS 
+  actor user
+  participant issuer
+	participant ODIS
 
-	user -->> user: blind plaintext identifier 
-  user -->> issuer: provide blinded identifier 
+	user -->> user: blind plaintext identifier
+  user -->> issuer: provide blinded identifier
 	issuer -->> ODIS: get blinded signature
-	ODIS -->> issuer: 
+	ODIS -->> issuer:
 	issuer -->> user: forward blinded signature
 	user -->> user: unblind signature and derive pepper and obfuscated identifier
 ```
@@ -132,13 +132,13 @@ The most important function is `getObfuscatedIdentifier`, which completes the en
 `signer` | AuthSigner | object describing the authentication method and providing authentication key, see [Authentication](#authentication)
 `context` | ServiceContext | object providing the ODIS context, see [Service Context](#service-context)
 `blindingFactor` (optional) | string | secret seed used for blinding/unblinding the identifier, by default a one-time random seed is used in the blinding client
-`clientVersion` (optional) | string | 
+`clientVersion` (optional) | string |
 `blsBlindingClient` (optional) | BlsBlindingClient | the default blinding client used only works server-side, see [Runtime Environments](#runtime-environments) for alternatives
-`sessionID` (optional) | string | 
-`keyVersion` (optional) | number | 
-`endpoint` (optional) | | 
+`sessionID` (optional) | string |
+`keyVersion` (optional) | number |
+`endpoint` (optional) | |
 
-#### Returns: 
+#### Returns:
 `Promise‹IdentifierHashDetails›`
 
 ```typescript
