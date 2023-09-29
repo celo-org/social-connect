@@ -8,7 +8,7 @@
     ],
     "declaration": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "dist"
   },
   "include": ["src", "index.d.ts"],
   "compileOnSave": true
