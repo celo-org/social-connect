@@ -40,7 +40,6 @@ export function catchErrorHandler<R extends OdisRequest>(
       logger.error(ErrorMessage.CAUGHT_ERROR_IN_ENDPOINT_HANDLER)
       logger.error(err)
       Counters.errorsCaughtInEndpointHandler.labels(req.url).inc()
-      Counters.combinerErrors.labels(req.url).inc()
       if (!res.headersSent) {
         if (err instanceof OdisError) {
           sendFailure(err.code, err.status, res, req.url)
