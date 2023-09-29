@@ -11,11 +11,3 @@ npm-debug.log
 dockerfiles
 .vscode
 
-# not docker packages
-packages/blockchain-api
-packages/docs
-packages/faucet
-packages/mobile
-packages/react-components
-packages/notification-service
-packages/web

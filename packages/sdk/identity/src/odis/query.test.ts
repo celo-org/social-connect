@@ -1,5 +1,5 @@
+import { hexToBuffer, trimLeading0x } from '@celo/base/lib'
 import crypto from 'crypto'
-import { hexToBuffer, trimLeading0x } from '../../../base/lib'
 import { signWithRawKey } from './query'
 
 const rawKey = '41e8e8593108eeedcbded883b8af34d2f028710355c57f4c10a056b72486aa04'

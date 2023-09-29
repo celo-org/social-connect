@@ -12,7 +12,11 @@ const USE_GANACHE = process.env.NO_GANACHE?.toLowerCase() !== 'true'
 export default async function globalSetup() {
   if (USE_GANACHE) {
     console.log('\nstarting ganache... set NO_GANACHE=true to disable')
-    await baseSetup(path.resolve(path.join(__dirname, '../..')), '.tmp/devchain.tar.gz', {
+    const chainDataPath = path.join(
+      path.dirname(require.resolve('@celo/celo-devchain')),
+      '../chains'
+    )
+    await baseSetup(path.resolve(chainDataPath), 'v10.tar.gz', {
       from_targz: true,
     })
     await waitForPortOpen('localhost', 8545, 60)

@@ -75,7 +75,6 @@ lerna-debug.log
 
 # Typechain types
 **/types/typechain/
-**/types/typechain-*/
 
 # keys
 .env.mnemonic*
@@ -96,6 +95,7 @@ packages/docs/_book/
 # old packages
 packages/reserve-site/*
 packages/blockchain-api/*
+packages/komencikit/*
 packages/mobile/*
 packages/faucet/*
 packages/moonpay-auth/*
@@ -104,6 +104,3 @@ packages/react-components/*
 
 # temp json file for deploy-sdks script
 scripts/failedSDKs.json
-
-packages/protocol/types/typechain-mento/*.d.ts
-tmp
