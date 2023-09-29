@@ -38,10 +38,10 @@
     "io-ts": "2.0.1"
   },
   "devDependencies": {
-    "@celo/dev-utils": "0.0.1",
+    "@celo/dev-utils": "0.0.1-beta.1",
     "fetch-mock": "9.10.4"
   },
   "engines": {
-    "node": ">=8.13.0"
+    "node": ">=16"
   }
 }

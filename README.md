@@ -1,149 +1,181 @@
-<p align="center">
-  <a href="https://celo.org/">
-    <img src="https://i.imgur.com/OxWGKrK.png" alt="celo logo" title="Go to celo.org" width="600" style="border:none;"/>
-  </a>
-</p>
+# SocialConnect
 
-**Celo Monorepo - Official repository for core projects comprising the Celo platform**
+SocialConnect is an open source protocol that maps off-chain personal **identifiers** (such as phone numbers, twitter handles, etc.) to on-chain account **addresses**. This enables a convenient and interoperable user experience for use cases such as:
 
-This repository contains the source code for the Celo core projects including the [smart contracts](https://github.com/celo-org/celo-monorepo/tree/master/packages/protocol), [contractKit](https://github.com/celo-org/celo-monorepo/tree/master/packages/sdk/contractkit),
-and other packages. The source code for the Celo Blockchain which operates a node on the Celo Network is kept in a separate repo [here](https://github.com/celo-org/celo-blockchain).
+-   payments - send money directly to your friend's phone number!
+-   social discovery - find someone's account based on their twitter!
+-   any other identity applications!
 
-<!-- row 1 - status -->
+Here is a short demo of a payment from a [Kaala](https://kaala.app/) wallet user to a [Libera](https://medium.com/impactmarket/ready-to-unlock-your-potential-meet-libera-your-new-crypto-wallet-d1053f917b95) wallet user, with only a phone number:
 
-[![GitHub Actions](https://github.com/celo-org/celo-monorepo/actions/workflows/container-all-monorepo.yml/badge.svg)](https://github.com/celo-org/celo-monorepo/actions/workflows/container-all-monorepo.yml)
-[![Codecov](https://img.shields.io/codecov/c/github/celo-org/celo-monorepo)](https://codecov.io/gh/celo-org/celo-monorepo)
-[![GitHub contributors](https://img.shields.io/github/contributors/celo-org/celo-monorepo)](https://github.com/celo-org/celo-monorepo/graphs/contributors)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/w/celo-org/celo-monorepo)](https://github.com/celo-org/celo-monorepo/graphs/contributors)
-[![GitHub Stars](https://img.shields.io/github/stars/celo-org/celo-monorepo.svg)](https://github.com/celo-org/celo-monorepo/stargazers)
-![GitHub repo size](https://img.shields.io/github/repo-size/celo-org/celo-monorepo)
-[![GitHub](https://img.shields.io/github/license/celo-org/celo-monorepo?color=blue)](https://github.com/celo-org/celo-monorepo/blob/master/LICENSE)
+[<img width="800" alt="image" src="https://user-images.githubusercontent.com/46296830/207285114-6ef73be4-10f2-4afc-a066-811e1f3e1042.png">](https://www.loom.com/share/8afddd73ba324ec18aeb63fc96d568f9)
 
-<!-- row 2 - links & profiles -->
+## 🛠 How it Works
 
-[![Website celo.org](https://img.shields.io/website-up-down-green-red/https/celo.org.svg)](https://celo.org)
-[![Blog](https://img.shields.io/badge/blog-up-green)](https://medium.com/celoorg)
-[![docs](https://img.shields.io/badge/docs-up-green)](https://docs.celo.org/)
-[![Youtube](https://img.shields.io/badge/YouTube%20channel-up-green)](https://www.youtube.com/channel/UCCZgos_YAJSXm5QX5D5Wkcw/videos?view=0&sort=p&flow=grid)
-[![forum](https://img.shields.io/badge/forum-up-green)](https://forum.celo.org)
-[![Discord](https://img.shields.io/discord/600834479145353243.svg)](https://discord.gg/RfHQKtY)
-[![Twitter CeloDevs](https://img.shields.io/twitter/follow/celodevs?style=social)](https://twitter.com/celodevs)
-[![Twitter CeloOrg](https://img.shields.io/twitter/follow/celoorg?style=social)](https://twitter.com/CeloOrg)
-[![Subreddit subscribers](https://img.shields.io/reddit/subreddit-subscribers/CeloHQ?style=social)](https://www.reddit.com/r/CeloHQ/)
+SocialConnect uses a federated model, meaning that anyone has the power to be an **issuer** of attestation mappings. Issuers have the freedom to decide how to verify that the user actually has ownership of their identifier. After verification, issuers register the mapping as an attestation to the [on-chain smart contract registry](https://github.com/celo-org/celo-monorepo/blob/master/packages/protocol/contracts/identity/FederatedAttestations.sol). Attestations are stored under the issuer that registered them. When looking up attestations, we then have to decide which issuers are trusted.
 
-<!-- row 3 - detailed status -->
+Here are some active issuers verifying and registering attestations:
 
-[![GitHub pull requests by-label](https://img.shields.io/github/issues-pr-raw/celo-org/celo-monorepo)](https://github.com/celo-org/celo-monorepo/pulls)
-[![GitHub Issues](https://img.shields.io/github/issues-raw/celo-org/celo-monorepo.svg)](https://github.com/celo-org/celo-monorepo/issues)
-[![GitHub issues by-label](https://img.shields.io/github/issues/celo-org/celo-monorepo/1%20hour%20tasks)](https://github.com/celo-org/celo-monorepo/issues?q=is%3Aopen+is%3Aissue+label%3A%221+hour+tasks%22)
+| Issuer Name | Address                                                                                                         |
+| ----------- | --------------------------------------------------------------------------------------------------------------- |
+| Kaala       | `0x6549aF2688e07907C1b821cA44d6d65872737f05` (mainnet)                                                          |
+| Libera      | `0x388612590F8cC6577F19c9b61811475Aa432CB44` (mainnet) `0xe3475047EF9F9231CD6fAe02B3cBc5148E8eB2c8` (alfajores) |
 
-Contents:
+Off-chain identifiers, originally in plaintext, are obfuscated before they are used in on-chain attestations to ensure user privacy and security. This is done with the help of the [Oblivious Decentralized Identifier Service (**ODIS**)](https://docs.celo.org/protocol/identity/odis). The details of the obfuscation process and how to interact with ODIS are described in the [docs about privacy](docs/privacy.md).
 
-<!-- TOC -->
+### Want a more profound understanding?
 
-- [Celo's Mission - Prosperity for All](#mission)
-- [The Celo Stack](#stack)
-- [Documentation](#docs)
-- [Issues](#issues)
-- [Repo Structure](#repo)
-- [Contributing](#contributing)
-- [Ask Questions, Find Answers, Get in Touch](#ask)
-- [License](#license)
-  <!-- /TOC -->
+We've made a mini-series to explain you:
 
-## 🥅 <a id="mission"></a>Celo's Mission - Prosperity for All
+- [Celo Spark: SocialConnect Mini-Series (1/3) — What Is It?](https://www.youtube.com/watch?v=a_756GRPcV4&list=PLsQbsop73cfErtQwacE4WgqQwoVcLvLZS&index=1)
+- [Celo Spark: SocialConnect Mini-Series (2/3) — How Does It Works?](https://www.youtube.com/watch?v=bzZbfoPLYM4&list=PLsQbsop73cfErtQwacE4WgqQwoVcLvLZS&index=2)
+- [Celo Spark: SocialConnect Mini-Series (3/3) — Coding Session](https://www.youtube.com/watch?v=qrIHC496avs&list=PLsQbsop73cfErtQwacE4WgqQwoVcLvLZS&index=3)
 
-Celo, pronounced /ˈtselo/, means ‘purpose’ in Esperanto. In a similar spirit, we are aiming to create a new platform to connect people globally and bring financial stability to those who need it most. We believe blockchain technology is one of the most exciting innovations in recent history and as a community we look to push the boundaries of what is possible with it today. More importantly, we are driven by purpose -- to solve real-world problems such as lack of access to sound currency, or friction for cash-transfer programs aimed to alleviate poverty. Our mission is to build a monetary system that creates the conditions for prosperity for all.
+## 🧑‍💻 Quickstart
 
-<!-- image with YouTube link -->
-<p align="center">
-  <a href="http://www.youtube.com/watch?v=kKggE5OvyhE">
-    <img src="https://i.imgur.com/GHF5U9B.jpg" alt="Play on Youtube - What if money were beautiful" title="Play on Youtube - What if money were beautiful" width="600" style="border:none;"/>
-  </a>
-  <br />
-  <i>What if money were beautiful?</i>
-</p>
+The following steps use the Celo [ContractKit](https://docs.celo.org/developer/contractkit) to quickly set you up to play around with the protocol. If you would like to use a different library instead, please refer to the [example scripts](examples/).
 
-## 🧱 <a id="stack"></a>The Celo Stack
+1. Add the [`@celo/identity`](https://www.npmjs.com/package/@celo/identity) package into your project.
 
-Celo is oriented around providing the simplest possible experience for end users, who may have no familiarity with cryptocurrencies, and may be using low cost devices with limited connectivity. To achieve this, the project takes a full-stack approach, where each layer of the stack is designed with the end user in mind whilst considering other stakeholders \(e.g. operators of nodes in the network\) involved in enabling the end user experience.
+    ```console
+    npm install @celo/identity
+    ```
 
-The Celo stack is structured into the following logical layers:
+2. Set up your issuer (read "Authentication" section in [privacy.md](docs/docs/privacy.md#authentication)), which is the account registering attestations. When a user requests for the issuer to register an attestation, the issuer should [verify](docs/protocol.md#verification) somehow that the user owns their identifier (ex. SMS verification for phone number identifiers).
 
-<!-- image -->
-<p align="center">
-  <img src="https://storage.googleapis.com/celo-website/docs/full-stack-diagram.jpg" alt="Celo protocol" width="900" style="border:none;"/>
-  <br />
-  <i>The Celo Blockchain and Celo Core Contracts together comprise the <b>Celo Protocol</b> </i>
-</p>
+    ```ts
+    import { newKit } from "@celo/contractkit";
 
-- **Celo Blockchain**: An open cryptographic protocol that allows applications to make transactions with and run smart contracts in a secure and decentralized fashion. The Celo Blockchain has shared ancestry with [Ethereum](https://www.ethereum.org), and maintains full EVM compatibility for smart contracts. However it uses a [Byzantine Fault Tolerant](http://pmg.csail.mit.edu/papers/osdi99.pdf) \(BFT\) consensus mechanism rather than Proof of Work, and has different block format, transaction format, client synchronization protocols, and gas payment and pricing mechanisms. The network’s native asset is Celo Gold, exposed via an ERC-20 interface.
+    // the issuer is the account that is registering the attestation
+    let ISSUER_PRIVATE_KEY;
 
-- **Celo Core Contracts**: A set of smart contracts running on the Celo Blockchain that comprise much of the logic of the platform features including ERC-20 stable currencies, identity attestations, Proof of Stake and governance. These smart contracts are upgradeable and managed by the decentralized governance process.
+    // create alfajores contractKit instance with the issuer private key
+    const kit = await newKit("https://alfajores-forno.celo-testnet.org");
+    kit.addAccount(ISSUER_PRIVATE_KEY);
+    const issuerAddress =
+        kit.web3.eth.accounts.privateKeyToAccount(ISSUER_PRIVATE_KEY).address;
+    kit.defaultAccount = issuerAddress;
 
-<!-- image -->
-<p align="center">
-  <img src="https://storage.googleapis.com/celo-website/docs/network.png" alt="Celo network" width="900" style="border:none;"/>
-  <br />
-  <i>Topology of a Celo Network</i>
-</p>
+    // information provided by user, issuer should confirm they do own the identifier
+    const userPlaintextIdentifier = "+12345678910";
+    const userAccountAddress = "0x000000000000000000000000000000000000user";
 
-- **Applications:** Applications for end users built on the Celo platform. The Celo Wallet app, the first of an ecosystem of applications, allows end users to manage accounts and make payments securely and simply by taking advantage of the innovations in the Celo protocol. Applications take the form of external mobile or backend software: they interact with the Celo Blockchain to issue transactions and invoke code that forms the Celo Core Contracts’ API. Third parties can also deploy custom smart contracts that their own applications can invoke, which in turn can leverage Celo Core Contracts. Applications may use centralized cloud services to provide some of their functionality: in the case of the Celo Wallet, push notifications and a transaction activity feed.
+    // time at which issuer verified the user owns their identifier
+    const attestationVerifiedTime = Date.now();
+    ```
 
-## 📚 <a id="docs"></a>Documentation
+3. Check and top up [quota for querying ODIS](docs/privacy.md#rate-limit) if necessary.
 
-Follow the instructions in [SETUP.md](SETUP.md) to get a development environment set up.
+    ```ts
+    import { OdisUtils } from "@celo/identity";
+    import { AuthSigner } from "@celo/identity/lib/odis/query";
 
-See [Developer's Guide](https://docs.celo.org/developer) for full details about the design of the Celo protocol and other information about running these projects.
+    // authSigner provides information needed to authenticate with ODIS
+    const authSigner: AuthSigner = {
+        authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
+        contractKit: kit,
+    };
+    // serviceContext provides the ODIS endpoint and public key
+    const serviceContext = OdisUtils.Query.getServiceContext(
+        OdisContextName.ALFAJORES
+    );
 
-## 🙋 <a id="issues"></a>Issues
+    // check existing quota on issuer account
+    const { remainingQuota } = await OdisUtils.Quota.getPnpQuotaStatus(
+        issuerAddress,
+        authSigner,
+        serviceContext
+    );
 
-See the [issue backlog](https://github.com/celo-org/celo-monorepo/issues) for a list of active or proposed tasks. Feel free to create new issues to report bugs and/or request features.
+    // if needed, approve and then send payment to OdisPayments to get quota for ODIS
+    if (remainingQuota < 1) {
+        const stableTokenContract = await kit.contracts.getStableToken();
+        const odisPaymentsContract = await kit.contracts.getOdisPayments();
+        const ONE_CENT_CUSD_WEI = 10000000000000000;
+        await stableTokenContract
+            .increaseAllowance(odisPaymentsContract.address, ONE_CENT_CUSD_WEI)
+            .sendAndWaitForReceipt();
+        const odisPayment = await odisPaymentsContract
+            .payInCUSD(issuerAddress, ONE_CENT_CUSD_WEI)
+            .sendAndWaitForReceipt();
+    }
+    ```
 
-## 📂 <a id="repo"></a>Repo Structure
+4. Derive the obfuscated identifier from your plaintext identifier. Refer to documentation on the [ODIS SDK](docs/privacy.md#using-the-sdk) for detailed explanations on these parameters and steps.
 
-The repository has the following packages (sub projects):
+    ```typescript
+    // get obfuscated identifier from plaintext identifier by querying ODIS
+    const { obfuscatedIdentifier } =
+        await OdisUtils.Identifier.getObfuscatedIdentifier(
+            userPlaintextIdentifier,
+            OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
+            issuerAddress,
+            authSigner,
+            serviceContext
+        );
+    ```
 
-- [celotool](packages/celotool) - scripts for deploying and managing testnets
-- [cli](packages/cli) - tool that uses ContractKit to interact with the Celo protocol ([docs](https://docs.celo.org/command-line-interface/introduction))
-- [dev-utils](packages/dev-utils) - a utils package for use as a dev dependency
-- [docs](packages/docs) - technical documentation for the Celo project ([live](https://docs.celo.org/))
-- [helm-charts](packages/helm-charts) - (DEPRECATED) templatized deployments of entire environments to Kubernetes clusters. Check [celo-org/charts](https://github.com/celo-org/charts) instead.
-- [protocol](packages/protocol) - identity, stability and other smart contracts for the Celo protocol ([docs](https://docs.celo.org/protocol))
-- [sdk](packages/sdk) - Typescript packages for interacting with Celo, including Contracts, Wallets, Crypto++
-- [contractkit](packages/sdk/contractkit) - library to help developers and validators interact with the protocol and its smart contracts ([docs](https://docs.celo.org/developer/contractkit))
-- [typescript](packages/typescript) - no README available (improve?)
+5. Register an attestation mapping between the obfuscated identifier and an account address in the `FederatedAttestations` contract. This attestation is associated under the issuer. See [docs](docs/protocol.md#registration) for more info.
 
-Code owners for each package can be found in [.github/CODEOWNERS](.github/CODEOWNERS).
+    ```typescript
+    const federatedAttestationsContract =
+        await kit.contracts.getFederatedAttestations();
 
-## ✍️ <a id="contributing"></a>Contributing
+    // upload identifier <-> address mapping to onchain registry
+    await federatedAttestationsContract
+        .registerAttestationAsIssuer(
+            obfuscatedIdentifier,
+            userAccountAddress,
+            attestationVerifiedTime
+        )
+        .send();
+    ```
 
-Feel free to jump on the Celo 🚂🚋🚋🚋. Improvements and contributions are highly encouraged! 🙏👊
+6. Look up the account addresses owned by an identifier, as attested by the issuers that you trust (in this example only your own issuer), by querying the `FederatedAttestations` contract. See [docs](docs/protocol.md#lookups) for more info.
 
-See the [contributing guide](https://docs.celo.org/community/contributing) for details on how to participate.
-[![GitHub issues by-label](https://img.shields.io/github/issues/celo-org/celo-monorepo/1%20hour%20tasks)](https://github.com/celo-org/celo-monorepo/issues?q=is%3Aopen+is%3Aissue+label%3A%221+hour+tasks%22)
+    ```ts
+    const attestations = await federatedAttestationsContract.lookupAttestations(
+        obfuscatedIdentifier,
+        [issuerAddress]
+    );
 
-All communication and contributions to the Celo project are subject to the [Celo Code of Conduct](https://celo.org/code-of-conduct).
+    console.log(attestations.accounts);
+    ```
 
-Not yet ready to contribute but do like the project? Support Celo with a ⭐ or share the love in a [![Twitter URL](https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fcelo.org%2F)](https://twitter.com/intent/tweet?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3DkKggE5OvyhE&via=celohq&text=Checkout%20celo%21%20Love%20what%20they%20are%20building.&hashtags=celo)
+## 🚀 Examples
 
+|                                             Type                                              |
+| :-------------------------------------------------------------------------------------------: |
+|                            [ContractKit](examples/contractKit.ts)                             |
+|                              [EthersJS (v5)](examples/ethers.ts)                              |
+|                                  [web3.js](examples/web3.ts)                                  |
+|         [NextJS based web app (Phone Number)](https://github.com/celo-org/emisianto)          |
+| [React Native App (Phone Number)](https://github.com/celo-org/SocialConnect-ReactNative-Demo) |
+|      [NextJS based web app (Twitter)](https://github.com/celo-org/SocialConnect-Twitter)      |
+| [Server side NextJS (Twitter)](https://github.com/celo-org/SocialConnect-Twitter-Server-Side) |
+
+<!-- -   [@celo/contractkit](https://docs.celo.org/developer/contractkit) (see [`examples/contractKit.ts`](examples/contractKit.ts)),
+-   [ethers.js](https://ethers.org/) (see [`examples/ethers.ts`](examples/ethers.ts)), and
+-   [web3.js](https://web3js.readthedocs.io/en/v1.8.1/) (see [`examples/web3.ts`](examples/web3.ts)). -->
+
+The [Runtime Environments section](docs/privacy.md#runtime-environments) shows instructions for using SocialConnect with:
+
+-   [NodeJS](https://nodejs.org) (see [Runtime Environments > Node](docs/privacy.md#node)),
+-   [React Native](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiK9paNjYH9AhUIesAKHQZ1CvYQFnoECA0QAQ&url=https%3A%2F%2Freactnative.dev%2F&usg=AOvVaw3N725EvNXK2_crezzoIs9d) (see [Runtime Environments > React Native](docs/privacy.md#react-native)), and
+-   Web (see [Runtime Environments > Web](privacy.md#web))
 <!--
-Twitter
-twitter intent generator - http://tech.cymi.org/tweet-intents
--->
+The [emisianto web app](https://emisianto.vercel.app/) is a sample implementation of a phone number issuer. The code is hosted at [celo-org/emisianto](https://github.com/celo-org/emisianto). -->
 
-## 💬 <a id="ask"></a>Ask Questions, Find Answers, Get in Touch
+<img width="500" alt="image" src="https://user-images.githubusercontent.com/46296830/205343775-60e429ea-f5e5-42b2-9474-8ca7dfe842cc.png">
 
-- [Website](https://celo.org/)
-- [Docs](https://docs.celo.org/)
-- [Blog](https://medium.com/celohq)
-- [YouTube](https://www.youtube.com/channel/UCCZgos_YAJSXm5QX5D5Wkcw/videos?view=0&sort=p&flow=grid)
-- [Forum](https://forum.celo.org)
-- [Discord](https://discord.gg/vRbExjv)
-- [Twitter](https://twitter.com/CeloDevs)
-- [Reddit](https://www.reddit.com/r/CeloHQ/)
-- [Community Events](https://celo.org/community)
+## 📄 Documentation
 
-## 📜 <a id="license"></a>License
+For a deeper dive under the hood and specific implementation details, check out the documentation of the [protocol](docs/protocol.md) for details on how to interact with the on-chain registry, [privacy](docs/privacy.md) for how identifiers are obfuscated, and [key-setup](docs/key-setup.md) to setup your role keys to interact with the protocol.
 
-All packages are licensed under the terms of the [Apache 2.0 License](LICENSE) unless otherwise specified in the LICENSE file at package's root.
+## 🤝 Get In Touch
+
+Interested in Integrating SocialConnect, get in touch by filling this [form](https://docs.google.com/forms/d/e/1FAIpQLSeePUyzd2VQfawO8OsXdvmut3OiyICoLPRtfNfPpvtRw3tEfw/viewform).
+
+## 📣 Feedback
+
+**SocialConnect is in beta**! Help us improve by sharing feedback on your experience in the Github Discussion section. You can also open an issue or a PR directly on this repo.

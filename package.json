@@ -1,12 +1,11 @@
 {
-  "name": "celo",
-  "version": "1.0.0",
+  "name": "odis",
+  "version": "3.0.0",
   "author": "Celo",
   "license": "SEE LICENSE IN SUB-PACKAGES",
   "private": true,
   "scripts": {
     "preinstall": "git config --global url.\"https://\".insteadOf ssh://",
-    "install-pkg": "yarn install --link-duplicates",
     "lint": "yarn lerna run lint && yarn run --silent lint:do-not-merge",
     "lint:do-not-merge": "! git grep -E 'DO[ _]*NOT[ _]*MERGE'",
     "prettify": "yarn run prettier --config .prettierrc.js --write '**/*.+(ts|tsx|js|jsx|sol|java)'",
@@ -14,42 +13,24 @@
     "reset": "yarn reset-modules && yarn reset-cache",
     "reset-cache": "yarn reset-yarn && yarn reset-rn",
     "reset-modules": "rm -rf node_modules/ packages/*/node_modules",
-    "reset-rn": "watchman watch-del-all; rm -rf $TMPDIR/metro-cache-*; rm -rf $TMPDIR/haste-map-*; rm -rf $TMPDIR/metro-symbolicate*",
     "reset-yarn": "yarn cache clean",
     "test": "yarn run lerna run test",
     "build": "yarn run lerna run build",
     "clean": "yarn run lerna run clean",
-    "docs": "yarn run lerna run docs",
     "check-licenses": "yarn licenses list --prod | grep '\\(─ GPL\\|─ (GPL-[1-9]\\.[0-9]\\+ OR GPL-[1-9]\\.[0-9]\\+)\\)' && echo 'Found GPL license(s). Use 'yarn licenses list --prod' to look up the offending package' || echo 'No GPL licenses found'",
-    "report-coverage": "yarn run lerna run test-coverage",
     "test:watch": "node node_modules/jest/bin/jest.js --watch",
-    "postinstall": "yarn run lerna run postinstall && patch-package && yarn keys:decrypt",
-    "keys:decrypt": "bash scripts/key_placer.sh decrypt",
-    "keys:encrypt": "bash scripts/key_placer.sh encrypt",
-    "check:packages": "node ./scripts/check-packages.js",
-    "celotool": "yarn --cwd packages/celotool run --silent cli",
-    "celocli": "yarn --cwd packages/cli run --silent celocli",
-    "update-dependency-graph": "ts-node ./scripts/update_dependency_graph.ts",
-    "deploy-sdks": "ts-node ./scripts/deploy-sdks.ts",
-    "deprecate-sdks": "ts-node ./scripts/unpublish-sdks.ts"
+    "postinstall": "yarn run lerna run postinstall"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern '**/*.+(ts|tsx|js|jsx|sol|java)'",
-      "pre-push": "node ./scripts/hooks/pre-push.js"
+      "pre-commit": "pretty-quick --staged --pattern '**/*.+(ts|js)'"
     }
   },
   "workspaces": {
     "packages": [
       "packages/*",
       "packages/phone-number-privacy/*",
-      "packages/sdk/*",
-      "packages/sdk/wallets/*"
-    ],
-    "nohoist": [
-      "**/openzeppelin-solidity",
-      "**/solidity-bytes-utils",
-      "**/@apollo/react-testing"
+      "packages/sdk/*"
     ]
   },
   "devDependencies": {
@@ -71,7 +52,6 @@
     "patch-package": "^6.2.2",
     "prettier": "^2.7.1",
     "prettier-plugin-java": "^1.6.2",
-    "prettier-plugin-solidity": "1.0.0-alpha.35",
     "pretty-quick": "^2.0.1",
     "prompt": "1.2.0",
     "semver": "7.3.5",
