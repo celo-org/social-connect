@@ -26,15 +26,9 @@ defaults:
 
 env:
   # Increment these to force cache rebuilding
-  NODE_MODULE_CACHE_VERSION: 3
+  NODE_MODULE_CACHE_VERSION: 1
   NODE_OPTIONS: '--max-old-space-size=4096'
   TERM: dumb
-  GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
-  # Git Tag for contract release to use
-  RELEASE_TAG: ganache-v7-core-contracts.v9
-  # RELEASE_TAG: core-contracts.v9
-  # CELO_BLOCKCHAIN_BRANCH_TO_TEST: master
-  CELO_BLOCKCHAIN_BRANCH_TO_TEST: release/1.7.x
 
 jobs:
   install-dependencies:
@@ -45,7 +39,9 @@ jobs:
       # Adding a initial comma so ',<path>' matches also for the first file
       all_modified_files: ',${{ steps.changed-files.outputs.all_modified_files }}'
     # runs-on: ubuntu-latest
-    runs-on: ['self-hosted', 'monorepo-node18']
+    runs-on: ['self-hosted', 'org', '8-cpu']
+    container:
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
     steps:
       - name: Restore .git cache
@@ -134,7 +130,9 @@ jobs:
       - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
   lint-checks:
     name: Lint code
-    runs-on: ['self-hosted', 'monorepo-node18']
+    runs-on: ['self-hosted', 'org', '8-cpu']
+    container:
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
     needs: install-dependencies
     steps:
@@ -154,7 +152,9 @@ jobs:
       - run: yarn run lint
   general_test:
     name: General jest test
-    runs-on: ['self-hosted', 'monorepo-node18']
+    runs-on: ['self-hosted', 'org', '8-cpu']
+    container:
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     needs: install-dependencies
     steps:
       - uses: actions/cache/restore@v3
@@ -170,17 +170,7 @@ jobs:
       - name: Run Jest Tests
         run: |
           mkdir -p test-results/jest
-          # Skipping packages that are tested in a specific job below
-          yarn run lerna \
-            --ignore @celo/contractkit \
-            --ignore @celo/protocol \
-            --ignore @celo/celotool \
-            --ignore @celo/celocli \
-            --ignore @celo/env-tests \
-            --ignore @celo/identity \
-            --ignore @celo/transactions-uri \
-            --ignore '@celo/wallet-*' \
-            run test
+          yarn run lerna run test
       - name: Upload Jest Test Results
         uses: actions/upload-artifact@v3
         with:
@@ -190,7 +180,9 @@ jobs:
 
   identity-tests:
     name: Identity Tests
-    runs-on: ['self-hosted', 'monorepo-node18']
+    runs-on: ['self-hosted', 'org', '8-cpu']
+    container:
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
     needs: [install-dependencies]
     if: |
@@ -218,15 +210,14 @@ jobs:
           yarn --cwd=packages/sdk/identity test
   transactions-uri-tests:
     name: Transaction URI Tests
-    runs-on: ['self-hosted', 'monorepo-node18']
+    runs-on: ['self-hosted', 'org', '8-cpu']
+    container:
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
     needs: [install-dependencies, contractkit-tests]
     if: |
       github.base_ref == 'master' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/protocol') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/dev-utils') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/sdk') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/typescript') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
@@ -256,14 +247,14 @@ jobs:
 
   odis-test:
     name: ODIS test
-    runs-on: ['self-hosted', 'monorepo-node18']
+    runs-on: ['self-hosted', 'org', '8-cpu']
+    container:
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
     needs: [install-dependencies, lint-checks]
     if: |
       github.base_ref == 'master' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/protocol') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/sdk') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
