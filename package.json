@@ -37,9 +37,11 @@
     ]
   },
   "devDependencies": {
+    "@celo/typescript": "0.0.2",
     "@babel/core": "^7.8.4",
     "@babel/runtime": "^7.8.4",
     "@changesets/cli": "^2.26.2",
+    "@tsconfig/recommended": "^1.0.3",
     "@types/jest": "^29.1.1",
     "@types/node": "18.7.16",
     "@types/prompt": "1.1.1",

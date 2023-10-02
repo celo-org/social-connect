@@ -1,6 +1,7 @@
 {
-  "extends": "../../../tsconfig.json",
+  "extends": "@tsconfig/recommended",
   "compilerOptions": {
+    "declaration": true,
     "rootDir": "src",
     "outDir": "lib"
   },
