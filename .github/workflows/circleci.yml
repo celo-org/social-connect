@@ -59,8 +59,8 @@ jobs:
         run: |
           set -euo pipefail
           set -v
-          # To get the "master" branch mapping
-          git checkout master
+          # To get the "main" branch mapping
+          git checkout main
           git checkout ${GITHUB_SHA}
           # Verify that following commands work, they are later called in the incremental testing script
           # Their output does not matter here, the fact that they finish successfully does.
@@ -186,7 +186,7 @@ jobs:
     timeout-minutes: 30
     needs: [install-dependencies]
     if: |
-      github.base_ref == 'master' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
+      github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy/common') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
@@ -216,7 +216,7 @@ jobs:
     timeout-minutes: 30
     needs: [install-dependencies]
     if: |
-      github.base_ref == 'master' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
+      github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/sdk') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
@@ -253,7 +253,7 @@ jobs:
     timeout-minutes: 30
     needs: [install-dependencies, lint-checks]
     if: |
-      github.base_ref == 'master' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
+      github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
