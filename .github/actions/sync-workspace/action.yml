@@ -34,11 +34,6 @@ runs:
           packages/**/lib
           packages/**/dist
           packages/**/build
-          packages/protocol/*.js
-          packages/protocol/*.js.map
-          packages/protocol/**/*.js
-          packages/protocol/**/*.js.map
-          packages/sdk/contractkit/src/generated
         key: code-${{ github.sha }}
         restore-keys: |
           code-${{ github.sha }}
