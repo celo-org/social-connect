@@ -34,7 +34,6 @@ runs:
           packages/**/lib
           packages/**/dist
           packages/**/build
-          packages/sdk/contractkit/src/generated
         key: code-${{ github.sha }}
         restore-keys: |
           code-${{ github.sha }}
