@@ -209,10 +209,10 @@ jobs:
         uses: ./.github/actions/sync-workspace
         with:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
-      - name: Generate DevChain
-        run: |
-          cd packages/sdk/identity
-          yarn test:reset
+      #- name: Generate DevChain
+      #  run: |
+      #    cd packages/sdk/identity
+      #    yarn test:reset
       - name: Run tests
         run: |
           yarn --cwd=packages/sdk/identity test
