@@ -146,7 +146,7 @@ class StorageRoot {
     let dataResponse, signatureResponse
 
     try {
-      [dataResponse, signatureResponse] = await Promise.all([
+      ;[dataResponse, signatureResponse] = await Promise.all([
         fetch(resolvePath(this.root, dataPath)),
         fetch(resolvePath(this.root, `${dataPath}.signature`)),
       ])

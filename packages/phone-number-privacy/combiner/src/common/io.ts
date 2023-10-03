@@ -84,6 +84,7 @@ export async function fetchSignerResponseWithFallback<R extends OdisRequest>(
         [KEY_VERSION_HEADER]: keyVersion.toString()
       },
       body: JSON.stringify(request.body),
+      // @ts-expect-error throwIfAborted is not in the type definition
       signal: abortSignal,
       agent: url.startsWith("https://") ? httpsAgent : httpAgent
     })

@@ -144,7 +144,7 @@ export const queryOdisForQuota = async (
 }
 
 export const queryOdisDomain = async (contextName: OdisContextName) => {
-  console.log(`contextName: ${contextName}`) // tslint:disable-line:no-console
+  console.log(`contextName: ${contextName}`)
 
   const serviceContext = getServiceContext(contextName, OdisAPI.DOMAIN)
   const monitorDomainConfig: OdisHardeningConfig = {

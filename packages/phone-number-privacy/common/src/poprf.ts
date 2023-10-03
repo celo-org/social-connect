@@ -20,7 +20,6 @@ import { randomBytes } from 'crypto'
  * https://github.com/celo-org/celo-poprf-rs
  */
 
-
 let _poprf: typeof POPRF | undefined
 
 /**
