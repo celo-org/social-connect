@@ -34,7 +34,6 @@ RUN yarn install --network-timeout 100000 --frozen-lockfile && yarn cache clean
 RUN yarn build
 
 RUN rm -r .git
-RUN rm .gitmodules
 
 # Setup and run the combiner application.
 ENV NODE_ENV production
