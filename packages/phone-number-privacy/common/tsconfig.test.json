@@ -7,9 +7,9 @@
       }
     ],
     "declaration": true,
-    "rootDir": "src",
+    "rootDir": ".",
     "outDir": "lib"
   },
-  "include": ["src", "index.d.ts"],
-  "compileOnSave": true
+  "exclude": ["node_modules", "lib", "dist", "coverage"],
+  "include": ["test", "src", "index.d.ts"],
 }
