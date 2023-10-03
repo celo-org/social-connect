@@ -117,7 +117,7 @@ testWithGanache('Offchain Data', (web3) => {
         case SchemaErrorTypes.InvalidDataError:
           console.log("Something was wrong with the schema, can't try again")
           break
-        case SchemaErrorTypes.OffchainError:
+        case SchemaErrorTypes.OffchainError: {
           const offchainError = error.error
           switch (offchainError.errorType) {
             case OffchainErrorTypes.FetchError:
@@ -130,7 +130,8 @@ testWithGanache('Offchain Data', (web3) => {
               console.log("Account doesn't have data for this type")
               break
           }
-
+        }
+        break;
         default:
           break
       }

@@ -37,7 +37,6 @@
     ]
   },
   "devDependencies": {
-    "@celo/typescript": "0.0.2",
     "@babel/core": "^7.8.4",
     "@babel/runtime": "^7.8.4",
     "@changesets/cli": "^2.26.2",
@@ -46,9 +45,12 @@
     "@types/node": "18.7.16",
     "@types/prompt": "1.1.1",
     "@types/semver": "7.3.8",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
     "babel-jest": "^29.1.2",
     "codecov": "^3.6.5",
     "colors": "1.4.0",
+    "eslint": "^8.50.0",
     "husky": "^3.1.0",
     "jest": "^29.0.2",
     "jest-circus": "^29.0.2",
@@ -65,9 +67,7 @@
     "ts-jest": "^29.0.0",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^3.8.0",
-    "tslint": "^5.20.0",
-    "typescript": "4.7.4",
-    "typescript-tslint-plugin": "^0.5.4"
+    "typescript": "^5.2.2"
   },
   "resolutions": {
     "bip39": "https://github.com/bitcoinjs/bip39#d8ea080a18b40f301d4e2219a2991cd2417e83c2",

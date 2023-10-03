@@ -19,7 +19,7 @@
     "clean": "tsc -b . --clean",
     "docs": "typedoc",
     "test": "jest --runInBand --testPathIgnorePatterns src/odis/identifier-backwards-compatibility.test.ts",
-    "lint": "tslint -c tslint.json --project .",
+    "lint": "eslint .",
     "prepublishOnly": "yarn build"
   },
   "dependencies": {

@@ -16,7 +16,7 @@ jest.setTimeout(20000)
 describe('request service', () => {
   let db: Knex
   let service: PnpRequestService
-  let ctx = {
+  const ctx = {
     logger: rootLogger('test'),
     url: '',
     errors: [],

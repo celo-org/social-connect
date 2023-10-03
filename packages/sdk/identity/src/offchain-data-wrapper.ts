@@ -1,5 +1,5 @@
 import { Address, ensureLeading0x } from '@celo/base/lib/address'
-import { Err, makeAsyncThrowable, Ok, Result, RootError } from '@celo/base/lib/result'
+import { Err, Ok, Result, RootError, makeAsyncThrowable } from '@celo/base/lib/result'
 import { ContractKit } from '@celo/contractkit'
 import { ClaimTypes } from '@celo/contractkit/lib/identity/claims/types'
 import { IdentityMetadataWrapper } from '@celo/contractkit/lib/identity/metadata'
@@ -146,7 +146,7 @@ class StorageRoot {
     let dataResponse, signatureResponse
 
     try {
-      ;[dataResponse, signatureResponse] = await Promise.all([
+      [dataResponse, signatureResponse] = await Promise.all([
         fetch(resolvePath(this.root, dataPath)),
         fetch(resolvePath(this.root, `${dataPath}.signature`)),
       ])

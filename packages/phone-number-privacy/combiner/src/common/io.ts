@@ -19,7 +19,6 @@ import { isAbortError, Signer } from './combine'
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
 
-// tslint:disable-next-line: interface-over-type-literal
 export type SignerResponse<R extends OdisRequest> = {
   url: string
   res: OdisResponse<R>

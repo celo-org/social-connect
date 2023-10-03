@@ -240,7 +240,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
     let req: DomainRestrictedSignatureRequest
     let poprf: ThresholdPoprfClient
     beforeAll(async () => {
-      ;[req, poprf] = await signatureRequest(wallet, ACCOUNT_ADDRESS1, signSaltNew)
+      [req, poprf] = await signatureRequest(wallet, ACCOUNT_ADDRESS1, signSaltNew)
     })
     it('[Signer configuration test] Should respond with 200 on valid request for new domain', async () => {
       const res = await queryDomainEndpoint(req, SignerEndpoint.DOMAIN_SIGN)
