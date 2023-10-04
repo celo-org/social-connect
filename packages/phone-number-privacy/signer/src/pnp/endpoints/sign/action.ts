@@ -127,7 +127,7 @@ export function pnpSign(
     return {
       status: 200,
       body: {
-        success: true as true,
+        success: true as const,
         version: getSignerVersion(),
         signature,
         performedQueryCount: usedQuota,

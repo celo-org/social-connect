@@ -7,6 +7,7 @@ import { Backup } from './backup'
 import { ComputationalHardeningFunction } from './config'
 import { DecodeError } from './errors'
 
+// eslint-disable-next-line no-useless-escape
 const BASE64_REGEXP = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/
 
 /** Utility type to leverage io-ts for encoding and decoding of buffers from base64 strings. */
