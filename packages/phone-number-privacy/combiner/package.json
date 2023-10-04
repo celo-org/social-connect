@@ -61,6 +61,7 @@
     "uuid": "^7.0.3"
   },
   "devDependencies": {
+    "@celo/phone-number-privacy-signer": "workspace: *",
     "@celo/phone-utils": "^5.0.4",
     "@celo/utils": "^5.0.4",
     "@celo/wallet-local": "^5.0.4",
