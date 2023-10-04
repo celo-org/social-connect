@@ -29,13 +29,13 @@ LABEL org.opencontainers.image.authors="devops@clabs.co"
 WORKDIR /celo-phone-number-privacy/
 
 # Copy monorepo settings
-COPY lerna.json package.json yarn.lock ./
+COPY lerna.json package.json pnpm-lock.yaml ./
 COPY scripts/ scripts/
 COPY patches/ patches/
 
 # Makes build fail if it doesn't copy git, will be removed after build
-COPY .git .git 
-COPY .gitmodules .gitmodules 
+COPY .git .git
+COPY .gitmodules .gitmodules
 
 # Setting ONLY_PUBLISHED_DEPENDENCIES to true or any non-empty string results in only the
 # phone-number-privacy package being copied into the image, and therefore it will only build using
@@ -45,8 +45,8 @@ ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+phone-number-privacy/signer}
 COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} packages/${PACKAGE_SELECTOR}
 
 # Install dependencies and build.
-RUN yarn install --network-timeout 100000 --frozen-lockfile && yarn cache clean
-RUN yarn build
+RUN pnpm i --network-timeout 100000 && pnpm cache clean
+RUN pnpm build
 
 RUN rm -r .git
 RUN rm .gitmodules
@@ -55,4 +55,4 @@ RUN rm .gitmodules
 ENV NODE_ENV production
 WORKDIR /celo-phone-number-privacy/packages/phone-number-privacy/signer
 EXPOSE 8080
-ENTRYPOINT ["yarn", "start:docker"]
+ENTRYPOINT ["pnpm", "start:docker"]

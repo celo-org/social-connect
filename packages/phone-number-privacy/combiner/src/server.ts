@@ -9,6 +9,7 @@ import {
   rootLogger,
 } from '@celo/phone-number-privacy-common'
 import express, { RequestHandler } from 'express'
+import type { Application } from 'express-serve-static-core'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -28,7 +29,7 @@ import { pnpSign } from './pnp/endpoints/sign/action'
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
-export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
+export function startCombiner(config: CombinerConfig, kit?: ContractKit): Application {
   const logger = rootLogger(config.serviceName)
 
   kit = kit ?? getContractKitWithAgent(config.blockchain)

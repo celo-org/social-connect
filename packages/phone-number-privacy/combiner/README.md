@@ -6,7 +6,7 @@ A firebase function that orchestrates distributed BLS threshold signing with the
 
 ### Add migration file
 
-To update the combiner DB schema, first run `yarn db:migrate:make <migration_name>` to create a new migrations file. Then, fill in the new migration file as needed using the previous migration files as references.
+To update the combiner DB schema, first run `pnpm db:migrate:make <migration_name>` to create a new migrations file. Then, fill in the new migration file as needed using the previous migration files as references.
 
 ### Whitelist your IP address
 
@@ -16,7 +16,7 @@ Remember to remove your IP address from the whitelist when finished.
 
 ### Add db credentials to config.ts
 
-Run the command `yarn config:get:<network>` to fetch the necessary db credentials and add them to `src/config.ts` under the `DEV_MODE` section. DO NOT COMMIT THESE CREDENTIALS TO GITHUB.
+Run the command `pnpm config:get:<network>` to fetch the necessary db credentials and add them to `src/config.ts` under the `DEV_MODE` section. DO NOT COMMIT THESE CREDENTIALS TO GITHUB.
 
 Note: When you fill in the `host` field you may need to use the database's public IP, which can be found in the `Overview` section under the link above.
 
@@ -24,4 +24,4 @@ Note: When you fill in the `host` field you may need to use the database's publi
 
 Always run migrations in staging first and ensure all e2e tests pass before migrating in alfajores and mainnet.
 
-Run `yarn db:migrate:<network>`
+Run `pnpm db:migrate:<network>`

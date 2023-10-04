@@ -10,7 +10,7 @@ This package contains common code used across ODIS. It is depended on by the Com
 
 ## Release Process
 
-When updating the ODIS common package, it is important to remember that all changes must be published before they can be used in production ODIS services or SDKS. If your changes are needed in the SDKS, then you will need to also publish all the Celo SDKs. The instructions below detail this entire SDK release process, but if your changes are only needed in ODIS services you only need to do step 7 (remember to run `yarn && yarn build` before publishing, and consider reading the rest of the steps anyway for context)
+When updating the ODIS common package, it is important to remember that all changes must be published before they can be used in production ODIS services or SDKS. If your changes are needed in the SDKS, then you will need to also publish all the Celo SDKs. The instructions below detail this entire SDK release process, but if your changes are only needed in ODIS services you only need to do step 7 (remember to run `pnpm i && pnpm build` before publishing, and consider reading the rest of the steps anyway for context)
 
 These instructions assume the following scenario for readability:
 
@@ -25,7 +25,7 @@ These instructions assume the following scenario for readability:
 3. Search and replace all instances of the current sdk version in the monorepo with the new sdk version you are releasing (check the search and replace changes do what you intend them to before hitting replace!)
    - i.e. search and replace `3.1.1-dev` with `3.2.0-beta.1` (note that we’ve removed the `-dev`)
 4. Same idea as above -- ensure the version of the `@celo/phone-number-privacy-common` package is set to the version you are trying to release (i.e. `2.0.3-beta.1`) and that all other packages are importing this version.
-5. From the monorepo root directory, run `yarn reset && yarn && yarn build` (expect this to take at least 10 mins)
+5. From the monorepo root directory, run `pnpm reset && pnpm && pnpm build` (expect this to take at least 10 mins)
 6. Commit your changes with the message `3.2.0-beta.1`
 7. Publish the ODIS common package by navigating to the `phone-number-privacy/common` directory and running `npm publish —-tag beta`
    - You will be prompted to enter your OTP

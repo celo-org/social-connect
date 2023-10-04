@@ -41,7 +41,7 @@ The service currently supports Postgres, MSSQL, and MySQL.
 
 #### DB Migrations
 
-To update the signer DB schema, first run `yarn db:migrate:make <migration_name>` to create a new migrations file. Then, fill in the new migration file as needed using the previous migration files as references.
+To update the signer DB schema, first run `pnpm db:migrate:make <migration_name>` to create a new migrations file. Then, fill in the new migration file as needed using the previous migration files as references.
 
 Migrations will run automatically on startup.
 
@@ -124,9 +124,9 @@ The service requires a connection to a secret store and to a SQL database. The S
 
 #### Running locally or without docker
 
-To run without docker, or for development, start by git cloning the celo-monorepo. Next, run `yarn` from the monorepo root to install dependencies.
+To run without docker, or for development, start by git cloning the celo-monorepo. Next, run `pnpm` from the monorepo root to install dependencies.
 
-Then start the service: `yarn start`
+Then start the service: `pnpm start`
 
 #### Running in docker
 
@@ -166,7 +166,7 @@ You can test your mainnet service is set up correctly by running specific tests 
 
    - Change `ODIS_SIGNER_SERVICE_URL` to your service endpoint.
 
-4. Run `yarn test:signer:mainnet`.
+4. Run `pnpm test:signer:mainnet`.
 
    *Technical note: this command intentionally points the test's blockchain provider to Alfajores, in order to top up quota on Alfajores before running the test cases. It still verifies signatures against the respective mainnet polynomials.*
 5. Verify that all tests pass.

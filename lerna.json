@@ -5,7 +5,7 @@
     "packages/phone-number-privacy/*",
     "packages/sdk/*"
   ],
-  "npmClient": "yarn",
+  "npmClient": "pnpm",
   "useWorkspaces": true,
   "version": "independent"
 }

@@ -6,10 +6,10 @@
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "scripts": {
-    "deploy": "yarn build && firebase deploy --only functions:odisMonitorScheduleFunctionLegacyPNP,functions:odisMonitorScheduleFunctionPNP,functions:odisMonitorScheduleFunctionDomains",
-    "deploy:staging": "yarn deploy --project celo-phone-number-privacy-stg",
-    "deploy:alfajores": "yarn deploy --project celo-phone-number-privacy",
-    "deploy:mainnet": "yarn deploy --project celo-pgpnp-mainnet",
+    "deploy": "pnpm build && firebase deploy --only functions:odisMonitorScheduleFunctionLegacyPNP,functions:odisMonitorScheduleFunctionPNP,functions:odisMonitorScheduleFunctionDomains",
+    "deploy:staging": "pnpm deploy --project celo-phone-number-privacy-stg",
+    "deploy:alfajores": "pnpm deploy --project celo-phone-number-privacy",
+    "deploy:mainnet": "pnpm deploy --project celo-pgpnp-mainnet",
     "config:get:staging": "firebase functions:config:get --project celo-phone-number-privacy-stg",
     "config:get:alfajores": "firebase functions:config:get --project celo-phone-number-privacy",
     "config:get:mainnet": "firebase functions:config:get --project celo-pgpnp-mainnet",
@@ -27,14 +27,15 @@
     "@celo/cryptographic-utils": "^5.0.4",
     "@celo/encrypted-backup": "^5.0.4",
     "@celo/identity": "^5.0.4",
-    "@celo/wallet-local": "^5.0.4",
     "@celo/phone-number-privacy-common": "^3.0.3",
     "@celo/utils": "^5.0.4",
-    "yargs": "^14.0.0",
+    "@celo/wallet-local": "^5.0.4",
     "firebase-admin": "^9.12.0",
-    "firebase-functions": "^3.15.7"
+    "firebase-functions": "^3.15.7",
+    "yargs": "^14.0.0"
   },
   "devDependencies": {
+    "@types/yargs": "^17.0.26",
     "firebase-functions-test": "^0.3.3",
     "firebase-tools": "9.20.0"
   },

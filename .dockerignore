@@ -3,7 +3,6 @@ node_modules
 *node_modules
 
 # logs
-yarn-error.log
 npm-debug.log
 
 # root folders

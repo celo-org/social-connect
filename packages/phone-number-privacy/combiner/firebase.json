@@ -1,6 +1,6 @@
 {
   "functions": {
     "source": ".",
-    "predeploy": ["yarn run lint", "yarn run build"]
+    "predeploy": ["pnpm lint", "pnpm build"]
   }
 }

@@ -1,0 +1,5 @@
+packages:
+  # include packages in subfolders (e.g. apps/ and packages/)
+  -  "packages/phone-number-privacy/**"
+  -  "packages/sdk/**"
+  -  "docs/examples/**"
