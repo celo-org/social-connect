@@ -13,7 +13,7 @@ import {
 import { normalizeAddressWith0x } from '@celo/utils/lib/address'
 import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
-import 'isomorphic-fetch'
+import fetch from 'node-fetch'
 import { config as signerConfig } from '../../../signer/src/config'
 import { getCombinerVersion } from '../../src'
 import {

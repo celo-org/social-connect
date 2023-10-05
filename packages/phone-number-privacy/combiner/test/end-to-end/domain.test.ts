@@ -30,7 +30,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import { defined, noNumber, noString } from '@celo/utils/lib/sign-typed-data-utils'
 import * as crypto from 'crypto'
-import 'isomorphic-fetch'
+import fetch from 'node-fetch'
 import { getCombinerVersion } from '../../src'
 import { getTestContextName } from './resources'
 
