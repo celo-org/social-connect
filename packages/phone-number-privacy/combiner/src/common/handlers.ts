@@ -97,6 +97,7 @@ export function meteringHandler<R extends OdisRequest>(
       logger.info({ eventLoopLag }, 'Measure event loop lag')
     })
 
+    //TODO: Add prometheus metric to track e2e response latency
     await handler(req, res)
     if (res.headersSent) {
       // used for log based metrics
