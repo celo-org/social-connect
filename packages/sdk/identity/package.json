@@ -20,13 +20,13 @@
     "docs": "typedoc",
     "test": "jest --runInBand --testPathIgnorePatterns src/odis/identifier-backwards-compatibility.test.ts",
     "lint": "eslint .",
-    "prepublishOnly": "yarn build"
+    "prepublish": "yarn build"
   },
   "dependencies": {
     "@celo/base": "^5.0.4",
-    "@celo/utils": "^5.0.4",
     "@celo/contractkit": "^5.0.4",
     "@celo/phone-number-privacy-common": "^3.0.3",
+    "@celo/utils": "^5.0.4",
     "@types/debug": "^4.1.5",
     "bignumber.js": "^9.0.0",
     "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
