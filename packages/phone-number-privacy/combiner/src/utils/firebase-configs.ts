@@ -12,76 +12,77 @@ export const defaultMockDEK = ensureLeading0x(
 )
 
 // function settings
-export const minInstancesConfig = defineInt('MIN_INSTANCES', { default: 0 })
-export const requestConcurency = defineInt('REQUEST_CONCURRENCY', { default: 80 })
+export const minInstancesConfig: any = defineInt('MIN_INSTANCES', { default: 0 })
+export const requestConcurency: any = defineInt('REQUEST_CONCURRENCY', { default: 80 })
+
 // Root
-export const serviceNameConfig = defineString('SERVICE_NAME', { default: defaultServiceName })
+export const serviceNameConfig: any = defineString('SERVICE_NAME', { default: defaultServiceName })
 
 // Blockchain
-export const blockchainProvider = defineString('BLOCKCHAIN_PROVIDER')
-export const blockchainApiKey = defineSecret('BLOCKCHAIN_API_KEY')
+export const blockchainProvider: any = defineString('BLOCKCHAIN_PROVIDER')
+export const blockchainApiKey: any = defineSecret('BLOCKCHAIN_API_KEY')
 
 // PNP
-export const pnpServiceName = defineString('PNP_SERVICE_NAME', { default: defaultServiceName })
-export const pnpEnabled = defineBoolean('PNP_ENABLED', {
+export const pnpServiceName: any = defineString('PNP_SERVICE_NAME', { default: defaultServiceName })
+export const pnpEnabled: any = defineBoolean('PNP_ENABLED', {
   default: false,
   description: '',
 })
-export const pnpOdisServicesSigners = defineString('PNP_ODIS_SERVICES_SIGNERS')
-export const pnpOdisServicesTimeoutMilliseconds = defineInt(
+export const pnpOdisServicesSigners: any = defineString('PNP_ODIS_SERVICES_SIGNERS')
+export const pnpOdisServicesTimeoutMilliseconds: any = defineInt(
   'PNP_ODIS_SERVICES_TIMEOUT_MILLISECONDS',
   {
     default: 5 * 1000,
   }
 )
-export const pnpKeysCurrentVersion = defineInt('PNP_KEYS_CURRENT_VERSION')
-export const pnpKeysVersions = defineString('PNP_KEYS_VERSIONS')
-export const pnpFullNodeTimeoutMs = defineInt('PNP_FULL_NODE_TIMEOUT_MS', {
+export const pnpKeysCurrentVersion: any = defineInt('PNP_KEYS_CURRENT_VERSION')
+export const pnpKeysVersions: any = defineString('PNP_KEYS_VERSIONS')
+export const pnpFullNodeTimeoutMs: any = defineInt('PNP_FULL_NODE_TIMEOUT_MS', {
   default: FULL_NODE_TIMEOUT_IN_MS,
 })
-export const pnpFullNodeRetryCount = defineInt('PNP_FULL_NODE_RETRY_COUNT', {
+export const pnpFullNodeRetryCount: any = defineInt('PNP_FULL_NODE_RETRY_COUNT', {
   default: RETRY_COUNT,
 })
-export const pnpFullNodeDelaysMs = defineInt('PNP_FULL_NODE_DELAY_MS', {
+export const pnpFullNodeDelaysMs: any = defineInt('PNP_FULL_NODE_DELAY_MS', {
   default: RETRY_DELAY_IN_MS,
 })
-export const pnpShouldAuthenticate = defineBoolean('PNP_SHOULD_AUTHENTICATE', {
+export const pnpShouldAuthenticate: any = defineBoolean('PNP_SHOULD_AUTHENTICATE', {
   default: true,
 })
-export const pnpShouldCheckQuota = defineBoolean('PNP_SHOULD_CHECK_QUOTA', {
+export const pnpShouldCheckQuota: any = defineBoolean('PNP_SHOULD_CHECK_QUOTA', {
   default: false,
 })
-export const pnpShouldMockAccountService = defineBoolean('PNP_SHOULD_MOCK_ACCOUNT_SERVICE', {
+export const pnpShouldMockAccountService: any = defineBoolean('PNP_SHOULD_MOCK_ACCOUNT_SERVICE', {
   default: false,
 })
-export const pnpMockDek = defineString('PNP_MOCK_DECK', { default: defaultMockDEK })
+export const pnpMockDek: any = defineString('PNP_MOCK_DECK', { default: defaultMockDEK })
 
 // Domains
-export const domainServiceName = defineString('DOMAIN_SERVICE_NAME', {
+export const domainServiceName: any = defineString('DOMAIN_SERVICE_NAME', {
   default: defaultServiceName,
 })
-export const domainEnabled = defineBoolean('DOMAIN_ENABLED', { default: false })
-export const domainOdisServicesSigners = defineString('DOMAIN_ODIS_SERVICES_SIGNERS')
-export const domainOdisServicesTimeoutMilliseconds = defineInt(
+export const domainEnabled: any = defineBoolean('DOMAIN_ENABLED', { default: false })
+export const domainOdisServicesSigners: any = defineString('DOMAIN_ODIS_SERVICES_SIGNERS')
+export const domainOdisServicesTimeoutMilliseconds: any = defineInt(
   'DOMAIN_ODIS_SERVICES_TIMEOUT_MILLISECONDS',
   {
     default: 5 * 1000,
   }
 )
-export const domainKeysCurrentVersion = defineInt('DOMAIN_KEYS_CURRENT_VERSION')
-export const domainKeysVersions = defineString('DOMAIN_KEYS_VERSIONS')
-export const domainFullNodeTimeoutMs = defineInt('DOMAIN_FULL_NODE_TIMEOUT_MS', {
+export const domainKeysCurrentVersion: any = defineInt('DOMAIN_KEYS_CURRENT_VERSION')
+export const domainKeysVersions: any = defineString('DOMAIN_KEYS_VERSIONS')
+export const domainFullNodeTimeoutMs: any = defineInt('DOMAIN_FULL_NODE_TIMEOUT_MS', {
   default: FULL_NODE_TIMEOUT_IN_MS,
 })
-export const domainFullNodeRetryCount = defineInt('DOMAIN_FULL_NODE_RETRY_COUNT', {
+export const domainFullNodeRetryCount: any = defineInt('DOMAIN_FULL_NODE_RETRY_COUNT', {
   default: RETRY_COUNT,
 })
-export const domainFullNodeDelaysMs = defineInt('DOMAIN_FULL_NODE_DELAY_MS', {
+export const domainFullNodeDelaysMs: any = defineInt('DOMAIN_FULL_NODE_DELAY_MS', {
   default: RETRY_DELAY_IN_MS,
 })
-export const domainShouldAuthenticate = defineBoolean('DOMAIN_SHOULD_AUTHENTICATE', {
+export const domainShouldAuthenticate: any = defineBoolean('DOMAIN_SHOULD_AUTHENTICATE', {
   default: true,
 })
-export const domainShouldCheckQuota = defineBoolean('DOMAIN_SHOULD_CHECK_QUOTA', {
+export const domainShouldCheckQuota: any = defineBoolean('DOMAIN_SHOULD_CHECK_QUOTA', {
   default: false,
 })
