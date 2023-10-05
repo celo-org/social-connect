@@ -12,7 +12,6 @@ import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import Logger from 'bunyan'
 import { Request, Response } from 'express'
-import { performance, PerformanceObserver } from 'perf_hooks'
 import { getCombinerVersion } from '../config'
 import { OdisError } from './error'
 
@@ -97,31 +96,11 @@ export function meteringHandler<R extends OdisRequest>(
       const eventLoopLag = Date.now() - eventLoopLagMeasurementStart
       logger.info({ eventLoopLag }, 'Measure event loop lag')
     })
-    const startMark = `Begin ${req.url}`
-    const endMark = `End ${req.url}`
-    const entryName = `${req.url} latency`
 
-    const obs = new PerformanceObserver((list) => {
-      const entry = list.getEntriesByName(entryName)[0]
-      if (entry) {
-        logger.info({ latency: entry }, 'e2e response latency measured')
-      }
-    })
-    obs.observe({ entryTypes: ['measure'], buffered: false })
-
-    performance.mark(startMark)
-
-    try {
-      await handler(req, res)
-      if (res.headersSent) {
-        // used for log based metrics
-        logger.info({ res }, 'Response sent')
-      }
-    } finally {
-      performance.mark(endMark)
-      performance.measure(entryName, startMark, endMark)
-      performance.clearMarks()
-      obs.disconnect()
+    await handler(req, res)
+    if (res.headersSent) {
+      // used for log based metrics
+      logger.info({ res }, 'Response sent')
     }
   }
 }
