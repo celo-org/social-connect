@@ -58,6 +58,9 @@ jobs:
           key: git-${{ github.ref }}
           restore-keys: |
             git-
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -144,6 +147,9 @@ jobs:
     steps:
       # Restore .git cache as we need to checkout the local composite action to run it:
       # https://github.com/orgs/community/discussions/11771
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - uses: actions/cache/restore@v3
         id: cache_git
         with:
@@ -169,6 +175,7 @@ jobs:
           path: .git
           key: git-${{ github.ref }}
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -206,6 +213,7 @@ jobs:
           path: .git
           key: git-${{ github.ref }}
       - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -229,6 +237,9 @@ jobs:
       contains(needs.install-dependencies.outputs.all_modified_files, ',pnpm-lock.yaml') ||
       false
     steps:
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
       - uses: actions/cache/restore@v3
         id: cache_git
         with:
