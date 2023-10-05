@@ -11,7 +11,6 @@ import {
   normalizeAddressWith0x,
   privateKeyToAddress,
 } from '@celo/utils/lib/address'
-import 'isomorphic-fetch'
 
 require('dotenv').config()
 

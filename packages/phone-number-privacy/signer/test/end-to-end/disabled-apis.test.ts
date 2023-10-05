@@ -20,7 +20,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import { defined, noBool, noNumber, noString } from '@celo/utils/lib/sign-typed-data-utils'
 import { LocalWallet } from '@celo/wallet-local'
-import 'isomorphic-fetch'
+import fetch from 'node-fetch'
 
 require('dotenv').config()
 
