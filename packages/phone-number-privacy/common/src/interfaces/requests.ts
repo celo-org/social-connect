@@ -22,7 +22,6 @@ import {
 
 // Domain request types are only assignable to EIP712Object when using type instead
 // of interface. Otherwise the compiler complains about a missing index signature.
-// tslint:disable:interface-over-type-literal
 
 export enum AuthenticationMethod {
   WALLET_KEY = 'wallet_key',

@@ -1,4 +1,3 @@
-// tslint:disable: no-console
 import * as poprf from '@celo/poprf'
 import crypto from 'crypto'
 

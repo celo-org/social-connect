@@ -14,7 +14,6 @@ describe(signWithRawKey, () => {
 
     // NOTE: elliptic is disabled elsewhere in this library to prevent
     // accidental signing of truncated messages.
-    // tslint:disable-next-line:import-blacklist
     const EC = require('elliptic').ec
     const ec = new EC('secp256k1')
 
@@ -50,7 +49,6 @@ describe(signWithRawKey, () => {
 
     // NOTE: elliptic is disabled elsewhere in this library to prevent
     // accidental signing of truncated messages.
-    // tslint:disable-next-line:import-blacklist
     const EC = require('elliptic').ec
     const ec = new EC('secp256k1')
 

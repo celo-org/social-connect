@@ -20,7 +20,7 @@
     "config:set:mainnet": "firebase functions:config:set --project celo-pgpnp-mainnet",
     "clean": "tsc -b . --clean",
     "build": "tsc -b .",
-    "lint": "tslint --project .",
+    "lint": "eslint .",
     "test": "jest --runInBand --testPathIgnorePatterns test/end-to-end",
     "test:coverage": "yarn test --coverage",
     "test:integration": "jest --runInBand test/integration",

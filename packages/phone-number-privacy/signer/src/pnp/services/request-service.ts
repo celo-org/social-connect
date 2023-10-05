@@ -82,7 +82,6 @@ export class DefaultPnpRequestService implements PnpRequestService {
   }
 }
 
-// tslint:disable-next-line:max-classes-per-file
 export class MockPnpRequestService implements PnpRequestService {
   public async recordRequest(
     account: string,

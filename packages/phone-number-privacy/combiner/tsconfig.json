@@ -1,11 +1,7 @@
 {
-  "extends": "@tsconfig/recommended/tsconfig.json",
+  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
-    "plugins": [
-      {
-        "name": "typescript-tslint-plugin"
-      }
-    ],
+    "esModuleInterop": true,
     "declaration": true,
     "rootDir": "src",
     "outDir": "dist"
