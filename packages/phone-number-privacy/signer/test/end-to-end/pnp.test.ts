@@ -15,7 +15,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
-import fetch, { Response } from 'node-fetch'
+import 'isomorphic-fetch'
 import { config } from '../../src/config'
 import { getBlindedPhoneNumber, getTestParamsForContext } from './utils'
 

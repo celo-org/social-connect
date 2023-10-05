@@ -20,8 +20,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import { defined, noBool, noNumber, noString } from '@celo/utils/lib/sign-typed-data-utils'
 import { LocalWallet } from '@celo/wallet-local'
-import fetch from 'node-fetch'
-
+import 'isomorphic-fetch'
 require('dotenv').config()
 
 const { ACCOUNT_ADDRESS1, BLINDED_PHONE_NUMBER, PRIVATE_KEY1 } = TestUtils.Values
