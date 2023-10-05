@@ -6,8 +6,8 @@
   "private": true,
   "scripts": {
     "preinstall": "git config --global url.\"https://\".insteadOf ssh://",
-    "lint": "yarn lerna run lint && yarn run --silent lint:do-not-merge",
-    "lint:do-not-merge": "! git grep -E 'DO[ _]*NOT[ _]*MERGE'",
+    "lint": "yarn lerna run lint && yarn lint:do-not-merge",
+    "lint:do-not-merge": "git grep -E 'DO[ _]*NOT[ _]*MERGE'",
     "prettify": "yarn run prettier --config .prettierrc.js --write '**/*.+(ts|js)'",
     "prettify:diff": "yarn run prettier --config .prettierrc.js --list-different '**/*.+(ts|js)'",
     "reset": "yarn reset-modules && yarn reset-cache",
