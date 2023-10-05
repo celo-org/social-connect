@@ -1,20 +1,22 @@
 ---
-name: Build celo-monorepo container
+name: Build ODIS combiner image
 
 on:
   push:
     paths:
-      - 'dockerfiles/all-monorepo/**'
+      - 'dockerfiles/phone-number-privacy/Dockerfile-combiner'
+      - 'packages/phone-number-privacy/combiner/**'
     branches:
-      - master
+      - main
   pull_request:
     paths:
-      - 'dockerfiles/all-monorepo/**'
+      - 'dockerfiles/phone-number-privacy/Dockerfile-combiner'
+      - 'packages/phone-number-privacy/combiner/**'
   workflow_dispatch:
 
 jobs:
-  celomonorepo-build-dev:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.8
+  odis-combiner-build-dev:
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.11.4
     name: Build us-west1-docker.pkg.dev/devopsre/dev-images/monorepo:${{ github.sha }}
     if: |
       github.ref != 'refs/heads/master'
@@ -27,8 +29,8 @@ jobs:
       file: dockerfiles/all-monorepo/Dockerfile
       trivy: true
 
-  celomonorepo-build:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.8
+  odis-combiner-build:
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.11.4
     name: Build us-west1-docker.pkg.dev/devopsre/celo-monorepo/monorepo:${{ github.sha }}
     if: |
       github.ref == 'refs/heads/master'
