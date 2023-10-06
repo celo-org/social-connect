@@ -1,5 +1,3 @@
-// tslint:disable: no-console
-
 import { initDatabase } from '../src/common/database/database'
 import { config } from '../src/config'
 

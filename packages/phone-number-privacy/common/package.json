@@ -12,7 +12,7 @@
     "clean": "tsc -b . --clean",
     "test": "jest --testPathIgnorePatterns test/end-to-end",
     "test:coverage": "yarn test --coverage",
-    "lint": "tslint -c tslint.json --project ."
+    "lint": "eslint ."
   },
   "files": [
     "lib/**/*"

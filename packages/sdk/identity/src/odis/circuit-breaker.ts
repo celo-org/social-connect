@@ -2,6 +2,7 @@ import { Err, Ok, Result, RootError } from '@celo/base/lib/result'
 import fetch from 'cross-fetch'
 import * as crypto from 'crypto'
 
+// eslint-disable-next-line no-useless-escape
 export const BASE64_REGEXP = /^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$/
 
 export interface CircuitBreakerServiceContext {

@@ -53,7 +53,6 @@ export class CachingAccountService implements AccountService {
   }
 }
 
-// tslint:disable-next-line:max-classes-per-file
 export class ContractKitAccountService implements AccountService {
   constructor(private readonly logger: Logger, private readonly kit: ContractKit) {}
 
@@ -86,7 +85,6 @@ export class ContractKitAccountService implements AccountService {
   }
 }
 
-// tslint:disable-next-line:max-classes-per-file
 export class MockAccountService implements AccountService {
   constructor(private readonly mockDek: string, private readonly mockTotalQuota: number) {}
 

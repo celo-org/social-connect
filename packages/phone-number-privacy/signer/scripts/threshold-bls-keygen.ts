@@ -1,4 +1,3 @@
-// tslint:disable: no-console
 import threshold_bls from 'blind-threshold-bls'
 import crypto from 'crypto'
 
