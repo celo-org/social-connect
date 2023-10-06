@@ -111,60 +111,58 @@ function createHandler<R extends OdisRequest>(
 }
 
 export function startProxy(req: any, res: any, config: CombinerConfig) {
-  let destinationUrl: string
-  let stringBod: string
-  let jsonObject: any
-  let dataArray: any[] = []
   const logger = rootLogger(config.serviceName)
 
   logger.info({ request: req }, 'Starting proxy.')
+
+  let destinationUrl: string
+  let rawBodyString: string
+  let rawBodyJson: any
+  let rawBodyData: any[] = []
 
   const proxy = httpProxy.createProxyServer({
     proxyTimeout: config.phoneNumberPrivacy.odisServices.timeoutMilliSeconds,
   })
 
   if (req.rawBody) {
-    // XXX having to strigify and then parse, because `req.rawBody.data` does not work
-    stringBod = JSON.stringify(req.rawBody)
-    jsonObject = JSON.parse(stringBod)
-    dataArray = jsonObject.data
+    // XXX having to strigify and then parse, because simply using `req.rawBody.data` does not work.
+    rawBodyString = JSON.stringify(req.rawBody)
+    rawBodyJson = JSON.parse(rawBodyString)
+    rawBodyData = rawBodyJson.data
   }
 
   switch (config.proxy.deploymentEnv) {
     case 'mainnet':
       destinationUrl = 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerGen2'
-      proxy.web(req, res, { target: destinationUrl })
       break
+
     case 'alfajores':
       destinationUrl =
         'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2'
-
-      proxy.web(req, res, { target: destinationUrl })
       break
+
     case 'staging':
       destinationUrl =
         'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerGen2'
-
-      logger.info(
-        {
-          request: req,
-          rawBody: req.rawBody,
-          data: dataArray,
-          destinationURL: destinationUrl,
-        },
-        'Proxying request to staging Combiner gen 2.'
-      )
-
-      proxy.web(req, res, {
-        target: destinationUrl,
-        buffer: streamify(dataArray.length != 0 ? [Buffer.from(dataArray)] : []),
-        changeOrigin: true,
-        secure: false,
-      })
       break
+
     default:
       throw ErrorMessage.UNKNOWN_ERROR
   }
+
+  logger.info(
+    {
+      request: req,
+      rawBodyData: rawBodyData,
+      destinationURL: destinationUrl,
+    },
+    'Proxying request to staging Combiner gen 2.'
+  )
+
+  proxy.web(req, res, {
+    target: destinationUrl,
+    buffer: streamify(rawBodyData.length != 0 ? [Buffer.from(rawBodyData)] : []),
+  })
 
   proxy.on('error', (err) => {
     logger.error({ err }, 'Error in Proxying request to Combiner.')
