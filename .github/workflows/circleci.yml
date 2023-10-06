@@ -133,6 +133,10 @@ jobs:
           # Checking if changed in the last 100 commits in PRs
           fetch_depth: '150'
       - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
+      - name: Has Changeset
+        id: changeset
+        run: yarn changeset status --since origin/main
+
   lint-checks:
     name: Lint code
     runs-on: ['self-hosted', 'org', '8-cpu']
@@ -167,9 +171,12 @@ jobs:
         with:
           # check out full history
           fetch-depth: 0
-
+      - name: Sync workspace
+        uses: ./.github/actions/sync-workspace
+        with:
+          package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       # set baseBranch to origin/main
-      - run: yarn changeset status --since origin/main
+      - run: yarn changeset status --since main
   general_test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
@@ -227,6 +234,7 @@ jobs:
           yarn --cwd=packages/phone-number-privacy/combiner test:coverage
   odis-test:
     name: ODIS (signer + common) test
+    needs: install-dependencies
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
