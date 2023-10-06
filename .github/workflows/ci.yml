@@ -177,7 +177,7 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - run: yarn changeset status --since=main
   general_test:
-    name: General jest test
+    name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
@@ -232,12 +232,12 @@ jobs:
         run: |
           yarn --cwd=packages/phone-number-privacy/combiner test:coverage
   odis-test:
-    name: ODIS test
+    name: ODIS (signer + common) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
-    needs: [install-dependencies, lint-checks]
+
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
