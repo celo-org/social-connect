@@ -38,7 +38,7 @@ env:
 
 jobs:
   install-dependencies:
-    name: Install dependencies
+    name: Install + Build +
     outputs:
       package-json-checksum: ${{ steps.node-checksums.outputs.PACKAGE_JSON_CHECKSUM }}
       # Propagate more outputs if you need https://github.com/tj-actions/changed-files#outputs
@@ -132,7 +132,7 @@ jobs:
           separator: ','
           # Checking if changed in the last 100 commits in PRs
           fetch_depth: '150'
-      - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
+        run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
       - name: Has Changeset
         id: changeset
         run: yarn changeset status --since origin/main
@@ -159,24 +159,6 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - run: yarn run prettify:diff
       - run: yarn run lint
-  changeset:
-    name: Has Changeset
-    runs-on: ['self-hosted', 'org', '8-cpu']
-    container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
-    timeout-minutes: 5
-    needs: install-dependencies
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # check out full history
-          fetch-depth: 0
-      - name: Sync workspace
-        uses: ./.github/actions/sync-workspace
-        with:
-          package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
-      # set baseBranch to origin/main
-      - run: yarn changeset status --since main
   general_test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
