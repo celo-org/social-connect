@@ -132,7 +132,6 @@ jobs:
           separator: ','
           # Checking if changed in the last 100 commits in PRs
           fetch_depth: '150'
-        run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
       - name: Has Changeset
         id: changeset
         run: yarn changeset status --since origin/main
