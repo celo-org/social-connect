@@ -58,7 +58,7 @@ jobs:
           key: git-${{ github.ref }}
           restore-keys: |
             git-
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Verify setup for incremental testing
@@ -139,7 +139,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -170,7 +170,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -205,7 +205,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -233,7 +233,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
