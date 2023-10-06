@@ -155,6 +155,27 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - run: yarn run prettify:diff
       - run: yarn run lint
+  changeset:
+    name: Has Changeset
+    runs-on: ['self-hosted', 'org', '8-cpu']
+    container:
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+    timeout-minutes: 4
+    needs: install-dependencies
+    steps:
+      # Restore .git cache as we need to checkout the local composite action to run it:
+      # https://github.com/orgs/community/discussions/11771
+      - uses: actions/cache/restore@v3
+        id: cache_git
+        with:
+          path: .git
+          key: git-${{ github.ref }}
+      - uses: actions/checkout@v3
+      - name: Sync workspace
+        uses: ./.github/actions/sync-workspace
+        with:
+          package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
+      - run: yarn changeset status --since=main
   general_test:
     name: General jest test
     runs-on: ['self-hosted', 'org', '8-cpu']
