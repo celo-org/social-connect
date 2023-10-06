@@ -20,8 +20,6 @@ import { randomBytes } from 'crypto'
  * https://github.com/celo-org/celo-poprf-rs
  */
 
-// tslint:disable: max-classes-per-file
-
 let _poprf: typeof POPRF | undefined
 
 /**

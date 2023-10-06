@@ -1,0 +1,10 @@
+{
+  "extends": "@tsconfig/recommended",
+  "compilerOptions": {
+    "declaration": true,
+    "rootDir": ".",
+    "outDir": "lib"
+  },
+  "exclude": ["node_modules", "lib", "dist", "coverage"],
+  "include": ["test", "src", "index.d.ts"],
+}

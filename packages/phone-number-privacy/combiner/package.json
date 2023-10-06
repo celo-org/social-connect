@@ -1,6 +1,7 @@
 {
   "name": "@celo/phone-number-privacy-combiner",
   "version": "3.0.1-beta.0-dev",
+  "private": "true",
   "description": "Orchestrates and combines threshold signatures for use in ODIS",
   "author": "Celo",
   "license": "Apache-2.0",
@@ -19,7 +20,7 @@
     "config:set:mainnet": "firebase functions:config:set --project celo-pgpnp-mainnet",
     "clean": "tsc -b . --clean",
     "build": "tsc -b .",
-    "lint": "tslint --project .",
+    "lint": "eslint .",
     "test": "jest --runInBand --testPathIgnorePatterns test/end-to-end",
     "test:coverage": "yarn test --coverage",
     "test:integration": "jest --runInBand test/integration",

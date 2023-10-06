@@ -5,7 +5,6 @@ import {
   OdisResponse,
   PnpQuotaStatus,
   send,
-  // tslint:disable-next-line: ordered-imports
   SequentialDelayDomainState,
   WarningMessage,
 } from '@celo/phone-number-privacy-common'

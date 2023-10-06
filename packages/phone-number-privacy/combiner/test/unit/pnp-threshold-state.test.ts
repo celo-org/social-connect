@@ -77,7 +77,7 @@ describe('pnp threshold state', () => {
           url: 'random url',
           status: 200,
           res: {
-            success: true as true,
+            success: true as const,
             version: expectedVersion,
             ...o,
           },
@@ -132,7 +132,7 @@ describe('pnp threshold state', () => {
           url: 'random url',
           status: 200,
           res: {
-            success: true as true,
+            success: true as const,
             version: expectedVersion,
             ...o,
           },
@@ -185,7 +185,7 @@ describe('pnp threshold state', () => {
           url: 'random url',
           status: 200,
           res: {
-            success: true as true,
+            success: true as const,
             version: expectedVersion,
             ...o,
           },
@@ -219,7 +219,7 @@ describe('pnp threshold state', () => {
         url: 'random url',
         status: 200,
         res: {
-          success: true as true,
+          success: true as const,
           version: expectedVersion,
           ...o,
         },

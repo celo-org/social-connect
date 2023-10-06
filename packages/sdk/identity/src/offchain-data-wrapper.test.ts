@@ -118,19 +118,21 @@ testWithGanache('Offchain Data', (web3) => {
           console.log("Something was wrong with the schema, can't try again")
           break
         case SchemaErrorTypes.OffchainError:
-          const offchainError = error.error
-          switch (offchainError.errorType) {
-            case OffchainErrorTypes.FetchError:
-              console.log('Something went wrong with fetching, try again')
-              break
-            case OffchainErrorTypes.InvalidSignature:
-              console.log('Signature was wrong')
-              break
-            case OffchainErrorTypes.NoStorageRootProvidedData:
-              console.log("Account doesn't have data for this type")
-              break
+          {
+            const offchainError = error.error
+            switch (offchainError.errorType) {
+              case OffchainErrorTypes.FetchError:
+                console.log('Something went wrong with fetching, try again')
+                break
+              case OffchainErrorTypes.InvalidSignature:
+                console.log('Signature was wrong')
+                break
+              case OffchainErrorTypes.NoStorageRootProvidedData:
+                console.log("Account doesn't have data for this type")
+                break
+            }
           }
-
+          break
         default:
           break
       }
