@@ -19,7 +19,6 @@ import { isAbortError, Signer } from './combine'
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
 
-// tslint:disable-next-line: interface-over-type-literal
 export type SignerResponse<R extends OdisRequest> = {
   url: string
   res: OdisResponse<R>
@@ -85,7 +84,7 @@ export async function fetchSignerResponseWithFallback<R extends OdisRequest>(
         [KEY_VERSION_HEADER]: keyVersion.toString()
       },
       body: JSON.stringify(request.body),
-      // @ts-expect-error -- wants a param for abortifThrown but thats not available on the incoming yet. @alec will fix it ;) 
+      // @ts-expect-error throwIfAborted is not in the type definition
       signal: abortSignal,
       agent: url.startsWith("https://") ? httpsAgent : httpAgent
     })

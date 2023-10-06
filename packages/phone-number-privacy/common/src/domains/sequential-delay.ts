@@ -10,7 +10,6 @@ import { Domain } from './domains'
 
 // Concrete Domain subtypes are only assignable to Domain and EIP712Object when using type instead
 // of interface. Otherwise the compiler complains about a missing index signature.
-// tslint:disable:interface-over-type-literal
 
 export type SequentialDelayStage = {
   /**

@@ -1,26 +1,9 @@
 {
+  "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
-    "plugins": [
-      {
-        "name": "typescript-tslint-plugin"
-      }
-    ],
-    "lib": ["es2017", "ES2020.Promise"],
-    "module": "commonjs",
-    "strict": true,
-    "allowJs": false,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "sourceMap": true,
     "declaration": true,
-    "target": "es2017",
     "rootDir": "src",
-    "outDir": "./dist",
-    "skipLibCheck": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "preserveConstEnums": true,
-    "composite": true
+    "outDir": "dist"
   },
   "include": ["src", "index.d.ts"],
   "compileOnSave": true

@@ -5,7 +5,6 @@ import { concurrentRPSLoadTest } from '../test'
 
 const logger = rootLogger('odis-monitor')
 
-// tslint:disable-next-line: no-unused-expression
 yargs
   .scriptName('ODIS-load-test')
   .recommendCommands()
@@ -94,6 +93,6 @@ yargs
         args.movingAvgRequests,
         args.privateKey,
         args.privateKeyPercentage
-      ) // tslint:disable-line:no-floating-promises
+      )
     }
   ).argv

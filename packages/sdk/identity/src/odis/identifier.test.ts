@@ -12,7 +12,6 @@ import { AuthenticationMethod, EncryptionKeySigner, ErrorMessages, ServiceContex
 import fetchMock from '../__mocks__/cross-fetch'
 
 jest.mock('./bls-blinding-client', () => {
-  // tslint:disable-next-line:no-shadowed-variable
   class WasmBlsBlindingClient {
     blindMessage = (m: string) => m
     unblindAndVerifyMessage = (m: string) => m

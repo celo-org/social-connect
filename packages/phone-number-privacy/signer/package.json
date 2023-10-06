@@ -1,6 +1,7 @@
 {
   "name": "@celo/phone-number-privacy-signer",
   "version": "3.0.2",
+  "private": "true",
   "description": "Signing participator of ODIS",
   "author": "Celo",
   "license": "Apache-2.0",
@@ -12,7 +13,7 @@
     "start:docker:tracing": "yarn build && node --require ./dist/tracing.js dist/index.js",
     "clean": "tsc -b . --clean",
     "build": "tsc -b .",
-    "lint": "tslint --project .",
+    "lint": "eslint .",
     "test": "jest --testPathIgnorePatterns test/end-to-end",
     "test:debughandles": "jest --watch --runInBand --detectOpenHandles --testPathIgnorePatterns test/end-to-end",
     "test:debug": "node --inspect ../../../node_modules/.bin/jest --runInBand",

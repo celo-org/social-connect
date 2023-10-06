@@ -69,6 +69,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
   obs.observe({ entryTypes: ['measure'], buffered: false })
 
   const manualAbort = new AbortController()
+  // @ts-ignore
   const timeoutSignal = AbortSignal.timeout(requestTimeoutMS)
   const abortSignal = abortSignalAny([manualAbort.signal, timeoutSignal])
 

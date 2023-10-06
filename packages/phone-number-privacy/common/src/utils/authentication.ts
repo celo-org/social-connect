@@ -104,7 +104,6 @@ export function getMessageDigest(message: string) {
 export function signWithRawKey(msg: string, rawKey: string) {
   // NOTE: elliptic is disabled elsewhere in this library to prevent
   // accidental signing of truncated messages.
-  // tslint:disable-next-line:import-blacklist
   const EC = require('elliptic').ec
   const ec = new EC('secp256k1')
 
@@ -123,7 +122,6 @@ export function verifyDEKSignature(
   try {
     // NOTE: elliptic is disabled elsewhere in this library to prevent
     // accidental signing of truncated messages.
-    // tslint:disable-next-line:import-blacklist
     const EC = require('elliptic').ec
     const ec = new EC('secp256k1')
     const key = ec.keyFromPublic(trimLeading0x(registeredEncryptionKey), 'hex')

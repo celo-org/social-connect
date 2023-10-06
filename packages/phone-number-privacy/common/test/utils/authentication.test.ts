@@ -2,7 +2,7 @@ import { hexToBuffer } from '@celo/base'
 import { ContractKit } from '@celo/contractkit'
 import Logger from 'bunyan'
 import { Request } from 'express'
-import { ErrorMessage, ErrorType } from '../../lib'
+import { ErrorMessage, ErrorType } from '../../src/interfaces/errors'
 import { AuthenticationMethod } from '../../src/interfaces/requests'
 import * as auth from '../../src/utils/authentication'
 import { newContractKitFetcher } from '../../src/utils/authentication'
@@ -139,7 +139,6 @@ describe('Authentication test suite', () => {
               getDataEncryptionKey: async (_: string) => {
                 // NOTE: elliptic is disabled elsewhere in this library to prevent
                 // accidental signing of truncated messages.
-                // tslint:disable-next-line:import-blacklist
                 const EC = require('elliptic').ec
                 const ec = new EC('secp256k1')
                 const key = ec.keyFromPrivate(hexToBuffer(rawKey))
@@ -185,7 +184,6 @@ describe('Authentication test suite', () => {
                 getDataEncryptionKey: async (_: string) => {
                   // NOTE: elliptic is disabled elsewhere in this library to prevent
                   // accidental signing of truncated messages.
-                  // tslint:disable-next-line:import-blacklist
                   const EC = require('elliptic').ec
                   const ec = new EC('secp256k1')
                   const key = ec.keyFromPrivate(hexToBuffer(rawKey))
@@ -226,7 +224,6 @@ describe('Authentication test suite', () => {
               getDataEncryptionKey: async (_: string) => {
                 // NOTE: elliptic is disabled elsewhere in this library to prevent
                 // accidental signing of truncated messages.
-                // tslint:disable-next-line:import-blacklist
                 const EC = require('elliptic').ec
                 const ec = new EC('secp256k1')
                 // Send back a manipulated key.
@@ -269,7 +266,6 @@ describe('Authentication test suite', () => {
               getDataEncryptionKey: async (_: string) => {
                 // NOTE: elliptic is disabled elsewhere in this library to prevent
                 // accidental signing of truncated messages.
-                // tslint:disable-next-line:import-blacklist
                 const EC = require('elliptic').ec
                 const ec = new EC('secp256k1')
                 // Send back a manipulated key.
@@ -299,7 +295,6 @@ describe('Authentication test suite', () => {
       }
       // NOTE: elliptic is disabled elsewhere in this library to prevent
       // accidental signing of truncated messages.
-      // tslint:disable-next-line:import-blacklist
       const EC = require('elliptic').ec
       const ec = new EC('secp256k1')
       const key = ec.keyFromPrivate(hexToBuffer(rawKey))
