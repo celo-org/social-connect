@@ -111,25 +111,24 @@ function createHandler<R extends OdisRequest>(
 }
 
 export function startProxy(req: any, res: any, config: CombinerConfig) {
-  let destinationUrl
-
+  let destinationUrl: string
+  let stringBod: string
+  let jsonObject: any
+  let dataArray: any[] = []
   const logger = rootLogger(config.serviceName)
+
   logger.info({ request: req }, 'Starting proxy.')
+
   const proxy = httpProxy.createProxyServer({
-    // proxyTimeout: config.phoneNumberPrivacy.odisServices.timeoutMilliSeconds,
+    proxyTimeout: config.phoneNumberPrivacy.odisServices.timeoutMilliSeconds,
   })
 
-  const stringBod = JSON.stringify(req.rawBody)
-
-  const jsonObject = JSON.parse(stringBod)
-
-  logger.info({ body: req.body }, 'created proxy server.')
-  // Extract the "data" array from the object
-  const dataArray = jsonObject.data
-
-  const dataStringsArray = dataArray.map(function (number: number) {
-    return `${number}`
-  })
+  if (req.rawBody) {
+    // XXX having to strigify and then parse, because `req.rawBody.data` does not work
+    stringBod = JSON.stringify(req.rawBody)
+    jsonObject = JSON.parse(stringBod)
+    dataArray = jsonObject.data
+  }
 
   switch (config.proxy.deploymentEnv) {
     case 'mainnet':
@@ -151,7 +150,6 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
           request: req,
           rawBody: req.rawBody,
           data: dataArray,
-          dataString: dataStringsArray,
           destinationURL: destinationUrl,
         },
         'Proxying request to staging Combiner gen 2.'
@@ -159,8 +157,7 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
 
       proxy.web(req, res, {
         target: destinationUrl,
-        buffer: streamify([Buffer.from(dataArray)]),
-        // buffer: streamify(req.rawBody),
+        buffer: streamify(dataArray.length != 0 ? [Buffer.from(dataArray)] : []),
         changeOrigin: true,
         secure: false,
       })
