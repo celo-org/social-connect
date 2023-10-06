@@ -121,12 +121,10 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
 
   switch (config.proxy.deploymentEnv) {
     case 'mainnet':
-      // XXX (soloseng):URL may need to be updated after gen2 function is created on mainnet
       destinationUrl = 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerGen2'
       proxy.web(req, res, { target: destinationUrl })
       break
     case 'alfajores':
-      // XXX (soloseng):URL may need to be updated after gen2 function is created on alfajores
       destinationUrl =
         'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2'
 

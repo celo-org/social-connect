@@ -1,7 +1,7 @@
 {
   "name": "@celo/phone-number-privacy-combiner",
-  "version": "3.0.1-beta.0-dev",
-  "private": "true",
+  "version": "3.0.1-proxy.0-dev",
+  "private": true,
   "description": "Orchestrates and combines threshold signatures for use in ODIS",
   "author": "Celo",
   "license": "Apache-2.0",
