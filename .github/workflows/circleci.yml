@@ -124,7 +124,15 @@ jobs:
         if: steps.cache_node.outputs.cache-hit != 'true'
         run: |
           yarn check-licenses
-
+      - name: Detect files changed in PR, and expose as output
+        id: changed-files
+        uses: tj-actions/changed-files@v37
+        with:
+          # Using comma as separator to be able to easily match full paths (using ,<path>)
+          separator: ','
+          # Checking if changed in the last 100 commits in PRs
+          fetch_depth: '150'
+      - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
   lint-checks:
     name: Lint code
     runs-on: ['self-hosted', 'org', '8-cpu']
@@ -147,14 +155,6 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - run: yarn run prettify:diff
       - run: yarn run lint
-      - name: Detect files changed in PR, and expose as output
-        id: changed-files
-        uses: tj-actions/changed-files@v37
-        with:
-          # Using comma as separator to be able to easily match full paths (using ,<path>)
-          separator: ','
-          # Checking if changed in the last 100 commits in PRs
-          fetch_depth: '150'
       - name: Has Changeset
         id: changeset
         run: yarn changeset status --since origin/main
