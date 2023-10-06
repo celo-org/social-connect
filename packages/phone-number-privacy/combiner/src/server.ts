@@ -27,6 +27,7 @@ import { domainQuota } from './domain/endpoints/quota/action'
 import { domainSign } from './domain/endpoints/sign/action'
 import { pnpQuota } from './pnp/endpoints/quota/action'
 import { pnpSign } from './pnp/endpoints/sign/action'
+const streamify = require('stream-array')
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
@@ -113,11 +114,22 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
   let destinationUrl
 
   const logger = rootLogger(config.serviceName)
-  logger.info('Starting proxy.')
+  logger.info({ request: req }, 'Starting proxy.')
   const proxy = httpProxy.createProxyServer({
-    proxyTimeout: config.phoneNumberPrivacy.odisServices.timeoutMilliSeconds,
+    // proxyTimeout: config.phoneNumberPrivacy.odisServices.timeoutMilliSeconds,
   })
-  logger.info('created proxy server.')
+
+  const stringBod = JSON.stringify(req.rawBody)
+
+  const jsonObject = JSON.parse(stringBod)
+
+  logger.info({ body: req.body }, 'created proxy server.')
+  // Extract the "data" array from the object
+  const dataArray = jsonObject.data
+
+  const dataStringsArray = dataArray.map(function (number: number) {
+    return `${number}`
+  })
 
   switch (config.proxy.deploymentEnv) {
     case 'mainnet':
@@ -135,15 +147,28 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
         'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerGen2'
 
       logger.info(
-        { request: req, destinationURL: destinationUrl },
+        {
+          request: req,
+          rawBody: req.rawBody,
+          data: dataArray,
+          dataString: dataStringsArray,
+          destinationURL: destinationUrl,
+        },
         'Proxying request to staging Combiner gen 2.'
       )
 
-      proxy.web(req, res, { target: destinationUrl })
+      proxy.web(req, res, {
+        target: destinationUrl,
+        buffer: streamify([Buffer.from(dataArray)]),
+        // buffer: streamify(req.rawBody),
+        changeOrigin: true,
+        secure: false,
+      })
       break
     default:
       throw ErrorMessage.UNKNOWN_ERROR
   }
+
   proxy.on('error', (err) => {
     logger.error({ err }, 'Error in Proxying request to Combiner.')
     res.status(500).json({
