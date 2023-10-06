@@ -53,7 +53,7 @@ export const Counters = {
     labelNames: ['status', 'signer', 'endpoint'],
   }),
   sigInconsistenciesErrors: new Counter({
-    name: 'combiner_sig_response_errors_total',
+    name: 'combiner_sig_inconsistency_errors_total',
     help: 'Counter for signer inconsistency errors',
     labelNames: ['endpoint'],
   }),
