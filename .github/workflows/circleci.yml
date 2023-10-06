@@ -1,4 +1,4 @@
-name: social connect
+name: Tests for Social Connect PRs
 run-name: social connect tests
 
 # Dockefile for the self-hosted runner:
@@ -172,30 +172,28 @@ jobs:
         uses: ./.github/actions/sync-workspace
         with:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
-      - name: Run Jest Tests
+      - name: Run Encrypted Backup tests
         run: |
-          mkdir -p test-results/jest
-          # Skipping packages that are tested in a specific job below
-          yarn run lerna \
-            --ignore @celo/identity \
-            run test
+          yarn --cwd=packages/sdk/encrypted-backup test
+      - name: Run Identity Tests
+        run: |
+          yarn --cwd=packages/sdk/identity test
       - name: Upload Jest Test Results
         uses: actions/upload-artifact@v3
         with:
           name: Jest Test Results
           path: test-results/jest
-
-
-  identity-tests:
-    name: Identity Tests
+  combiner-test:
+    name: Combiner test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
-    needs: [install-dependencies]
+    needs: install-dependencies
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy/common') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy/combiner') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
     steps:
@@ -209,13 +207,9 @@ jobs:
         uses: ./.github/actions/sync-workspace
         with:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
-      #- name: Generate DevChain
-      #  run: |
-      #    cd packages/sdk/identity
-      #    yarn test:reset
-      - name: Run tests
+      - name: Run Tests for combiner
         run: |
-          yarn --cwd=packages/sdk/identity test
+          yarn --cwd=packages/phone-number-privacy/combiner test:coverage
   odis-test:
     name: ODIS test
     runs-on: ['self-hosted', 'org', '8-cpu']
@@ -226,8 +220,6 @@ jobs:
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/protocol') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/sdk') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
@@ -245,9 +237,6 @@ jobs:
       - name: Run Tests for common package
         run: |
           yarn --cwd=packages/phone-number-privacy/common test:coverage
-      - name: Run Tests for combiner
-        run: |
-          yarn --cwd=packages/phone-number-privacy/combiner test:coverage
       - name: Run Tests for signer
         run: |
           yarn --cwd=packages/phone-number-privacy/signer test:coverage
