@@ -12,6 +12,7 @@ import { Request } from 'express'
 import * as t from 'io-ts'
 import { PerformanceObserver } from 'perf_hooks'
 import { fetchSignerResponseWithFallback, SignerResponse } from './io'
+import { Counters, Histograms, newMeter } from './metrics'
 
 export interface Signer {
   url: string
@@ -85,17 +86,23 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
   await Promise.all(
     signers.map(async (signer) => {
       try {
-        const signerFetchResult = await fetchSignerResponseWithFallback(
-          signer,
-          endpoint,
-          keyVersionInfo.keyVersion,
-          request,
-          logger,
-          // @ts-ignore
-          abortSignal
+        const _meter = newMeter(Histograms.signerLatency, signer.url, request.url)
+        const signerFetchResult = await _meter(() =>
+          fetchSignerResponseWithFallback(
+            signer,
+            endpoint,
+            keyVersionInfo.keyVersion,
+            request,
+            logger,
+            // @ts-ignore
+            abortSignal
+          )
         )
 
         // used for log based metrics
+        Counters.sigResponses
+          .labels(signerFetchResult.status.toString(), signer.url, request.url)
+          .inc()
         logger.info({
           message: 'Received signerFetchResult',
           signer: signer.url,
@@ -105,6 +112,9 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
         if (!signerFetchResult.ok) {
           const responseData = await signerFetchResult.json()
           // used for log based metrics
+          Counters.sigResponsesErrors
+            .labels(signerFetchResult.status.toString(), signer.url, request.url)
+            .inc()
           logger.info({
             message: 'Received signerFetchResult on unsuccessful signer response',
             res: responseData,
@@ -156,11 +166,18 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
         }
       } catch (err) {
         if (isTimeoutError(err)) {
+          Counters.sigRequestErrors
+            .labels(signer.url, request.url, ErrorMessage.TIMEOUT_FROM_SIGNER)
+            .inc()
           logger.error({ signer }, ErrorMessage.TIMEOUT_FROM_SIGNER)
         } else if (isAbortError(err)) {
+          Counters.warnings.labels(request.url, WarningMessage.CANCELLED_REQUEST_TO_SIGNER).inc()
           logger.info({ signer }, WarningMessage.CANCELLED_REQUEST_TO_SIGNER)
         } else {
           // Logging the err & message simultaneously fails to log the message in some cases
+          Counters.sigRequestErrors
+            .labels(signer.url, request.url, ErrorMessage.SIGNER_REQUEST_ERROR)
+            .inc()
           logger.error({ signer }, ErrorMessage.SIGNER_REQUEST_ERROR)
           logger.error({ signer, err })
 
@@ -180,6 +197,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
 
   if (errorCodes.size > 0) {
     if (errorCodes.size > 1) {
+      Counters.sigInconsistenciesErrors.labels(request.url).inc()
       logger.error(
         { errorCodes: JSON.stringify([...errorCodes]) },
         ErrorMessage.INCONSISTENT_SIGNER_RESPONSES

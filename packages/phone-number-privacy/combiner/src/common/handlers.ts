@@ -44,6 +44,7 @@ export function catchErrorHandler<R extends OdisRequest>(
         if (err instanceof OdisError) {
           sendFailure(err.code, err.status, res, req.url)
         } else {
+          Counters.unknownErrors.labels(req.url).inc()
           sendFailure(ErrorMessage.UNKNOWN_ERROR, 500, res, req.url)
         }
       } else {
@@ -164,6 +165,7 @@ export async function disabledHandler<R extends OdisRequest>(
   req: Request<{}, {}, R>,
   response: Response<OdisResponse<R>, Locals>
 ): Promise<void> {
+  Counters.warnings.labels(req.url, WarningMessage.API_UNAVAILABLE).inc()
   sendFailure(WarningMessage.API_UNAVAILABLE, 503, response, req.url)
 }
 

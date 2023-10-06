@@ -13,6 +13,7 @@ import {
 import { Signer, thresholdCallToSigners } from '../../../common/combine'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo } from '../../../common/io'
+import { Counters } from '../../../common/metrics'
 import { getCombinerVersion, OdisConfig } from '../../../config'
 import { logDomainResponseDiscrepancies } from '../../services/log-responses'
 import { findThresholdDomainState } from '../../services/threshold-state'
@@ -23,10 +24,12 @@ export function domainQuota(
 ): ResultHandler<DomainQuotaStatusRequest> {
   return async (request, response) => {
     if (!domainQuotaStatusRequestSchema(DomainSchema).is(request.body)) {
+      Counters.warnings.labels(request.url, WarningMessage.INVALID_INPUT).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
     }
 
     if (!verifyDomainQuotaStatusRequestAuthenticity(request.body)) {
+      Counters.warnings.labels(request.url, WarningMessage.UNAUTHENTICATED_USER).inc()
       return errorResult(401, WarningMessage.UNAUTHENTICATED_USER)
     }
 

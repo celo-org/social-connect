@@ -29,13 +29,48 @@ export const Counters = {
   }),
   blsComputeErrors: new Counter({
     name: 'combiner_bls_compute_errors_total',
-    help: 'Counter for the number of errors from interacting with the blockchain',
+    help: 'Counter for the number of BLS compute errors',
     labelNames: ['signer'],
   }),
   errorsCaughtInEndpointHandler: new Counter({
     name: 'combiner_endpoint_handler_errors_total',
     help: 'Counter for the number of errors caught in the outermost endpoint handler',
     labelNames: ['endpoint'],
+  }),
+  notEnoughSigErrors: new Counter({
+    name: 'combiner_not_enough_sig_errors_total',
+    help: 'Counter for the number of not enough sig errors',
+    labelNames: ['endpoint'],
+  }),
+  sigRequestErrors: new Counter({
+    name: 'combiner_sig_request_errors_total',
+    help: 'Counter for errors receiving signer request (not triggered by combiner abort)',
+    labelNames: ['signer', 'endpoint', 'error_type'],
+  }),
+  sigResponsesErrors: new Counter({
+    name: 'combiner_sig_response_errors_total',
+    help: 'Counter for error responses received from signers',
+    labelNames: ['status', 'signer', 'endpoint'],
+  }),
+  sigInconsistenciesErrors: new Counter({
+    name: 'combiner_sig_response_errors_total',
+    help: 'Counter for signer inconsistency errors',
+    labelNames: ['endpoint'],
+  }),
+  sigResponses: new Counter({
+    name: 'combiner_sig_response_total',
+    help: 'Counter for responses received from signers',
+    labelNames: ['status', 'signer', 'endpoint'],
+  }),
+  unknownErrors: new Counter({
+    name: 'combiner_unknown_errors_total',
+    help: 'Counter for unknown errors thrown in the combiner',
+    labelNames: ['endpoint'],
+  }),
+  warnings: new Counter({
+    name: 'combiner_warnings_total',
+    help: 'Counter for all cpmbiner warnings',
+    labelNames: ['endpoint', 'warning_type'],
   }),
 }
 
@@ -52,6 +87,12 @@ export const Histograms = {
     name: 'combiner_full_node_latency',
     help: 'Histogram tracking latency of full node requests',
     labelNames: ['codeSegment'],
+    buckets,
+  }),
+  signerLatency: new Histogram({
+    name: 'combiner_signer_latency',
+    help: 'Histogram tracking latency of signers',
+    labelNames: ['endpoint', 'signer'],
     buckets,
   }),
 }

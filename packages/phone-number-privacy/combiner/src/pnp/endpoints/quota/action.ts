@@ -15,6 +15,7 @@ import { Request } from 'express'
 import { Signer, thresholdCallToSigners } from '../../../common/combine'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo } from '../../../common/io'
+import { Counters } from '../../../common/metrics'
 import { getCombinerVersion, OdisConfig } from '../../../config'
 import { NoQuotaCache } from '../../../utils/no-quota-cache'
 import { AccountService } from '../../services/account-services'
@@ -31,12 +32,16 @@ export function pnpQuota(
     const logger = response.locals.logger
 
     if (!isValidRequest(request)) {
+      Counters.warnings.labels(CombinerEndpoint.PNP_QUOTA, WarningMessage.INVALID_INPUT).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
     }
 
     const warnings: ErrorType[] = []
     if (config.shouldAuthenticate) {
       if (!(await authenticateUser(request, logger, accountService.getAccount, warnings))) {
+        Counters.warnings
+          .labels(CombinerEndpoint.PNP_QUOTA, WarningMessage.UNAUTHENTICATED_USER)
+          .inc()
         return errorResult(401, WarningMessage.UNAUTHENTICATED_USER)
       }
     }
