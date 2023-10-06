@@ -139,7 +139,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
           `received 'OK' response from signer`
         )
 
-        const odisResponse: OdisResponse<R> = parseSchema(responseSchema, data, logger, endpoint)
+        const odisResponse: OdisResponse<R> = parseSchema(responseSchema, data, logger)
         if (!odisResponse.success) {
           logger.error(
             { err: odisResponse.error, signer: signer.url },
@@ -192,12 +192,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
   }
 }
 
-function parseSchema<T>(
-  schema: t.Type<T, T, unknown>,
-  data: unknown,
-  logger: Logger,
-  endpoint: string
-): T {
+function parseSchema<T>(schema: t.Type<T, T, unknown>, data: unknown, logger: Logger): T {
   if (!schema.is(data)) {
     logger.error({ data }, `Malformed schema`)
     throw new Error(ErrorMessage.INVALID_SIGNER_RESPONSE)
