@@ -140,6 +140,8 @@ jobs:
           path: .git
           key: git-${{ github.ref }}
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -159,7 +161,7 @@ jobs:
         if: ${{ github.event.pull_request.title != 'Version Packages' }}
         id: changeset
         run: |
-          git fetch origin main
+          git status
           yarn changeset status --since origin/main
   general_test:
     name: General (identity + encrypted-backup) test
