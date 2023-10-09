@@ -153,11 +153,13 @@ jobs:
           # Using comma as separator to be able to easily match full paths (using ,<path>)
           separator: ','
           # Checking if changed in the last 100 commits in PRs
-          fetch_depth: '250'
+          fetch_depth: '150'
       - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
       - name: Has Changeset
         id: changeset
-        run: yarn changeset status --since main
+        run: |
+          git checkout ${{ github.event.pull_request.head.sha }}
+          yarn changeset status --since main
   general_test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
