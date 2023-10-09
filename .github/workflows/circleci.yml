@@ -106,7 +106,7 @@ jobs:
           restore-keys: |
             code-${{ github.sha }}
       - name: "yarn3"
-        run : corepack enable && yarn set version berry
+        run : sudo corepack enable && yarn set version berry
       - name: Install yarn dependencies
         run: git config --global url."https://".insteadOf ssh:// && yarn install
         if: steps.cache_node.outputs.cache-hit != 'true'
