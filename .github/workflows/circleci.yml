@@ -156,10 +156,11 @@ jobs:
           fetch_depth: '150'
       - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
       - name: Has Changeset
+        if: ${{ github.event.pull_request.title != 'Version Packages' }}
         id: changeset
         run: |
-          git checkout ${{ github.event.pull_request.head.sha }}
-          yarn changeset status --since main
+          git fetch origin main
+          yarn changeset status --since origin/main
   general_test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
