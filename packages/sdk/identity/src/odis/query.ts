@@ -58,7 +58,7 @@ export const ODIS_STAGING_CONTEXT: ServiceContext = {
 }
 
 export const ODIS_STAGING_CONTEXT_K8S: ServiceContext = {
-  odisUrl: 'https://odis-combiner-test.integration-tests.celo-networks-dev.org',
+  odisUrl: 'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerProxyK8s',
   odisPubKey:
     '7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA',
 }
