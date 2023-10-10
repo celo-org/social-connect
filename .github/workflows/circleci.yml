@@ -155,9 +155,19 @@ jobs:
           # Checking if changed in the last 100 commits in PRs
           fetch_depth: '150'
       - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
-      - name: Has Changeset
-        id: changeset
-        run: yarn changeset status --since origin/main
+      - name: Find ChangeSet in PR
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body-includes: Changeset detected
+          comment-author: changeset-bot[bot]
+      - run: |
+          if ${{ steps.fc.outputs.comment-id == 0 }}; then
+            echo "No Changeset Found" && exit 1
+          else
+            echo "Changeset Found"
+          fi
   general_test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
