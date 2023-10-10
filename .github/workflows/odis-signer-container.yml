@@ -33,7 +33,7 @@
       uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.11.4
       name: Build us-west1-docker.pkg.dev/devopsre/celo-monorepo/monorepo:${{ github.sha }}
       if: |
-        github.ref == 'refs/heads/master'
+        github.ref == 'refs/heads/main'
       with:
         workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
         service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
