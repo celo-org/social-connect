@@ -60,7 +60,7 @@ jobs:
             git-
       - uses: actions/checkout@v3
         with:
-            fetch-depth: 0
+          fetch-depth: 0
       - name: Verify setup for incremental testing
         run: |
           set -euo pipefail
