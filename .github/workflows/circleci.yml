@@ -162,7 +162,8 @@ jobs:
         id: fc
         with:
           issue-number: 85
-          comment-author: changeset-bot
+          body-includes: Changeset detected
+          # comment-author: changeset-bot
       - run: |
           echo ${{ steps.fc.outputs.comment-author }}
           if [ ${{ steps.fc.outputs.comment-id == 0 }} ]; then
