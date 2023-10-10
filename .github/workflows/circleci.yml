@@ -59,6 +59,8 @@ jobs:
           restore-keys: |
             git-
       - uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
       - name: Verify setup for incremental testing
         run: |
           set -euo pipefail
@@ -138,8 +140,6 @@ jobs:
           path: .git
           key: git-${{ github.ref }}
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
