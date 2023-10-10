@@ -116,6 +116,7 @@ export function domainSign(
     const errorCode = maxErrorCode ?? 500
     const error = errorCodeToError(errorCode)
     if (error == ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES) {
+      Counters.errors.labels(request.url).inc()
       Counters.notEnoughSigErrors.labels(request.url).inc()
     } else if (error in WarningMessage) {
       Counters.warnings.labels(request.url, error).inc()

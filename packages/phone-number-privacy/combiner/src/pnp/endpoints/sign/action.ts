@@ -144,6 +144,7 @@ export function pnpSign(
     }
     const error = errorCodeToError(errorCode)
     if (error === ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES) {
+      Counters.errors.labels(request.url).inc()
       Counters.notEnoughSigErrors.labels(request.url).inc()
     } else if (error === WarningMessage.EXCEEDED_QUOTA) {
       Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.EXCEEDED_QUOTA).inc()

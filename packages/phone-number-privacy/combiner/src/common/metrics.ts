@@ -23,6 +23,11 @@ export const Counters = {
     help: 'Counter for the number of responses sent',
     labelNames: ['endpoint', 'statusCode'],
   }),
+  errors: new Counter({
+    name: 'combiner_errors_total',
+    help: 'Counter for the total number of errors',
+    labelNames: ['endpoint'],
+  }),
   blockchainErrors: new Counter({
     name: 'combiner_blockchain_errors_total',
     help: 'Counter for the number of errors from interacting with the blockchain',

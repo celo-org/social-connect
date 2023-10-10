@@ -16,6 +16,7 @@ export async function getDEK(kit: ContractKit, logger: Logger, account: string):
       config.phoneNumberPrivacy.fullNodeRetryDelayMs
     ).catch((err) => {
       logger.error({ err, account }, 'failed to get on-chain DEK for account')
+      Counters.errors.labels('getDEK').inc()
       Counters.blockchainErrors.inc()
       throw err
     })

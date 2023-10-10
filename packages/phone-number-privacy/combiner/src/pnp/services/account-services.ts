@@ -36,6 +36,7 @@ export class CachingAccountService implements AccountService {
 
       if (dek === undefined) {
         // TODO decide which error ot use here
+        Counters.errors.labels('getAccount').inc()
         Counters.blockchainErrors.inc()
         throw new OdisError(ErrorMessage.FULL_NODE_ERROR)
       }

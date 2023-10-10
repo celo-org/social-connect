@@ -197,6 +197,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
 
   if (errorCodes.size > 0) {
     if (errorCodes.size > 1) {
+      Counters.errors.labels(request.url).inc()
       Counters.sigInconsistenciesErrors.labels(request.url).inc()
       logger.error(
         { errorCodes: JSON.stringify([...errorCodes]) },
