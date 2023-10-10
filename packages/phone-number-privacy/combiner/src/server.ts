@@ -162,6 +162,7 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
   proxy.web(req, res, {
     target: destinationUrl,
     buffer: streamify(rawBodyData.length != 0 ? [Buffer.from(rawBodyData)] : []),
+    changeOrigin: true,
   })
 
   proxy.on('error', (err) => {
