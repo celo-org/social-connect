@@ -106,7 +106,7 @@ jobs:
           restore-keys: |
             code-${{ github.sha }}
       - name: "enable corepack"
-        run : corepack enable yarn
+        run : sudo corepack enable yarn
       - name: Install yarn dependencies
         run: git config --global url."https://".insteadOf ssh:// && yarn install
         if: steps.cache_node.outputs.cache-hit != 'true'
