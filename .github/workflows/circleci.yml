@@ -164,8 +164,13 @@ jobs:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Changeset detected
           comment-author: changeset-bot
-        run: |
-          echo ${{ steps.fc.outputs.comment-id }}
+      - run: |
+          if [ ${{ steps.fc.outputs.comment-id }} != "" ]; then
+            echo "No Changeset Found"
+            exit 1
+          else
+            echo "Changeset Found"
+          fi
   general_test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
