@@ -165,7 +165,8 @@ jobs:
           body-includes: Changeset detected
           comment-author: changeset-bot
       - run: |
-          if [ ${{ steps.fc.outputs.comment-id }} != "" ]; then
+          echo ${{ steps.fc.outputs.comment-author }}
+          if [ ${{ steps.fc.outputs.comment-id }} == "" ]; then
             echo "No Changeset Found"
             exit 1
           else
