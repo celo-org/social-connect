@@ -20,7 +20,7 @@
     "build": "tsc -b .",
     "clean": "tsc -b . --clean",
     "docs": "typedoc",
-    "test": "jest --runInBand",
+    "test": "yarn jest --runInBand",
     "lint": "eslint .",
     "prepublish": "yarn build"
   },
@@ -39,7 +39,8 @@
   },
   "devDependencies": {
     "@celo/dev-utils": "0.0.1-beta.1",
-    "fetch-mock": "9.10.4"
+    "fetch-mock": "9.10.4",
+    "jest": "^29.0.2"
   },
   "engines": {
     "node": ">=16"
