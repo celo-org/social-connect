@@ -942,6 +942,7 @@ __metadata:
     fp-ts: 2.1.1
     ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
     io-ts: 2.0.1
+    jest: ^29.0.2
     old-identity-sdk: "npm:@celo/identity@1.5.2"
   languageName: unknown
   linkType: soft
@@ -983,6 +984,7 @@ __metadata:
     firebase-functions-test: ^3.1.0
     firebase-tools: 12.4.7
     io-ts: 2.0.1
+    jest: ^29.0.2
     knex: ^2.1.0
     node-fetch: ^2.6.9
     pg: ^8.2.1
@@ -1022,6 +1024,7 @@ __metadata:
     fp-ts: 2.1.1
     io-ts: 2.0.1
     is-base64: ^1.1.0
+    jest: ^29.0.2
     node-fetch: ^2.6.9
   languageName: unknown
   linkType: soft
@@ -1062,6 +1065,7 @@ __metadata:
     firebase-functions: ^3.15.7
     firebase-functions-test: ^0.3.3
     firebase-tools: 9.20.0
+    jest: ^29.0.2
     yargs: ^14.0.0
   languageName: unknown
   linkType: soft
@@ -1100,6 +1104,7 @@ __metadata:
     cron: ^2.4.1
     dotenv: ^8.2.0
     express: ^4.17.1
+    jest: ^29.0.2
     knex: ^2.1.0
     lru-cache: ^10.0.1
     mssql: ^6.3.1
