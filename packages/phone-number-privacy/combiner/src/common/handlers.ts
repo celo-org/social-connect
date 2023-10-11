@@ -12,7 +12,6 @@ import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import Logger from 'bunyan'
 import { Request, Response } from 'express'
-import { performance, PerformanceObserver } from 'perf_hooks'
 import { getCombinerVersion } from '../config'
 import { OdisError } from './error'
 
@@ -97,36 +96,16 @@ export function meteringHandler<R extends OdisRequest>(
       const eventLoopLag = Date.now() - eventLoopLagMeasurementStart
       logger.info({ eventLoopLag }, 'Measure event loop lag')
     })
-    // TODO:(soloseng): session ID may not always exist
-    const startMark = `Begin ${req.url}/${req.body.sessionID}`
-    const endMark = `End ${req.url}/${req.body.sessionID}`
-    const entryName = `${req.url}/${req.body.sessionID} latency`
 
-    const obs = new PerformanceObserver((list) => {
-      const entry = list.getEntriesByName(entryName)[0]
-      if (entry) {
-        logger.info({ latency: entry }, 'e2e response latency measured')
-      }
-    })
-    obs.observe({ entryTypes: ['measure'], buffered: false })
-
-    performance.mark(startMark)
-
-    try {
-      await handler(req, res)
-      if (res.headersSent) {
-        // used for log based metrics
-        logger.info({ res }, 'Response sent')
-      }
-    } finally {
-      performance.mark(endMark)
-      performance.measure(entryName, startMark, endMark)
-
-      performance.clearMeasures(entryName)
-      performance.clearMarks(startMark)
-      performance.clearMarks(endMark)
-      obs.disconnect()
+    // try {
+    await handler(req, res)
+    if (res.headersSent) {
+      // used for log based metrics
+      logger.info({ res }, 'Response sent')
     }
+    // } finally {
+    //   logger.info({ res }, 'Response sent')
+    // }
   }
 }
 
