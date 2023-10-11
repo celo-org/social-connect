@@ -8,7 +8,8 @@ import {
   OdisRequest,
   rootLogger,
 } from '@celo/phone-number-privacy-common'
-import express, { RequestHandler } from 'express'
+import express, { Express, RequestHandler } from 'express'
+import httpProxy from 'http-proxy'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -25,10 +26,11 @@ import { domainQuota } from './domain/endpoints/quota/action'
 import { domainSign } from './domain/endpoints/sign/action'
 import { pnpQuota } from './pnp/endpoints/quota/action'
 import { pnpSign } from './pnp/endpoints/sign/action'
+const streamify = require('stream-array')
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
-export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
+export function startCombiner(config: CombinerConfig, kit?: ContractKit): Express {
   const logger = rootLogger(config.serviceName)
 
   kit = kit ?? getContractKitWithAgent(config.blockchain)
@@ -105,4 +107,68 @@ function createHandler<R extends OdisRequest>(
   return catchErrorHandler(
     tracingHandler(meteringHandler(enabled ? resultHandler(action) : disabledHandler))
   )
+}
+
+export function startProxy(req: any, res: any, config: CombinerConfig) {
+  const logger = rootLogger(config.serviceName)
+
+  logger.info({ request: req }, 'Starting proxy.')
+
+  let destinationUrl: string
+  let rawBodyString: string
+  let rawBodyJson: any
+  let rawBodyData: any[] = []
+
+  const proxy = httpProxy.createProxyServer({
+    proxyTimeout: config.phoneNumberPrivacy.odisServices.timeoutMilliSeconds,
+  })
+
+  if (req.rawBody) {
+    // XXX having to strigify and then parse, because simply using `req.rawBody.data` does not work.
+    rawBodyString = JSON.stringify(req.rawBody)
+    rawBodyJson = JSON.parse(rawBodyString)
+    rawBodyData = rawBodyJson.data
+  }
+
+  switch (config.proxy.deploymentEnv) {
+    case 'mainnet':
+      destinationUrl = 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerGen2'
+      break
+
+    case 'alfajores':
+      destinationUrl =
+        'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2'
+      break
+
+    case 'staging':
+      destinationUrl =
+        'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerGen2'
+      break
+
+    default:
+      throw 'Failed to set destination URL'
+  }
+
+  logger.info(
+    {
+      request: req,
+      rawBodyData: rawBodyData,
+      destinationURL: destinationUrl,
+    },
+    'Proxying request to staging Combiner gen 2.'
+  )
+
+  proxy.web(req, res, {
+    target: destinationUrl,
+    buffer: streamify(rawBodyData.length != 0 ? [Buffer.from(rawBodyData)] : []),
+    changeOrigin: true,
+  })
+
+  proxy.on('error', (err) => {
+    logger.error({ err }, 'Error in Proxying request to Combiner.')
+    res.status(500).json({
+      success: false,
+      error: err,
+    })
+  })
 }

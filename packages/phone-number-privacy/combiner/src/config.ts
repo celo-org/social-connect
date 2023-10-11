@@ -41,12 +41,16 @@ export interface OdisConfig {
   fullNodeRetryDelayMs: number
   shouldAuthenticate: boolean
 }
-
+export interface ProxyConfig {
+  deploymentEnv: string
+  forwardToGen2: boolean
+}
 export interface CombinerConfig {
   serviceName: string
   blockchain: BlockchainConfig
   phoneNumberPrivacy: OdisConfig
   domains: OdisConfig
+  proxy: ProxyConfig
 }
 
 let config: CombinerConfig
@@ -144,6 +148,10 @@ if (DEV_MODE) {
       fullNodeRetryDelayMs: RETRY_DELAY_IN_MS,
       shouldAuthenticate: true,
     },
+    proxy: {
+      forwardToGen2: false,
+      deploymentEnv: 'local',
+    },
   }
 } else {
   const functionConfig = functions.config()
@@ -186,12 +194,18 @@ if (DEV_MODE) {
         currentVersion: Number(functionConfig.domains_keys.current_version),
         versions: functionConfig.domains_keys.versions,
       },
-      fullNodeTimeoutMs: Number(functionConfig.pnp.full_node_timeout_ms ?? FULL_NODE_TIMEOUT_IN_MS), // TODO refactor config - domains endpoints don't use full node
-      fullNodeRetryCount: Number(functionConfig.pnp.full_node_retry_count ?? RETRY_COUNT),
+      fullNodeTimeoutMs: Number(
+        functionConfig.domains.full_node_timeout_ms ?? FULL_NODE_TIMEOUT_IN_MS
+      ), // TODO refactor config - domains endpoints don't use full node
+      fullNodeRetryCount: Number(functionConfig.domains.full_node_retry_count ?? RETRY_COUNT),
       fullNodeRetryDelayMs: Number(
-        functionConfig.pnp.full_node_retry_delay_ms ?? RETRY_DELAY_IN_MS
+        functionConfig.domains.full_node_retry_delay_ms ?? RETRY_DELAY_IN_MS
       ),
       shouldAuthenticate: true,
+    },
+    proxy: {
+      forwardToGen2: toBool(functionConfig.proxy.forward_to_gen2, false),
+      deploymentEnv: functionConfig.proxy.deployment_env,
     },
   }
 }
