@@ -1,7 +1,6 @@
 import { ContractKit } from '@celo/contractkit'
 import {
   CombinerEndpoint,
-  ErrorMessage,
   getContractKitWithAgent,
   KEY_VERSION_HEADER,
   loggerMiddleware,
@@ -147,7 +146,7 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
       break
 
     default:
-      throw ErrorMessage.UNKNOWN_ERROR
+      throw 'Failed to set destination URL'
   }
 
   logger.info(
