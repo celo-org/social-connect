@@ -52,12 +52,6 @@ export interface ServiceContext {
 }
 
 export const ODIS_STAGING_CONTEXT: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2',
-  odisPubKey:
-    '7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA',
-}
-
-export const ODIS_STAGING_CONTEXT_K8S: ServiceContext = {
   odisUrl: 'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerProxyK8s',
   odisPubKey:
     '7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA',
@@ -94,7 +88,6 @@ export enum OdisAPI {
 
 export enum OdisContextName {
   STAGING = 'alfajoresstaging',
-  STAGING_K8S = 'alfajoresstaging-k8s',
   ALFAJORES = 'alfajores',
   MAINNET = 'mainnet',
 }
@@ -114,12 +107,6 @@ export function getServiceContext(
         // Intentionally the same on staging
         [OdisAPI.PNP]: ODIS_STAGING_CONTEXT,
         [OdisAPI.DOMAIN]: ODIS_STAGING_CONTEXT,
-      }[api]
-    case OdisContextName.STAGING_K8S:
-      return {
-        // Intentionally the same on staging
-        [OdisAPI.PNP]: ODIS_STAGING_CONTEXT_K8S,
-        [OdisAPI.DOMAIN]: ODIS_STAGING_CONTEXT_K8S,
       }[api]
     case OdisContextName.MAINNET:
       return {
