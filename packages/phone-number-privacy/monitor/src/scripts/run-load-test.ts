@@ -65,7 +65,6 @@ yargs
       let blockchainProvider: string
       switch (contextName) {
         case 'alfajoresstaging':
-        case 'alfajoresstaging-k8s':
         case 'alfajores':
           blockchainProvider = 'https://alfajores-forno.celo-testnet.org'
           break
