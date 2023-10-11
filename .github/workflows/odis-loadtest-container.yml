@@ -17,7 +17,7 @@
   jobs:
     odis-loadtest-build-dev:
       uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.11.4
-      name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest:${{ github.sha }}
+      name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
       if: |
         github.ref != 'refs/heads/main'
       with:
@@ -31,7 +31,7 @@
   
     odis-loadtest-build:
       uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.11.4
-      name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest:${{ github.sha }}
+      name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
       if: |
         github.ref == 'refs/heads/main'
       with:
