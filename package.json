@@ -21,6 +21,7 @@
     "test:watch": "node node_modules/jest/bin/jest.js --watch",
     "cs": "yarn changeset",
     "bump": "yarn changeset version",
+    "release": "yarn build && yarn cs publish",
     "postinstall": "yarn run lerna run postinstall"
   },
   "husky": {
