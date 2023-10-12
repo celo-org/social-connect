@@ -30,7 +30,6 @@ ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+phone-number-privacy/monitor
 COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} packages/${PACKAGE_SELECTOR}
 
 # Install dependencies and build.
-RUN corepack enable yarn
 RUN yarn install --network-timeout 100000 --immutable --inline-builds && yarn cache clean
 RUN yarn build
 
