@@ -154,7 +154,7 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
       rawBodyData: rawBodyData,
       destinationURL: destinationUrl,
     },
-    'Proxying request to staging Combiner gen 2.'
+    'Proxying request to staging Combiner in K8S.'
   )
 
   proxy.web(req, res, {
