@@ -70,13 +70,13 @@ export const ODIS_ALFAJORES_CONTEXT_DOMAINS: ServiceContext = {
 }
 
 export const ODIS_MAINNET_CONTEXT_PNP: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combiner',
+  odisUrl: 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerProxyK8s',
   odisPubKey:
     'FvreHfLmhBjwxHxsxeyrcOLtSonC9j7K3WrS4QapYsQH6LdaDTaNGmnlQMfFY04Bp/K4wAvqQwO9/bqPVCKf8Ze8OZo8Frmog4JY4xAiwrsqOXxug11+htjEe1pj4uMA',
 }
 
 export const ODIS_MAINNET_CONTEXT_DOMAINS: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combiner',
+  odisUrl: 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerProxyK8s',
   odisPubKey:
     'LX4tLiuYm8geZ3ztmH7oIWz4ohXt3ePRTd9BbG9RO86NMrApflioiOzKYtIsyjEA0uarnX8Emo+luTY4bwEWpgZDyPYE6UMWAoBaZBdy6NDMgAxSbdNtaQEq51fBjCUA',
 }
