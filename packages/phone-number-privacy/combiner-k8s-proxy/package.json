@@ -1,5 +1,5 @@
 {
-  "name": "@celo/phone-number-privacy-combiner",
+  "name": "@celo/phone-number-privacy-combiner-k8s-proxy",
   "version": "3.0.1",
   "private": true,
   "description": "Orchestrates and combines threshold signatures for use in ODIS",
