@@ -23,7 +23,8 @@
     "test:watch": "node node_modules/jest/bin/jest.js --watch",
     "cs": "yarn changeset",
     "bump": "yarn changeset version",
-    "postinstall": "yarn workspaces foreach -pitv run postinstall"
+    "postinstall": "yarn workspaces foreach -pitv run postinstall",
+    "release": "yarn build && yarn cs publish"
   },
   "husky": {
     "hooks": {
