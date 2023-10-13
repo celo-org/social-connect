@@ -5,9 +5,38 @@ import {
   RETRY_DELAY_IN_MS,
   rootLogger,
   TestUtils,
-  toBool,
 } from '@celo/phone-number-privacy-common'
-import * as functions from 'firebase-functions'
+import {
+  blockchainApiKey,
+  blockchainProvider,
+  defaultMockDEK,
+  domainEnabled,
+  domainFullNodeDelaysMs,
+  domainFullNodeRetryCount,
+  domainFullNodeTimeoutMs,
+  domainKeysCurrentVersion,
+  domainKeysVersions,
+  domainOdisServicesSigners,
+  domainOdisServicesTimeoutMilliseconds,
+  domainServiceName,
+  domainShouldAuthenticate,
+  domainShouldCheckQuota,
+  pnpEnabled,
+  pnpFullNodeDelaysMs,
+  pnpFullNodeRetryCount,
+  pnpFullNodeTimeoutMs,
+  pnpKeysCurrentVersion,
+  pnpKeysVersions,
+  pnpMockDek,
+  pnpOdisServicesSigners,
+  pnpOdisServicesTimeoutMilliseconds,
+  pnpServiceName,
+  pnpShouldAuthenticate,
+  pnpShouldCheckQuota,
+  pnpShouldMockAccountService,
+  serviceNameConfig,
+} from './utils/firebase-configs'
+
 export function getCombinerVersion(): string {
   return process.env.npm_package_version ?? require('../package.json').version ?? '0.0.0'
 }
@@ -40,17 +69,16 @@ export interface OdisConfig {
   fullNodeRetryCount: number
   fullNodeRetryDelayMs: number
   shouldAuthenticate: boolean
+  shouldCheckQuota: boolean
+  shouldMockAccountService?: boolean
+  mockDek?: string
 }
-export interface ProxyConfig {
-  deploymentEnv: string
-  forwardToGen2: boolean
-}
+
 export interface CombinerConfig {
   serviceName: string
   blockchain: BlockchainConfig
   phoneNumberPrivacy: OdisConfig
   domains: OdisConfig
-  proxy: ProxyConfig
 }
 
 let config: CombinerConfig
@@ -112,6 +140,8 @@ if (DEV_MODE) {
       fullNodeRetryCount: RETRY_COUNT,
       fullNodeRetryDelayMs: RETRY_DELAY_IN_MS,
       shouldAuthenticate: true,
+      shouldCheckQuota: false,
+      mockDek: defaultMockDEK,
     },
     domains: {
       serviceName: defaultServiceName,
@@ -147,65 +177,51 @@ if (DEV_MODE) {
       fullNodeRetryCount: RETRY_COUNT,
       fullNodeRetryDelayMs: RETRY_DELAY_IN_MS,
       shouldAuthenticate: true,
-    },
-    proxy: {
-      forwardToGen2: false,
-      deploymentEnv: 'local',
+      shouldCheckQuota: false,
     },
   }
 } else {
-  const functionConfig = functions.config()
   config = {
-    serviceName: functionConfig.service.name ?? defaultServiceName,
+    serviceName: serviceNameConfig.value(),
     blockchain: {
-      provider: functionConfig.blockchain.provider,
-      apiKey: functionConfig.blockchain.api_key,
+      provider: blockchainProvider.value(),
+      apiKey: blockchainApiKey.value(),
     },
     phoneNumberPrivacy: {
-      serviceName: functionConfig.pnp.service_name ?? defaultServiceName,
-      enabled: toBool(functionConfig.pnp.enabled, false),
+      serviceName: pnpServiceName.value(),
+      enabled: pnpEnabled.value(),
       odisServices: {
-        signers: functionConfig.pnp.odisservices,
-        timeoutMilliSeconds: functionConfig.pnp.timeout_ms
-          ? Number(functionConfig.pnp.timeout_ms)
-          : 5 * 1000,
+        signers: pnpOdisServicesSigners.value(),
+        timeoutMilliSeconds: pnpOdisServicesTimeoutMilliseconds.value(),
       },
       keys: {
-        currentVersion: Number(functionConfig.pnp_keys.current_version),
-        versions: functionConfig.pnp_keys.versions,
+        currentVersion: pnpKeysCurrentVersion.value(),
+        versions: pnpKeysVersions.value(),
       },
-      fullNodeTimeoutMs: Number(functionConfig.pnp.full_node_timeout_ms ?? FULL_NODE_TIMEOUT_IN_MS),
-      fullNodeRetryCount: Number(functionConfig.pnp.full_node_retry_count ?? RETRY_COUNT),
-      fullNodeRetryDelayMs: Number(
-        functionConfig.pnp.full_node_retry_delay_ms ?? RETRY_DELAY_IN_MS
-      ),
-      shouldAuthenticate: toBool(functionConfig.pnp.should_authenticate, true),
+      fullNodeTimeoutMs: pnpFullNodeTimeoutMs.value(),
+      fullNodeRetryCount: pnpFullNodeRetryCount.value(),
+      fullNodeRetryDelayMs: pnpFullNodeDelaysMs.value(),
+      shouldAuthenticate: pnpShouldAuthenticate.value(),
+      shouldCheckQuota: pnpShouldCheckQuota.value(),
+      shouldMockAccountService: pnpShouldMockAccountService.value(),
+      mockDek: pnpMockDek.value(),
     },
     domains: {
-      serviceName: functionConfig.domains.service_name ?? defaultServiceName,
-      enabled: toBool(functionConfig.domains.enabled, false),
+      serviceName: domainServiceName.value(),
+      enabled: domainEnabled.value(),
       odisServices: {
-        signers: functionConfig.domains.odisservices,
-        timeoutMilliSeconds: functionConfig.domains.timeout_ms
-          ? Number(functionConfig.domains.timeout_ms)
-          : 5 * 1000,
+        signers: domainOdisServicesSigners.value(),
+        timeoutMilliSeconds: domainOdisServicesTimeoutMilliseconds.value(),
       },
       keys: {
-        currentVersion: Number(functionConfig.domains_keys.current_version),
-        versions: functionConfig.domains_keys.versions,
+        currentVersion: domainKeysCurrentVersion.value(),
+        versions: domainKeysVersions.value(),
       },
-      fullNodeTimeoutMs: Number(
-        functionConfig.domains.full_node_timeout_ms ?? FULL_NODE_TIMEOUT_IN_MS
-      ), // TODO refactor config - domains endpoints don't use full node
-      fullNodeRetryCount: Number(functionConfig.domains.full_node_retry_count ?? RETRY_COUNT),
-      fullNodeRetryDelayMs: Number(
-        functionConfig.domains.full_node_retry_delay_ms ?? RETRY_DELAY_IN_MS
-      ),
-      shouldAuthenticate: true,
-    },
-    proxy: {
-      forwardToGen2: toBool(functionConfig.proxy.forward_to_gen2, false),
-      deploymentEnv: functionConfig.proxy.deployment_env,
+      fullNodeTimeoutMs: domainFullNodeTimeoutMs.value(), // TODO refactor config - domains endpoints don't use full node
+      fullNodeRetryCount: domainFullNodeRetryCount.value(),
+      fullNodeRetryDelayMs: domainFullNodeDelaysMs.value(),
+      shouldAuthenticate: domainShouldAuthenticate.value(),
+      shouldCheckQuota: domainShouldCheckQuota.value(),
     },
   }
 }
