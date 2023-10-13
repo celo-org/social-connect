@@ -33,20 +33,6 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
   options: ThresholdCallToSignersOptions<R>,
   processResult: (res: OdisResponse<R>) => Promise<boolean> = (_) => Promise.resolve(false)
 ): Promise<{ signerResponses: Array<SignerResponse<R>>; maxErrorCode?: number }> {
-  const obs = new PerformanceObserver((list) => {
-    // Possible race condition here: if multiple signers take exactly the same
-    // amount of time, the PerformanceObserver callback may be called twice with
-    // both entries present. Node 12 doesn't allow for entries to be deleted by name,
-    // and eliminating the race condition requires a more significant redesign of
-    // the measurement code.
-    // This is only used for monitoring purposes, so a rare
-    // duplicate latency measure for the signer should have minimal impact.
-    list.getEntries().forEach((entry) => {
-      logger.info({ latency: entry, signer: entry.name }, 'Signer response latency measured')
-    })
-  })
-  obs.observe({ entryTypes: ['measure'], buffered: false })
-
   const {
     signers,
     endpoint,
@@ -56,6 +42,31 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
     request,
     responseSchema,
   } = options
+
+  const obs = new PerformanceObserver((list) => {
+    // Since moving to a Cloud Run based infrastucture, which allows for
+    // multiple requests to be processed by the same server instance,
+    // there was a need to filter the performance observer by entry name.
+    //
+    // Without this, the performance observer would incorrectly log requests
+    // from multiple sessions.
+
+    list.getEntries().forEach((entry) => {
+      // Filter entries based on signer URL
+      const matchingSigner = signers.find((signer) => {
+        const entryName = signer.url + endpoint + `/${request.body.sessionID}`
+        return entry.name === entryName
+      })
+
+      if (matchingSigner) {
+        logger.info(
+          { latency: entry, signer: matchingSigner.url + endpoint },
+          'Signer response latency measured'
+        )
+      }
+    })
+  })
+  obs.observe({ entryTypes: ['measure'], buffered: false })
 
   const manualAbort = new AbortController()
   // @ts-ignore
@@ -92,10 +103,11 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
         })
 
         if (!signerFetchResult.ok) {
+          const responseData = await signerFetchResult.json()
           // used for log based metrics
           logger.info({
             message: 'Received signerFetchResult on unsuccessful signer response',
-            res: await signerFetchResult.json(),
+            res: responseData,
             status: signerFetchResult.status,
             signer: signer.url,
           })
@@ -110,6 +122,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
             logger.warn('Not possible to reach a threshold of signer responses. Failing fast')
             manualAbort.abort()
           }
+          responses.push({ res: responseData, url: signer.url })
           return
         }
 
