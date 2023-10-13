@@ -173,7 +173,7 @@ jobs:
           comment-author: changeset-bot[bot]
       - name: Fail if Changeset commit not found
         # Skip if author is github-bot from celo-org
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'Bot'
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
         run: |
           if ${{ steps.fc.outputs.comment-id == 0 }}; then
             echo "Error: No Changeset Found. You create an empty changeset with 'yarn cs add --empty'" && exit 1
