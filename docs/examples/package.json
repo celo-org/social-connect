@@ -5,7 +5,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "tsc -b ."
+    "build": "tsc -b .",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@celo/base": "^5.0.4",
