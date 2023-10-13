@@ -217,7 +217,7 @@ if (DEV_MODE) {
         currentVersion: domainKeysCurrentVersion.value(),
         versions: domainKeysVersions.value(),
       },
-      fullNodeTimeoutMs: domainFullNodeTimeoutMs.value(),
+      fullNodeTimeoutMs: domainFullNodeTimeoutMs.value(), // TODO refactor config - domains endpoints don't use full node
       fullNodeRetryCount: domainFullNodeRetryCount.value(),
       fullNodeRetryDelayMs: domainFullNodeDelaysMs.value(),
       shouldAuthenticate: domainShouldAuthenticate.value(),

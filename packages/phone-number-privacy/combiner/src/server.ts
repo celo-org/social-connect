@@ -7,7 +7,7 @@ import {
   OdisRequest,
   rootLogger,
 } from '@celo/phone-number-privacy-common'
-import express, { RequestHandler } from 'express'
+import express, { Express, RequestHandler } from 'express'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -33,7 +33,7 @@ import { NoQuotaCache } from './utils/no-quota-cache'
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
-export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
+export function startCombiner(config: CombinerConfig, kit?: ContractKit): Express {
   const logger = rootLogger(config.serviceName)
 
   kit = kit ?? getContractKitWithAgent(config.blockchain)

@@ -1,5 +1,5 @@
-name: CI Checks
-run-name: ci checks
+name: social-connect CI/CD
+run-name: social-connect CI/CD for ${{ github.head_ref || github.ref_name }}
 
 # Dockefile for the self-hosted runner:
 # https://github.com/celo-org/infrastructure/blob/master/terraform/root-modules/gcp/integration-tests-gke/files/github-arc/Dockerfile-monorepo
@@ -17,7 +17,7 @@ on:
       - '**/*.md'
 
 concurrency:
-  group: circle-ci-${{ github.ref }}
+  group: social-connect-${{ github.ref }}
   cancel-in-progress: true
 
 defaults:
@@ -38,7 +38,7 @@ env:
 
 jobs:
   install-dependencies:
-    name: Install + Build +
+    name: Install + Build
     outputs:
       package-json-checksum: ${{ steps.node-checksums.outputs.PACKAGE_JSON_CHECKSUM }}
       # Propagate more outputs if you need https://github.com/tj-actions/changed-files#outputs
@@ -61,6 +61,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Detect files changed in PR, and expose as output
+        id: changed-files
+        uses: tj-actions/changed-files@v39
+        with:
+          # Using comma as separator to be able to easily match full paths (using ,<path>)
+          separator: ','
+          # Checking if changed in the last 100 commits in PRs
+          fetch_depth: '100'
+      - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
       - name: Verify setup for incremental testing
         run: |
           set -euo pipefail
@@ -115,7 +124,7 @@ jobs:
         run: |
           # This fails if there is any change
           if ! git diff-index HEAD --; then
-            echo "Git changes detected while building. If this is unexpected, bump NODE_MODULE_CACHE_VERSION in .github/workflows/circleci.yml"
+            echo "Git changes detected while building. If this is unexpected, bump NODE_MODULE_CACHE_VERSION in .github/workflows/social-connect.yml"
             exit 1
           fi
       - name: Build packages
@@ -146,25 +155,28 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - run: yarn run prettify:diff
       - run: yarn run lint
-      - name: Detect files changed in PR, and expose as output
-        id: changed-files
-        uses: tj-actions/changed-files@v37
-        with:
-          # Using comma as separator to be able to easily match full paths (using ,<path>)
-          separator: ','
-          # Checking if changed in the last 100 commits in PRs
-          fetch_depth: '150'
-      - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
+      - name: Dump GitHub context
+        # Use to debug github event and check user ids
+        if: true
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
       - name: Find ChangeSet in PR
         uses: peter-evans/find-comment@v2
         id: fc
+        # Skip if author is github-bot from celo-org
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Changeset detected
           comment-author: changeset-bot[bot]
-      - run: |
+      - name: Fail if Changeset commit not found
+        # Skip if author is github-bot from celo-org
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
+        run: |
           if ${{ steps.fc.outputs.comment-id == 0 }}; then
-            echo "No Changeset Found" && exit 1
+            echo "Error: No Changeset Found. You create an empty changeset with 'yarn cs add --empty'" && exit 1
           else
             echo "Changeset Found"
           fi
