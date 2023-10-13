@@ -1,5 +1,5 @@
-name: CI Checks
-run-name: ci checks
+name: social-connect CI/CD
+run-name: social-connect CI/CD for ${{ github.head_ref || github.ref_name }}
 
 # Dockefile for the self-hosted runner:
 # https://github.com/celo-org/infrastructure/blob/master/terraform/root-modules/gcp/integration-tests-gke/files/github-arc/Dockerfile-monorepo
@@ -17,7 +17,7 @@ on:
       - '**/*.md'
 
 concurrency:
-  group: circle-ci-${{ github.ref }}
+  group: social-connect-${{ github.ref }}
   cancel-in-progress: true
 
 defaults:
@@ -115,7 +115,7 @@ jobs:
         run: |
           # This fails if there is any change
           if ! git diff-index HEAD --; then
-            echo "Git changes detected while building. If this is unexpected, bump NODE_MODULE_CACHE_VERSION in .github/workflows/circleci.yml"
+            echo "Git changes detected while building. If this is unexpected, bump NODE_MODULE_CACHE_VERSION in .github/workflows/social-connect.yml"
             exit 1
           fi
       - name: Build packages
