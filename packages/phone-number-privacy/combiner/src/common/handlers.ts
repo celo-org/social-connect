@@ -13,8 +13,10 @@ import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import Logger from 'bunyan'
 import { Request, Response } from 'express'
 import { performance, PerformanceObserver } from 'perf_hooks'
+import * as client from 'prom-client'
 import { getCombinerVersion } from '../config'
 import { OdisError } from './error'
+import { Counters, newMeter } from './metrics'
 
 const tracer = opentelemetry.trace.getTracer('combiner-tracer')
 
@@ -37,10 +39,14 @@ export function catchErrorHandler<R extends OdisRequest>(
       const logger: Logger = res.locals.logger
       logger.error(ErrorMessage.CAUGHT_ERROR_IN_ENDPOINT_HANDLER)
       logger.error(err)
+      Counters.errors.labels(req.url).inc()
+      Counters.errorsCaughtInEndpointHandler.labels(req.url).inc()
       if (!res.headersSent) {
         if (err instanceof OdisError) {
           sendFailure(err.code, err.status, res, req.url)
         } else {
+          Counters.errors.labels(req.url).inc()
+          Counters.unknownErrors.labels(req.url).inc()
           sendFailure(ErrorMessage.UNKNOWN_ERROR, 500, res, req.url)
         }
       } else {
@@ -84,50 +90,57 @@ export function tracingHandler<R extends OdisRequest>(
 }
 
 export function meteringHandler<R extends OdisRequest>(
+  histogram: client.Histogram<string>,
   handler: PromiseHandler<R>
 ): PromiseHandler<R> {
-  return async (req, res) => {
-    const logger: Logger = res.locals.logger
+  return async (req, res) =>
+    newMeter(
+      histogram,
+      req.url
+    )(async () => {
+      const logger: Logger = res.locals.logger
 
-    // used for log based metrics
-    logger.info({ req: req.body }, 'Request received')
+      // used for log based metrics
+      logger.info({ req: req.body }, 'Request received')
 
-    const eventLoopLagMeasurementStart = Date.now()
-    setTimeout(() => {
-      const eventLoopLag = Date.now() - eventLoopLagMeasurementStart
-      logger.info({ eventLoopLag }, 'Measure event loop lag')
-    })
-    // TODO:(soloseng): session ID may not always exist
-    const startMark = `Begin ${req.url}/${req.body.sessionID}`
-    const endMark = `End ${req.url}/${req.body.sessionID}`
-    const entryName = `${req.url}/${req.body.sessionID} latency`
+      const eventLoopLagMeasurementStart = Date.now()
+      setTimeout(() => {
+        const eventLoopLag = Date.now() - eventLoopLagMeasurementStart
+        logger.info({ eventLoopLag }, 'Measure event loop lag')
+      })
+      // TODO:(soloseng): session ID may not always exist
+      const startMark = `Begin ${req.url}/${req.body.sessionID}`
+      const endMark = `End ${req.url}/${req.body.sessionID}`
+      const entryName = `${req.url}/${req.body.sessionID} latency`
 
-    const obs = new PerformanceObserver((list) => {
-      const entry = list.getEntriesByName(entryName)[0]
-      if (entry) {
-        logger.info({ latency: entry }, 'e2e response latency measured')
+      const obs = new PerformanceObserver((list) => {
+        const entry = list.getEntriesByName(entryName)[0]
+        if (entry) {
+          logger.info({ latency: entry }, 'e2e response latency measured')
+        }
+      })
+      obs.observe({ entryTypes: ['measure'], buffered: false })
+
+      performance.mark(startMark)
+
+      try {
+        Counters.requests.labels(req.url).inc()
+        await handler(req, res)
+        if (res.headersSent) {
+          // used for log based metrics
+          logger.info({ res }, 'Response sent')
+          Counters.responses.labels(req.url, res.statusCode.toString()).inc()
+        }
+      } finally {
+        performance.mark(endMark)
+        performance.measure(entryName, startMark, endMark)
+
+        performance.clearMeasures(entryName)
+        performance.clearMarks(startMark)
+        performance.clearMarks(endMark)
+        obs.disconnect()
       }
     })
-    obs.observe({ entryTypes: ['measure'], buffered: false })
-
-    performance.mark(startMark)
-
-    try {
-      await handler(req, res)
-      if (res.headersSent) {
-        // used for log based metrics
-        logger.info({ res }, 'Response sent')
-      }
-    } finally {
-      performance.mark(endMark)
-      performance.measure(entryName, startMark, endMark)
-
-      performance.clearMeasures(entryName)
-      performance.clearMarks(startMark)
-      performance.clearMarks(endMark)
-      obs.disconnect()
-    }
-  }
 }
 
 export function timeoutHandler<R extends OdisRequest>(
@@ -154,6 +167,7 @@ export async function disabledHandler<R extends OdisRequest>(
   req: Request<{}, {}, R>,
   response: Response<OdisResponse<R>, Locals>
 ): Promise<void> {
+  Counters.warnings.labels(req.url, WarningMessage.API_UNAVAILABLE).inc()
   sendFailure(WarningMessage.API_UNAVAILABLE, 503, response, req.url)
 }
 

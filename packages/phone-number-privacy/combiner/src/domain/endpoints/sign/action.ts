@@ -17,6 +17,7 @@ import { Signer, thresholdCallToSigners } from '../../../common/combine'
 import { DomainCryptoClient } from '../../../common/crypto-clients/domain-crypto-client'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo, requestHasSupportedKeyVersion } from '../../../common/io'
+import { Counters } from '../../../common/metrics'
 import { getCombinerVersion, OdisConfig } from '../../../config'
 import { logDomainResponseDiscrepancies } from '../../services/log-responses'
 import { findThresholdDomainState } from '../../services/threshold-state'
@@ -29,9 +30,11 @@ export function domainSign(
     const { logger } = response.locals
 
     if (!domainRestrictedSignatureRequestSchema(DomainSchema).is(request.body)) {
+      Counters.warnings.labels(request.url, WarningMessage.INVALID_INPUT).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
     }
     if (!requestHasSupportedKeyVersion(request, config, logger)) {
+      Counters.warnings.labels(request.url, WarningMessage.INVALID_KEY_VERSION_REQUEST).inc()
       return errorResult(400, WarningMessage.INVALID_KEY_VERSION_REQUEST)
     }
 
@@ -39,6 +42,7 @@ export function domainSign(
     // the signer, but is not checked here. As a result, requests that pass the authentication check
     // here may still fail when sent to the signer.
     if (!verifyDomainRestrictedSignatureRequestAuthenticity(request.body)) {
+      Counters.warnings.labels(request.url, WarningMessage.UNAUTHENTICATED_USER).inc()
       return errorResult(401, WarningMessage.UNAUTHENTICATED_USER)
     }
 
@@ -111,6 +115,12 @@ export function domainSign(
 
     const errorCode = maxErrorCode ?? 500
     const error = errorCodeToError(errorCode)
+    if (error == ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES) {
+      Counters.errors.labels(request.url).inc()
+      Counters.notEnoughSigErrors.labels(request.url).inc()
+    } else if (error in WarningMessage) {
+      Counters.warnings.labels(request.url, error).inc()
+    }
     return errorResult(errorCode, error)
   }
 }

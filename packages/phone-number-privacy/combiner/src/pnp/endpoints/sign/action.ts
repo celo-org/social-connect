@@ -19,6 +19,7 @@ import { Signer, thresholdCallToSigners } from '../../../common/combine'
 import { BLSCryptographyClient } from '../../../common/crypto-clients/bls-crypto-client'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo, requestHasSupportedKeyVersion } from '../../../common/io'
+import { Counters } from '../../../common/metrics'
 import { getCombinerVersion, OdisConfig } from '../../../config'
 import { NoQuotaCache } from '../../../utils/no-quota-cache'
 import { AccountService } from '../../services/account-services'
@@ -34,16 +35,23 @@ export function pnpSign(
   return async (request, response) => {
     const logger = response.locals.logger
     if (!isValidRequest(request)) {
+      Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.UNAUTHENTICATED_USER).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
     }
 
     if (!requestHasSupportedKeyVersion(request, config, response.locals.logger)) {
+      Counters.warnings
+        .labels(CombinerEndpoint.PNP_SIGN, WarningMessage.INVALID_KEY_VERSION_REQUEST)
+        .inc()
       return errorResult(400, WarningMessage.INVALID_KEY_VERSION_REQUEST)
     }
 
     const warnings: ErrorType[] = []
     if (config.shouldAuthenticate) {
       if (!(await authenticateUser(request, logger, accountService.getAccount, warnings))) {
+        Counters.warnings
+          .labels(CombinerEndpoint.PNP_SIGN, WarningMessage.UNAUTHENTICATED_USER)
+          .inc()
         return errorResult(401, WarningMessage.UNAUTHENTICATED_USER)
       }
     }
@@ -54,6 +62,7 @@ export function pnpSign(
         const quota = noQuotaCache.getTotalQuota(account)
         // can exist a race condition between the hasQuota and getTotalQuota but that's highly improbable
         if (quota !== undefined) {
+          Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.EXCEEDED_QUOTA).inc()
           return errorResult(403, WarningMessage.EXCEEDED_QUOTA)
         }
       }
@@ -134,6 +143,12 @@ export function pnpSign(
       }
     }
     const error = errorCodeToError(errorCode)
+    if (error === ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES) {
+      Counters.errors.labels(request.url).inc()
+      Counters.notEnoughSigErrors.labels(request.url).inc()
+    } else if (error === WarningMessage.EXCEEDED_QUOTA) {
+      Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.EXCEEDED_QUOTA).inc()
+    }
     return errorResult(errorCode, error)
   }
 }

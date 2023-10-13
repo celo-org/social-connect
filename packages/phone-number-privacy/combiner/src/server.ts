@@ -8,6 +8,7 @@ import {
   rootLogger,
 } from '@celo/phone-number-privacy-common'
 import express, { RequestHandler } from 'express'
+import * as PromClient from 'prom-client'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -18,6 +19,7 @@ import {
   ResultHandler,
   tracingHandler,
 } from './common/handlers'
+import { Histograms } from './common/metrics'
 import { CombinerConfig, getCombinerVersion } from './config'
 import { disableDomain } from './domain/endpoints/disable/action'
 import { domainQuota } from './domain/endpoints/quota/action'
@@ -104,6 +106,9 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
     CombinerEndpoint.DISABLE_DOMAIN,
     createHandler(domains.enabled, disableDomain(domainSigners, domains))
   )
+  app.get(CombinerEndpoint.METRICS, (_req, res) => {
+    res.send(PromClient.register.metrics())
+  })
 
   return app
 }
@@ -113,6 +118,8 @@ function createHandler<R extends OdisRequest>(
   action: ResultHandler<R>
 ): RequestHandler<{}, {}, R, {}, Locals> {
   return catchErrorHandler(
-    tracingHandler(meteringHandler(enabled ? resultHandler(action) : disabledHandler))
+    tracingHandler(
+      meteringHandler(Histograms.responseLatency, enabled ? resultHandler(action) : disabledHandler)
+    )
   )
 }
