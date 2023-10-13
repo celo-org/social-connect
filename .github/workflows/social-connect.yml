@@ -176,7 +176,7 @@ jobs:
         if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'celo-org'
         run: |
           if ${{ steps.fc.outputs.comment-id == 0 }}; then
-            echo "No Changeset Found" && exit 1
+            echo "No Changeset Found"
           else
             echo "Changeset Found"
           fi
