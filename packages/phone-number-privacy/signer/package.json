@@ -1,7 +1,7 @@
 {
   "name": "@celo/phone-number-privacy-signer",
   "version": "3.0.2",
-  "private": "true",
+  "private": true,
   "description": "Signing participator of ODIS",
   "author": "Celo",
   "license": "Apache-2.0",
