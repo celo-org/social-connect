@@ -1,8 +1,12 @@
 {
-  "name": "example-scripts",
+  "name": "odis-example-scripts",
   "version": "1.0.0",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
+  "scripts": {
+    "build": "tsc -b ."
+  },
   "dependencies": {
     "@celo/base": "^5.0.4",
     "@celo/identity": "^5.0.4",

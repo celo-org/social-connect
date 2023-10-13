@@ -35,7 +35,7 @@
     "packages/*",
     "packages/phone-number-privacy/*",
     "packages/sdk/*",
-    "docs/examples/*"
+    "docs/examples"
   ],
   "devDependencies": {
     "@babel/core": "^7.8.4",

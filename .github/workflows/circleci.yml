@@ -121,7 +121,7 @@ jobs:
             exit 1
           fi
       - name: Build packages
-        run: yarn build --ignore docs --include-dependencies
+        run: yarn build
       - name: Check licenses
         if: steps.cache_node.outputs.cache-hit != 'true'
         run: |
