@@ -80,8 +80,6 @@ buck-out/
 coverage
 coverage.json
 
-lerna-debug.log
-
 # Typechain types
 **/types/typechain/
 **/types/typechain-*/
