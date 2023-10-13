@@ -165,15 +165,15 @@ jobs:
       - name: Find ChangeSet in PR
         uses: peter-evans/find-comment@v2
         id: fc
-        # Skip if author is github-bot from celo-org (id is celo-org github id)
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != '37552875'
+        # Skip if author is github-bot from celo-org
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'celo-org'
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Changeset detected
           comment-author: changeset-bot[bot]
       - name: Fail if Changeset commit not found
-        # Skip if author is github-bot from celo-org (id is celo-org github id)
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != '37552875'
+        # Skip if author is github-bot from celo-org
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'celo-org'
         run: |
           if ${{ steps.fc.outputs.comment-id == 0 }}; then
             echo "No Changeset Found" && exit 1
