@@ -1,5 +1,15 @@
 # @celo/phone-number-privacy-combiner
 
+## 3.2.0
+
+### Minor Changes
+
+- ffe645c: Migrated the combiner from gen1 to gen2 cloud function. This changeset overwride the previous one.
+
+### Patch Changes
+
+- bf1ffb5: Migrated the combiner to gen2 cloud function.
+
 ## 3.1.0
 
 ### Minor Changes
