@@ -1,6 +1,7 @@
 {
   "name": "@celo/phone-number-privacy-monitor",
   "version": "3.0.1",
+  "private": true,
   "description": "Regularly queries ODIS to ensure the system is functioning properly",
   "author": "Celo",
   "license": "Apache-2.0",

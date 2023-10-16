@@ -4,12 +4,10 @@ import {
   getContractKitWithAgent,
   KEY_VERSION_HEADER,
   loggerMiddleware,
-  newContractKitFetcher,
   OdisRequest,
   rootLogger,
 } from '@celo/phone-number-privacy-common'
 import express, { Express, RequestHandler } from 'express'
-import httpProxy from 'http-proxy'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -26,7 +24,12 @@ import { domainQuota } from './domain/endpoints/quota/action'
 import { domainSign } from './domain/endpoints/sign/action'
 import { pnpQuota } from './pnp/endpoints/quota/action'
 import { pnpSign } from './pnp/endpoints/sign/action'
-const streamify = require('stream-array')
+import {
+  CachingAccountService,
+  ContractKitAccountService,
+  MockAccountService,
+} from './pnp/services/account-services'
+import { NoQuotaCache } from './utils/no-quota-cache'
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
@@ -63,13 +66,12 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit): Expres
     })
   })
 
-  const dekFetcher = newContractKitFetcher(
-    kit,
-    logger,
-    config.phoneNumberPrivacy.fullNodeTimeoutMs,
-    config.phoneNumberPrivacy.fullNodeRetryCount,
-    config.phoneNumberPrivacy.fullNodeRetryDelayMs
-  )
+  const baseAccountService = config.phoneNumberPrivacy.shouldMockAccountService
+    ? new MockAccountService(config.phoneNumberPrivacy.mockDek!)
+    : new ContractKitAccountService(logger, kit)
+
+  const accountService = new CachingAccountService(baseAccountService)
+  const noQuotaCache = new NoQuotaCache()
 
   const pnpSigners: Signer[] = JSON.parse(config.phoneNumberPrivacy.odisServices.signers)
   const domainSigners: Signer[] = JSON.parse(config.domains.odisServices.signers)
@@ -78,15 +80,21 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit): Expres
 
   app.post(
     CombinerEndpoint.PNP_QUOTA,
-    createHandler(phoneNumberPrivacy.enabled, pnpQuota(pnpSigners, phoneNumberPrivacy, dekFetcher))
+    createHandler(
+      phoneNumberPrivacy.enabled,
+      pnpQuota(pnpSigners, config.phoneNumberPrivacy, accountService, noQuotaCache)
+    )
   )
   app.post(
     CombinerEndpoint.PNP_SIGN,
-    createHandler(phoneNumberPrivacy.enabled, pnpSign(pnpSigners, phoneNumberPrivacy, dekFetcher))
+    createHandler(
+      phoneNumberPrivacy.enabled,
+      pnpSign(pnpSigners, config.phoneNumberPrivacy, accountService, noQuotaCache)
+    )
   )
   app.post(
     CombinerEndpoint.DOMAIN_QUOTA_STATUS,
-    createHandler(domains.enabled, domainQuota(domainSigners, domains))
+    createHandler(domains.enabled, domainQuota(domainSigners, config.domains))
   )
   app.post(
     CombinerEndpoint.DOMAIN_SIGN,
@@ -107,68 +115,4 @@ function createHandler<R extends OdisRequest>(
   return catchErrorHandler(
     tracingHandler(meteringHandler(enabled ? resultHandler(action) : disabledHandler))
   )
-}
-
-export function startProxy(req: any, res: any, config: CombinerConfig) {
-  const logger = rootLogger(config.serviceName)
-
-  logger.info({ request: req }, 'Starting proxy.')
-
-  let destinationUrl: string
-  let rawBodyString: string
-  let rawBodyJson: any
-  let rawBodyData: any[] = []
-
-  const proxy = httpProxy.createProxyServer({
-    proxyTimeout: config.phoneNumberPrivacy.odisServices.timeoutMilliSeconds,
-  })
-
-  if (req.rawBody) {
-    // XXX having to strigify and then parse, because simply using `req.rawBody.data` does not work.
-    rawBodyString = JSON.stringify(req.rawBody)
-    rawBodyJson = JSON.parse(rawBodyString)
-    rawBodyData = rawBodyJson.data
-  }
-
-  switch (config.proxy.deploymentEnv) {
-    case 'mainnet':
-      destinationUrl = 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerGen2'
-      break
-
-    case 'alfajores':
-      destinationUrl =
-        'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2'
-      break
-
-    case 'staging':
-      destinationUrl =
-        'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerGen2'
-      break
-
-    default:
-      throw 'Failed to set destination URL'
-  }
-
-  logger.info(
-    {
-      request: req,
-      rawBodyData: rawBodyData,
-      destinationURL: destinationUrl,
-    },
-    'Proxying request to staging Combiner gen 2.'
-  )
-
-  proxy.web(req, res, {
-    target: destinationUrl,
-    buffer: streamify(rawBodyData.length != 0 ? [Buffer.from(rawBodyData)] : []),
-    changeOrigin: true,
-  })
-
-  proxy.on('error', (err) => {
-    logger.error({ err }, 'Error in Proxying request to Combiner.')
-    res.status(500).json({
-      success: false,
-      error: err,
-    })
-  })
 }
