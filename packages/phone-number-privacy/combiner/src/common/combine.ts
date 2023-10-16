@@ -89,7 +89,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
   await Promise.all(
     signers.map(async (signer) => {
       try {
-        const _meter = newMeter(Histograms.signerLatency, signer.url, request.url)
+        const _meter = newMeter(Histograms.signerLatency, request.url, signer.url)
         const signerFetchResult = await _meter(() =>
           fetchSignerResponseWithFallback(
             signer,
@@ -102,7 +102,6 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
           )
         )
 
-        // used for log based metrics
         Counters.sigResponses
           .labels(signerFetchResult.status.toString(), signer.url, request.url)
           .inc()
@@ -114,7 +113,6 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
 
         if (!signerFetchResult.ok) {
           const responseData = await signerFetchResult.json()
-          // used for log based metrics
           Counters.sigResponsesErrors
             .labels(signerFetchResult.status.toString(), signer.url, request.url)
             .inc()
@@ -177,10 +175,10 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
           Counters.warnings.labels(request.url, WarningMessage.CANCELLED_REQUEST_TO_SIGNER).inc()
           logger.info({ signer }, WarningMessage.CANCELLED_REQUEST_TO_SIGNER)
         } else {
-          // Logging the err & message simultaneously fails to log the message in some cases
           Counters.sigRequestErrors
             .labels(signer.url, request.url, ErrorMessage.SIGNER_REQUEST_ERROR)
             .inc()
+          // Logging the err & message simultaneously fails to log the message in some cases
           logger.error({ signer }, ErrorMessage.SIGNER_REQUEST_ERROR)
           logger.error({ signer, err })
 
@@ -200,7 +198,6 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
 
   if (errorCodes.size > 0) {
     if (errorCodes.size > 1) {
-      Counters.errors.labels(request.url).inc()
       Counters.sigInconsistenciesErrors.labels(request.url).inc()
       logger.error(
         { errorCodes: JSON.stringify([...errorCodes]) },
