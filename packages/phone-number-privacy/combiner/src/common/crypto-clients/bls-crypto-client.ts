@@ -2,6 +2,7 @@ import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import threshold_bls from 'blind-threshold-bls'
 import Logger from 'bunyan'
 import { Counters } from '../../common/metrics'
+import { Context } from '../context'
 import { CryptoClient, ServicePartialSignature } from './crypto-client'
 
 function flattenSigsArray(sigs: Uint8Array[]) {
@@ -26,20 +27,20 @@ export class BLSCryptographyClient extends CryptoClient {
    * On error, logs and throws exception for not enough signatures,
    * and drops the invalid signature for future requests using this instance.
    */
-  protected _combineBlindedSignatureShares(blindedMessage: string, logger: Logger): string {
+  protected _combineBlindedSignatureShares(blindedMessage: string, ctx: Context): string {
     // Optimistically attempt to combine unverified signatures
     // If combination or verification fails, iterate through each signature and remove invalid ones
     // We do this since partial signature verification incurs higher latencies
     try {
       const result = threshold_bls.combine(this.keyVersionInfo.threshold, this.allSignatures)
-      this.verifyCombinedSignature(blindedMessage, result, logger)
+      this.verifyCombinedSignature(blindedMessage, result, ctx.logger)
       return Buffer.from(result).toString('base64')
     } catch (error) {
-      logger.error(error)
+      ctx.logger.error(error)
       // Verify each signature and remove invalid ones
       // This logging will help us troubleshoot which signers are having issues
       this.unverifiedSignatures.forEach((unverifiedSignature) => {
-        this.verifyPartialSignature(blindedMessage, unverifiedSignature, logger)
+        this.verifyPartialSignature(blindedMessage, unverifiedSignature, ctx)
       })
       this.clearUnverifiedSignatures()
       throw new Error(ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES)
@@ -69,16 +70,19 @@ export class BLSCryptographyClient extends CryptoClient {
   private verifyPartialSignature(
     blindedMessage: string,
     unverifiedSignature: ServicePartialSignature,
-    logger: Logger
+    ctx: Context
   ) {
     const sigBuffer = Buffer.from(unverifiedSignature.signature, 'base64')
     if (this.isValidPartialSignature(sigBuffer, blindedMessage)) {
       // We move it to the verified set so that we don't need to re-verify in the future
       this.verifiedSignatures.push(unverifiedSignature)
     } else {
-      Counters.errors.labels(unverifiedSignature.url).inc()
-      Counters.blsComputeErrors.labels(unverifiedSignature.url).inc()
-      logger.error({ url: unverifiedSignature.url }, ErrorMessage.VERIFY_PARITAL_SIGNATURE_ERROR)
+      Counters.errors.labels(ctx.url, ErrorMessage.VERIFY_PARTIAL_SIGNATURE_ERROR).inc()
+      Counters.blsComputeErrors.labels(ctx.url, unverifiedSignature.url).inc()
+      ctx.logger.error(
+        { url: unverifiedSignature.url },
+        ErrorMessage.VERIFY_PARTIAL_SIGNATURE_ERROR
+      )
     }
   }
 

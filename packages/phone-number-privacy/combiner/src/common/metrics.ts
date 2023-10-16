@@ -26,7 +26,7 @@ export const Counters = {
   errors: new Counter({
     name: 'combiner_errors_total',
     help: 'Counter for the total number of errors',
-    labelNames: ['endpoint'],
+    labelNames: ['endpoint', 'error_type'],
   }),
   blockchainErrors: new Counter({
     name: 'combiner_blockchain_errors_total',
@@ -35,7 +35,7 @@ export const Counters = {
   blsComputeErrors: new Counter({
     name: 'combiner_bls_compute_errors_total',
     help: 'Counter for the number of BLS compute errors',
-    labelNames: ['signer'],
+    labelNames: ['endpoint', 'signer'],
   }),
   errorsCaughtInEndpointHandler: new Counter({
     name: 'combiner_endpoint_handler_errors_total',

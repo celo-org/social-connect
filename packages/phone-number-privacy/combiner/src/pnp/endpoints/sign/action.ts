@@ -16,6 +16,7 @@ import {
 import { Request } from 'express'
 import assert from 'node:assert'
 import { Signer, thresholdCallToSigners } from '../../../common/combine'
+import { Context } from '../../../common/context'
 import { BLSCryptographyClient } from '../../../common/crypto-clients/bls-crypto-client'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo, requestHasSupportedKeyVersion } from '../../../common/io'
@@ -34,6 +35,9 @@ export function pnpSign(
 ): ResultHandler<SignMessageRequest> {
   return async (request, response) => {
     const logger = response.locals.logger
+    const { url } = request
+    const ctx: Context = { logger, url }
+
     if (!isValidRequest(request)) {
       Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.UNAUTHENTICATED_USER).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
@@ -79,7 +83,7 @@ export function pnpSign(
       // BLS threshold signatures can be combined without all partial signatures
       if (crypto.hasSufficientSignatures()) {
         try {
-          crypto.combineBlindedSignatureShares(request.body.blindedQueryPhoneNumber, logger)
+          crypto.combineBlindedSignatureShares(request.body.blindedQueryPhoneNumber, ctx)
           // Close outstanding requests
           return true
         } catch (err) {
@@ -93,7 +97,7 @@ export function pnpSign(
     }
 
     const { signerResponses, maxErrorCode } = await thresholdCallToSigners(
-      logger,
+      ctx,
       {
         signers,
         endpoint: getSignerEndpoint(CombinerEndpoint.PNP_SIGN),
@@ -112,7 +116,7 @@ export function pnpSign(
       try {
         const combinedSignature = crypto.combineBlindedSignatureShares(
           request.body.blindedQueryPhoneNumber,
-          logger
+          ctx
         )
 
         return {

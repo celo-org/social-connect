@@ -14,6 +14,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import assert from 'node:assert'
 import { Signer, thresholdCallToSigners } from '../../../common/combine'
+import { Context } from '../../../common/context'
 import { DomainCryptoClient } from '../../../common/crypto-clients/domain-crypto-client'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo, requestHasSupportedKeyVersion } from '../../../common/io'
@@ -28,6 +29,8 @@ export function domainSign(
 ): ResultHandler<DomainRestrictedSignatureRequest> {
   return async (request, response) => {
     const { logger } = response.locals
+    const { url } = request
+    const ctx: Context = { url, logger }
 
     if (!domainRestrictedSignatureRequestSchema(DomainSchema).is(request.body)) {
       Counters.warnings.labels(request.url, WarningMessage.INVALID_INPUT).inc()
@@ -60,7 +63,7 @@ export function domainSign(
       // BLS threshold signatures can be combined without all partial signatures
       if (crypto.hasSufficientSignatures()) {
         try {
-          crypto.combineBlindedSignatureShares(request.body.blindedMessage, logger)
+          crypto.combineBlindedSignatureShares(request.body.blindedMessage, ctx)
           // Close outstanding requests
           return true
         } catch (err) {
@@ -74,7 +77,7 @@ export function domainSign(
     }
 
     const { signerResponses, maxErrorCode } = await thresholdCallToSigners(
-      response.locals.logger,
+      ctx,
       {
         signers,
         endpoint: getSignerEndpoint(CombinerEndpoint.DOMAIN_SIGN),
@@ -93,7 +96,7 @@ export function domainSign(
       try {
         const combinedSignature = crypto.combineBlindedSignatureShares(
           request.body.blindedMessage,
-          logger
+          ctx
         )
 
         return {

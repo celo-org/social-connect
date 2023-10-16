@@ -201,13 +201,14 @@ if (DEV_MODE) {
         currentVersion: Number(env.DOMAIN_KEYS_CURRENT_VERSION ?? 1),
         versions: env.DOMAIN_KEYS_VERSIONS,
       },
+      // TODO refactor configs - none of these env vars are used for domains endpoints
       fullNodeTimeoutMs: Number(env.DOMAIN_FULL_NODE_TIMEOUT_MS ?? FULL_NODE_TIMEOUT_IN_MS),
       fullNodeRetryCount: Number(env.DOMAIN_FULL_NODE_RETRY_COUNT ?? RETRY_COUNT),
       fullNodeRetryDelayMs: Number(env.DOMAIN_FULL_NODE_DELAY_MS ?? RETRY_DELAY_IN_MS),
       shouldAuthenticate: toBool(env.PNP_SHOULD_AUTHENTICATE, true),
       shouldCheckQuota: toBool(env.PNP_SHOULD_CHECK_QUOTA, false),
       shouldMockAccountService: toBool(env.PNP_SHOULD_MOCK_ACCOUNT_SERVICE, false),
-      mockDek: env.PNP_MOCK_DEK ?? defaultMockDEK, // TODO refactor configs
+      mockDek: env.PNP_MOCK_DEK ?? defaultMockDEK,
     },
   }
 }

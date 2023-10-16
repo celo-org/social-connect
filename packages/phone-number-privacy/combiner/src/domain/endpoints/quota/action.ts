@@ -36,15 +36,18 @@ export function domainQuota(
     // TODO remove?
     const keyVersionInfo = getKeyVersionInfo(request, config, response.locals.logger)
 
-    const { signerResponses, maxErrorCode } = await thresholdCallToSigners(response.locals.logger, {
-      signers,
-      endpoint: getSignerEndpoint(CombinerEndpoint.DOMAIN_QUOTA_STATUS),
-      request,
-      keyVersionInfo,
-      requestTimeoutMS: config.odisServices.timeoutMilliSeconds,
-      responseSchema: domainQuotaStatusResponseSchema(SequentialDelayDomainStateSchema),
-      shouldCheckKeyVersion: false,
-    })
+    const { signerResponses, maxErrorCode } = await thresholdCallToSigners(
+      { url: request.url, logger: response.locals.logger },
+      {
+        signers,
+        endpoint: getSignerEndpoint(CombinerEndpoint.DOMAIN_QUOTA_STATUS),
+        request,
+        keyVersionInfo,
+        requestTimeoutMS: config.odisServices.timeoutMilliSeconds,
+        responseSchema: domainQuotaStatusResponseSchema(SequentialDelayDomainStateSchema),
+        shouldCheckKeyVersion: false,
+      }
+    )
 
     logDomainResponseDiscrepancies(response.locals.logger, signerResponses)
     if (signerResponses.length >= keyVersionInfo.threshold) {

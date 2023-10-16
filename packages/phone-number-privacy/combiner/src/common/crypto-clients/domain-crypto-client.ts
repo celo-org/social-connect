@@ -1,5 +1,6 @@
 import { ErrorMessage, KeyVersionInfo, PoprfCombiner } from '@celo/phone-number-privacy-common'
-import Logger from 'bunyan'
+import { Context } from '../context'
+import { Counters } from '../metrics'
 import { CryptoClient } from './crypto-client'
 
 export class DomainCryptoClient extends CryptoClient {
@@ -25,15 +26,16 @@ export class DomainCryptoClient extends CryptoClient {
    * Verification of partial signatures is not possible server-side
    * (i.e. without the client's blinding factor).
    */
-  protected _combineBlindedSignatureShares(_blindedMessage: string, logger: Logger): string {
+  protected _combineBlindedSignatureShares(_blindedMessage: string, ctx: Context): string {
     try {
       const result = this.poprfCombiner.blindAggregate(this.allSigsAsArray)
       if (result !== undefined) {
         return result.toString('base64')
       }
     } catch (error) {
-      logger.error(ErrorMessage.SIGNATURE_AGGREGATION_FAILURE)
-      logger.error(error)
+      Counters.blsComputeErrors.labels(ctx.url, 'NA').inc()
+      ctx.logger.error(ErrorMessage.SIGNATURE_AGGREGATION_FAILURE)
+      ctx.logger.error(error)
     }
     throw new Error(ErrorMessage.SIGNATURE_AGGREGATION_FAILURE)
   }

@@ -11,6 +11,7 @@ import Logger from 'bunyan'
 import { Request } from 'express'
 import * as t from 'io-ts'
 import { PerformanceObserver } from 'perf_hooks'
+import { Context } from './context'
 import { fetchSignerResponseWithFallback, SignerResponse } from './io'
 import { Counters, Histograms, newMeter } from './metrics'
 
@@ -30,7 +31,7 @@ export interface ThresholdCallToSignersOptions<R extends OdisRequest> {
 }
 
 export async function thresholdCallToSigners<R extends OdisRequest>(
-  logger: Logger,
+  ctx: Context,
   options: ThresholdCallToSignersOptions<R>,
   processResult: (res: OdisResponse<R>) => Promise<boolean> = (_) => Promise.resolve(false)
 ): Promise<{ signerResponses: Array<SignerResponse<R>>; maxErrorCode?: number }> {
@@ -43,6 +44,8 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
     request,
     responseSchema,
   } = options
+
+  const { logger } = ctx
 
   const obs = new PerformanceObserver((list) => {
     // Since moving to a Cloud Run based infrastucture, which allows for

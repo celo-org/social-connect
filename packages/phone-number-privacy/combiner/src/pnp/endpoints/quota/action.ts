@@ -13,6 +13,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import { Request } from 'express'
 import { Signer, thresholdCallToSigners } from '../../../common/combine'
+import { Context } from '../../../common/context'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo } from '../../../common/io'
 import { Counters } from '../../../common/metrics'
@@ -30,6 +31,8 @@ export function pnpQuota(
 ): ResultHandler<PnpQuotaRequest> {
   return async (request, response) => {
     const logger = response.locals.logger
+    const { url } = request
+    const ctx: Context = { url, logger }
 
     if (!isValidRequest(request)) {
       Counters.warnings.labels(CombinerEndpoint.PNP_QUOTA, WarningMessage.INVALID_INPUT).inc()
@@ -69,7 +72,7 @@ export function pnpQuota(
     // TODO remove this, we shouldn't need keyVersionInfo for non-signing endpoints
     const keyVersionInfo = getKeyVersionInfo(request, config, logger)
 
-    const { signerResponses, maxErrorCode } = await thresholdCallToSigners(logger, {
+    const { signerResponses, maxErrorCode } = await thresholdCallToSigners(ctx, {
       signers,
       endpoint: getSignerEndpoint(CombinerEndpoint.PNP_QUOTA),
       request,

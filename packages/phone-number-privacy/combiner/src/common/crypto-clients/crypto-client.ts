@@ -1,6 +1,6 @@
 import { ErrorMessage, KeyVersionInfo } from '@celo/phone-number-privacy-common'
-import Logger from 'bunyan'
 import { performance } from 'perf_hooks'
+import { Context } from '../context'
 
 export interface ServicePartialSignature {
   url: string
@@ -28,10 +28,10 @@ export abstract class CryptoClient {
    * logic defined in _combineBlindedSignatureShares.
    * Throws an exception if not enough valid signatures or on aggregation failure.
    */
-  public combineBlindedSignatureShares(blindedMessage: string, logger: Logger): string {
+  public combineBlindedSignatureShares(blindedMessage: string, ctx: Context): string {
     if (!this.hasSufficientSignatures()) {
       const { threshold } = this.keyVersionInfo
-      logger.error(
+      ctx.logger.error(
         { signatures: this.allSignaturesLength, required: threshold },
         ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES
       )
@@ -48,7 +48,7 @@ export abstract class CryptoClient {
 
     performance.mark(start)
 
-    const combinedSignature = this._combineBlindedSignatureShares(blindedMessage, logger)
+    const combinedSignature = this._combineBlindedSignatureShares(blindedMessage, ctx)
 
     performance.mark(end)
     performance.measure(name, start, end)
@@ -64,7 +64,7 @@ export abstract class CryptoClient {
    * Computes the signature for the blinded phone number.
    * Must be implemented by subclass.
    */
-  protected abstract _combineBlindedSignatureShares(blindedMessage: string, logger: Logger): string
+  protected abstract _combineBlindedSignatureShares(blindedMessage: string, ctx: Context): string
 
   /**
    * Returns total number of signatures received; must be implemented by subclass.

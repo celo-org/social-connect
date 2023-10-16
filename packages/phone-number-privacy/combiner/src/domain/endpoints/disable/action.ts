@@ -37,7 +37,7 @@ export function disableDomain(
     const keyVersionInfo = getKeyVersionInfo(request, config, response.locals.logger)
 
     const { signerResponses, maxErrorCode } = await thresholdCallToSigners<DisableDomainRequest>(
-      response.locals.logger,
+      { url: request.url, logger: response.locals.logger },
       {
         signers,
         endpoint: getSignerEndpoint(CombinerEndpoint.DISABLE_DOMAIN),

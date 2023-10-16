@@ -6,7 +6,7 @@ export enum ErrorMessage {
   DATABASE_GET_FAILURE = `CELO_ODIS_ERR_03 DB_ERR Failed to get database entry`,
   KEY_FETCH_ERROR = `CELO_ODIS_ERR_04 INIT_ERR Failed to retrieve key from keystore`,
   SIGNATURE_COMPUTATION_FAILURE = `CELO_ODIS_ERR_05 SIG_ERR Failed to compute BLS signature`,
-  VERIFY_PARITAL_SIGNATURE_ERROR = `CELO_ODIS_ERR_06 SIG_ERR BLS partial signature verification Failure`,
+  VERIFY_PARTIAL_SIGNATURE_ERROR = `CELO_ODIS_ERR_06 SIG_ERR BLS partial signature verification Failure`,
   NOT_ENOUGH_PARTIAL_SIGNATURES = `CELO_ODIS_ERR_07 SIG_ERR Not enough partial signatures`,
   INCONSISTENT_SIGNER_RESPONSES = `CELO_ODIS_ERR_08 SIG_ERR Inconsistent responses from signers`,
   SIGNER_REQUEST_ERROR = `CELO_ODIS_ERR_09 SIG_ERR Failure in signer request`,
