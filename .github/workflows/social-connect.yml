@@ -8,13 +8,9 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
 
 concurrency:
   group: social-connect-${{ github.ref }}
@@ -186,6 +182,12 @@ jobs:
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     needs: install-dependencies
+    if: |
+      contains(needs.install-dependencies.outputs.all_modified_files, 'packages') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, '.github') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, '.changeset') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'packafe.json') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'yarn.lock')
     steps:
       - uses: actions/cache/restore@v3
         id: cache_git
@@ -242,7 +244,6 @@ jobs:
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
-
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
