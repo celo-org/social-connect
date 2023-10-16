@@ -176,18 +176,12 @@ jobs:
           else
             echo "Changeset Found"
           fi
-  general_test:
+  general-test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     needs: install-dependencies
-    if: |
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, '.github') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, '.changeset') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packafe.json') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'yarn.lock')
     steps:
       - uses: actions/cache/restore@v3
         id: cache_git
