@@ -100,6 +100,12 @@ export const Histograms = {
     labelNames: ['endpoint', 'signer'],
     buckets,
   }),
+  eventLoopLag: new Histogram({
+    name: 'combiner_event_loop_lag',
+    help: 'Histogram event loop lag in Combiner',
+    labelNames: ['endpoint'],
+    buckets,
+  }),
 }
 
 export function newMeter(

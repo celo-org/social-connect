@@ -15,7 +15,7 @@ import { Request, Response } from 'express'
 import * as client from 'prom-client'
 import { getCombinerVersion } from '../config'
 import { OdisError } from './error'
-import { Counters, newMeter } from './metrics'
+import { Counters, Histograms, newMeter } from './metrics'
 
 const tracer = opentelemetry.trace.getTracer('combiner-tracer')
 
@@ -49,6 +49,7 @@ export function catchErrorHandler<R extends OdisRequest>(
           sendFailure(ErrorMessage.UNKNOWN_ERROR, 500, res, req.url)
         }
       } else {
+        Counters.errors.labels(req.url, ErrorMessage.ERROR_AFTER_RESPONSE_SENT).inc()
         logger.error(ErrorMessage.ERROR_AFTER_RESPONSE_SENT)
       }
     }
@@ -98,21 +99,17 @@ export function meteringHandler<R extends OdisRequest>(
       req.url
     )(async () => {
       const logger: Logger = res.locals.logger
-
-      // used for log based metrics
       logger.info({ req: req.body }, 'Request received')
+      Counters.requests.labels(req.url).inc()
 
       const eventLoopLagMeasurementStart = Date.now()
       setTimeout(() => {
         const eventLoopLag = Date.now() - eventLoopLagMeasurementStart
-        logger.info({ eventLoopLag }, 'Measure event loop lag') //TODO: Add prometheus metric to track event loop lag
+        Histograms.eventLoopLag.labels(req.url).observe(eventLoopLag)
       })
 
-      //TODO: Add prometheus metric to track e2e response latency
-      Counters.requests.labels(req.url).inc()
       await handler(req, res)
       if (res.headersSent) {
-        // used for log based metrics
         logger.info({ res }, 'Response sent')
         Counters.responses.labels(req.url, res.statusCode.toString()).inc()
       }
