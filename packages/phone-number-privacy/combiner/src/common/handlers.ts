@@ -38,13 +38,13 @@ export function catchErrorHandler<R extends OdisRequest>(
       const logger: Logger = res.locals.logger
       logger.error(ErrorMessage.CAUGHT_ERROR_IN_ENDPOINT_HANDLER)
       logger.error(err)
-      Counters.errors.labels(req.url).inc()
       Counters.errorsCaughtInEndpointHandler.labels(req.url).inc()
       if (!res.headersSent) {
         if (err instanceof OdisError) {
+          Counters.errors.labels(req.url, err.code).inc()
           sendFailure(err.code, err.status, res, req.url)
         } else {
-          Counters.errors.labels(req.url).inc()
+          Counters.errors.labels(req.url, ErrorMessage.UNKNOWN_ERROR).inc()
           Counters.unknownErrors.labels(req.url).inc()
           sendFailure(ErrorMessage.UNKNOWN_ERROR, 500, res, req.url)
         }

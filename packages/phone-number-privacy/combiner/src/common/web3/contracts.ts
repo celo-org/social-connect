@@ -1,5 +1,5 @@
 import { ContractKit } from '@celo/contractkit'
-import { getDataEncryptionKey } from '@celo/phone-number-privacy-common'
+import { ErrorMessage, getDataEncryptionKey } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
 import config from '../../config'
 import { Counters, Histograms, newMeter } from '../metrics'
@@ -16,7 +16,7 @@ export async function getDEK(kit: ContractKit, logger: Logger, account: string):
       config.phoneNumberPrivacy.fullNodeRetryDelayMs
     ).catch((err) => {
       logger.error({ err, account }, 'failed to get on-chain DEK for account')
-      Counters.errors.labels('getDEK').inc()
+      Counters.errors.labels('NA', ErrorMessage.FAILURE_TO_GET_DEK).inc()
       Counters.blockchainErrors.inc()
       throw err
     })
