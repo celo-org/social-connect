@@ -1,5 +1,11 @@
 # @celo/phone-number-privacy-combiner
 
+## 3.2.1
+
+### Patch Changes
+
+- a66c122: Updated the tracing endpoint URL.
+
 ## 3.2.0
 
 ### Minor Changes
