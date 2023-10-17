@@ -35,9 +35,8 @@ export class CachingAccountService implements AccountService {
       const dek = await this.cache.fetch(address)
 
       if (dek === undefined) {
-        // TODO decide which error ot use here
-        Counters.errors.labels('getAccount').inc()
-        Counters.blockchainErrors.inc()
+        Counters.errors.labels('NA', ErrorMessage.FULL_NODE_ERROR).inc()
+        Counters.blockchainErrors.labels('NA', ErrorMessage.FAILURE_TO_GET_DEK).inc()
         throw new OdisError(ErrorMessage.FULL_NODE_ERROR)
       }
       return dek

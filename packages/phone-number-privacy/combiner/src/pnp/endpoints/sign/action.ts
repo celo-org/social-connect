@@ -39,23 +39,19 @@ export function pnpSign(
     const ctx: Context = { logger, url }
 
     if (!isValidRequest(request)) {
-      Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.UNAUTHENTICATED_USER).inc()
+      Counters.warnings.labels(url, WarningMessage.INVALID_INPUT).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
     }
 
     if (!requestHasSupportedKeyVersion(request, config, response.locals.logger)) {
-      Counters.warnings
-        .labels(CombinerEndpoint.PNP_SIGN, WarningMessage.INVALID_KEY_VERSION_REQUEST)
-        .inc()
+      Counters.warnings.labels(url, WarningMessage.INVALID_KEY_VERSION_REQUEST).inc()
       return errorResult(400, WarningMessage.INVALID_KEY_VERSION_REQUEST)
     }
 
     const warnings: ErrorType[] = []
     if (config.shouldAuthenticate) {
       if (!(await authenticateUser(request, logger, accountService.getAccount, warnings))) {
-        Counters.warnings
-          .labels(CombinerEndpoint.PNP_SIGN, WarningMessage.UNAUTHENTICATED_USER)
-          .inc()
+        Counters.warnings.labels(url, WarningMessage.UNAUTHENTICATED_USER).inc()
         return errorResult(401, WarningMessage.UNAUTHENTICATED_USER)
       }
     }
@@ -66,7 +62,7 @@ export function pnpSign(
         const quota = noQuotaCache.getTotalQuota(account)
         // can exist a race condition between the hasQuota and getTotalQuota but that's highly improbable
         if (quota !== undefined) {
-          Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.EXCEEDED_QUOTA).inc()
+          Counters.warnings.labels(url, WarningMessage.EXCEEDED_QUOTA).inc()
           return errorResult(403, WarningMessage.EXCEEDED_QUOTA)
         }
       }
@@ -148,10 +144,10 @@ export function pnpSign(
     }
     const error = errorCodeToError(errorCode)
     if (error === ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES) {
-      Counters.errors.labels(request.url).inc()
+      Counters.errors.labels(request.url, error).inc()
       Counters.notEnoughSigErrors.labels(request.url).inc()
-    } else if (error === WarningMessage.EXCEEDED_QUOTA) {
-      Counters.warnings.labels(CombinerEndpoint.PNP_SIGN, WarningMessage.EXCEEDED_QUOTA).inc()
+    } else if (error in WarningMessage) {
+      Counters.warnings.labels(request.url, error).inc()
     }
     return errorResult(errorCode, error)
   }
