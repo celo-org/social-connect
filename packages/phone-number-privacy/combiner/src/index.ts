@@ -10,7 +10,6 @@ async function start() {
 
   logger.info('Starting server')
   const server = startCombiner(config)
-  // const server = startCombiner(config, getContractKitWithAgent(config.blockchain))
 
   const port = config.server.port ?? 0
   server.listen(port, () => {

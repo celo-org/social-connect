@@ -1,8 +1,15 @@
 import * as client from 'prom-client'
+import { config } from '../config'
 
 const { Counter, Histogram } = client
 
-client.collectDefaultMetrics()
+const register = new client.Registry()
+
+register.setDefaultLabels({
+  app: config.serviceName,
+})
+
+client.collectDefaultMetrics({ register })
 
 // This is just so autocomplete will remind devs what the options are.
 export enum Labels {
@@ -31,7 +38,7 @@ export const Counters = {
   blockchainErrors: new Counter({
     name: 'combiner_blockchain_errors_total',
     help: 'Counter for the number of errors from interacting with the blockchain',
-    labelNames: ['endpoint, error_type'],
+    labelNames: ['endpoint', 'error_type'],
   }),
   blsComputeErrors: new Counter({
     name: 'combiner_bls_compute_errors_total',
