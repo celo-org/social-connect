@@ -10,7 +10,6 @@ import {
 import Logger from 'bunyan'
 import { Request } from 'express'
 import * as t from 'io-ts'
-import { PerformanceObserver } from 'perf_hooks'
 import { Context } from './context'
 import { fetchSignerResponseWithFallback, SignerResponse } from './io'
 import { Counters, Histograms, newMeter } from './metrics'
@@ -46,31 +45,6 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
   } = options
 
   const { logger } = ctx
-
-  const obs = new PerformanceObserver((list) => {
-    // Since moving to a Cloud Run based infrastucture, which allows for
-    // multiple requests to be processed by the same server instance,
-    // there was a need to filter the performance observer by entry name.
-    //
-    // Without this, the performance observer would incorrectly log requests
-    // from multiple sessions.
-
-    list.getEntries().forEach((entry) => {
-      // Filter entries based on signer URL
-      const matchingSigner = signers.find((signer) => {
-        const entryName = signer.url + endpoint + `/${request.body.sessionID}`
-        return entry.name === entryName
-      })
-
-      if (matchingSigner) {
-        logger.info(
-          { latency: entry, signer: matchingSigner.url + endpoint },
-          'Signer response latency measured'
-        )
-      }
-    })
-  })
-  obs.observe({ entryTypes: ['measure'], buffered: false })
 
   const manualAbort = new AbortController()
   // @ts-ignore
@@ -191,10 +165,6 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
       }
     })
   )
-
-  // DO NOT call performance.clearMarks() as this also deletes marks used to
-  // measure e2e combiner latency.
-  obs.disconnect()
 
   if (errorCodes.size > 0) {
     if (errorCodes.size > 1) {

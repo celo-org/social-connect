@@ -1,6 +1,6 @@
 import { ErrorMessage, KeyVersionInfo } from '@celo/phone-number-privacy-common'
-import { performance } from 'perf_hooks'
 import { Context } from '../context'
+import { Histograms } from '../metrics'
 
 export interface ServicePartialSignature {
   url: string
@@ -39,23 +39,10 @@ export abstract class CryptoClient {
         `${ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES} ${this.allSignaturesLength}/${threshold}`
       )
     }
-    const randomID =
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 
-    const name = `combineBlindedSignatureShares/${randomID}`
-    const start = `Start ${name}`
-    const end = `End ${name}`
-
-    performance.mark(start)
-
+    const timer = Histograms.signatureAggregationLatency.startTimer()
     const combinedSignature = this._combineBlindedSignatureShares(blindedMessage, ctx)
-
-    performance.mark(end)
-    performance.measure(name, start, end)
-
-    performance.clearMeasures(name)
-    performance.clearMarks(start)
-    performance.clearMarks(end)
+    timer()
 
     return combinedSignature
   }

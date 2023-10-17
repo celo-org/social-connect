@@ -114,6 +114,12 @@ export const Histograms = {
     labelNames: ['endpoint'],
     buckets,
   }),
+  signatureAggregationLatency: new Histogram({
+    name: 'combiner_signature_aggregation_latency',
+    help: 'Histogram latency of signature aggregation in Combiner',
+    labelNames: ['endpoint'],
+    buckets,
+  }),
 }
 
 export function newMeter(
