@@ -8,13 +8,9 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
 
 concurrency:
   group: social-connect-${{ github.ref }}
@@ -180,7 +176,7 @@ jobs:
           else
             echo "Changeset Found"
           fi
-  general_test:
+  general-test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
@@ -242,7 +238,6 @@ jobs:
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
-
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
