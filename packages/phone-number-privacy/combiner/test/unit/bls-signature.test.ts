@@ -66,7 +66,7 @@ describe(`BLS service computes signature`, () => {
 
     const blsCryptoClient = new BLSCryptographyClient(keyVersionInfo)
     for (let i = 0; i < signatures.length; i++) {
-      blsCryptoClient.addSignature(signatures[i])
+      blsCryptoClient.addSignature(signatures[i], ctx)
       if (i >= 2) {
         expect(blsCryptoClient.hasSufficientSignatures()).toBeTruthy()
       } else {
@@ -118,7 +118,7 @@ describe(`BLS service computes signature`, () => {
 
     const blsCryptoClient = new BLSCryptographyClient(keyVersionInfo)
     signatures.forEach(async (signature) => {
-      blsCryptoClient.addSignature(signature)
+      blsCryptoClient.addSignature(signature, ctx)
     })
     const actual = blsCryptoClient.combineBlindedSignatureShares(blindedMsg, ctx)
     expect(actual).toEqual(COMBINED_SIGNATURE)
@@ -164,7 +164,7 @@ describe(`BLS service computes signature`, () => {
 
     const blsCryptoClient = new BLSCryptographyClient(keyVersionInfo)
     signatures.forEach(async (signature) => {
-      blsCryptoClient.addSignature(signature)
+      blsCryptoClient.addSignature(signature, ctx)
     })
     try {
       blsCryptoClient.combineBlindedSignatureShares(blindedMsg, ctx)
@@ -207,11 +207,11 @@ describe(`BLS service computes signature`, () => {
 
     const blsCryptoClient = new BLSCryptographyClient(keyVersionInfo)
     // Add sigs one-by-one and verify intermediary states
-    blsCryptoClient.addSignature(signatures[0])
+    blsCryptoClient.addSignature(signatures[0], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeFalsy()
-    blsCryptoClient.addSignature(signatures[1])
+    blsCryptoClient.addSignature(signatures[1], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeFalsy()
-    blsCryptoClient.addSignature(signatures[2])
+    blsCryptoClient.addSignature(signatures[2], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeTruthy()
     // Should fail since 1/3 sigs are invalid
     try {
@@ -222,7 +222,7 @@ describe(`BLS service computes signature`, () => {
     // Should be false, now that the invalid signature has been removed
     expect(blsCryptoClient.hasSufficientSignatures()).toBeFalsy()
 
-    blsCryptoClient.addSignature(signatures[3])
+    blsCryptoClient.addSignature(signatures[3], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeTruthy()
     const actual = blsCryptoClient.combineBlindedSignatureShares(blindedMsg, ctx)
     expect(actual).toEqual(COMBINED_SIGNATURE)
@@ -268,11 +268,11 @@ describe(`BLS service computes signature`, () => {
 
     const blsCryptoClient = new BLSCryptographyClient(keyVersionInfo)
     // Add sigs one-by-one and verify intermediary states
-    blsCryptoClient.addSignature(signatures[0])
+    blsCryptoClient.addSignature(signatures[0], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeFalsy()
-    blsCryptoClient.addSignature(signatures[1])
+    blsCryptoClient.addSignature(signatures[1], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeFalsy()
-    blsCryptoClient.addSignature(signatures[2])
+    blsCryptoClient.addSignature(signatures[2], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeTruthy()
     // Should fail since signature from url3 was generated with the wrong key version
     try {
@@ -284,7 +284,7 @@ describe(`BLS service computes signature`, () => {
     // Should be false, now that the invalid partial signature has been removed
     expect(blsCryptoClient.hasSufficientSignatures()).toBeFalsy()
 
-    blsCryptoClient.addSignature(signatures[3])
+    blsCryptoClient.addSignature(signatures[3], ctx)
     expect(blsCryptoClient.hasSufficientSignatures()).toBeTruthy()
     const actual = blsCryptoClient.combineBlindedSignatureShares(blindedMsg, ctx)
     expect(actual).toEqual(COMBINED_SIGNATURE)
