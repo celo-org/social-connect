@@ -8,6 +8,8 @@ import {
   rootLogger,
 } from '@celo/phone-number-privacy-common'
 import express, { RequestHandler } from 'express'
+import fs from 'fs'
+import https from 'https'
 import * as PromClient from 'prom-client'
 import { Signer } from './common/combine'
 import {
@@ -110,7 +112,31 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
     res.send(PromClient.register.metrics())
   })
 
+  const sslOptions = getSslOptions(config)
+  if (sslOptions) {
+    return https.createServer(sslOptions, app)
+  }
   return app
+}
+
+function getSslOptions(config: CombinerConfig) {
+  const logger = rootLogger(config.serviceName)
+  const { sslKeyPath, sslCertPath } = config.server
+
+  if (!sslKeyPath || !sslCertPath) {
+    logger.info('No SSL configs specified')
+    return null
+  }
+
+  if (!fs.existsSync(sslKeyPath) || !fs.existsSync(sslCertPath)) {
+    logger.error('SSL cert files not found')
+    return null
+  }
+
+  return {
+    key: fs.readFileSync(sslKeyPath),
+    cert: fs.readFileSync(sslCertPath),
+  }
 }
 
 function createHandler<R extends OdisRequest>(
