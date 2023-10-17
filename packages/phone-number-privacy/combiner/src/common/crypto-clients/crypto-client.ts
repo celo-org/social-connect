@@ -9,6 +9,7 @@ export interface ServicePartialSignature {
 
 export abstract class CryptoClient {
   protected unverifiedSignatures: ServicePartialSignature[] = []
+  private tailLatencyTimer: () => void = () => {}
 
   constructor(protected readonly keyVersionInfo: KeyVersionInfo) {}
 
@@ -19,7 +20,11 @@ export abstract class CryptoClient {
     return this.allSignaturesLength >= this.keyVersionInfo.threshold
   }
 
-  public addSignature(serviceResponse: ServicePartialSignature): void {
+  public addSignature(serviceResponse: ServicePartialSignature, ctx: Context): void {
+    if (!this.allSignaturesLength) {
+      // start timer when first signer responds
+      this.tailLatencyTimer = Histograms.signerTailLatency.labels(ctx.url).startTimer()
+    }
     this.unverifiedSignatures.push(serviceResponse)
   }
 
@@ -40,7 +45,10 @@ export abstract class CryptoClient {
       )
     }
 
-    const timer = Histograms.signatureAggregationLatency.startTimer()
+    // Once we reach this point, we've received a quorum of signer responses
+    this.tailLatencyTimer()
+
+    const timer = Histograms.signatureAggregationLatency.labels(ctx.url).startTimer()
     const combinedSignature = this._combineBlindedSignatureShares(blindedMessage, ctx)
     timer()
 

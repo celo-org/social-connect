@@ -57,7 +57,7 @@ export function domainSign(
     ): Promise<boolean> => {
       assert(res.success)
       // TODO remove the need to pass url here
-      crypto.addSignature({ url: request.url, signature: res.signature })
+      crypto.addSignature({ url: request.url, signature: res.signature }, ctx)
 
       // Send response immediately once we cross threshold
       // BLS threshold signatures can be combined without all partial signatures

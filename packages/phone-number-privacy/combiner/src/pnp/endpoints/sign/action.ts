@@ -73,7 +73,7 @@ export function pnpSign(
 
     const processResult = async (result: OdisResponse<SignMessageRequest>): Promise<boolean> => {
       assert(result.success)
-      crypto.addSignature({ url: request.url, signature: result.signature })
+      crypto.addSignature({ url: request.url, signature: result.signature }, ctx)
 
       // Send response immediately once we cross threshold
       // BLS threshold signatures can be combined without all partial signatures

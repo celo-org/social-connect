@@ -102,10 +102,9 @@ export function meteringHandler<R extends OdisRequest>(
       logger.info({ req: req.body }, 'Request received')
       Counters.requests.labels(req.url).inc()
 
-      const eventLoopLagMeasurementStart = Date.now()
+      const eventLoopLagTimer = Histograms.eventLoopLag.labels(req.url).startTimer()
       setTimeout(() => {
-        const eventLoopLag = Date.now() - eventLoopLagMeasurementStart
-        Histograms.eventLoopLag.labels(req.url).observe(eventLoopLag)
+        eventLoopLagTimer()
       })
 
       await handler(req, res)

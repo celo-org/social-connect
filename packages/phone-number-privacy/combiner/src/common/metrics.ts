@@ -120,6 +120,12 @@ export const Histograms = {
     labelNames: ['endpoint'],
     buckets,
   }),
+  signerTailLatency: new Histogram({
+    name: 'signer_tail_latency',
+    help: 'Histogram of latency discrepencies between the fastest and slowest signer in a quorum',
+    labelNames: ['endpoint'],
+    buckets,
+  }),
 }
 
 export function newMeter(
