@@ -23,6 +23,8 @@ Notice the following:
 
 For cLabs developers, this section contains links and information to useful deployments.
 
+> :warning: You will need to be a cLabs employee with appropiate permissions to access these links.
+
 ODIS combiner is deployed in the following clusters:
 
 - Staging: cluster `integration-tests`, namespace `odis-combiner-staging` with this [`values-staging.yaml` file](./values/values-staging.yaml).
