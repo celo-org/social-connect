@@ -44,7 +44,7 @@ export interface OdisConfig {
 export interface CombinerConfig {
   serviceName: string
   server: {
-    port: string | number | undefined
+    port: number
     sslKeyPath?: string
     sslCertPath?: string
   }
@@ -79,7 +79,7 @@ if (DEV_MODE) {
   config = {
     serviceName: defaultServiceName,
     server: {
-      port: 8080,
+      port: 8081,
     },
     blockchain: {
       provider: FORNO_ALFAJORES,
@@ -163,7 +163,7 @@ if (DEV_MODE) {
   config = {
     serviceName: env.SERVICE_NAME ?? defaultServiceName,
     server: {
-      port: Number(env.SERVER_PORT ?? 8080),
+      port: Number(env.SERVER_PORT ?? 8081),
       sslKeyPath: env.SERVER_SSL_KEY_PATH,
       sslCertPath: env.SERVER_SSL_CERT_PATH,
     },

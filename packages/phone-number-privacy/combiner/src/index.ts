@@ -11,7 +11,7 @@ async function start() {
   logger.info('Starting server')
   const server = startCombiner(config)
 
-  const port = config.server.port ?? 0
+  const port = config.server.port
   server.listen(port, () => {
     logger.info(`Server is listening on port ${port}`)
   })

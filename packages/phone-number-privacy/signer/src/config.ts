@@ -34,7 +34,7 @@ export enum SupportedKeystore {
 export interface SignerConfig {
   serviceName: string
   server: {
-    port: string | number | undefined
+    port: number
     sslKeyPath?: string
     sslCertPath?: string
   }

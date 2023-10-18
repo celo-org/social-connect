@@ -76,7 +76,7 @@ combinerConfig.phoneNumberPrivacy.enabled = true
 const signerConfig: SignerConfig = {
   serviceName: 'odis-signer',
   server: {
-    port: undefined,
+    port: 8080, // actual port specified with .listen() in test setup
     sslKeyPath: undefined,
     sslCertPath: undefined,
   },
