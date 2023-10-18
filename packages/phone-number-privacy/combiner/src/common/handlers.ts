@@ -36,8 +36,7 @@ export function catchErrorHandler<R extends OdisRequest>(
       await handler(req, res)
     } catch (err) {
       const logger: Logger = res.locals.logger
-      logger.error(ErrorMessage.CAUGHT_ERROR_IN_ENDPOINT_HANDLER)
-      logger.error(err)
+      logger.error(err, ErrorMessage.CAUGHT_ERROR_IN_ENDPOINT_HANDLER)
       Counters.errorsCaughtInEndpointHandler.labels(req.url).inc()
       if (!res.headersSent) {
         if (err instanceof OdisError) {

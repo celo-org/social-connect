@@ -152,9 +152,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
           Counters.sigRequestErrors
             .labels(signer.url, request.url, ErrorMessage.SIGNER_REQUEST_ERROR)
             .inc()
-          // Logging the err & message simultaneously fails to log the message in some cases
-          logger.error({ signer }, ErrorMessage.SIGNER_REQUEST_ERROR)
-          logger.error({ signer, err })
+          logger.error({ signer, err }, ErrorMessage.SIGNER_REQUEST_ERROR)
 
           errorCount++
           if (signers.length - errorCount < requiredThreshold) {

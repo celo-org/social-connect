@@ -32,10 +32,9 @@ export class DomainCryptoClient extends CryptoClient {
       if (result !== undefined) {
         return result.toString('base64')
       }
-    } catch (error) {
+    } catch (err) {
       Counters.blsComputeErrors.labels(ctx.url, 'NA').inc()
-      ctx.logger.error(ErrorMessage.SIGNATURE_AGGREGATION_FAILURE)
-      ctx.logger.error(error)
+      ctx.logger.error(err, ErrorMessage.SIGNATURE_AGGREGATION_FAILURE)
     }
     throw new Error(ErrorMessage.SIGNATURE_AGGREGATION_FAILURE)
   }
