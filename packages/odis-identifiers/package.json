@@ -1,6 +1,6 @@
 {
   "name": "@celo/odis-identifiers",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Identifier Prefixes and functions to hash identifiers",
   "main": "index.js",
   "types": "./lib/index.d.ts",
