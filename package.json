@@ -22,6 +22,10 @@
     "cs": "yarn changeset",
     "bump": "yarn changeset version",
     "release": "yarn build && yarn cs publish",
+    "snapshot": "yarn cs version --snapshot beta",
+    "snapshot-release": "yarn snapshot && yarn build && yarn cs publish --tag beta --no-git-tag",
+    "ci:snapshot": "yarn cs version --snapshot canary",
+    "ci:snapshot-release": "yarn ci:snapshot && yarn build && yarn cs publish --tag canary --no-git-tag",
     "postinstall": "yarn run lerna run postinstall"
   },
   "husky": {
