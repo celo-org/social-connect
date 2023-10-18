@@ -1,7 +1,11 @@
 {
   "name": "@celo/odis-identifiers",
+  "author": "cLabs",
+  "license": "Apache-2.0",
+  "private": false,
   "version": "0.0.1",
   "description": "Identifier Prefixes and functions to hash identifiers",
+  "repository": "https://github.com/celo-org/social-connect",
   "main": "index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
@@ -12,9 +16,5 @@
   },
   "devDependencies": {
     "web3-utils": "1.10.0"
-  },
-  "repository": "https://github.com/celo-org/social-connect",
-  "author": "cLabs",
-  "license": "Apache-2.0",
-  "private": false
+  }
 }
