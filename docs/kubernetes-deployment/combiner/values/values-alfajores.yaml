@@ -31,7 +31,7 @@ env:
     domainOdisServicesSigners: '[{"url": "https://odis-alfajores-signer2.azurefd.net"},{"url": "https://odis-alfajores-signer3.azurefd.net"},{"url": "https://odis-alfajores-signer-1-b.azurefd.net"}]'
     domainOdisServicesTimeoutMillisecond: "5000"
     domainServiceName: "odis_combiner"
-    domainShouldAuthenticate: false
+    domainShouldAuthenticate: true
     domainShouldCheckQuota: false
   pnp:
     pnpEnabled: true
@@ -44,7 +44,7 @@ env:
     pnpOdisServicesSigners: '[{"url": "https://odis-alfajores-signer2.azurefd.net"},{"url": "https://odis-alfajores-signer3.azurefd.net"},{"url": "https://odis-alfajores-signer-1-b.azurefd.net"}]'
     pnpOdisServicesTimeoutMilliseconds: "5000"
     pnpServiceName: "odis_combiner"
-    pnpShouldAuthenticate: false
+    pnpShouldAuthenticate: true
     pnpShoulñdCheckQuota: false
     pnpShouldMockAccountService: false
   service:

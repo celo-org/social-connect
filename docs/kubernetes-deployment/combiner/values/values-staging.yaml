@@ -31,7 +31,7 @@ env:
     domainOdisServicesSigners: '[{"url": "https://staging-pgpnp-signer0.azurefd.net", "fallbackUrl": "http://52.154.55.35"},{"url": "https://staging-pgpnp-signer1.azurefd.net", "fallbackUrl": "http://13.89.116.218"},{"url": "https://staging-pgpnp-signer2.azurefd.net", "fallbackUrl": "http://20.84.128.169"}]'
     domainOdisServicesTimeoutMillisecond: "5000"
     domainServiceName: "odis_combiner"
-    domainShouldAuthenticate: false
+    domainShouldAuthenticate: true
     domainShouldCheckQuota: false
   pnp:
     pnpEnabled: true
@@ -44,7 +44,7 @@ env:
     pnpOdisServicesSigners: '[{"url": "https://staging-pgpnp-signer0.azurefd.net", "fallbackUrl": "http://52.154.55.35"},{"url": "https://staging-pgpnp-signer1.azurefd.net", "fallbackUrl": "http://13.89.116.218"},{"url": "https://staging-pgpnp-signer2.azurefd.net", "fallbackUrl": "http://20.84.128.169"}]'
     pnpOdisServicesTimeoutMilliseconds: "5000"
     pnpServiceName: "odis_combiner"
-    pnpShouldAuthenticate: false
+    pnpShouldAuthenticate: true
     pnpShouldCheckQuota: false
     pnpShouldMockAccountService: false
   service:

@@ -31,7 +31,7 @@ env:
     domainOdisServicesSigners: '[{"url": "https://odis.vladiatorlabs.io"},{"url": "https://mainnet-pgpnp-brazilsouth.azurefd.net"},{"url": "https://phone.chainlayerattestations.com"},{"url": "https://pnprivacy.wotrust.us"},{"url": "https://pgpnp.census.works"},{"url": "https://odis.keyko.rocks"},{"url": "https://odis.celo.spruceid.xyz"}]'
     domainOdisServicesTimeoutMillisecond: "5000"
     domainServiceName: "odis-combiner-mainnet"
-    domainShouldAuthenticate: false
+    domainShouldAuthenticate: true
     domainShouldCheckQuota: false
   pnp:
     pnpEnabled: true
@@ -44,7 +44,7 @@ env:
     pnpOdisServicesSigners: '[{"url": "https://odis.vladiatorlabs.io"},{"url": "https://mainnet-pgpnp-brazilsouth.azurefd.net"},{"url": "https://mainnet-pgpnp-eastasia.azurefd.net"},{"url": "https://phone.chainlayerattestations.com"},{"url": "https://pnprivacy.wotrust.us"},{"url": "https://pgpnp.census.works"},{"url": "https://odis.keyko.rocks"},{"url": "https://odis.celo.spruceid.xyz"}]'
     pnpOdisServicesTimeoutMilliseconds: "5000"
     pnpServiceName: "odis-combiner-mainnet"
-    pnpShouldAuthenticate: false
+    pnpShouldAuthenticate: true
     pnpShoulñdCheckQuota: false
     pnpShouldMockAccountService: false
   service:
