@@ -45,7 +45,7 @@ env:
     pnpOdisServicesTimeoutMilliseconds: "5000"
     pnpServiceName: "odis-combiner-mainnet"
     pnpShouldAuthenticate: true
-    pnpShoulñdCheckQuota: false
+    pnpShouldCheckQuota: false
     pnpShouldMockAccountService: false
   service:
     serviceName: "odis-combiner-k8s"
@@ -60,7 +60,7 @@ ingress:
   className: "nginx"
   annotations:
     kubernetes.io/tls-acme: "true"
-  hosts: 
+  hosts:
     - host: odis-combiner-mainnet.mainnet.celo-testnet.org
       paths:
         - path: /
