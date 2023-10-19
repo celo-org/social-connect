@@ -1,4 +1,4 @@
-import { isE164Number } from "@celo/base/lib/phoneNumbers"
+import { isE164Number } from '@celo/base/lib/phoneNumbers'
 import {
   IdentifierPrefix,
   getIdentifierHash as baseGetIdentifierHash,
