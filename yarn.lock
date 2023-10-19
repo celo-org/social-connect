@@ -951,6 +951,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-combiner@workspace:packages/phone-number-privacy/combiner"
   dependencies:
+    "@celo/base": ^5.0.4
     "@celo/contractkit": ^5.0.4
     "@celo/encrypted-backup": ^5.0.4
     "@celo/identity": ^5.0.4
@@ -972,9 +973,6 @@ __metadata:
     "@opentelemetry/semantic-conventions": ^1.15.2
     "@types/bunyan": ^1.8.8
     "@types/express": ^4.17.6
-    "@types/http-proxy": ^1.17.11
-    "@types/node": 18.15.13
-    "@types/stream-array": 1.1.1
     "@types/supertest": ^2.0.12
     "@types/uuid": ^7.0.3
     blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
@@ -985,10 +983,9 @@ __metadata:
     firebase-functions: ^4.4.1
     firebase-functions-test: ^3.1.0
     firebase-tools: 12.4.7
-    http-proxy: ^1.18.1
-    io-ts: 2.0.1
     jest: ^29.0.2
     knex: ^2.1.0
+    lru-cache: ^10.0.1
     node-fetch: ^2.6.9
     pg: ^8.2.1
     stream-array: ^1.1.2
@@ -4982,15 +4979,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/http-proxy@npm:^1.17.11":
-  version: 1.17.12
-  resolution: "@types/http-proxy@npm:1.17.12"
-  dependencies:
-    "@types/node": "*"
-  checksum: 89700c8e3c8f2c59c87c8db8e7a070c97a3b30a4a38223aca6b8b817e6f2ca931f5a500e16ecadc1ebcfed2676cc60e073d8f887e621d84420298728ec6fd000
-  languageName: node
-  linkType: hard
-
 "@types/ioredis4@npm:@types/ioredis@^4.28.10":
   version: 4.28.10
   resolution: "@types/ioredis@npm:4.28.10"
@@ -5536,15 +5524,6 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 65617648686469e7130a9c00a018c03ddcfed8527a162e50352780e9a1acb7187d646389a596c2aef3a5566e3d649f68f0de7822be7349cafde5c1ec863c37c6
-  languageName: node
-  linkType: hard
-
-"@types/stream-array@npm:1.1.1":
-  version: 1.1.1
-  resolution: "@types/stream-array@npm:1.1.1"
-  dependencies:
-    "@types/node": "*"
-  checksum: 44eaadda94b89b9e5302937247a415fcaa0f9e4a3df1108a0cced12e5169da7835d5de368ca738511bd7ed3bd88389519ca55e167b0c31522b96e9df824b05b2
   languageName: node
   linkType: hard
 
@@ -9947,13 +9926,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:^4.0.0":
-  version: 4.0.7
-  resolution: "eventemitter3@npm:4.0.7"
-  checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
-  languageName: node
-  linkType: hard
-
 "events-listener@npm:^1.1.0":
   version: 1.1.0
   resolution: "events-listener@npm:1.1.0"
@@ -10866,16 +10838,6 @@ __metadata:
   version: 1.1.0
   resolution: "fn.name@npm:1.1.0"
   checksum: e357144f48cfc9a7f52a82bbc6c23df7c8de639fce049cac41d41d62cabb740cdb9f14eddc6485e29c933104455bdd7a69bb14a9012cef9cd4fa252a4d0cf293
-  languageName: node
-  linkType: hard
-
-"follow-redirects@npm:^1.0.0":
-  version: 1.15.3
-  resolution: "follow-redirects@npm:1.15.3"
-  peerDependenciesMeta:
-    debug:
-      optional: true
-  checksum: 584da22ec5420c837bd096559ebfb8fe69d82512d5585004e36a3b4a6ef6d5905780e0c74508c7b72f907d1fa2b7bd339e613859e9c304d0dc96af2027fd0231
   languageName: node
   linkType: hard
 
@@ -12208,17 +12170,6 @@ __metadata:
     agent-base: ^7.1.0
     debug: ^4.3.4
   checksum: 48d4fac997917e15f45094852b63b62a46d0c8a4f0b9c6c23ca26d27b8df8d178bed88389e604745e748bd9a01f5023e25093722777f0593c3f052009ff438b6
-  languageName: node
-  linkType: hard
-
-"http-proxy@npm:^1.18.1":
-  version: 1.18.1
-  resolution: "http-proxy@npm:1.18.1"
-  dependencies:
-    eventemitter3: ^4.0.0
-    follow-redirects: ^1.0.0
-    requires-port: ^1.0.0
-  checksum: f5bd96bf83e0b1e4226633dbb51f8b056c3e6321917df402deacec31dd7fe433914fc7a2c1831cf7ae21e69c90b3a669b8f434723e9e8b71fd68afe30737b6a5
   languageName: node
   linkType: hard
 
@@ -18482,13 +18433,6 @@ __metadata:
   version: 2.0.0
   resolution: "require-main-filename@npm:2.0.0"
   checksum: e9e294695fea08b076457e9ddff854e81bffbe248ed34c1eec348b7abbd22a0d02e8d75506559e2265e96978f3c4720bd77a6dad84755de8162b357eb6c778c7
-  languageName: node
-  linkType: hard
-
-"requires-port@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "requires-port@npm:1.0.0"
-  checksum: eee0e303adffb69be55d1a214e415cf42b7441ae858c76dfc5353148644f6fd6e698926fc4643f510d5c126d12a705e7c8ed7e38061113bdf37547ab356797ff
   languageName: node
   linkType: hard
 

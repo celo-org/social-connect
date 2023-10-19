@@ -8,13 +8,9 @@ on:
   push:
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
 
 concurrency:
   group: social-connect-${{ github.ref }}
@@ -30,11 +26,6 @@ env:
   NODE_OPTIONS: '--max-old-space-size=4096'
   TERM: dumb
   GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
-  # Git Tag for contract release to use
-  RELEASE_TAG: ganache-v7-core-contracts.v9
-  # RELEASE_TAG: core-contracts.v9
-  # CELO_BLOCKCHAIN_BRANCH_TO_TEST: master
-  CELO_BLOCKCHAIN_BRANCH_TO_TEST: release/1.7.x
 
 jobs:
   install-dependencies:
@@ -159,7 +150,7 @@ jobs:
       - run: yarn run lint
       - name: Dump GitHub context
         # Use to debug github event and check user ids
-        if: false
+        if: true
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
@@ -168,21 +159,21 @@ jobs:
         uses: peter-evans/find-comment@v2
         id: fc
         # Skip if author is github-bot from celo-org
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'celo-org'
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Changeset detected
           comment-author: changeset-bot[bot]
       - name: Fail if Changeset commit not found
         # Skip if author is github-bot from celo-org
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'celo-org'
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
         run: |
           if ${{ steps.fc.outputs.comment-id == 0 }}; then
-            echo "Error: No Changeset Found. You create an empty changeset with `yarn cs add --empty`" && exit 1
+            echo "Error: No Changeset Found. You create an empty changeset with 'yarn cs add --empty'" && exit 1
           else
             echo "Changeset Found"
           fi
-  general_test:
+  general-test:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
@@ -244,7 +235,6 @@ jobs:
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
     timeout-minutes: 30
-
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
