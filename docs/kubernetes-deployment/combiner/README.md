@@ -21,7 +21,7 @@ Notice the following:
 
 ## cLabs Developers
 
-For cLabs developers, this section contains links and information to useful deployments.
+For cLabs developers, this section contains links and information for useful deployments.
 
 > :warning: You will need to be a cLabs employee with appropiate permissions to access these links.
 
