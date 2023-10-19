@@ -16,7 +16,7 @@ Notice the following:
 
 - `<RELEASE_NAME>`: Name of the Helm release.
 - `<NAMESPACE>`: Kubernetes namespace to deploy the Helm chart.
-- `<VALUES_FILE_PATH>`: Path to your `values.yam` file that define the Helm deployment. You can use the examples under [./values] as a guide, but you will have to modify it according to your needs. You can find a table defining the values file [here](https://github.com/celo-org/charts/tree/main/charts/odis-combiner#values).
+- `<VALUES_FILE_PATH>`: Path to your `values.yaml` file that define the Helm deployment. You can use the examples under [./values] as a guide, but you will have to modify it according to your needs. You can find a table defining the values file [here](https://github.com/celo-org/charts/tree/main/charts/odis-combiner#values).
 - `<VERSION>`: The version of the Helm chart. If omitted, it will use the latest version (available at the [chart's README](https://github.com/celo-org/charts/tree/main/charts/odis-combiner#odis-combiner) as a GitHub badge).
 
 ## cLabs Developers
