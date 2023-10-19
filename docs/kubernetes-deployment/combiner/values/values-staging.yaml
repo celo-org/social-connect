@@ -1,68 +1,68 @@
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: ''
+fullnameOverride: ''
 replicaCount: 1
 image:
   repository: us-west1-docker.pkg.dev/devopsre/dev-images/odis-combiner
   pullPolicy: Always
-  tag: "85baf6c3854aff588d88332addd709d544ebd6c4"
+  tag: '85baf6c3854aff588d88332addd709d544ebd6c4'
 imagePullSecrets: []
 serviceAccount:
   create: true
   annotations: {}
-  name: ""
+  name: ''
 env:
   tracing:
     enabled: false
-    endpoint: "https://<GRAFANA_AGENT_URL>/api/traces"
-    serviceName: "odis-combiner-env-cluster"
+    endpoint: 'https://<GRAFANA_AGENT_URL>/api/traces'
+    serviceName: 'odis-combiner-env-cluster'
   log:
     format: stackdriver
     level: trace
   blockchain:
-    blockchainProvider: "https://alfajores-forno.celo-testnet.org"
+    blockchainProvider: 'https://alfajores-forno.celo-testnet.org'
   domain:
     domainEnabled: true
-    domainFullNodeDelayMs: "100"
-    domainFullNodeRetryCount: "5"
-    domainFullNodeTimeoutMs: "1000"
-    domainKeysCurrentVersion: "1"
+    domainFullNodeDelayMs: '100'
+    domainFullNodeRetryCount: '5'
+    domainFullNodeTimeoutMs: '1000'
+    domainKeysCurrentVersion: '1'
     domainKeysVersions: '[{"keyVersion":1,"threshold":2,"polynomial":"0200000000000000ec5b161ac167995bd17cc0e9cf3f79369efac1fff5b0f68ad0e83dca207e3fc41b8e20bc155ebb3416a7b3d87364490169032189aa7380c47a0a464864fbe0c106e803197ae4959165e7067b95775cee2c74a78d7a67406764f342e5a4b99a003a510287524c9437b12ebb0bfdc7ea46078b807d1b665966961784bd71c4227c272b01c0fcd19c5b92226c1aac324b010abef36192e8ff3abb25686b3e6707bc747b129c32e572b5850db8446bd8f0af9a3fbf6b579793002b1b68528ca4ac00","pubKey":"7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA"},{"keyVersion":2,"threshold":2,"polynomial":"0200000000000000ec5b161ac167995bd17cc0e9cf3f79369efac1fff5b0f68ad0e83dca207e3fc41b8e20bc155ebb3416a7b3d87364490169032189aa7380c47a0a464864fbe0c106e803197ae4959165e7067b95775cee2c74a78d7a67406764f342e5a4b99a003a510287524c9437b12ebb0bfdc7ea46078b807d1b665966961784bd71c4227c272b01c0fcd19c5b92226c1aac324b010abef36192e8ff3abb25686b3e6707bc747b129c32e572b5850db8446bd8f0af9a3fbf6b579793002b1b68528ca4ac00","pubKey":"7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA"},{"keyVersion":3,"threshold":2,"polynomial":"0200000000000000ec5b161ac167995bd17cc0e9cf3f79369efac1fff5b0f68ad0e83dca207e3fc41b8e20bc155ebb3416a7b3d87364490169032189aa7380c47a0a464864fbe0c106e803197ae4959165e7067b95775cee2c74a78d7a67406764f342e5a4b99a003a510287524c9437b12ebb0bfdc7ea46078b807d1b665966961784bd71c4227c272b01c0fcd19c5b92226c1aac324b010abef36192e8ff3abb25686b3e6707bc747b129c32e572b5850db8446bd8f0af9a3fbf6b579793002b1b68528ca4ac00","pubKey":"7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA"}]'
     domainOdisServicesSigners: '[{"url": "https://staging-pgpnp-signer0.azurefd.net", "fallbackUrl": "http://52.154.55.35"},{"url": "https://staging-pgpnp-signer1.azurefd.net", "fallbackUrl": "http://13.89.116.218"},{"url": "https://staging-pgpnp-signer2.azurefd.net", "fallbackUrl": "http://20.84.128.169"}]'
-    domainOdisServicesTimeoutMillisecond: "5000"
-    domainServiceName: "odis_combiner"
-    domainShouldAuthenticate: false
-    domainShouldCheckQuota: false
+    domainOdisServicesTimeoutMillisecond: '5000'
+    domainServiceName: 'odis_combiner'
+    domainShouldAuthenticate: true
+    domainShouldCheckQuota: true
   pnp:
     pnpEnabled: true
-    pnpFullNodeDelayMs: "100"
-    pnpFullNodeRetryCount: "5"
-    pnpFullNodeTimeoutMs: "1000"
-    pnpKeysCurrentVersion: "1"
+    pnpFullNodeDelayMs: '100'
+    pnpFullNodeRetryCount: '5'
+    pnpFullNodeTimeoutMs: '1000'
+    pnpKeysCurrentVersion: '1'
     pnpKeysVersions: '[{"keyVersion":1,"threshold":2,"polynomial":"0200000000000000ec5b161ac167995bd17cc0e9cf3f79369efac1fff5b0f68ad0e83dca207e3fc41b8e20bc155ebb3416a7b3d87364490169032189aa7380c47a0a464864fbe0c106e803197ae4959165e7067b95775cee2c74a78d7a67406764f342e5a4b99a003a510287524c9437b12ebb0bfdc7ea46078b807d1b665966961784bd71c4227c272b01c0fcd19c5b92226c1aac324b010abef36192e8ff3abb25686b3e6707bc747b129c32e572b5850db8446bd8f0af9a3fbf6b579793002b1b68528ca4ac00","pubKey":"7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA"},{"keyVersion":2,"threshold":2,"polynomial":"0200000000000000ec5b161ac167995bd17cc0e9cf3f79369efac1fff5b0f68ad0e83dca207e3fc41b8e20bc155ebb3416a7b3d87364490169032189aa7380c47a0a464864fbe0c106e803197ae4959165e7067b95775cee2c74a78d7a67406764f342e5a4b99a003a510287524c9437b12ebb0bfdc7ea46078b807d1b665966961784bd71c4227c272b01c0fcd19c5b92226c1aac324b010abef36192e8ff3abb25686b3e6707bc747b129c32e572b5850db8446bd8f0af9a3fbf6b579793002b1b68528ca4ac00","pubKey":"7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA"},{"keyVersion":3,"threshold":2,"polynomial":"0200000000000000ec5b161ac167995bd17cc0e9cf3f79369efac1fff5b0f68ad0e83dca207e3fc41b8e20bc155ebb3416a7b3d87364490169032189aa7380c47a0a464864fbe0c106e803197ae4959165e7067b95775cee2c74a78d7a67406764f342e5a4b99a003a510287524c9437b12ebb0bfdc7ea46078b807d1b665966961784bd71c4227c272b01c0fcd19c5b92226c1aac324b010abef36192e8ff3abb25686b3e6707bc747b129c32e572b5850db8446bd8f0af9a3fbf6b579793002b1b68528ca4ac00","pubKey":"7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA"}]'
-    pnpMockDeck: "0xbf8a2b73baf8402f8fe906ad3f42b560bf14b39f7df7797ece9e293d6f162188"
+    pnpMockDeck: '0xbf8a2b73baf8402f8fe906ad3f42b560bf14b39f7df7797ece9e293d6f162188'
     pnpOdisServicesSigners: '[{"url": "https://staging-pgpnp-signer0.azurefd.net", "fallbackUrl": "http://52.154.55.35"},{"url": "https://staging-pgpnp-signer1.azurefd.net", "fallbackUrl": "http://13.89.116.218"},{"url": "https://staging-pgpnp-signer2.azurefd.net", "fallbackUrl": "http://20.84.128.169"}]'
-    pnpOdisServicesTimeoutMilliseconds: "5000"
-    pnpServiceName: "odis_combiner"
-    pnpShouldAuthenticate: false
-    pnpShouldCheckQuota: false
+    pnpOdisServicesTimeoutMilliseconds: '5000'
+    pnpServiceName: 'odis_combiner'
+    pnpShouldAuthenticate: true
+    pnpShouldCheckQuota: true
     pnpShouldMockAccountService: false
   service:
-    serviceName: "odis-combiner-k8s"
+    serviceName: 'odis-combiner-k8s'
 akeyless:
   enabled: true
-  path: "/static-secrets/identity-circle/ODIS-Combiner/Staging/Forno-API-Key"
+  path: '/static-secrets/identity-circle/ODIS-Combiner/Staging/Forno-API-Key'
 podAnnotations:
   prometheus.io/path: /metrics
-  prometheus.io/port: "8080"
-  prometheus.io/scrape: "true"
+  prometheus.io/port: '8080'
+  prometheus.io/scrape: 'true'
 podSecurityContext: {}
 securityContext: {}
 ingress:
   enabled: true
-  className: "nginx"
+  className: 'nginx'
   annotations:
-    kubernetes.io/tls-acme: "true"
-  hosts: 
+    kubernetes.io/tls-acme: 'true'
+  hosts:
     - host: odis-combiner-staging.integration-tests.celo-networks-dev.org
       paths:
         - path: /
