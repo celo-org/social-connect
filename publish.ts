@@ -24,7 +24,7 @@ function publish() {
     if (!line) return
     return line[0].replace('info Publishing ', '').replace(' at ', '@')
   }).join(',')
-
+  process.env.PKGS = pkgs
   console.log(pkgs)
   return  pkgs
 }
