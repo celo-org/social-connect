@@ -3,11 +3,12 @@ name: Snapshot Releasing
 on:
   push:
     branches:
-      - main
+      - "changesets/**"
       - chore/auto-snap-release
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
-
+env:
+  ACTIONS_STEP_DEBUG: true
 jobs:
   release:
     name: Snapshot Release
@@ -45,12 +46,15 @@ jobs:
         shell: bash
         run: yarn build
       - name: Version packages
+        id: 'versioning'
         run: yarn version --snapshot alpha
       - name: Publish packages
         run: yarn cs publish --tag alpha --no-git-tag
+    outputs:
+      packages: ${{ steps.versioning.outputs }}
   install:
     name: Install Snapshot Releases
     needs: ['release']
     runs-on: ['self-hosted', 'org', 'npm-publish']
     steps:
-      - run: echo ${{needs.release.outputs}}
+      - run: echo ${{needs.release.outputs.packages}}
