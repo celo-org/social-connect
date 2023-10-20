@@ -59,7 +59,7 @@ jobs:
         # when there are version changes "All files have been updated. Review them and commit at your leisure"
         # when there are no version changes "No unreleased changesets found, exiting"
       - name: Publish packages
-        run: echo "PUBLISHED_PACKAGES=$(yarn ts-node publish.ts)" >> "$GITHUB_OUTPUT"
+        run: echo '"PUBLISHED_PACKAGES=$(yarn ts-node publish.ts)" >> "$GITHUB_OUTPUT"'
 
         # Publishing "@celo/phone-number-privacy-common" at "3.0.4-alpha-964a99345"
         # id like to take all lines like the above and create an array of packages with form
