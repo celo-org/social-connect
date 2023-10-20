@@ -1,4 +1,4 @@
-name: Release
+name: Snapshot Releasing
 
 on:
   push:
@@ -12,8 +12,6 @@ jobs:
   release:
     name: Snapshot Release
     runs-on: ['self-hosted', 'org', 'npm-publish']
-    env:
-      NPM_TOKEN: ${{ env.NPM_TOKEN }}
     permissions:
       contents: write
       id-token: write
