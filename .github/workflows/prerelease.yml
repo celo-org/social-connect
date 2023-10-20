@@ -53,4 +53,4 @@ jobs:
     needs: ['release']
     runs-on: ['self-hosted', 'org', 'npm-publish']
     steps:
-      - run: echo ${{jobs.release.outputs}}}
+      - run: echo ${{needs.release.outputs}}
