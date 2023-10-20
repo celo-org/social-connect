@@ -24,9 +24,10 @@ function publish() {
     if (!line) return
     return line[0].replace('info Publishing ', '').replace(' at ', '@')
   }).join(',')
-  process.env.PKGS = pkgs
-  console.log(pkgs)
-  return  pkgs
+  const result = pkgs ? pkgs : 'no-op'
+  process.env.PKGS = result
+  console.info(result)
+  return  result
 }
 
 publish()
