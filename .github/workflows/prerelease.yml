@@ -1,10 +1,18 @@
 name: Snapshot Releasing
+run-name: snapshot-releasing ${{ github.head_ref || github.ref_name }}
 
 on:
   push:
     branches:
       - "changesets/**"
       - chore/auto-snap-release
+
+# This workflow should on push to a changeset branch
+#  1. checkout repo, install, build
+#  2. version packages as a snapshot
+#  3. publish packages to npm if there are any to be published || or exit success
+#  b. save a list of packages that were published
+#  4. use the list to install the packages that were just published
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 env:
@@ -48,13 +56,24 @@ jobs:
       - name: Version packages
         id: 'versioning'
         run: yarn version --snapshot alpha
+        # when there are version changes "All files have been updated. Review them and commit at your leisure"
+        # when there are no version changes "No unreleased changesets found, exiting"
       - name: Publish packages
-        run: yarn cs publish --tag alpha --no-git-tag
+        run: yarn cs publish --tag alpha --no-git-tag --dry-run
+        # Publishing "@celo/phone-number-privacy-common" at "3.0.4-alpha-964a99345"
+        # id like to take all lines like the above and create an array of packages with form
+        # ["@celo/phone-number-privacy-common@3.0.4-alpha-964a99345"]
     outputs:
+      # output array of packages like ["@celo/phone-number-privacy-common@3.0.4-alpha-964a99345"]
       packages: ${{ steps.versioning.outputs }}
+      status: no-op | success
   install:
     name: Install Snapshot Releases
     needs: ['release']
+    # if any packages where published install them else report success
+    # if: ${{needs.release.outputs.status == 'success'}}
     runs-on: ['self-hosted', 'org', 'npm-publish']
     steps:
+      # for each package call npm install package@version
+      # possibly use a matrix
       - run: echo ${{needs.release.outputs.packages}}
