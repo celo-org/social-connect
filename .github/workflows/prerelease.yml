@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - chore/auto-snap-release
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  release:
+    name: Snapshot Release
+    runs-on: ['self-hosted', 'org', 'npm-publish']
+    env:
+      NPM_TOKEN: ${{ env.NPM_TOKEN }}
+    permissions:
+      contents: write
+      id-token: write
+      pull-requests: write
+      repository-projects: write
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Akeyless Get Secrets
+        id: get_auth_token
+        uses:
+          docker://us-west1-docker.pkg.dev/devopsre/akeyless-public/akeyless-action:latest
+        with:
+          api-url: https://api.gateway.akeyless.celo-networks-dev.org
+          access-id: p-kf9vjzruht6l
+          static-secrets: '{"/static-secrets/apps-tooling-circle/npm-publish-token":"NPM_TOKEN"}'
+      - name: Setup Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - name: 'Setup yarn'
+        shell: bash
+        run: |
+          npm install --global yarn
+          source ~/.bashrc
+      - name: Install Dependencies
+        shell: bash
+        run: yarn
+      - name: Build packages
+        shell: bash
+        run: yarn build
+      - name: Version packages
+        run: yarn version --snapshot alpha
+      - name: Publish packages
+        run: yarn cs publish --tag alpha --no-git-tag
+  install:
+    name: Install Snapshot Releases
+    needs: ['release']
+    runs-on: ['self-hosted', 'org', 'npm-publish']
+    steps:
+      - run: echo ${{jobs.release.outputs}}}
