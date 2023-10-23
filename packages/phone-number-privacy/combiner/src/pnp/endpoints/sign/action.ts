@@ -16,9 +16,11 @@ import {
 import { Request } from 'express'
 import assert from 'node:assert'
 import { Signer, thresholdCallToSigners } from '../../../common/combine'
+import { Context } from '../../../common/context'
 import { BLSCryptographyClient } from '../../../common/crypto-clients/bls-crypto-client'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo, requestHasSupportedKeyVersion } from '../../../common/io'
+import { Counters } from '../../../common/metrics'
 import { getCombinerVersion, OdisConfig } from '../../../config'
 import { NoQuotaCache } from '../../../utils/no-quota-cache'
 import { AccountService } from '../../services/account-services'
@@ -33,17 +35,23 @@ export function pnpSign(
 ): ResultHandler<SignMessageRequest> {
   return async (request, response) => {
     const logger = response.locals.logger
+    const { url } = request
+    const ctx: Context = { logger, url }
+
     if (!isValidRequest(request)) {
+      Counters.warnings.labels(url, WarningMessage.INVALID_INPUT).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
     }
 
     if (!requestHasSupportedKeyVersion(request, config, response.locals.logger)) {
+      Counters.warnings.labels(url, WarningMessage.INVALID_KEY_VERSION_REQUEST).inc()
       return errorResult(400, WarningMessage.INVALID_KEY_VERSION_REQUEST)
     }
 
     const warnings: ErrorType[] = []
     if (config.shouldAuthenticate) {
       if (!(await authenticateUser(request, logger, accountService.getAccount, warnings))) {
+        Counters.warnings.labels(url, WarningMessage.UNAUTHENTICATED_USER).inc()
         return errorResult(401, WarningMessage.UNAUTHENTICATED_USER)
       }
     }
@@ -54,6 +62,7 @@ export function pnpSign(
         const quota = noQuotaCache.getTotalQuota(account)
         // can exist a race condition between the hasQuota and getTotalQuota but that's highly improbable
         if (quota !== undefined) {
+          Counters.warnings.labels(url, WarningMessage.EXCEEDED_QUOTA).inc()
           return errorResult(403, WarningMessage.EXCEEDED_QUOTA)
         }
       }
@@ -64,13 +73,13 @@ export function pnpSign(
 
     const processResult = async (result: OdisResponse<SignMessageRequest>): Promise<boolean> => {
       assert(result.success)
-      crypto.addSignature({ url: request.url, signature: result.signature })
+      crypto.addSignature({ url: request.url, signature: result.signature }, ctx)
 
       // Send response immediately once we cross threshold
       // BLS threshold signatures can be combined without all partial signatures
       if (crypto.hasSufficientSignatures()) {
         try {
-          crypto.combineBlindedSignatureShares(request.body.blindedQueryPhoneNumber, logger)
+          crypto.combineBlindedSignatureShares(request.body.blindedQueryPhoneNumber, ctx)
           // Close outstanding requests
           return true
         } catch (err) {
@@ -84,7 +93,7 @@ export function pnpSign(
     }
 
     const { signerResponses, maxErrorCode } = await thresholdCallToSigners(
-      logger,
+      ctx,
       {
         signers,
         endpoint: getSignerEndpoint(CombinerEndpoint.PNP_SIGN),
@@ -103,7 +112,7 @@ export function pnpSign(
       try {
         const combinedSignature = crypto.combineBlindedSignatureShares(
           request.body.blindedQueryPhoneNumber,
-          logger
+          ctx
         )
 
         return {
@@ -134,6 +143,12 @@ export function pnpSign(
       }
     }
     const error = errorCodeToError(errorCode)
+    if (error === ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES) {
+      Counters.errors.labels(request.url, error).inc()
+      Counters.notEnoughSigErrors.labels(request.url).inc()
+    } else if (error in WarningMessage) {
+      Counters.warnings.labels(request.url, error).inc()
+    }
     return errorResult(errorCode, error)
   }
 }

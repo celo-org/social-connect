@@ -7,7 +7,10 @@ import {
   OdisRequest,
   rootLogger,
 } from '@celo/phone-number-privacy-common'
-import express, { Express, RequestHandler } from 'express'
+import express, { RequestHandler } from 'express'
+import fs from 'fs'
+import https from 'https'
+import * as PromClient from 'prom-client'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -18,6 +21,7 @@ import {
   ResultHandler,
   tracingHandler,
 } from './common/handlers'
+import { Histograms } from './common/metrics'
 import { CombinerConfig, getCombinerVersion } from './config'
 import { disableDomain } from './domain/endpoints/disable/action'
 import { domainQuota } from './domain/endpoints/quota/action'
@@ -33,7 +37,7 @@ import { NoQuotaCache } from './utils/no-quota-cache'
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
-export function startCombiner(config: CombinerConfig, kit?: ContractKit): Express {
+export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
   const logger = rootLogger(config.serviceName)
 
   kit = kit ?? getContractKitWithAgent(config.blockchain)
@@ -104,8 +108,35 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit): Expres
     CombinerEndpoint.DISABLE_DOMAIN,
     createHandler(domains.enabled, disableDomain(domainSigners, domains))
   )
+  app.get(CombinerEndpoint.METRICS, (_req, res) => {
+    res.send(PromClient.register.metrics())
+  })
 
+  const sslOptions = getSslOptions(config)
+  if (sslOptions) {
+    return https.createServer(sslOptions, app)
+  }
   return app
+}
+
+function getSslOptions(config: CombinerConfig) {
+  const logger = rootLogger(config.serviceName)
+  const { sslKeyPath, sslCertPath } = config.server
+
+  if (!sslKeyPath || !sslCertPath) {
+    logger.info('No SSL configs specified')
+    return null
+  }
+
+  if (!fs.existsSync(sslKeyPath) || !fs.existsSync(sslCertPath)) {
+    logger.error('SSL cert files not found')
+    return null
+  }
+
+  return {
+    key: fs.readFileSync(sslKeyPath),
+    cert: fs.readFileSync(sslCertPath),
+  }
 }
 
 function createHandler<R extends OdisRequest>(
@@ -113,6 +144,8 @@ function createHandler<R extends OdisRequest>(
   action: ResultHandler<R>
 ): RequestHandler<{}, {}, R, {}, Locals> {
   return catchErrorHandler(
-    tracingHandler(meteringHandler(enabled ? resultHandler(action) : disabledHandler))
+    tracingHandler(
+      meteringHandler(Histograms.responseLatency, enabled ? resultHandler(action) : disabledHandler)
+    )
   )
 }

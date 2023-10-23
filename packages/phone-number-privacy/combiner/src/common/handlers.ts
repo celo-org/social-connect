@@ -12,8 +12,10 @@ import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import Logger from 'bunyan'
 import { Request, Response } from 'express'
+import * as client from 'prom-client'
 import { getCombinerVersion } from '../config'
 import { OdisError } from './error'
+import { Counters, Histograms, newMeter } from './metrics'
 
 const tracer = opentelemetry.trace.getTracer('combiner-tracer')
 
@@ -34,15 +36,19 @@ export function catchErrorHandler<R extends OdisRequest>(
       await handler(req, res)
     } catch (err) {
       const logger: Logger = res.locals.logger
-      logger.error(ErrorMessage.CAUGHT_ERROR_IN_ENDPOINT_HANDLER)
-      logger.error(err)
+      logger.error(err, ErrorMessage.CAUGHT_ERROR_IN_ENDPOINT_HANDLER)
+      Counters.errorsCaughtInEndpointHandler.labels(req.url).inc()
       if (!res.headersSent) {
         if (err instanceof OdisError) {
+          Counters.errors.labels(req.url, err.code).inc()
           sendFailure(err.code, err.status, res, req.url)
         } else {
+          Counters.errors.labels(req.url, ErrorMessage.UNKNOWN_ERROR).inc()
+          Counters.unknownErrors.labels(req.url).inc()
           sendFailure(ErrorMessage.UNKNOWN_ERROR, 500, res, req.url)
         }
       } else {
+        Counters.errors.labels(req.url, ErrorMessage.ERROR_AFTER_RESPONSE_SENT).inc()
         logger.error(ErrorMessage.ERROR_AFTER_RESPONSE_SENT)
       }
     }
@@ -83,27 +89,29 @@ export function tracingHandler<R extends OdisRequest>(
 }
 
 export function meteringHandler<R extends OdisRequest>(
+  histogram: client.Histogram<string>,
   handler: PromiseHandler<R>
 ): PromiseHandler<R> {
-  return async (req, res) => {
-    const logger: Logger = res.locals.logger
+  return async (req, res) =>
+    newMeter(
+      histogram,
+      req.url
+    )(async () => {
+      const logger: Logger = res.locals.logger
+      logger.info({ req: req.body }, 'Request received')
+      Counters.requests.labels(req.url).inc()
 
-    // used for log based metrics
-    logger.info({ req: req.body }, 'Request received')
+      const eventLoopLagTimer = Histograms.eventLoopLag.labels(req.url).startTimer()
+      setTimeout(() => {
+        eventLoopLagTimer()
+      })
 
-    const eventLoopLagMeasurementStart = Date.now()
-    setTimeout(() => {
-      const eventLoopLag = Date.now() - eventLoopLagMeasurementStart
-      logger.info({ eventLoopLag }, 'Measure event loop lag')
+      await handler(req, res)
+      if (res.headersSent) {
+        logger.info({ res }, 'Response sent')
+        Counters.responses.labels(req.url, res.statusCode.toString()).inc()
+      }
     })
-
-    //TODO: Add prometheus metric to track e2e response latency
-    await handler(req, res)
-    if (res.headersSent) {
-      // used for log based metrics
-      logger.info({ res }, 'Response sent')
-    }
-  }
 }
 
 export function timeoutHandler<R extends OdisRequest>(
@@ -130,6 +138,7 @@ export async function disabledHandler<R extends OdisRequest>(
   req: Request<{}, {}, R>,
   response: Response<OdisResponse<R>, Locals>
 ): Promise<void> {
+  Counters.warnings.labels(req.url, WarningMessage.API_UNAVAILABLE).inc()
   sendFailure(WarningMessage.API_UNAVAILABLE, 503, response, req.url)
 }
 

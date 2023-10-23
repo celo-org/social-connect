@@ -3,6 +3,7 @@ import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
 import { OdisError, wrapError } from '../../common/error'
+import { Counters } from '../../common/metrics'
 import { traceAsyncFunction } from '../../common/tracing-utils'
 import { getDEK } from '../../common/web3/contracts'
 
@@ -34,8 +35,8 @@ export class CachingAccountService implements AccountService {
       const dek = await this.cache.fetch(address)
 
       if (dek === undefined) {
-        // TODO decide which error ot use here
-        throw new OdisError(ErrorMessage.FULL_NODE_ERROR)
+        Counters.errors.labels('NA', ErrorMessage.FAILURE_TO_GET_DEK).inc()
+        throw new OdisError(ErrorMessage.FAILURE_TO_GET_DEK)
       }
       return dek
     })
