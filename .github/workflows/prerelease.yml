@@ -4,8 +4,9 @@ run-name: snapshot-releasing ${{ github.head_ref || github.ref_name }}
 on:
   push:
     branches:
-      - "changesets/**"
-      - chore/auto-snap-release
+      # Publish each time changeset-release branch is updated (which happens each time a changeset is merged to master)
+      - "changeset-release/**"
+      - chore/auto-snap-release # for testing remove me when done
 
 # This workflow should on push to a changeset branch
 #  1. checkout repo, install, build
@@ -59,8 +60,8 @@ jobs:
         # when there are version changes "All files have been updated. Review them and commit at your leisure"
         # when there are no version changes "No unreleased changesets found, exiting"
       - name: Publish packages
-        run: echo '"PUBLISHED_PACKAGES=$(yarn ts-node publish.ts)" >> "$GITHUB_OUTPUT"'
-
+        run: PUBLISHED_PACKAGES=$(yarn ts-node publish.ts) >> "$GITHUB_OUTPUT"
+        id: 'publishing'
         # Publishing "@celo/phone-number-privacy-common" at "3.0.4-alpha-964a99345"
         # id like to take all lines like the above and create an array of packages with form
         # ["@celo/phone-number-privacy-common@3.0.4-alpha-964a99345"]
