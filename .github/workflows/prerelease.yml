@@ -56,7 +56,7 @@ jobs:
         run: yarn build
       - name: Version packages
         id: 'versioning'
-        run: yarn version --snapshot alpha
+        run: yarn changeset version --snapshot alpha
         # when there are version changes "All files have been updated. Review them and commit at your leisure"
         # when there are no version changes "No unreleased changesets found, exiting"
       - name: Publish packages
