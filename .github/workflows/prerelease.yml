@@ -60,7 +60,9 @@ jobs:
         # when there are version changes "All files have been updated. Review them and commit at your leisure"
         # when there are no version changes "No unreleased changesets found, exiting"
       - name: Publish packages
-        run: echo PUBLISHED_PACKAGES=$(yarn --silent ts-node publish.ts) >> $GITHUB_OUTPUT
+        run: |
+          npm config set _auth=$NODE_AUTH_TOKEN
+          echo PUBLISHED_PACKAGES=$(yarn --silent ts-node publish.ts) >> $GITHUB_OUTPUT
         id: 'publishing'
         env:
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
