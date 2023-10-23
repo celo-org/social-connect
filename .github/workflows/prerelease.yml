@@ -62,6 +62,8 @@ jobs:
       - name: Publish packages
         run: echo PUBLISHED_PACKAGES=$(yarn --silent ts-node publish.ts) >> $GITHUB_OUTPUT
         id: 'publishing'
+        env:
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
       - name: View output
         run: echo ${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}
         # Publishing "@celo/phone-number-privacy-common" at "3.0.4-alpha-964a99345"
