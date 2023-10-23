@@ -24,7 +24,7 @@ function publish() {
     if (!line) return
     return line[0].replace('info Publishing ', '').replace(' at ', '@')
   })
-  const result = pkgs ? JSON.stringify(pkgs) : 'no-op'
+  const result = pkgs.length ? JSON.stringify(pkgs) : 'no-op'
   process.stdout.write(result)
 }
 
