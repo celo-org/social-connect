@@ -60,7 +60,7 @@ jobs:
         # when there are version changes "All files have been updated. Review them and commit at your leisure"
         # when there are no version changes "No unreleased changesets found, exiting"
       - name: Publish packages
-        run: echo PUBLISHED_PACKAGES=$(yarn ts-node publish.ts) >> $GITHUB_OUTPUT
+        run: echo PUBLISHED_PACKAGES=$(yarn --silent ts-node publish.ts) >> $GITHUB_OUTPUT
         id: 'publishing'
       - name: View output
         run: echo ${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}
@@ -75,8 +75,14 @@ jobs:
     name: Install Snapshot Releases
     needs: ['release']
     # if any packages where published install them else report success
-    runs-on: ['self-hosted', 'org', 'npm-publish']
+    if: ${{ needs.release.outputs.packages != 'no-op' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        packages: ${{ fromJson(needs.release.outputs.packages) }}
     steps:
       # for each package call npm install package@version
-      # possibly use a matrix
-      - run: echo ${{needs.release.outputs.example}} -- ${{needs.release.outputs.packages}}
+      - name: Install ${{ matrix.package }}
+        run: npm install ${{ matrix.package }}
+

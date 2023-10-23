@@ -23,8 +23,8 @@ function publish() {
   const pkgs = arrayOfLines.filter(line => !!line).map((line) => {
     if (!line) return
     return line[0].replace('info Publishing ', '').replace(' at ', '@')
-  }).join(',')
-  const result = pkgs ? pkgs : 'no-op'
+  })
+  const result = pkgs ? JSON.stringify(pkgs) : 'no-op'
   process.stdout.write(result)
 }
 
