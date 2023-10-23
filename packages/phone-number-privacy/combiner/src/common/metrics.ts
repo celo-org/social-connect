@@ -3,7 +3,7 @@ import { config } from '../config'
 
 const { Counter, Histogram } = client
 
-const register = new client.Registry()
+export const register = new client.Registry()
 
 register.setDefaultLabels({
   app: config.serviceName,
@@ -87,6 +87,19 @@ export const Counters = {
   }),
 }
 
+register.registerMetric(Counters.requests)
+register.registerMetric(Counters.responses)
+register.registerMetric(Counters.errors)
+register.registerMetric(Counters.blockchainErrors)
+register.registerMetric(Counters.blsComputeErrors)
+register.registerMetric(Counters.errorsCaughtInEndpointHandler)
+register.registerMetric(Counters.notEnoughSigErrors)
+register.registerMetric(Counters.sigRequestErrors)
+register.registerMetric(Counters.sigInconsistenciesErrors)
+register.registerMetric(Counters.sigResponses)
+register.registerMetric(Counters.unknownErrors)
+register.registerMetric(Counters.warnings)
+
 const buckets = [0.001, 0.01, 0.1, 0.5, 1, 2, 5, 10]
 
 export const Histograms = {
@@ -127,6 +140,13 @@ export const Histograms = {
     buckets,
   }),
 }
+
+register.registerMetric(Histograms.responseLatency)
+register.registerMetric(Histograms.fullNodeLatency)
+register.registerMetric(Histograms.signerLatency)
+register.registerMetric(Histograms.eventLoopLag)
+register.registerMetric(Histograms.signatureAggregationLatency)
+register.registerMetric(Histograms.signerTailLatency)
 
 export function newMeter(
   histogram: client.Histogram<string>,
