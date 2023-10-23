@@ -1,5 +1,11 @@
 # @celo/phone-number-privacy-combiner
 
+## 3.3.1
+
+### Patch Changes
+
+- a55409c: Include all metrics in new Prometheus register
+
 ## 3.3.0
 
 ### Minor Changes
