@@ -67,6 +67,7 @@ jobs:
     outputs:
       # output array of packages like ["@celo/phone-number-privacy-common@3.0.4-alpha-964a99345"]
       packages: ${{ steps.versioning.outputs.PUBLISHED_PACKAGES }}
+      example: "This is a static example"
   install:
     name: Install Snapshot Releases
     needs: ['release']
@@ -75,4 +76,4 @@ jobs:
     steps:
       # for each package call npm install package@version
       # possibly use a matrix
-      - run: echo ${{needs.release.outputs.packages}}
+      - run: echo ${{needs.release.outputs.example}} -- ${{needs.release.outputs.packages}}
