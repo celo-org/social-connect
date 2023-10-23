@@ -4,7 +4,6 @@ import {
   FULL_NODE_TIMEOUT_IN_MS,
   RETRY_COUNT,
   RETRY_DELAY_IN_MS,
-  rootLogger,
   TestUtils,
   toBool,
 } from '@celo/phone-number-privacy-common'
@@ -61,7 +60,6 @@ const defaultMockDEK = ensureLeading0x(
 )
 
 if (DEV_MODE) {
-  rootLogger(defaultServiceName).debug('Running in dev mode')
   const devSignersString = JSON.stringify([
     {
       url: 'http://localhost:3001',

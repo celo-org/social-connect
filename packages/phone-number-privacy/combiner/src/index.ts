@@ -17,11 +17,13 @@ async function start() {
   })
 }
 
-start().catch((err) => {
-  const logger = rootLogger(config.serviceName)
-  logger.error({ err }, 'Fatal error occured. Exiting')
-  process.exit(1)
-})
+if (!process.env.E2E_TESTING) {
+  start().catch((err) => {
+    const logger = rootLogger(config.serviceName)
+    logger.error({ err }, 'Fatal error occured. Exiting')
+    process.exit(1)
+  })
+}
 
 export * from './config'
 export * from './server'
