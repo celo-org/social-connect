@@ -132,17 +132,15 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
 
   switch (config.proxy.deploymentEnv) {
     case 'mainnet':
-      destinationUrl = 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerGen2'
+      destinationUrl = 'https://odis-combiner-mainnet.mainnet.celo-testnet.org'
       break
 
     case 'alfajores':
-      destinationUrl =
-        'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2'
+      destinationUrl = 'https://odis-combiner-alfajores.alfajores.celo-testnet.org'
       break
 
     case 'staging':
-      destinationUrl =
-        'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerGen2'
+      destinationUrl = 'https://odis-combiner-staging.integration-tests.celo-networks-dev.org'
       break
 
     default:
