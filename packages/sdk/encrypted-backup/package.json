@@ -9,7 +9,7 @@
   "homepage": "https://celo-sdk-docs.readthedocs.io/en/latest/encrypted-backup",
   "repository": {
     "type": "git",
-    "url": "https://github.com/celo-org/social-connect",
+    "url": "git+https://github.com/celo-org/social-connect.git",
     "directory": "packages/sdk/encrypted-backup"
   },
   "keywords": [
