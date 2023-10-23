@@ -10,7 +10,6 @@ import {
 import express, { RequestHandler } from 'express'
 import fs from 'fs'
 import https from 'https'
-import * as PromClient from 'prom-client'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -21,7 +20,7 @@ import {
   ResultHandler,
   tracingHandler,
 } from './common/handlers'
-import { Histograms } from './common/metrics'
+import { Histograms, register } from './common/metrics'
 import { CombinerConfig, getCombinerVersion } from './config'
 import { disableDomain } from './domain/endpoints/disable/action'
 import { domainQuota } from './domain/endpoints/quota/action'
@@ -109,7 +108,7 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
     createHandler(domains.enabled, disableDomain(domainSigners, domains))
   )
   app.get(CombinerEndpoint.METRICS, (_req, res) => {
-    res.send(PromClient.register.metrics())
+    res.send(register.metrics())
   })
 
   const sslOptions = getSslOptions(config)
