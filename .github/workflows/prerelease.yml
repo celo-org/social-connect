@@ -62,12 +62,14 @@ jobs:
       - name: Publish packages
         run: echo PUBLISHED_PACKAGES=$(yarn ts-node publish.ts) >> $GITHUB_OUTPUT
         id: 'publishing'
+      - name: View output
+        run: echo ${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}
         # Publishing "@celo/phone-number-privacy-common" at "3.0.4-alpha-964a99345"
         # id like to take all lines like the above and create an array of packages with form
         # ["@celo/phone-number-privacy-common@3.0.4-alpha-964a99345"]
     outputs:
       # output array of packages like ["@celo/phone-number-privacy-common@3.0.4-alpha-964a99345"]
-      packages: ${{ steps.versioning.outputs.PUBLISHED_PACKAGES }}
+      packages: ${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}
       example: "This is a static example"
   install:
     name: Install Snapshot Releases
