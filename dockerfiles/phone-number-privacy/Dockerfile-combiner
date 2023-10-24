@@ -33,7 +33,7 @@ COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} pack
 
 # Install dependencies and build.
 RUN yarn -v
-RUN yarn install --network-timeout 100000 --frozen-lockfile
+RUN yarn install --network-timeout 100000 --immutable
 RUN yarn build
 
 RUN rm -r .git

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { hexToBuffer } from '@celo/base/lib/address'
 import { BlsBlindingClient } from '@celo/identity/lib/odis/bls-blinding-client'
 import crypto from 'crypto'
