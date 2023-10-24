@@ -12,7 +12,6 @@ import { Request } from 'express'
 import * as http from 'http'
 import * as https from 'https'
 import fetch, { Response as FetchResponse } from 'node-fetch'
-import { performance } from 'perf_hooks'
 import { OdisConfig } from '../config'
 import { isAbortError, Signer } from './combine'
 
@@ -90,32 +89,14 @@ export async function fetchSignerResponseWithFallback<R extends OdisRequest>(
     })
   }
 
-  return measureTime(signer.url + signerEndpoint + `/${request.body.sessionID}`, () =>
-    fetchSignerResponse(signer.url + signerEndpoint).catch((err) => {
-      logger.error({ url: signer.url, error: err }, `Signer failed with primary url`)
-      if (signer.fallbackUrl && !isAbortError(err)) {
-        // TODO should we also be checking isTimeoutError here?
-        logger.warn({ signer }, `Using fallback url to call signer`)
-        return fetchSignerResponse(signer.fallbackUrl + signerEndpoint)
-      } else {
-        throw err
-      }
-    })
-  )
-}
-async function measureTime<T>(name: string, fn: () => Promise<T>): Promise<T> {
-  const start = `Start ${name}`
-  const end = `End ${name}`
-  performance.mark(start)
-  try {
-    const res = await fn()
-    return res
-  } finally {
-    performance.mark(end)
-    performance.measure(name, start, end)
-
-    performance.clearMeasures(name)
-    performance.clearMarks(start)
-    performance.clearMarks(end)
-  }
+  return fetchSignerResponse(signer.url + signerEndpoint).catch((err) => {
+    logger.error({ url: signer.url, error: err }, `Signer failed with primary url`)
+    if (signer.fallbackUrl && !isAbortError(err)) {
+      // TODO should we also be checking isTimeoutError here?
+      logger.warn({ signer }, `Using fallback url to call signer`)
+      return fetchSignerResponse(signer.fallbackUrl + signerEndpoint)
+    } else {
+      throw err
+    }
+  })
 }

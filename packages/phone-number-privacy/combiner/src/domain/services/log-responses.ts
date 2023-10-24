@@ -1,6 +1,8 @@
 import { DomainRequest, WarningMessage } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
+import { request } from 'express'
 import { SignerResponse } from '../../common/io'
+import { Counters } from '../../common/metrics'
 
 export function logDomainResponseDiscrepancies<R extends DomainRequest>(
   logger: Logger,
@@ -38,6 +40,7 @@ export function logDomainResponseDiscrepancies<R extends DomainRequest>(
   const first = JSON.stringify(parsedResponses[0].values)
   for (let i = 1; i < parsedResponses.length; i++) {
     if (JSON.stringify(parsedResponses[i].values) !== first) {
+      Counters.warnings.labels(request.url, WarningMessage.SIGNER_RESPONSE_DISCREPANCIES).inc()
       logger.warn({ parsedResponses }, WarningMessage.SIGNER_RESPONSE_DISCREPANCIES)
       break
     }
@@ -46,6 +49,9 @@ export function logDomainResponseDiscrepancies<R extends DomainRequest>(
   // disabled
   const numDisabled = parsedResponses.filter((res) => res.values.disabled).length
   if (numDisabled > 0 && numDisabled < parsedResponses.length) {
+    Counters.warnings
+      .labels(request.url, WarningMessage.INCONSISTENT_SIGNER_DOMAIN_DISABLED_STATES)
+      .inc()
     logger.error({ parsedResponses }, WarningMessage.INCONSISTENT_SIGNER_DOMAIN_DISABLED_STATES)
   }
 }

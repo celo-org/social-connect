@@ -5,7 +5,9 @@ import {
   WarningMessage,
 } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
+import { request } from 'express'
 import { SignerResponse } from '../../common/io'
+import { Counters } from '../../common/metrics'
 import {
   MAX_QUERY_COUNT_DISCREPANCY_THRESHOLD,
   MAX_TOTAL_QUOTA_DISCREPANCY_THRESHOLD,
@@ -47,6 +49,7 @@ export function logPnpSignerResponseDiscrepancies(
   const first = JSON.stringify(parsedResponses[0].values)
   for (let i = 1; i < parsedResponses.length; i++) {
     if (JSON.stringify(parsedResponses[i].values) !== first) {
+      Counters.warnings.labels(request.url, WarningMessage.SIGNER_RESPONSE_DISCREPANCIES).inc()
       logger.warn({ parsedResponses }, WarningMessage.SIGNER_RESPONSE_DISCREPANCIES)
       warnings.push(WarningMessage.SIGNER_RESPONSE_DISCREPANCIES)
       break
@@ -62,6 +65,9 @@ export function logPnpSignerResponseDiscrepancies(
       sortedByTotalQuota[0].values.totalQuota >=
     MAX_TOTAL_QUOTA_DISCREPANCY_THRESHOLD
   ) {
+    Counters.warnings
+      .labels(request.url, WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS)
+      .inc()
     logger.error({ sortedByTotalQuota }, WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS)
     warnings.push(WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS)
   }
@@ -75,6 +81,9 @@ export function logPnpSignerResponseDiscrepancies(
       sortedByQueryCount[0].values.performedQueryCount >=
     MAX_QUERY_COUNT_DISCREPANCY_THRESHOLD
   ) {
+    Counters.warnings
+      .labels(request.url, WarningMessage.INCONSISTENT_SIGNER_QUERY_MEASUREMENTS)
+      .inc()
     logger.error({ sortedByQueryCount }, WarningMessage.INCONSISTENT_SIGNER_QUERY_MEASUREMENTS)
     warnings.push(WarningMessage.INCONSISTENT_SIGNER_QUERY_MEASUREMENTS)
   }
