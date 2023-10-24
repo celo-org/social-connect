@@ -19,7 +19,6 @@ WORKDIR /celo-phone-number-privacy/
 # Copy monorepo settings
 COPY .yarnrc.yml package.json yarn.lock ./
 COPY .yarn/releases/ .yarn/releases/
-COPY .yarn/plugins/ .yarn/plugins/
 
 # Makes build fail if it doesn't copy git, will be removed after build
 COPY .git .git
