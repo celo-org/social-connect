@@ -5,7 +5,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "yarn g:tsc",
+    "build": "yarn --top-level tsc -b .",
     "lint": "eslint ."
   },
   "dependencies": {

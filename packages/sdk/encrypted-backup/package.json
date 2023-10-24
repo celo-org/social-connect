@@ -17,8 +17,8 @@
     "encrypted-backup"
   ],
   "scripts": {
-    "build": "yarn g:tsc",
-    "clean": "yarn g:tsc --clean",
+    "build": "yarn g:tsc  .",
+    "clean": "yarn g:tsc  . --clean",
     "docs": "typedoc",
     "test": "yarn jest --runInBand",
     "lint": "eslint .",

@@ -15,8 +15,8 @@
     "odis"
   ],
   "scripts": {
-    "build": "yarn g:tsc",
-    "clean": "yarn g:tsc --clean",
+    "build": "yarn run --top-level tsc --build .",
+    "clean": "yarn run --top-level tsc --build . --clean",
     "docs": "typedoc",
     "test": "yarn jest --runInBand --testPathIgnorePatterns src/odis/identifier-backwards-compatibility.test.ts",
     "lint": "eslint .",
