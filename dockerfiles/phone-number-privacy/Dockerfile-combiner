@@ -30,7 +30,8 @@ ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+phone-number-privacy/combine
 COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} packages/${PACKAGE_SELECTOR}
 
 # Install dependencies and build.
-RUN yarn install --network-timeout 100000 --frozen-lockfile && yarn cache clean
+RUN yarn -v
+RUN yarn install --network-timeout 100000 --frozen-lockfile
 RUN yarn build
 
 RUN rm -r .git
