@@ -21,6 +21,7 @@ export class ReactNativeBlsBlindingClient implements BlsBlindingClient {
 
   async blindMessage(base64PhoneNumber: string): Promise<string> {
     return (
+      // @ts-expect-error
       await BlindThresholdBls.blindMessageWithRandom(base64PhoneNumber, this.base64Random)
     ).trim()
   }

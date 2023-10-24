@@ -1,6 +1,6 @@
-import { randomBytes } from 'crypto'
-import thresholdBls from 'blind-threshold-bls'
 import { BlsBlindingClient } from '@celo/identity/lib/odis/bls-blinding-client'
+import thresholdBls from 'blind-threshold-bls'
+import { randomBytes } from 'crypto'
 
 interface BlindedMessage {
   blindingFactor: Uint8Array
@@ -18,6 +18,7 @@ export class WebBlsBlindingClient implements BlsBlindingClient {
   }
 
   async init() {
+    // @ts-ignore
     await thresholdBls.init('/blind_threshold_bls_bg.wasm')
   }
 
