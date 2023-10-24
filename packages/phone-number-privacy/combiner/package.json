@@ -31,7 +31,7 @@
     "@celo/phone-number-privacy-common": "^3.1.0",
     "@celo/poprf": "^0.1.9",
     "@opentelemetry/api": "^1.4.1",
-    "@opentelemetry/auto-instrumentations-node": "^0.38.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.39.4",
     "@opentelemetry/exporter-jaeger": "^1.15.2",
     "@opentelemetry/instrumentation": "^0.41.2",
     "@opentelemetry/propagator-ot-trace": "^0.27.0",

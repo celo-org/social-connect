@@ -46,7 +46,7 @@
     "@celo/wallet-hsm-azure": "^5.0.4",
     "@google-cloud/secret-manager": "3.0.0",
     "@opentelemetry/api": "^1.4.1",
-    "@opentelemetry/auto-instrumentations-node": "^0.38.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.39.4",
     "@opentelemetry/exporter-jaeger": "^1.15.2",
     "@opentelemetry/instrumentation": "^0.41.2",
     "@opentelemetry/propagator-ot-trace": "^0.27.0",
@@ -82,7 +82,7 @@
     "supertest": "^6.2.3",
     "ts-mockito": "^2.6.1",
     "ts-node": "^8.3.0",
-    "typescript": "4.4.3"
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": ">=10"
