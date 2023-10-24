@@ -8,8 +8,8 @@
   "types": "./lib/index.d.ts",
   "scripts": {
     "prepublish": "yarn build",
-    "build": "yarn g:tsc -b .",
-    "clean": "yarn g:tsc -b . --clean",
+    "build": "yarn g:tsc",
+    "clean": "yarn g:tsc --clean",
     "test": "yarn jest --testPathIgnorePatterns test/end-to-end",
     "test:coverage": "yarn test --coverage",
     "lint": "eslint ."
