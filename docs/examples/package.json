@@ -5,8 +5,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "yarn --top-level tsc -b .",
-    "lint": "eslint ."
+    "build": "yarn run --top-level tsc -b .",
+    "lint": "yarn run --top-level eslint ."
   },
   "dependencies": {
     "@celo/base": "^5.0.4",

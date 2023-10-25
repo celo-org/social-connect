@@ -19,7 +19,7 @@
     "clean": "yarn run --top-level tsc --build . --clean",
     "docs": "typedoc",
     "test": "yarn jest --runInBand --testPathIgnorePatterns src/odis/identifier-backwards-compatibility.test.ts",
-    "lint": "eslint .",
+    "lint": "yarn run --top-level eslint .",
     "prepublish": "yarn build"
   },
   "dependencies": {

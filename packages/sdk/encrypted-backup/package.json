@@ -17,11 +17,11 @@
     "encrypted-backup"
   ],
   "scripts": {
-    "build": "yarn g:tsc  .",
-    "clean": "yarn g:tsc  . --clean",
+    "build": "yarn run --top-level tsc ",
+    "clean": "yarn run --top-level tsc  --clean",
     "docs": "typedoc",
     "test": "yarn jest --runInBand",
-    "lint": "eslint .",
+    "lint": "yarn run --top-level eslint .",
     "prepublish": "yarn build"
   },
   "dependencies": {
