@@ -11,7 +11,7 @@
     "start": "yarn build && node -r dotenv/config dist/index.js",
     "start:docker": "yarn build && node dist/index.js",
     "start:docker:tracing": "yarn build && node --require ./dist/tracing.js dist/index.js",
-    "clean": "yarn run --top-level tsc  --clean",
+    "clean": "yarn run --top-level tsc --build --clean",
     "build": "yarn run --top-level tsc ",
     "lint": "yarn run --top-level eslint .",
     "test": "jest --testPathIgnorePatterns test/end-to-end",

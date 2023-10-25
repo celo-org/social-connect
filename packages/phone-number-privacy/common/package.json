@@ -9,7 +9,7 @@
   "scripts": {
     "prepublish": "yarn build",
     "build": "yarn run --top-level tsc ",
-    "clean": "yarn run --top-level tsc  --clean",
+    "clean": "yarn run --top-level tsc --build --clean",
     "test": "yarn jest --testPathIgnorePatterns test/end-to-end",
     "test:coverage": "yarn test --coverage",
     "lint": "yarn run --top-level eslint ."

@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "yarn run --top-level tsc ",
-    "clean": "yarn run --top-level tsc  --clean",
+    "clean": "yarn run --top-level tsc --build  --clean",
     "docs": "typedoc",
     "test": "yarn jest --runInBand",
     "lint": "yarn run --top-level eslint .",

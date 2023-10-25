@@ -17,7 +17,7 @@
     "config:set:staging": "firebase functions:config:set --project celo-phone-number-privacy-stg",
     "config:set:alfajores": "firebase functions:config:set --project celo-phone-number-privacy",
     "config:set:mainnet": "firebase functions:config:set --project celo-pgpnp-mainnet",
-    "clean": "yarn run --top-level tsc  --clean",
+    "clean": "yarn run --top-level tsc --build --clean",
     "build": "yarn run --top-level tsc  ",
     "lint": "yarn run --top-level eslint .",
     "loadTest": "ts-node src/scripts/run-load-test.ts run"
