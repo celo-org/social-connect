@@ -188,12 +188,16 @@ jobs:
         uses: ./.github/actions/sync-workspace
         with:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
+      - name: Run Odis Identifier Tests
+        run: |
+          yarn --cwd=packages/odis-identifiers test
       - name: Run Encrypted Backup tests
         run: |
           yarn --cwd=packages/sdk/encrypted-backup test
       - name: Run Identity Tests
         run: |
           yarn --cwd=packages/sdk/identity test
+
       - name: Upload Jest Test Results
         uses: actions/upload-artifact@v3
         with:
