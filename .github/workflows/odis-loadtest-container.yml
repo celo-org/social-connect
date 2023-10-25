@@ -1,44 +1,44 @@
 ---
-  name: Build ODIS loadtest image
-  
-  on:
-    push:
-      paths:
-        - 'dockerfiles/phone-number-privacy/Dockerfile-loadtest'
-        - 'packages/phone-number-privacy/monitor/**'
-      branches:
-        - main
-    pull_request:
-      paths:
-        - 'dockerfiles/phone-number-privacy/Dockerfile-loadtest'
-        - 'packages/phone-number-privacy/monitor/**'
-    workflow_dispatch:
-  
-  jobs:
-    odis-loadtest-build-dev:
-      uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
-      name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
-      if: |
-        github.ref != 'refs/heads/main'
-      with:
-        workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
-        service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
-        artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
-        tag: ${{ github.sha }}
-        context: .
-        file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
-        trivy: true
-  
-    odis-loadtest-build:
-      uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
-      name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
-      if: |
-        github.ref == 'refs/heads/main'
-      with:
-        workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
-        service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
-        artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
-        tag: ${{ github.sha }}
-        context: .
-        file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
-        trivy: true
+name: Build ODIS loadtest image
+
+on:
+  push:
+    paths:
+      - 'dockerfiles/phone-number-privacy/Dockerfile-loadtest'
+      - 'packages/phone-number-privacy/monitor/**'
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'dockerfiles/phone-number-privacy/Dockerfile-loadtest'
+      - 'packages/phone-number-privacy/monitor/**'
+  workflow_dispatch:
+
+jobs:
+  odis-loadtest-build-dev:
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
+    name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
+    if: |
+      github.ref != 'refs/heads/main'
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
+      service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
+      tag: ${{ github.sha }}
+      context: .
+      file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
+      trivy: true
+
+  odis-loadtest-build:
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
+    name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
+    if: |
+      github.ref == 'refs/heads/main'
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
+      service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
+      tag: ${{ github.sha }}
+      context: .
+      file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
+      trivy: true

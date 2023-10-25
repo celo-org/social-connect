@@ -1,44 +1,44 @@
 ---
-  name: Build ODIS signer image
+name: Build ODIS signer image
 
-  on:
-    push:
-      paths:
-        - 'dockerfiles/phone-number-privacy/Dockerfile-signer'
-        - 'packages/phone-number-privacy/signer/**'
-      branches:
-        - main
-    pull_request:
-      paths:
-        - 'dockerfiles/phone-number-privacy/Dockerfile-signer'
-        - 'packages/phone-number-privacy/signer/**'
-    workflow_dispatch:
+on:
+  push:
+    paths:
+      - 'dockerfiles/phone-number-privacy/Dockerfile-signer'
+      - 'packages/phone-number-privacy/signer/**'
+    branches:
+      - main
+  pull_request:
+    paths:
+      - 'dockerfiles/phone-number-privacy/Dockerfile-signer'
+      - 'packages/phone-number-privacy/signer/**'
+  workflow_dispatch:
 
-  jobs:
-    odis-signer-build-dev:
-      uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
-      name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
-      if: |
-        github.ref != 'refs/heads/main'
-      with:
-        workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
-        service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
-        artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
-        tag: ${{ github.sha }}
-        context: .
-        file: dockerfiles/phone-number-privacy/Dockerfile-signer
-        trivy: true
+jobs:
+  odis-signer-build-dev:
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
+    name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
+    if: |
+      github.ref != 'refs/heads/main'
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
+      service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
+      tag: ${{ github.sha }}
+      context: .
+      file: dockerfiles/phone-number-privacy/Dockerfile-signer
+      trivy: true
 
-    odis-signer-build:
-      uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
-      name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
-      if: |
-        github.ref == 'refs/heads/main'
-      with:
-        workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
-        service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
-        artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
-        tag: ${{ github.sha }}
-        context: .
-        file: dockerfiles/phone-number-privacy/Dockerfile-signer
-        trivy: true
+  odis-signer-build:
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
+    name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
+    if: |
+      github.ref == 'refs/heads/main'
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
+      service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
+      tag: ${{ github.sha }}
+      context: .
+      file: dockerfiles/phone-number-privacy/Dockerfile-signer
+      trivy: true
