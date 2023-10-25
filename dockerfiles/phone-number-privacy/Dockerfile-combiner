@@ -33,10 +33,10 @@ COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} pack
 
 # Install dependencies and build.
 RUN yarn -v
-RUN yarn install && yarn cache clean
+RUN yarn install
 # RUN yarn workspaces focus @celo/phone-number-privacy-combiner
 RUN yarn bin
-RUN yarn workspaces foreach --recursive --from @celo/phone-number-privacy-combiner run build
+RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-combiner run build
 
 RUN rm -r .git
 
