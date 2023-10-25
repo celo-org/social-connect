@@ -31,7 +31,7 @@ COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} pack
 
 # Install dependencies and build.
 RUN yarn install --network-timeout 100000 --immutable --inline-builds && yarn cache clean
-RUN yarn build
+RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-monitor run build
 
 RUN rm -r .git
 

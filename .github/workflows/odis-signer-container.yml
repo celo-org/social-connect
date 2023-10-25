@@ -1,6 +1,6 @@
 ---
   name: Build ODIS signer image
-  
+
   on:
     push:
       paths:
@@ -13,7 +13,7 @@
         - 'dockerfiles/phone-number-privacy/Dockerfile-signer'
         - 'packages/phone-number-privacy/signer/**'
     workflow_dispatch:
-  
+
   jobs:
     odis-signer-build-dev:
       uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
@@ -28,7 +28,7 @@
         context: .
         file: dockerfiles/phone-number-privacy/Dockerfile-signer
         trivy: true
-  
+
     odis-signer-build:
       uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
       name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
