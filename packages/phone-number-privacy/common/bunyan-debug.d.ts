@@ -1,2 +1,1 @@
-declare module 'bunyan-debug-stream';
-
+declare module 'bunyan-debug-stream'
