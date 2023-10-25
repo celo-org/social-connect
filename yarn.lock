@@ -918,6 +918,7 @@ __metadata:
     "@celo/celo-devchain": "npm:6.0.0"
     "@celo/contractkit": "npm:^5.0.4"
     "@celo/dev-utils": "npm:0.0.1-beta.1"
+    "@celo/odis-identifiers": "npm:^0.0.1"
     "@celo/phone-number-privacy-common": "npm:^3.0.3"
     "@celo/utils": "npm:^5.0.4"
     "@celo/wallet-local": "npm:^5.0.4"
@@ -935,6 +936,14 @@ __metadata:
     io-ts: "npm:2.0.1"
     jest: "npm:^29.0.2"
     old-identity-sdk: "npm:@celo/identity@1.5.2"
+  languageName: unknown
+  linkType: soft
+
+"@celo/odis-identifiers@npm:^0.0.1, @celo/odis-identifiers@workspace:packages/odis-identifiers":
+  version: 0.0.0-use.local
+  resolution: "@celo/odis-identifiers@workspace:packages/odis-identifiers"
+  dependencies:
+    web3-utils: "npm:1.10.0"
   languageName: unknown
   linkType: soft
 
