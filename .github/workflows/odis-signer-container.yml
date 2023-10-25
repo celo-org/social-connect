@@ -16,7 +16,7 @@ on:
 
 jobs:
   odis-signer-build-dev:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.1
     name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
     if: |
       github.ref != 'refs/heads/main'
@@ -30,7 +30,7 @@ jobs:
       trivy: true
 
   odis-signer-build:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.0
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.1
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
     if: |
       github.ref == 'refs/heads/main'
