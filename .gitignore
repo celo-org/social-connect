@@ -115,3 +115,4 @@ scripts/failedSDKs.json
 packages/protocol/types/typechain-mento/*.d.ts
 tmp
 docs/examples/lib
+packages/odis-identifiers/lib
