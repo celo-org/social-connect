@@ -25,6 +25,7 @@ jobs:
       service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
       artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
       tag: ${{ github.sha }}
+      platforms: 'linux/amd64'
       context: .
       file: dockerfiles/phone-number-privacy/Dockerfile-signer
       trivy: true
@@ -39,6 +40,7 @@ jobs:
       service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
       artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
       tag: ${{ github.sha }}
+      platforms: 'linux/amd64'
       context: .
       file: dockerfiles/phone-number-privacy/Dockerfile-signer
       trivy: true
