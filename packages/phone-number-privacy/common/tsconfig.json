@@ -4,8 +4,9 @@
     "composite": true,
     "declaration": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "typeRoots": ["bunyan-debug.d.ts"]
   },
-  "include": ["src", "index.d.ts"],
+  "include": ["src", "bunyan-debug.d.ts"],
   "compileOnSave": true
 }
