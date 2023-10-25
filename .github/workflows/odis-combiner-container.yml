@@ -32,8 +32,8 @@ jobs:
   odis-combiner-build:
     uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.11.4
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner
-    if: |
-      github.ref == 'refs/heads/main'
+    # if: |
+    #   github.ref == 'refs/heads/main'
     with:
       workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
       service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
