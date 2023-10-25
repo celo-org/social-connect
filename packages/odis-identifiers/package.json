@@ -8,10 +8,10 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "build": "tsc -b .",
-    "clean": "tsc -b . --clean",
-    "test": "jest --runInBand",
-    "lint": "eslint ."
+    "build": "yarn run --top-level tsc -b .",
+    "clean": "yarn run --top-level tsc -b . --clean",
+    "test": "yarn run --top-level jest --runInBand",
+    "lint": "yarn run --top-level eslint ."
   },
   "devDependencies": {
     "web3-utils": "1.10.0"
