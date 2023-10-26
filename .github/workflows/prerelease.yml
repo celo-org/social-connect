@@ -68,7 +68,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
       - name: View output
-        run: echo ${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}
+        run: |
+          echo ${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}
+          [ '${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}' == '' ] && exit 1
         # Publishing "@celo/phone-number-privacy-common" at "3.0.4-alpha-964a99345"
         # id like to take all lines like the above and create an array of packages with form
         # ["@celo/phone-number-privacy-common@3.0.4-alpha-964a99345"]
