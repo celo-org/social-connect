@@ -32,10 +32,9 @@ ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+phone-number-privacy/combine
 COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} packages/${PACKAGE_SELECTOR}
 
 # Install dependencies and build.
-RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
-# RUN yarn workspaces focus @celo/phone-number-privacy-combiner
+RUN yarn install --non-interactive --network-timeout 100000  --inline-builds && yarn cache clean
 RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-combiner run build
-
+RUN yarn workspaces focus @celo/phone-number-privacy-combiner --production
 RUN rm -r .git
 
 # Setup and run the combiner application.

@@ -33,9 +33,10 @@ COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} pack
 
 # Install dependencies and build.
 RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
-# RUN yarn workspaces focus @celo/phone-number-privacy-combiner
-RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-monitor run build
 
+RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-monitor run build
+# clean up dev dependencies after build
+RUN yarn workspaces focus @celo/phone-number-privacy-monitor --production
 RUN rm -r .git
 
 # Setup and run the signer application.
