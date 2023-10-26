@@ -1,6 +1,6 @@
 import { ErrorMessage, KeyVersionInfo } from '@celo/phone-number-privacy-common'
-import Logger from 'bunyan'
-import { performance } from 'perf_hooks'
+import { Context } from '../context'
+import { Histograms } from '../metrics'
 
 export interface ServicePartialSignature {
   url: string
@@ -9,6 +9,7 @@ export interface ServicePartialSignature {
 
 export abstract class CryptoClient {
   protected unverifiedSignatures: ServicePartialSignature[] = []
+  private tailLatencyTimer: () => void = () => {}
 
   constructor(protected readonly keyVersionInfo: KeyVersionInfo) {}
 
@@ -19,7 +20,11 @@ export abstract class CryptoClient {
     return this.allSignaturesLength >= this.keyVersionInfo.threshold
   }
 
-  public addSignature(serviceResponse: ServicePartialSignature): void {
+  public addSignature(serviceResponse: ServicePartialSignature, ctx: Context): void {
+    if (!this.allSignaturesLength) {
+      // start timer when first signer responds
+      this.tailLatencyTimer = Histograms.signerTailLatency.labels(ctx.url).startTimer()
+    }
     this.unverifiedSignatures.push(serviceResponse)
   }
 
@@ -28,10 +33,10 @@ export abstract class CryptoClient {
    * logic defined in _combineBlindedSignatureShares.
    * Throws an exception if not enough valid signatures or on aggregation failure.
    */
-  public combineBlindedSignatureShares(blindedMessage: string, logger: Logger): string {
+  public combineBlindedSignatureShares(blindedMessage: string, ctx: Context): string {
     if (!this.hasSufficientSignatures()) {
       const { threshold } = this.keyVersionInfo
-      logger.error(
+      ctx.logger.error(
         { signatures: this.allSignaturesLength, required: threshold },
         ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES
       )
@@ -39,23 +44,13 @@ export abstract class CryptoClient {
         `${ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES} ${this.allSignaturesLength}/${threshold}`
       )
     }
-    const randomID =
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 
-    const name = `combineBlindedSignatureShares/${randomID}`
-    const start = `Start ${name}`
-    const end = `End ${name}`
+    // Once we reach this point, we've received a quorum of signer responses
+    this.tailLatencyTimer()
 
-    performance.mark(start)
-
-    const combinedSignature = this._combineBlindedSignatureShares(blindedMessage, logger)
-
-    performance.mark(end)
-    performance.measure(name, start, end)
-
-    performance.clearMeasures(name)
-    performance.clearMarks(start)
-    performance.clearMarks(end)
+    const timer = Histograms.signatureAggregationLatency.labels(ctx.url).startTimer()
+    const combinedSignature = this._combineBlindedSignatureShares(blindedMessage, ctx)
+    timer()
 
     return combinedSignature
   }
@@ -64,7 +59,7 @@ export abstract class CryptoClient {
    * Computes the signature for the blinded phone number.
    * Must be implemented by subclass.
    */
-  protected abstract _combineBlindedSignatureShares(blindedMessage: string, logger: Logger): string
+  protected abstract _combineBlindedSignatureShares(blindedMessage: string, ctx: Context): string
 
   /**
    * Returns total number of signatures received; must be implemented by subclass.

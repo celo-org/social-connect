@@ -10,8 +10,9 @@ import {
 import Logger from 'bunyan'
 import { Request } from 'express'
 import * as t from 'io-ts'
-import { PerformanceObserver } from 'perf_hooks'
+import { Context } from './context'
 import { fetchSignerResponseWithFallback, SignerResponse } from './io'
+import { Counters, Histograms, newMeter } from './metrics'
 
 export interface Signer {
   url: string
@@ -29,7 +30,7 @@ export interface ThresholdCallToSignersOptions<R extends OdisRequest> {
 }
 
 export async function thresholdCallToSigners<R extends OdisRequest>(
-  logger: Logger,
+  ctx: Context,
   options: ThresholdCallToSignersOptions<R>,
   processResult: (res: OdisResponse<R>) => Promise<boolean> = (_) => Promise.resolve(false)
 ): Promise<{ signerResponses: Array<SignerResponse<R>>; maxErrorCode?: number }> {
@@ -43,30 +44,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
     responseSchema,
   } = options
 
-  const obs = new PerformanceObserver((list) => {
-    // Since moving to a Cloud Run based infrastucture, which allows for
-    // multiple requests to be processed by the same server instance,
-    // there was a need to filter the performance observer by entry name.
-    //
-    // Without this, the performance observer would incorrectly log requests
-    // from multiple sessions.
-
-    list.getEntries().forEach((entry) => {
-      // Filter entries based on signer URL
-      const matchingSigner = signers.find((signer) => {
-        const entryName = signer.url + endpoint + `/${request.body.sessionID}`
-        return entry.name === entryName
-      })
-
-      if (matchingSigner) {
-        logger.info(
-          { latency: entry, signer: matchingSigner.url + endpoint },
-          'Signer response latency measured'
-        )
-      }
-    })
-  })
-  obs.observe({ entryTypes: ['measure'], buffered: false })
+  const { logger } = ctx
 
   const manualAbort = new AbortController()
   // @ts-ignore
@@ -85,17 +63,22 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
   await Promise.all(
     signers.map(async (signer) => {
       try {
-        const signerFetchResult = await fetchSignerResponseWithFallback(
-          signer,
-          endpoint,
-          keyVersionInfo.keyVersion,
-          request,
-          logger,
-          // @ts-ignore
-          abortSignal
+        const _meter = newMeter(Histograms.signerLatency, request.url, signer.url)
+        const signerFetchResult = await _meter(() =>
+          fetchSignerResponseWithFallback(
+            signer,
+            endpoint,
+            keyVersionInfo.keyVersion,
+            request,
+            logger,
+            // @ts-ignore
+            abortSignal
+          )
         )
 
-        // used for log based metrics
+        Counters.sigResponses
+          .labels(signerFetchResult.status.toString(), signer.url, request.url)
+          .inc()
         logger.info({
           message: 'Received signerFetchResult',
           signer: signer.url,
@@ -104,7 +87,9 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
 
         if (!signerFetchResult.ok) {
           const responseData = await signerFetchResult.json()
-          // used for log based metrics
+          Counters.sigResponsesErrors
+            .labels(signerFetchResult.status.toString(), signer.url, request.url)
+            .inc()
           logger.info({
             message: 'Received signerFetchResult on unsuccessful signer response',
             res: responseData,
@@ -156,13 +141,18 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
         }
       } catch (err) {
         if (isTimeoutError(err)) {
+          Counters.sigRequestErrors
+            .labels(signer.url, request.url, ErrorMessage.TIMEOUT_FROM_SIGNER)
+            .inc()
           logger.error({ signer }, ErrorMessage.TIMEOUT_FROM_SIGNER)
         } else if (isAbortError(err)) {
+          Counters.warnings.labels(request.url, WarningMessage.CANCELLED_REQUEST_TO_SIGNER).inc()
           logger.info({ signer }, WarningMessage.CANCELLED_REQUEST_TO_SIGNER)
         } else {
-          // Logging the err & message simultaneously fails to log the message in some cases
-          logger.error({ signer }, ErrorMessage.SIGNER_REQUEST_ERROR)
-          logger.error({ signer, err })
+          Counters.sigRequestErrors
+            .labels(signer.url, request.url, ErrorMessage.SIGNER_REQUEST_ERROR)
+            .inc()
+          logger.error({ signer, err }, ErrorMessage.SIGNER_REQUEST_ERROR)
 
           errorCount++
           if (signers.length - errorCount < requiredThreshold) {
@@ -174,12 +164,9 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
     })
   )
 
-  // DO NOT call performance.clearMarks() as this also deletes marks used to
-  // measure e2e combiner latency.
-  obs.disconnect()
-
   if (errorCodes.size > 0) {
     if (errorCodes.size > 1) {
+      Counters.sigInconsistenciesErrors.labels(request.url).inc()
       logger.error(
         { errorCodes: JSON.stringify([...errorCodes]) },
         ErrorMessage.INCONSISTENT_SIGNER_RESPONSES

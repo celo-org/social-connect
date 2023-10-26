@@ -27,19 +27,22 @@ import {
   WarningMessage,
 } from '@celo/phone-number-privacy-common'
 import { initDatabase as initSignerDatabase } from '@celo/phone-number-privacy-signer/dist/common/database/database'
-import { startSigner } from '@celo/phone-number-privacy-signer/dist/server'
-import { SupportedDatabase, SupportedKeystore } from '@celo/phone-number-privacy-signer/dist/config'
 import {
   DefaultKeyName,
   KeyProvider,
 } from '@celo/phone-number-privacy-signer/dist/common/key-management/key-provider-base'
-import { SignerConfig } from '@celo/phone-number-privacy-signer/dist/config'
+import {
+  SignerConfig,
+  SupportedDatabase,
+  SupportedKeystore,
+} from '@celo/phone-number-privacy-signer/dist/config'
+import { startSigner } from '@celo/phone-number-privacy-signer/dist/server'
 import { defined, noBool, noNumber, noString } from '@celo/utils/lib/sign-typed-data-utils'
 import { LocalWallet } from '@celo/wallet-local'
 import BigNumber from 'bignumber.js'
+import { Server } from 'http'
 import { Server as HttpsServer } from 'https'
 import { Knex } from 'knex'
-import { Server } from 'http'
 import request from 'supertest'
 import { MockKeyProvider } from '../../../signer/dist/common/key-management/mock-key-provider'
 import config from '../../src/config'
@@ -65,20 +68,11 @@ combinerConfig.domains.enabled = true
 const signerConfig: SignerConfig = {
   serviceName: 'odis-signer',
   server: {
-    port: undefined,
+    port: 8080, // actual port specified with .listen() in test setup
     sslKeyPath: undefined,
     sslCertPath: undefined,
   },
   quota: {
-    unverifiedQueryMax: 10,
-    additionalVerifiedQueryMax: 30,
-    queryPerTransaction: 2,
-    // Min balance is .01 cUSD
-    minDollarBalance: new BigNumber(1e16),
-    // Min balance is .01 cEUR
-    minEuroBalance: new BigNumber(1e16),
-    // Min balance is .005 CELO
-    minCeloBalance: new BigNumber(5e15),
     // Equivalent to 0.001 cUSD/query
     queryPriceInCUSD: new BigNumber(0.001),
   },
