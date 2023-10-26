@@ -4,7 +4,9 @@ import {
   PnpQuotaStatus,
   WarningMessage,
 } from '@celo/phone-number-privacy-common'
+import { request } from 'express'
 import { SignerResponse } from '../../common/io'
+import { Counters } from '../../common/metrics'
 import { MAX_TOTAL_QUOTA_DISCREPANCY_THRESHOLD } from '../../config'
 
 export function findCombinerQuotaState<R extends OdisRequest>(
@@ -30,6 +32,9 @@ export function findCombinerQuotaState<R extends OdisRequest>(
     // TODO(2.0.0): add alerting for this
     throw new Error(WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS)
   } else if (totalQuotaStDev > 0) {
+    Counters.warnings
+      .labels(request.url, WarningMessage.INCONSISTENT_SIGNER_QUERY_MEASUREMENTS)
+      .inc()
     warnings.push(
       WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS +
         ', using threshold signer as best guess'

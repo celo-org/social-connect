@@ -1,8 +1,15 @@
 import * as client from 'prom-client'
+import { config } from '../config'
 
 const { Counter, Histogram } = client
 
-client.collectDefaultMetrics()
+const register = new client.Registry()
+
+register.setDefaultLabels({
+  app: config.serviceName,
+})
+
+client.collectDefaultMetrics({ register })
 
 // This is just so autocomplete will remind devs what the options are.
 export enum Labels {

@@ -13,6 +13,7 @@ import {
 import { Signer, thresholdCallToSigners } from '../../../common/combine'
 import { errorResult, ResultHandler } from '../../../common/handlers'
 import { getKeyVersionInfo } from '../../../common/io'
+import { Counters } from '../../../common/metrics'
 import { getCombinerVersion, OdisConfig } from '../../../config'
 import { logDomainResponseDiscrepancies } from '../../services/log-responses'
 import { findThresholdDomainState } from '../../services/threshold-state'
@@ -23,10 +24,12 @@ export function disableDomain(
 ): ResultHandler<DisableDomainRequest> {
   return async (request, response) => {
     if (!disableDomainRequestSchema(DomainSchema).is(request.body)) {
+      Counters.warnings.labels(request.url, WarningMessage.INVALID_INPUT).inc()
       return errorResult(400, WarningMessage.INVALID_INPUT)
     }
 
     if (!verifyDisableDomainRequestAuthenticity(request.body)) {
+      Counters.warnings.labels(request.url, WarningMessage.UNAUTHENTICATED_USER).inc()
       return errorResult(401, WarningMessage.UNAUTHENTICATED_USER)
     }
 
@@ -34,7 +37,7 @@ export function disableDomain(
     const keyVersionInfo = getKeyVersionInfo(request, config, response.locals.logger)
 
     const { signerResponses, maxErrorCode } = await thresholdCallToSigners<DisableDomainRequest>(
-      response.locals.logger,
+      { url: request.url, logger: response.locals.logger },
       {
         signers,
         endpoint: getSignerEndpoint(CombinerEndpoint.DISABLE_DOMAIN),

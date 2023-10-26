@@ -1,9 +1,9 @@
+import { isE164Number } from '@celo/base/lib/phoneNumbers'
 import {
+  IdentifierPrefix,
   getIdentifierHash as baseGetIdentifierHash,
   getPrefixedIdentifier,
-  IdentifierPrefix,
-  isE164Number,
-} from '@celo/base'
+} from '@celo/odis-identifiers'
 import {
   CombinerEndpointPNP,
   KEY_VERSION_HEADER,
@@ -15,12 +15,12 @@ import { createHash } from 'crypto'
 import debugFactory from 'debug'
 import { BlsBlindingClient, WasmBlsBlindingClient } from './bls-blinding-client'
 import {
-  AuthenticationMethod,
   AuthSigner,
+  AuthenticationMethod,
   EncryptionKeySigner,
+  ServiceContext,
   getOdisPnpRequestAuth,
   queryOdis,
-  ServiceContext,
 } from './query'
 
 const debug = debugFactory('kit:odis:identifier')
