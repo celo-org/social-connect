@@ -1,16 +1,16 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 . "$(dirname -- "$0")/_/husky.sh"
 
-pretty-quick --staged --pattern '**/*.+(ts|js)'
+# pretty-quick --staged --pattern '**/*.+(ts|js)'
 
 branch="$(git rev-parse --abbrev-ref HEAD)"
-if [ $branch = prerelease* ]; then
-	echo "prerelease branch must have a pre.json"
-  FILE=.changeset/pre.json
-  if test -f "$FILE"; then
-    echo "$FILE exists."
+if  [[ $branch == prerelease* ]]; then
+	echo "checking for  pre.json"
+  PRE_JSON=.changeset/pre.json
+  if test -f "$PRE_JSON"; then
+    echo "$PRE_JSON exists."
   else
-    echo "$FILE does not exist."
+    echo "$PRE_JSON does not exist. Run yarn beta-enter to create it."
     exit 1
   fi
 fi
