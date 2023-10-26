@@ -1,5 +1,12 @@
 # @celo/phone-number-privacy-combiner
 
+## 3.3.2-beta.0
+
+### Patch Changes
+
+- @celo/identity@5.0.5-beta.0
+- @celo/encrypted-backup@5.0.5-beta.0
+
 ## 3.3.1
 
 ### Patch Changes

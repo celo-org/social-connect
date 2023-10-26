@@ -1,6 +1,6 @@
 {
   "name": "@celo/phone-number-privacy-monitor",
-  "version": "3.0.1",
+  "version": "3.0.2-beta.0",
   "private": true,
   "description": "Regularly queries ODIS to ensure the system is functioning properly",
   "author": "Celo",
@@ -26,8 +26,8 @@
     "@celo/base": "^5.0.4",
     "@celo/contractkit": "^5.0.4",
     "@celo/cryptographic-utils": "^5.0.4",
-    "@celo/encrypted-backup": "^5.0.4",
-    "@celo/identity": "^5.0.4",
+    "@celo/encrypted-backup": "^5.0.5-beta.0",
+    "@celo/identity": "^5.0.5-beta.0",
     "@celo/wallet-local": "^5.0.4",
     "@celo/phone-number-privacy-common": "^3.0.3",
     "@celo/utils": "^5.0.4",

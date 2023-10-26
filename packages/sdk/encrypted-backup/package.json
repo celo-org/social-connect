@@ -1,6 +1,6 @@
 {
   "name": "@celo/encrypted-backup",
-  "version": "5.0.4",
+  "version": "5.0.5-beta.0",
   "description": "Libraries for implemented password encrypted account backups",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@celo/connect": "^5.0.4",
     "@celo/base": "^5.0.4",
-    "@celo/identity": "^5.0.4",
+    "@celo/identity": "^5.0.5-beta.0",
     "@celo/wallet-local": "^5.0.4",
     "@celo/phone-number-privacy-common": "^3.0.3",
     "@celo/poprf": "^0.1.9",

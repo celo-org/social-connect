@@ -10,5 +10,8 @@
     "@celo/encrypted-backup": "5.0.4",
     "@celo/identity": "5.0.4"
   },
-  "changesets": []
+  "changesets": [
+    "odd-foxes-boil",
+    "tasty-gifts-itch"
+  ]
 }

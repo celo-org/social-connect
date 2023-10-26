@@ -3,7 +3,7 @@
   "author": "cLabs",
   "license": "Apache-2.0",
   "private": false,
-  "version": "0.0.1",
+  "version": "1.0.0-beta.0",
   "description": "ODIS Identifier Prefixes and functions to hash identifiers",
   "repository": "https://github.com/celo-org/social-connect",
   "main": "./lib/index.js",
