@@ -63,7 +63,7 @@ jobs:
         run: |
           set -eo pipefail
           npm config set //registry.npmjs.org/:_auth=$NODE_AUTH_TOKEN
-          echo PUBLISHED_PACKAGES=$(yarn --silent ts-node publish.ts) >> $GITHUB_OUTPUT
+          echo PUBLISHED_PACKAGES=$(yarn --silent ts-node publish-alpha.ts) >> $GITHUB_OUTPUT
         id: 'publishing'
         env:
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
