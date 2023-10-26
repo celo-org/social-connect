@@ -14,16 +14,20 @@ const FAKE_OUTPUT = `
 function publish() {
   const snapshot = child_process.execSync('yarn cs publish --tag alpha --no-git-tag')
   // const snapshot = child_process.execSync(`echo "${FAKE_OUTPUT}"`)
-  const arrayOfLines = snapshot.toString().split('\n').map((line: string) => {
-    const matches = line.match(/info Publishing @celo.*$/)
-    return matches
-  })
+  const arrayOfLines = snapshot
+    .toString()
+    .split('\n')
+    .map((line: string) => {
+      const matches = line.match(/info Publishing @celo.*$/)
+      return matches
+    })
 
-
-  const pkgs = arrayOfLines.filter(line => !!line).map((line) => {
-    if (!line) return
-    return line[0].replace('info Publishing ', '').replace(' at ', '@')
-  })
+  const pkgs = arrayOfLines
+    .filter((line) => !!line)
+    .map((line) => {
+      if (!line) return
+      return line[0].replace('info Publishing ', '').replace(' at ', '@')
+    })
   const result = pkgs.length ? JSON.stringify(pkgs) : 'no-op'
   process.stdout.write(result)
 }
