@@ -25,7 +25,7 @@ jobs:
       service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
       artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
       tag: ${{ github.sha }}
-      platforms: 'linux/amd64'
+      #platforms: 'linux/amd64'
       context: .
       file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
       trivy: true
@@ -40,7 +40,7 @@ jobs:
       service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
       artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
       tag: ${{ github.sha }}
-      platforms: 'linux/amd64'
+      #platforms: 'linux/amd64'
       context: .
       file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
       trivy: true
