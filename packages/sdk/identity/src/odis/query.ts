@@ -52,31 +52,31 @@ export interface ServiceContext {
 }
 
 export const ODIS_STAGING_CONTEXT: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-phone-number-privacy-stg.cloudfunctions.net/combinerGen2',
+  odisUrl: 'https://odis-combiner-staging.integration-tests.celo-networks-dev.org',
   odisPubKey:
     '7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA',
 }
 
 export const ODIS_ALFAJORES_CONTEXT_PNP: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2',
+  odisUrl: 'https://odis-combiner-alfajores.alfajores.celo-testnet.org',
   odisPubKey:
     'kPoRxWdEdZ/Nd3uQnp3FJFs54zuiS+ksqvOm9x8vY6KHPG8jrfqysvIRU0wtqYsBKA7SoAsICMBv8C/Fb2ZpDOqhSqvr/sZbZoHmQfvbqrzbtDIPvUIrHgRS0ydJCMsA',
 }
 
 export const ODIS_ALFAJORES_CONTEXT_DOMAINS: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-phone-number-privacy.cloudfunctions.net/combinerGen2',
+  odisUrl: 'https://odis-combiner-alfajores.alfajores.celo-testnet.org',
   odisPubKey:
     '+ZrxyPvLChWUX/DyPw6TuGwQH0glDJEbSrSxUARyP5PuqYyP/U4WZTV1e0bAUioBZ6QCJMiLpDwTaFvy8VnmM5RBbLQUMrMg5p4+CBCqj6HhsMfcyUj8V0LyuNdStlCB',
 }
 
 export const ODIS_MAINNET_CONTEXT_PNP: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerGen2',
+  odisUrl: 'https://odis-combiner-mainnet.rc1-europe-west1.celo-testnet.org',
   odisPubKey:
     'FvreHfLmhBjwxHxsxeyrcOLtSonC9j7K3WrS4QapYsQH6LdaDTaNGmnlQMfFY04Bp/K4wAvqQwO9/bqPVCKf8Ze8OZo8Frmog4JY4xAiwrsqOXxug11+htjEe1pj4uMA',
 }
 
 export const ODIS_MAINNET_CONTEXT_DOMAINS: ServiceContext = {
-  odisUrl: 'https://us-central1-celo-pgpnp-mainnet.cloudfunctions.net/combinerGen2',
+  odisUrl: 'https://odis-combiner-mainnet.rc1-europe-west1.celo-testnet.org',
   odisPubKey:
     'LX4tLiuYm8geZ3ztmH7oIWz4ohXt3ePRTd9BbG9RO86NMrApflioiOzKYtIsyjEA0uarnX8Emo+luTY4bwEWpgZDyPYE6UMWAoBaZBdy6NDMgAxSbdNtaQEq51fBjCUA',
 }
