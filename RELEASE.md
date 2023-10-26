@@ -14,37 +14,28 @@ finally `changeset publish` will go thru and publish to npm the packages that ne
 
 after go ahead and run `git push --follow-tags` to push git tags up to github.
 
-## for pre releasing
+## For pre releasing
 
-changesets has 2 strategies for pre release versions.
+For Detailed Steps read scripts/beta-mode.sh
 
-The first is to enter `pre` mode on changesets. [docs here](https://github.com/changesets/changesets/blob/main/docs/prereleases.md)
+1. Run `yarn beta-enter`
+This will enter into the pre mode of changesets and create a prerelease/beta branch and push it up to origin(github)
 
-```
-yarn changeset pre enter beta
-yarn changeset version
-git add .
-git commit -m "Enter prerelease mode and version packages"
-yarn changeset publish
-git push --follow-tags
-```
+Any time a commit is pushed to prerelease/** github will go and open a specially Version Packages (Beta) PR. You can merge this and packages will be published as specified in the branch (should be beta)
 
-The other is to append --snapshot. which is great for daily releases.
+2. If you need to release another beta make a changeset and commit it up.
 
-```
-yarn changeset version --snapshot canary
+3. When done run `yarn beta-exit`
+This will exit changeset pre mode. Push up.
 
-yarn changeset publish --no-git-tag --snapshot
-
-```
-<https://github.com/changesets/changesets/blob/main/docs/snapshot-releases.md>
-
+4. Now you can Open a Pr with your prerelease/? branch against main.
 
 ## Package Versioning
 
 Based on semantic versioning best practices [semver.org](semver.org)
 
 Given a version number MAJOR.MINOR.PATCH, increment the:
+
 - MAJOR version when you make incompatible API changes
 - MINOR version when you add functionality in a backward compatible manner
 - PATCH version when you make backward compatible bug fixes
