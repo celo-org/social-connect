@@ -22,12 +22,8 @@
     "cs": "yarn changeset",
     "bump": "yarn changeset version",
     "release": "yarn build && yarn cs publish",
-    "postinstall": "yarn run lerna run postinstall"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern '**/*.+(ts|js)'"
-    }
+    "postinstall": "yarn run lerna run postinstall",
+    "prepare": "husky install"
   },
   "workspaces": {
     "packages": [
@@ -55,7 +51,7 @@
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "husky": "^3.1.0",
+    "husky": "^8.0.0",
     "jest": "^29.0.2",
     "jest-circus": "^29.0.2",
     "jest-junit": "^14.0.1",
