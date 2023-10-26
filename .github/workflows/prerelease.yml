@@ -67,7 +67,7 @@ jobs:
         id: 'publishing'
         env:
           NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
-      - name: View output
+      - name: Fail if no output (publishing error)
         run: |
           echo ${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}
           [ '${{ steps.publishing.outputs.PUBLISHED_PACKAGES }}' == '' ] && exit 1
