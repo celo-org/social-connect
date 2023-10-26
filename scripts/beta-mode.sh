@@ -27,3 +27,4 @@ echo "IMPORTANT: once you exit pre mode you should open a PR to merge your branc
 # 11. open PR for prerelease into main
 # NOTE: if you want to exit pre mode and not publish a beta, you can run `yarn beta-exit --no-publis
 # TODO right now if you merge the changeset-prerelease Version Packages PR into its BASE it might be possible to end up in a state where pre mode is exited and you merge version packages in and end up pubblishing a regular package
+exit 0
