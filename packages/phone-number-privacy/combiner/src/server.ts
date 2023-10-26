@@ -132,7 +132,7 @@ export function startProxy(req: any, res: any, config: CombinerConfig) {
 
   switch (config.proxy.deploymentEnv) {
     case 'mainnet':
-      destinationUrl = 'https://odis-combiner-mainnet.mainnet.celo-testnet.org'
+      destinationUrl = 'https://odis-combiner-mainnet.rc1-europe-west1.celo-testnet.org'
       break
 
     case 'alfajores':
