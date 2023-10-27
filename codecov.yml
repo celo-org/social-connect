@@ -5,10 +5,10 @@ coverage:
         target: auto
         threshold: null
         removed_code_behavior: adjust_base
-      odis:
+      packages:
         paths:
-          - packages/phone-number-privacy
-      sdk:
+          - packages/
+      apps:
         paths:
-          - packages/sdk
+          - apps/
     patch: off

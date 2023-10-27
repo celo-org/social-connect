@@ -7,7 +7,7 @@
   "author": "Celo",
   "license": "Apache-2.0",
   "homepage": "https://celo-sdk-docs.readthedocs.io/en/latest/identity",
-  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/sdk/identity",
+  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/identity",
   "keywords": [
     "celo",
     "blockchain",

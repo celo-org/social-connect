@@ -5,10 +5,10 @@ FROM scratch AS packages
 # Assemble all dependencies into the packages folder so the second stage can select whether to
 # include all packages, or just the phone-number-privacy packages.
 WORKDIR /celo-phone-number-privacy/
-COPY packages/phone-number-privacy/signer packages/phone-number-privacy/signer
-COPY packages/phone-number-privacy/common packages/phone-number-privacy/common
-COPY packages/sdk/encrypted-backup packages/sdk/encrypted-backup
-COPY packages/sdk/identity packages/sdk/identity
+COPY apps/combiner apps/combiner
+COPY packages/common packages/common
+COPY packages/encrypted-backup packages/encrypted-backup
+COPY packages/identity packages/identity
 COPY packages/odis-identifiers packages/odis-identifiers
 
 ##### Main stage
@@ -28,18 +28,17 @@ COPY .git .git
 # phone-number-privacy package being copied into the image, and therefore it will only build using
 # published dependencies. Setting ONLY_PUBLISHED_DEPENDENCIES to "" will copy in all dependecies.
 ARG ONLY_PUBLISHED_DEPENDENCIES=""
-ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+phone-number-privacy/signer}
+ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+phone-number-privacy/combiner}
 COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} packages/${PACKAGE_SELECTOR}
 
-# Install dependencies and build. need dev deps too so  we can build (tsc)
+# Install dependencies and build.
 RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
-RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-signer run build
-# clean up dev dependencies after build
-RUN yarn workspaces focus @celo/phone-number-privacy-signer --production
+RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-combiner run build
+RUN yarn workspaces focus @celo/phone-number-privacy-combiner --production
 RUN rm -r .git
 
-# Setup and run the signer application.
+# Setup and run the combiner application.
 ENV NODE_ENV production
-WORKDIR /celo-phone-number-privacy/packages/phone-number-privacy/signer
+WORKDIR /celo-phone-number-privacy/apps/combiner
 EXPOSE 8080
 ENTRYPOINT ["yarn", "start:docker"]

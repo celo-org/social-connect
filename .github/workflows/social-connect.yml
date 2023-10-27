@@ -201,10 +201,10 @@ jobs:
           yarn --cwd=packages/odis-identifiers test
       - name: Run Encrypted Backup tests
         run: |
-          yarn --cwd=packages/sdk/encrypted-backup test
+          yarn --cwd=packages/encrypted-backup test
       - name: Run Identity Tests
         run: |
-          yarn --cwd=packages/sdk/identity test
+          yarn --cwd=packages/identity test
 
       - name: Upload Jest Test Results
         uses: actions/upload-artifact@v3
@@ -220,7 +220,7 @@ jobs:
     needs: install-dependencies
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy/combiner') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'apps/combiner') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
@@ -237,7 +237,7 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - name: Run Tests for combiner
         run: |
-          yarn --cwd=packages/phone-number-privacy/combiner test:coverage
+          yarn --cwd=apps/combiner test:coverage
   odis-test:
     name: ODIS (signer + common) test
     needs: install-dependencies
@@ -247,7 +247,8 @@ jobs:
     timeout-minutes: 30
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages/phone-number-privacy') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'packages') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'apps/signer') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
@@ -264,7 +265,7 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - name: Run Tests for common package
         run: |
-          yarn --cwd=packages/phone-number-privacy/common test:coverage
+          yarn --cwd=packages/common test:coverage
       - name: Run Tests for signer
         run: |
-          yarn --cwd=packages/phone-number-privacy/signer test:coverage
+          yarn --cwd=apps/signer test:coverage

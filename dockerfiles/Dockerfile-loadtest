@@ -5,10 +5,10 @@ FROM scratch AS packages
 # Assemble all dependencies into the packages folder so the second stage can select whether to
 # include all packages, or just the phone-number-privacy packages.
 WORKDIR /celo-phone-number-privacy/
-COPY packages/phone-number-privacy/monitor packages/phone-number-privacy/monitor
-COPY packages/phone-number-privacy/common packages/phone-number-privacy/common
-COPY packages/sdk/encrypted-backup packages/sdk/encrypted-backup
-COPY packages/sdk/identity packages/sdk/identity
+COPY apps/monitor apps/monitor
+COPY packages/common packages/common
+COPY packages/encrypted-backup packages/encrypted-backup
+COPY packages/identity packages/identity
 COPY packages/odis-identifiers packages/odis-identifiers
 
 ##### Main stage
@@ -41,6 +41,6 @@ RUN rm -r .git
 
 # Setup and run the signer application.
 ENV NODE_ENV production
-WORKDIR /celo-phone-number-privacy/packages/phone-number-privacy/monitor
+WORKDIR /celo-phone-number-privacy/apps/monitor
 EXPOSE 8080
 ENTRYPOINT ["yarn", "loadTest"]
