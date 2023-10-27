@@ -17,9 +17,9 @@
     "config:set:staging": "firebase functions:config:set --project celo-phone-number-privacy-stg",
     "config:set:alfajores": "firebase functions:config:set --project celo-phone-number-privacy",
     "config:set:mainnet": "firebase functions:config:set --project celo-pgpnp-mainnet",
-    "clean": "tsc -b . --clean",
-    "build": "tsc -b .",
-    "lint": "eslint .",
+    "clean": "yarn run --top-level tsc --build --clean",
+    "build": "yarn run --top-level tsc  ",
+    "lint": "yarn run --top-level eslint .",
     "loadTest": "ts-node src/scripts/run-load-test.ts run"
   },
   "dependencies": {
@@ -28,16 +28,17 @@
     "@celo/cryptographic-utils": "^5.0.4",
     "@celo/encrypted-backup": "^5.0.4",
     "@celo/identity": "^5.0.4",
-    "@celo/wallet-local": "^5.0.4",
     "@celo/phone-number-privacy-common": "^3.0.3",
     "@celo/utils": "^5.0.4",
-    "yargs": "^14.0.0",
+    "@celo/wallet-local": "^5.0.4",
     "firebase-admin": "^9.12.0",
-    "firebase-functions": "^3.15.7"
+    "firebase-functions": "^3.15.7",
+    "yargs": "^14.0.0"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.3.3",
-    "firebase-tools": "9.20.0"
+    "firebase-tools": "9.20.0",
+    "jest": "^29.0.2"
   },
   "engines": {
     "node": ">=14"

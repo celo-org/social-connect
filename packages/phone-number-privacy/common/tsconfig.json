@@ -3,8 +3,8 @@
   "compilerOptions": {
     "declaration": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
   },
-  "include": ["src", "index.d.ts"],
+  "include": ["src", "bunyan-debug.d.ts"],
   "compileOnSave": true
 }

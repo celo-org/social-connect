@@ -2,17 +2,16 @@
   "name": "@celo/odis-identifiers",
   "author": "cLabs",
   "license": "Apache-2.0",
-  "private": false,
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "ODIS Identifier Prefixes and functions to hash identifiers",
   "repository": "https://github.com/celo-org/social-connect",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
-    "build": "tsc -b .",
-    "clean": "tsc -b . --clean",
-    "test": "jest --runInBand",
-    "lint": "eslint ."
+    "build": "yarn run --top-level tsc -b .",
+    "clean": "yarn run --top-level tsc -b . --clean",
+    "test": "yarn run --top-level jest --runInBand",
+    "lint": "yarn run --top-level eslint ."
   },
   "devDependencies": {
     "web3-utils": "1.10.0"

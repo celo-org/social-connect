@@ -8,11 +8,14 @@ To create a changeset run `changeset add` (or  `yarn cs`)
 
 This will bring up an interactive console which asks which packages are affect and if they require minor or major update.
 
-when time to release new versions of npm package run `changeset version` this will look thru the changeset files that have been generated since last release to bump the versions for package automatically to major if any changesets specify major change minor if only minor and patch if a the package had no changesets of its own but depends on one which will be updated.
+## Releasing
 
-finally `changeset publish` will go thru and publish to npm the packages that need publishing.
+This repo is setup to automatically version and release packages
 
-after go ahead and run `git push --follow-tags` to push git tags up to github.
+Each time a changeset is merged into main a "Version Packages" PR will automatically be opened showing the next versions for all packages and convert changeset files into changelog.md. Merging this PR will
+
+* publish packages to NPM
+* create GH release notes
 
 ## For pre releasing
 
@@ -36,8 +39,8 @@ Based on semantic versioning best practices [semver.org](semver.org)
 
 Given a version number MAJOR.MINOR.PATCH, increment the:
 
-- MAJOR version when you make incompatible API changes
-- MINOR version when you add functionality in a backward compatible manner
-- PATCH version when you make backward compatible bug fixes
+* MAJOR version when you make incompatible API changes
+* MINOR version when you add functionality in a backward compatible manner
+* PATCH version when you make backward compatible bug fixes
 
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
