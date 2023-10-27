@@ -26,8 +26,7 @@
     "release": "yarn build && yarn cs publish",
     "beta-enter": "bash scripts/beta-mode.sh",
     "beta-exit": "yarn cs pre exit && git commit -am 'Complete beta releasing'",
-    "postinstall": "yarn workspaces foreach --all -piv run postinstall",
-    "prepare": "husky install"
+    "postinstall": "yarn husky install && yarn workspaces foreach --all -piv run postinstall"
   },
   "workspaces": [
     "packages/*",
