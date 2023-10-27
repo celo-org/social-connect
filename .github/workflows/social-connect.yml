@@ -9,6 +9,7 @@ on:
     branches:
       - main
       - changeset-release/prerelease/*
+      - prerelease/*
   pull_request:
     branches:
       - main
