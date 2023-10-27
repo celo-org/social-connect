@@ -105,11 +105,10 @@ jobs:
           key: code-${{ github.sha }}
           restore-keys: |
             code-${{ github.sha }}
+      - name: "enable corepack"
+        run : sudo corepack enable yarn
       - name: Install yarn dependencies
         run: git config --global url."https://".insteadOf ssh:// && yarn install
-        if: steps.cache_node.outputs.cache-hit != 'true'
-      - name: Run yarn postinstall if cache hitted
-        run: yarn run postinstall
         if: steps.cache_node.outputs.cache-hit == 'true'
       - name: Fail if any file changed on git
         run: |
@@ -119,7 +118,7 @@ jobs:
             exit 1
           fi
       - name: Build packages
-        run: yarn build --ignore docs --include-dependencies
+        run: yarn build
       - name: Check licenses
         if: steps.cache_node.outputs.cache-hit != 'true'
         run: |
@@ -153,18 +152,27 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
           echo "$GITHUB_CONTEXT"
+      - name: Filter paths
+        id: changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            markdown:
+              - added|deleted|modified: '*.md'
+            others:
+              - added|deleted|modified: "!('*.md')"
       - name: Find ChangeSet in PR
         uses: peter-evans/find-comment@v2
         id: fc
-        # Skip if author is github-bot from celo-org
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
+        # Skip if author is github-bot from celo-org or only md files changed
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot' && steps.changes.outputs.others == 'true'
         with:
           issue-number: ${{ github.event.pull_request.number }}
           body-includes: Changeset detected
           comment-author: changeset-bot[bot]
       - name: Fail if Changeset commit not found
-        # Skip if author is github-bot from celo-org
-        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot'
+        # Skip if author is github-bot from celo-org or only md files changed
+        if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot' && steps.changes.outputs.others == 'true'
         run: |
           if ${{ steps.fc.outputs.comment-id == 0 }}; then
             echo "Error: No Changeset Found. You create an empty changeset with 'yarn cs add --empty'" && exit 1

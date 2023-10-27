@@ -50,6 +50,15 @@ dist/
 npm-debug.log
 yarn-error.log
 
+# yarn3 files https://yarnpkg.com/getting-started/qa#which-files-should-be-gitignored
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
 # BUCK
 buck-out/
 \.buckd/
@@ -70,8 +79,6 @@ buck-out/
 
 coverage
 coverage.json
-
-lerna-debug.log
 
 # Typechain types
 **/types/typechain/
@@ -107,4 +114,5 @@ scripts/failedSDKs.json
 
 packages/protocol/types/typechain-mento/*.d.ts
 tmp
+docs/examples/lib
 packages/odis-identifiers/lib

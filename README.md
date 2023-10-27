@@ -1,10 +1,12 @@
 # SocialConnect
 
+*For Dev Setup see [CONTRIBUTING.MD](.github/CONTRIBUTING.md)*
+
 SocialConnect is an open source protocol that maps off-chain personal **identifiers** (such as phone numbers, twitter handles, etc.) to on-chain account **addresses**. This enables a convenient and interoperable user experience for use cases such as:
 
--   payments - send money directly to your friend's phone number!
--   social discovery - find someone's account based on their twitter!
--   any other identity applications!
+- payments - send money directly to your friend's phone number!
+- social discovery - find someone's account based on their twitter!
+- any other identity applications!
 
 Here is a short demo of a payment from a [Kaala](https://kaala.app/) wallet user to a [Libera](https://medium.com/impactmarket/ready-to-unlock-your-potential-meet-libera-your-new-crypto-wallet-d1053f917b95) wallet user, with only a phone number:
 
@@ -160,9 +162,9 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 
 The [Runtime Environments section](docs/privacy.md#runtime-environments) shows instructions for using SocialConnect with:
 
--   [NodeJS](https://nodejs.org) (see [Runtime Environments > Node](docs/privacy.md#node)),
--   [React Native](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiK9paNjYH9AhUIesAKHQZ1CvYQFnoECA0QAQ&url=https%3A%2F%2Freactnative.dev%2F&usg=AOvVaw3N725EvNXK2_crezzoIs9d) (see [Runtime Environments > React Native](docs/privacy.md#react-native)), and
--   Web (see [Runtime Environments > Web](privacy.md#web))
+- [NodeJS](https://nodejs.org) (see [Runtime Environments > Node](docs/privacy.md#node)),
+- [React Native](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiK9paNjYH9AhUIesAKHQZ1CvYQFnoECA0QAQ&url=https%3A%2F%2Freactnative.dev%2F&usg=AOvVaw3N725EvNXK2_crezzoIs9d) (see [Runtime Environments > React Native](docs/privacy.md#react-native)), and
+- Web (see [Runtime Environments > Web](privacy.md#web))
 <!--
 The [emisianto web app](https://emisianto.vercel.app/) is a sample implementation of a phone number issuer. The code is hosted at [celo-org/emisianto](https://github.com/celo-org/emisianto). -->
 

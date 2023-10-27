@@ -7,4 +7,6 @@ package.json
 
 packages/**/dist
 packages/**/lib
+docs/examples/**/lib
+
 
