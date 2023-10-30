@@ -17,9 +17,8 @@ runs:
         REBUILD_PACKAGE: ${{ inputs.rebuild-package }}
       with:
         path: |
-          node_modules
-          packages/**/node_modules
-        key: node-${{ runner.os }}-${{ runner.arch }}-${{ env.NODE_MODULE_CACHE_VERSION }}-${{ hashFiles('**/yarn.lock') }}-${{ inputs.package-json-checksum }}
+          './.yarn/cache'
+        key: node-${{ runner.os }}-${{ runner.arch }}-${{ env.NODE_MODULE_CACHE_VERSION }}-${{ hashFiles('yarn.lock') }}-${{ inputs.package-json-checksum }}
         enableCrossOsArchive: true
         fail-on-cache-miss: "!${{ fromJSON(env.REBUILD_PACKAGE) }}"
     - name: Restore build artifacts cache
