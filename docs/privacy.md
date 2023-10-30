@@ -31,7 +31,7 @@ Below describes the steps to derive the *obfuscated identifier*, which is public
 |**pepper**| Unique secret, obtained by taking the first 13 characters of the sha256 hash of the *unblinded signature*|
 |**obfuscated identifier**| Identifier used for on-chain attestations, obtained by hashing the *plaintext identifier*, *identifier prefix*, and *pepper* using this schema: `sha3(sha3({prefix}://{plaintextIdentifier})__{pepper})`. For backwards compatibility, identifiers that are phone numbers use this schema: `sha3({prefix}://{plaintextIdentifier}__{pepper})`|
 
-You can see these steps implemented in the `@celo/identity` sdk [here](https://github.com/celo-org/socialconnect/blob/main/packages/sdk/identity/src/odis/identifier.ts).
+You can see these steps implemented in the `@celo/identity` sdk [here](https://github.com/celo-org/socialconnect/blob/main/packages/identity/src/odis/identifier.ts).
 
 Here is a concrete example:
 
@@ -45,7 +45,7 @@ Here is a concrete example:
 
 Each identifier type has a corresponding prefix that is appended before the blinding and hashing. This prevents identifiers from different sources from having the same pepper (ie. if you have the same handle for twitter and instagram, the obfuscated identifier should be different for each).
 
-These are the prefixes currently defined in the SDK. We are using [DID methods](https://w3c.github.io/did-spec-registries/#did-methods) as prefixes when they exist. We welcome PRs here and [in the SDK](https://github.com/celo-org/celo-monorepo/blob/master/packages/sdk/identity/src/odis/identifier.ts#L27-L34) if you'd like to add a new identifier type and prefix! You can also cast an arbitrary string as your prefix if you would like.
+These are the prefixes currently defined in the SDK. We are using [DID methods](https://w3c.github.io/did-spec-registries/#did-methods) as prefixes when they exist. We welcome PRs here and [in the SDK](https://github.com/celo-org/celo-monorepo/blob/master/packages/identity/src/odis/identifier.ts#L27-L34) if you'd like to add a new identifier type and prefix! You can also cast an arbitrary string as your prefix if you would like.
 
 | Type | Prefix |
 |---------|--------|
@@ -169,7 +169,7 @@ await OdisUtils.Identifier.getObfuscatedIdentifier(
 //   unblindedSignature: '9as8duf98as...df80u'
 // }
 ```
-*Source code for `getObfuscatedIdentifier` and other relevant functions [here](https://github.com/celo-org/celo-monorepo/blob/master/packages/sdk/identity/src/odis/identifier.ts)*
+*Source code for `getObfuscatedIdentifier` and other relevant functions [here](https://github.com/celo-org/celo-monorepo/blob/master/packages/identity/src/odis/identifier.ts)*
 
 -------------
 

@@ -5,10 +5,10 @@ FROM scratch AS packages
 # Assemble all dependencies into the packages folder so the second stage can select whether to
 # include all packages, or just the phone-number-privacy packages.
 WORKDIR /celo-phone-number-privacy/
-COPY packages/phone-number-privacy/monitor packages/phone-number-privacy/monitor
-COPY packages/phone-number-privacy/common packages/phone-number-privacy/common
-COPY packages/sdk/encrypted-backup packages/sdk/encrypted-backup
-COPY packages/sdk/identity packages/sdk/identity
+COPY apps/monitor apps/monitor
+COPY packages/common packages/common
+COPY packages/encrypted-backup packages/encrypted-backup
+COPY packages/identity packages/identity
 COPY packages/odis-identifiers packages/odis-identifiers
 
 ##### Main stage
@@ -28,9 +28,8 @@ COPY .git .git
 # phone-number-privacy package being copied into the image, and therefore it will only build using
 # published dependencies. Setting ONLY_PUBLISHED_DEPENDENCIES to "" will copy in all dependecies.
 ARG ONLY_PUBLISHED_DEPENDENCIES=""
-ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+phone-number-privacy/monitor}
-COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} packages/${PACKAGE_SELECTOR}
-
+ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+apps/monitor}
+COPY --from=packages celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${PACKAGE_SELECTOR}
 # Install dependencies and build.
 RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
 
@@ -41,6 +40,6 @@ RUN rm -r .git
 
 # Setup and run the signer application.
 ENV NODE_ENV production
-WORKDIR /celo-phone-number-privacy/packages/phone-number-privacy/monitor
+WORKDIR /celo-phone-number-privacy/apps/monitor
 EXPOSE 8080
 ENTRYPOINT ["yarn", "loadTest"]

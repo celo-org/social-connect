@@ -31,6 +31,7 @@ import {
   DefaultKeyName,
   KeyProvider,
 } from '@celo/phone-number-privacy-signer/dist/common/key-management/key-provider-base'
+import { MockKeyProvider } from '@celo/phone-number-privacy-signer/dist/common/key-management/mock-key-provider'
 import {
   SignerConfig,
   SupportedDatabase,
@@ -44,7 +45,6 @@ import { Server } from 'http'
 import { Server as HttpsServer } from 'https'
 import { Knex } from 'knex'
 import request from 'supertest'
-import { MockKeyProvider } from '../../../signer/dist/common/key-management/mock-key-provider'
 import config from '../../src/config'
 import { startCombiner } from '../../src/server'
 import { serverClose } from '../utils'
