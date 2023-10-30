@@ -17,7 +17,11 @@ runs:
         REBUILD_PACKAGE: ${{ inputs.rebuild-package }}
       with:
         path: |
-          './.yarn/cache'
+          ./.yarn/cache
+          node_modules
+          app/**/node_modules
+          packages/**/node_modules
+          examples/docs/node_modules
         key: node-${{ runner.os }}-${{ runner.arch }}-${{ env.NODE_MODULE_CACHE_VERSION }}-${{ hashFiles('yarn.lock') }}-${{ inputs.package-json-checksum }}
         enableCrossOsArchive: true
         fail-on-cache-miss: "!${{ fromJSON(env.REBUILD_PACKAGE) }}"

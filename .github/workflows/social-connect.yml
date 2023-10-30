@@ -86,6 +86,10 @@ jobs:
           # Update this list also in .github/actions/sync-workspace/action.yml with exactly the same list
           path: |
             ./.yarn/cache
+            node_modules
+            app/**/node_modules
+            packages/**/node_modules
+            examples/docs/node_modules
           key: node-${{ runner.os }}-${{ runner.arch }}-${{ env.NODE_MODULE_CACHE_VERSION }}-${{ hashFiles('yarn.lock') }}-${{ steps.node-checksums.outputs.PACKAGE_JSON_CHECKSUM }}
           restore-keys: |
             node-${{ runner.os }}-${{ runner.arch }}-${{ env.NODE_MODULE_CACHE_VERSION }}-
