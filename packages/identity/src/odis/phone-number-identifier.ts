@@ -38,7 +38,7 @@ export async function getPhoneNumberIdentifier(
   clientVersion?: string,
   blsBlindingClient?: BlsBlindingClient,
   sessionID?: string,
-  keyVersion?: number
+  keyVersion?: number,
 ): Promise<PhoneNumberHashDetails> {
   debug('Getting phone number pepper')
 
@@ -53,7 +53,7 @@ export async function getPhoneNumberIdentifier(
       clientVersion,
       blsBlindingClient,
       sessionID,
-      keyVersion
+      keyVersion,
     )
   return {
     e164Number: plaintextIdentifier,
@@ -71,7 +71,7 @@ export async function getPhoneNumberIdentifier(
 export async function getBlindedPhoneNumber(
   e164Number: string,
   blsBlindingClient: BlsBlindingClient,
-  seed?: Buffer
+  seed?: Buffer,
 ): Promise<string> {
   return getBlindedIdentifier(e164Number, IdentifierPrefix.PHONE_NUMBER, blsBlindingClient, seed)
 }
@@ -89,7 +89,7 @@ export async function getBlindedPhoneNumberSignature(
   base64BlindedMessage: string,
   clientVersion?: string,
   sessionID?: string,
-  keyVersion?: number
+  keyVersion?: number,
 ): Promise<string> {
   return getBlindedIdentifierSignature(
     account,
@@ -98,7 +98,7 @@ export async function getBlindedPhoneNumberSignature(
     base64BlindedMessage,
     clientVersion,
     sessionID,
-    keyVersion
+    keyVersion,
   )
 }
 
@@ -109,14 +109,14 @@ export async function getBlindedPhoneNumberSignature(
 export async function getPhoneNumberIdentifierFromSignature(
   e164Number: string,
   base64BlindedSignature: string,
-  blsBlindingClient: BlsBlindingClient
+  blsBlindingClient: BlsBlindingClient,
 ): Promise<PhoneNumberHashDetails> {
   const { plaintextIdentifier, obfuscatedIdentifier, pepper, unblindedSignature } =
     await getObfuscatedIdentifierFromSignature(
       e164Number,
       IdentifierPrefix.PHONE_NUMBER,
       base64BlindedSignature,
-      blsBlindingClient
+      blsBlindingClient,
     )
   return {
     e164Number: plaintextIdentifier,
@@ -132,7 +132,7 @@ export async function getPhoneNumberIdentifierFromSignature(
  */
 export function isBalanceSufficientForSigRetrieval(
   dollarBalance: BigNumber.Value,
-  celoBalance: BigNumber.Value
+  celoBalance: BigNumber.Value,
 ) {
   return (
     new BigNumber(dollarBalance).isGreaterThanOrEqualTo(ODIS_MINIMUM_DOLLAR_BALANCE) ||

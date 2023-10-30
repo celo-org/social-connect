@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 . "$(dirname -- "$0")/_/husky.sh"
 
-yarn pretty-quick --staged --pattern '**/*.+(ts|js)'
+yarn lint-staged
 
 bash scripts/prereleasecheck.sh

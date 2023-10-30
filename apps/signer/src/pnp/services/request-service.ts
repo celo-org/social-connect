@@ -16,13 +16,13 @@ export interface PnpRequestService {
     address: string,
     blindedQuery: string,
     signature: string,
-    ctx: Context
+    ctx: Context,
   ): Promise<void>
   getUsedQuotaForAccount(address: string, ctx: Context): Promise<number>
   getDuplicateRequest(
     address: string,
     blindedQuery: string,
-    ctx: Context
+    ctx: Context,
   ): Promise<PnpSignRequestRecord | undefined>
   removeOldRequests(daysToKeep: number, ctx: Context): Promise<number>
 }
@@ -34,13 +34,13 @@ export class DefaultPnpRequestService implements PnpRequestService {
     account: string,
     blindedQueryPhoneNumber: string,
     signature: string,
-    ctx: Context
+    ctx: Context,
   ): Promise<void> {
     return traceAsyncFunction('DefaultPnpRequestService - recordRequest', () =>
       this.db.transaction(async (trx) => {
         await insertRequest(this.db, account, blindedQueryPhoneNumber, signature, ctx.logger, trx)
         await incrementQueryCount(this.db, account, ctx.logger, trx)
-      })
+      }),
     )
   }
 
@@ -48,15 +48,15 @@ export class DefaultPnpRequestService implements PnpRequestService {
     return traceAsyncFunction('DefaultPnpRequestService - getUsedQuotaForAccount', () =>
       wrapError(
         getPerformedQueryCount(this.db, account, ctx.logger),
-        ErrorMessage.FAILURE_TO_GET_PERFORMED_QUERY_COUNT
-      )
+        ErrorMessage.FAILURE_TO_GET_PERFORMED_QUERY_COUNT,
+      ),
     )
   }
 
   public async getDuplicateRequest(
     account: string,
     blindedQueryPhoneNumber: string,
-    ctx: Context
+    ctx: Context,
   ): Promise<PnpSignRequestRecord | undefined> {
     try {
       const res = await getRequestIfExists(this.db, account, blindedQueryPhoneNumber, ctx.logger)
@@ -71,13 +71,13 @@ export class DefaultPnpRequestService implements PnpRequestService {
     if (daysToKeep < 0) {
       ctx.logger.error(
         { daysToKeep },
-        'RemoveOldRequests - DaysToKeep should be bigger than or equal to zero'
+        'RemoveOldRequests - DaysToKeep should be bigger than or equal to zero',
       )
       return 0
     }
     const since: Date = new Date(Date.now() - daysToKeep * 24 * 60 * 60 * 1000)
     return traceAsyncFunction('DefaultPnpRequestService - removeOldRequests', () =>
-      deleteRequestsOlderThan(this.db, since, ctx.logger)
+      deleteRequestsOlderThan(this.db, since, ctx.logger),
     )
   }
 }
@@ -87,11 +87,11 @@ export class MockPnpRequestService implements PnpRequestService {
     account: string,
     blindedQueryPhoneNumber: string,
     signature: string,
-    ctx: Context
+    ctx: Context,
   ): Promise<void> {
     ctx.logger.info(
       { account, blindedQueryPhoneNumber, signature },
-      'MockPnpRequestService - recordRequest'
+      'MockPnpRequestService - recordRequest',
     )
     return
   }
@@ -104,11 +104,11 @@ export class MockPnpRequestService implements PnpRequestService {
   public async getDuplicateRequest(
     account: string,
     blindedQueryPhoneNumber: string,
-    ctx: Context
+    ctx: Context,
   ): Promise<PnpSignRequestRecord | undefined> {
     ctx.logger.info(
       { account, blindedQueryPhoneNumber },
-      'MockPnpRequestService - isDuplicateRequest'
+      'MockPnpRequestService - isDuplicateRequest',
     )
     return undefined
   }

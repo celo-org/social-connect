@@ -20,7 +20,7 @@ import { findThresholdDomainState } from '../../services/threshold-state'
 
 export function domainQuota(
   signers: Signer[],
-  config: OdisConfig
+  config: OdisConfig,
 ): ResultHandler<DomainQuotaStatusRequest> {
   return async (request, response) => {
     if (!domainQuotaStatusRequestSchema(DomainSchema).is(request.body)) {
@@ -46,7 +46,7 @@ export function domainQuota(
         requestTimeoutMS: config.odisServices.timeoutMilliSeconds,
         responseSchema: domainQuotaStatusResponseSchema(SequentialDelayDomainStateSchema),
         shouldCheckKeyVersion: false,
-      }
+      },
     )
 
     logDomainResponseDiscrepancies(response.locals.logger, signerResponses)

@@ -26,7 +26,7 @@ describe('Identifier hashing', () => {
       it(`with IdentifierPrefix: ${prefix}`, () => {
         const expectedHash = EXPECTED_HASH_FOR_PREFIX[prefix]
         expect(getIdentifierHash(sha3, TEST_PLAINTEXT_IDENTIFIER, prefix, TEST_SALT)).toBe(
-          expectedHash
+          expectedHash,
         )
       })
     })

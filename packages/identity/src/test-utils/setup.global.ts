@@ -14,7 +14,7 @@ export default async function globalSetup() {
     console.log('\nstarting ganache... set NO_GANACHE=true to disable')
     const chainDataPath = path.join(
       path.dirname(require.resolve('@celo/celo-devchain')),
-      '../chains'
+      '../chains',
     )
     await baseSetup(path.resolve(chainDataPath), 'v10.tar.gz', {
       from_targz: true,

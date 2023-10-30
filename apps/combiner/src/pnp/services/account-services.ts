@@ -45,7 +45,10 @@ export class CachingAccountService implements AccountService {
 
 // tslint:disable-next-line:max-classes-per-file
 export class ContractKitAccountService implements AccountService {
-  constructor(private readonly logger: Logger, private readonly kit: ContractKit) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly kit: ContractKit,
+  ) {}
 
   async getAccount(address: string): Promise<string> {
     return traceAsyncFunction('ContractKitAccountService - getAccount', async () => {

@@ -67,12 +67,12 @@ describe(getPhoneNumberIdentifier, () => {
         mockAccount,
         authSigner,
         serviceContext,
-        base64BlindedMessage
+        base64BlindedMessage,
       )
       const base64UnblindedSig = await blsBlindingClient.unblindAndVerifyMessage(base64BlindSig)
 
       await expect(
-        getPhoneNumberIdentifier(mockE164Number, mockAccount, authSigner, serviceContext)
+        getPhoneNumberIdentifier(mockE164Number, mockAccount, authSigner, serviceContext),
       ).resolves.toMatchObject({
         e164Number: mockE164Number,
         pepper: expectedPepper,
@@ -97,13 +97,13 @@ describe(getPhoneNumberIdentifier, () => {
         mockAccount,
         authSigner,
         serviceContext,
-        base64BlindedMessage
+        base64BlindedMessage,
       )
 
       const phoneNumberHashDetails = await getPhoneNumberIdentifierFromSignature(
         mockE164Number,
         base64BlindSig,
-        blsBlindingClient
+        blsBlindingClient,
       )
 
       expect(phoneNumberHashDetails.phoneHash).toEqual(expectedPhoneHash)
@@ -115,14 +115,14 @@ describe(getPhoneNumberIdentifier, () => {
     fetchMock.mock(endpoint, 403)
 
     await expect(
-      getPhoneNumberIdentifier(mockE164Number, mockAccount, authSigner, serviceContext)
+      getPhoneNumberIdentifier(mockE164Number, mockAccount, authSigner, serviceContext),
     ).rejects.toThrow(ErrorMessages.ODIS_QUOTA_ERROR)
   })
 
   it('Throws auth error', async () => {
     fetchMock.mock(endpoint, 401)
     await expect(
-      getPhoneNumberIdentifier(mockE164Number, mockAccount, authSigner, serviceContext)
+      getPhoneNumberIdentifier(mockE164Number, mockAccount, authSigner, serviceContext),
     ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)
   })
 })

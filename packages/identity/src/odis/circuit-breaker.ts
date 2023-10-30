@@ -82,7 +82,10 @@ export enum CircuitBreakerErrorTypes {
 }
 
 export class CircuitBreakerServiceError extends RootError<CircuitBreakerErrorTypes.SERVICE_ERROR> {
-  constructor(readonly status: number, readonly error?: Error) {
+  constructor(
+    readonly status: number,
+    readonly error?: Error,
+  ) {
     super(CircuitBreakerErrorTypes.SERVICE_ERROR)
   }
 }
@@ -176,8 +179,8 @@ export class CircuitBreakerClient {
       return Err(
         new CircuitBreakerServiceError(
           response.status,
-          new Error(`circuit breaker service returned unexpected response: ${obj.status}`)
-        )
+          new Error(`circuit breaker service returned unexpected response: ${obj.status}`),
+        ),
       )
     }
 
@@ -198,7 +201,7 @@ export class CircuitBreakerClient {
           key: this.environment.publicKey,
           oaepHash: 'sha256',
         },
-        plaintext
+        plaintext,
       )
     } catch (error) {
       return Err(new EncryptionError(error as Error))

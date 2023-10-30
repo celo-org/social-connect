@@ -54,19 +54,22 @@ export class CachingAccountService implements AccountService {
 }
 
 export class ContractKitAccountService implements AccountService {
-  constructor(private readonly logger: Logger, private readonly kit: ContractKit) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly kit: ContractKit,
+  ) {}
 
   async getAccount(address: string): Promise<PnpAccount> {
     return traceAsyncFunction('ContractKitAccountService - getAccount', async () => {
       const dek = await wrapError(
         getDEK(this.kit, this.logger, address),
-        ErrorMessage.FAILURE_TO_GET_DEK
+        ErrorMessage.FAILURE_TO_GET_DEK,
       )
 
       const { queryPriceInCUSD } = config.quota
       const totalPaidInWei = await wrapError(
         getOnChainOdisPayments(this.kit, this.logger, address),
-        ErrorMessage.FAILURE_TO_GET_TOTAL_QUOTA
+        ErrorMessage.FAILURE_TO_GET_TOTAL_QUOTA,
       )
       const totalQuotaBN = totalPaidInWei
         .div(queryPriceInCUSD.times(new BigNumber(1e18)))
@@ -86,7 +89,10 @@ export class ContractKitAccountService implements AccountService {
 }
 
 export class MockAccountService implements AccountService {
-  constructor(private readonly mockDek: string, private readonly mockTotalQuota: number) {}
+  constructor(
+    private readonly mockDek: string,
+    private readonly mockTotalQuota: number,
+  ) {}
 
   async getAccount(address: string): Promise<PnpAccount> {
     return {

@@ -26,7 +26,7 @@ export type SignerResponse<R extends OdisRequest> = {
 export function requestHasSupportedKeyVersion(
   request: Request<{}, {}, OdisRequest>,
   config: OdisConfig,
-  logger: Logger
+  logger: Logger,
 ): boolean {
   try {
     getKeyVersionInfo(request, config, logger)
@@ -41,7 +41,7 @@ export function requestHasSupportedKeyVersion(
 export function getKeyVersionInfo(
   request: Request<{}, {}, OdisRequest>,
   config: OdisConfig,
-  logger: Logger
+  logger: Logger,
 ): KeyVersionInfo {
   // If an invalid key version is present, we don't want this function to throw but
   // to instead replace the key version with the default
@@ -53,7 +53,7 @@ export function getKeyVersionInfo(
   const keyVersion = requestKeyVersion ?? config.keys.currentVersion
   const supportedVersions: KeyVersionInfo[] = JSON.parse(config.keys.versions) // TODO add io-ts checks for this and signer array
   const filteredSupportedVersions: KeyVersionInfo[] = supportedVersions.filter(
-    (v) => v.keyVersion === keyVersion
+    (v) => v.keyVersion === keyVersion,
   )
   if (!filteredSupportedVersions.length) {
     throw new Error(`key version ${keyVersion} not supported`)
@@ -67,7 +67,7 @@ export async function fetchSignerResponseWithFallback<R extends OdisRequest>(
   keyVersion: number,
   request: Request<{}, {}, R>,
   logger: Logger,
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
 ): Promise<FetchResponse> {
   async function fetchSignerResponse(url: string): Promise<FetchResponse> {
     // prettier-ignore

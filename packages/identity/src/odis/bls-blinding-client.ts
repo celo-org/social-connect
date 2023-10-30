@@ -42,7 +42,7 @@ export class WasmBlsBlindingClient implements BlsBlindingClient {
     const userSeed = seed ?? randomBytes(32)
     if (!seed) {
       console.warn(
-        'Warning: Use a private deterministic seed (e.g. DEK private key) to preserve user quota when requests are replayed.'
+        'Warning: Use a private deterministic seed (e.g. DEK private key) to preserve user quota when requests are replayed.',
       )
     }
     this.rawMessage = Buffer.from(base64PhoneNumber, 'base64')
@@ -59,7 +59,7 @@ export class WasmBlsBlindingClient implements BlsBlindingClient {
     const blindedSignature = Buffer.from(base64BlindSig, 'base64')
     const unblindMessage = await this.thresholdBls.unblind(
       blindedSignature,
-      this.blindedValue.blindingFactor
+      this.blindedValue.blindingFactor,
     )
     // this throws on error
     await this.thresholdBls.verify(this.odisPubKey, this.rawMessage, unblindMessage)

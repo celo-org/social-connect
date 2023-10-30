@@ -25,11 +25,11 @@ export interface Locals {
 
 export type PromiseHandler<R extends OdisRequest> = (
   request: Request<{}, {}, R>,
-  res: Response<OdisResponse<R>, Locals>
+  res: Response<OdisResponse<R>, Locals>,
 ) => Promise<void>
 
 export function catchErrorHandler<R extends OdisRequest>(
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     try {
@@ -59,7 +59,7 @@ export function catchErrorHandler<R extends OdisRequest>(
 }
 
 export function tracingHandler<R extends OdisRequest>(
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     return tracer.startActiveSpan(
@@ -86,21 +86,21 @@ export function tracingHandler<R extends OdisRequest>(
         } finally {
           span.end()
         }
-      }
+      },
     )
   }
 }
 
 export function meteringHandler<R extends OdisRequest>(
   histogram: client.Histogram<string>,
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return (req, res) => newMeter(histogram, req.url)(async () => handler(req, res))
 }
 
 export function timeoutHandler<R extends OdisRequest>(
   timeoutMs: number,
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     const timeoutId = setTimeout(() => {
@@ -120,7 +120,7 @@ export function timeoutHandler<R extends OdisRequest>(
 }
 
 export function connectionClosedHandler<R extends OdisRequest>(
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     req.on('close', () => {
@@ -137,7 +137,7 @@ export function connectionClosedHandler<R extends OdisRequest>(
 
 export async function disabledHandler<R extends OdisRequest>(
   req: Request<{}, {}, R>,
-  response: Response<OdisResponse<R>, Locals>
+  response: Response<OdisResponse<R>, Locals>,
 ): Promise<void> {
   sendFailure(WarningMessage.API_UNAVAILABLE, 503, response, req.url)
 }
@@ -149,11 +149,11 @@ export interface Result<R extends OdisRequest> {
 
 export type ResultHandler<R extends OdisRequest> = (
   request: Request<{}, {}, R>,
-  res: Response<OdisResponse<R>, Locals>
+  res: Response<OdisResponse<R>, Locals>,
 ) => Promise<Result<R>>
 
 export function resultHandler<R extends OdisRequest>(
-  resHandler: ResultHandler<R>
+  resHandler: ResultHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     const result = await resHandler(req, res)
@@ -168,7 +168,7 @@ export function resultHandler<R extends OdisRequest>(
 export function errorResult(
   status: number,
   error: string,
-  quotaStatus?: PnpQuotaStatus | { status: SequentialDelayDomainState }
+  quotaStatus?: PnpQuotaStatus | { status: SequentialDelayDomainState },
 ): Result<any> {
   // TODO remove any
   return {
@@ -187,7 +187,7 @@ function sendFailure(
   status: number,
   response: Response,
   endpoint: string,
-  body?: Record<any, any> // TODO remove any
+  body?: Record<any, any>, // TODO remove any
 ) {
   // Check if the response was ended
   if (!response.writableEnded) {
@@ -200,7 +200,7 @@ function sendFailure(
         ...body,
       },
       status,
-      response.locals.logger
+      response.locals.logger,
     )
     Counters.responses.labels(endpoint, status.toString()).inc()
   }

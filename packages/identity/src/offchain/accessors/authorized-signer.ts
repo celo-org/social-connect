@@ -23,7 +23,7 @@ export class AuthorizedSignerAccessor {
       account,
       dataPath,
       false,
-      AuthorizedSignerSchema
+      AuthorizedSignerSchema,
     )
     if (!rawData.ok) {
       return Err(new OffchainError(rawData.error))
@@ -37,7 +37,7 @@ export class AuthorizedSignerAccessor {
   async write(
     signer: Address,
     proofOfPossession: string,
-    filteredDataPaths: string
+    filteredDataPaths: string,
   ): Promise<OffchainErrors | void> {
     const payload = {
       address: toChecksumAddress(signer),
@@ -49,7 +49,7 @@ export class AuthorizedSignerAccessor {
       this.wrapper,
       dataPath,
       payload,
-      AuthorizedSignerSchema
+      AuthorizedSignerSchema,
     )
     const signature = await this.wrapper.kit
       .getWallet()!
@@ -57,7 +57,7 @@ export class AuthorizedSignerAccessor {
     return this.wrapper.writeDataTo(
       Buffer.from(JSON.stringify(payload)),
       Buffer.from(trimLeading0x(signature), 'hex'),
-      dataPath
+      dataPath,
     )
   }
 }

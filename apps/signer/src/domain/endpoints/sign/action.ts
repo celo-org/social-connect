@@ -45,7 +45,7 @@ export function domainSign(
   db: Knex,
   config: SignerConfig,
   quota: DomainQuotaService,
-  keyProvider: KeyProvider
+  keyProvider: KeyProvider,
 ): ResultHandler<DomainRestrictedSignatureRequest> {
   return async (request, response) => {
     const { logger } = response.locals
@@ -68,7 +68,7 @@ export function domainSign(
         version: domain.version,
         hash: domainHash(domain).toString('hex'),
       },
-      'Processing request to get domain signature '
+      'Processing request to get domain signature ',
     )
     const res: TrxResult = await db.transaction(async (trx) => {
       // Get the current domain state record, or use an empty record if one does not exist.
@@ -92,7 +92,7 @@ export function domainSign(
           domainStateRecord,
           request.body.domain,
           trx,
-          logger
+          logger,
         )
 
       if (!quotaStatus.sufficient) {
@@ -102,7 +102,7 @@ export function domainSign(
             version: domain.version,
             hash: domainHash(domain),
           },
-          `Exceeded quota`
+          `Exceeded quota`,
         )
         return {
           success: false,
@@ -123,7 +123,7 @@ export function domainSign(
         request.body.blindedMessage,
         key,
         logger,
-        keyProvider
+        keyProvider,
       )
 
       return {
@@ -155,7 +155,7 @@ export function domainSign(
 }
 
 function isValidRequest(
-  request: Request<{}, {}, unknown>
+  request: Request<{}, {}, unknown>,
 ): request is Request<{}, {}, DomainRestrictedSignatureRequest> {
   return domainRestrictedSignatureRequestSchema(DomainSchema).is(request.body)
 }
@@ -163,7 +163,7 @@ function isValidRequest(
 function nonceCheck(
   domainStateRecord: DomainStateRecord,
   body: DomainRestrictedSignatureRequest,
-  logger: Logger
+  logger: Logger,
 ): boolean {
   const nonce: EIP712Optional<number> = body.options.nonce
   if (!nonce.defined) {
@@ -178,7 +178,7 @@ async function sign(
   blindedMessage: string,
   key: Key,
   logger: Logger,
-  keyProvider: KeyProvider
+  keyProvider: KeyProvider,
 ): Promise<Buffer> {
   let privateKey: string
   try {

@@ -17,7 +17,7 @@ export interface PnpSignRequestRecord {
 export function toPnpSignRequestRecord(
   account: string,
   blindedQuery: string,
-  signature: string
+  signature: string,
 ): PnpSignRequestRecord {
   return {
     [REQUESTS_COLUMNS.address]: account,

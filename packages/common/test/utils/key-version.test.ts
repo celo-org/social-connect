@@ -80,7 +80,7 @@ describe('key version test suite', () => {
       it(`Should throw for invalid key version ${kv}`, () => {
         request.headers[KEY_VERSION_HEADER] = kv.toString()
         expect(() => getRequestKeyVersion(request, logger)).toThrow(
-          WarningMessage.INVALID_KEY_VERSION_REQUEST
+          WarningMessage.INVALID_KEY_VERSION_REQUEST,
         )
       })
     })
@@ -172,7 +172,7 @@ describe('key version test suite', () => {
       it(`Should throw for invalid key version ${kv}`, () => {
         response.headers.set(KEY_VERSION_HEADER, kv.toString())
         expect(() => getResponseKeyVersion(response, logger)).toThrow(
-          ErrorMessage.INVALID_KEY_VERSION_RESPONSE
+          ErrorMessage.INVALID_KEY_VERSION_RESPONSE,
         )
       })
     })

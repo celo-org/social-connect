@@ -14,7 +14,7 @@ export async function getRequestIfExists(
   db: Knex,
   account: string,
   blindedQuery: string,
-  logger: Logger
+  logger: Logger,
 ): Promise<PnpSignRequestRecord | undefined> {
   logger.debug(`Checking if request exists for account: ${account}, blindedQuery: ${blindedQuery}`)
   return doMeteredSql('getRequestIfExists', ErrorMessage.DATABASE_GET_FAILURE, logger, async () => {
@@ -35,10 +35,10 @@ export async function insertRequest(
   blindedQuery: string,
   signature: string,
   logger: Logger,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ): Promise<void> {
   logger.debug(
-    `Storing salt request for: ${account}, blindedQuery: ${blindedQuery}, signature: ${signature}`
+    `Storing salt request for: ${account}, blindedQuery: ${blindedQuery}, signature: ${signature}`,
   )
   return doMeteredSql('insertRequest', ErrorMessage.DATABASE_INSERT_FAILURE, logger, async () => {
     const sql = db<PnpSignRequestRecord>(REQUESTS_TABLE)
@@ -51,7 +51,7 @@ export async function insertRequest(
 export async function deleteRequestsOlderThan(
   db: Knex,
   since: Date,
-  logger: Logger
+  logger: Logger,
 ): Promise<number> {
   logger.debug(`Removing request older than: ${since}`)
   if (since > new Date(Date.now())) {
@@ -67,6 +67,6 @@ export async function deleteRequestsOlderThan(
         .where(REQUESTS_COLUMNS.timestamp, '<=', since)
         .del()
       return sql
-    }
+    },
   )
 }

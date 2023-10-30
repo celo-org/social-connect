@@ -20,7 +20,7 @@ import { findThresholdDomainState } from '../../services/threshold-state'
 
 export function disableDomain(
   signers: Signer[],
-  config: OdisConfig
+  config: OdisConfig,
 ): ResultHandler<DisableDomainRequest> {
   return async (request, response) => {
     if (!disableDomainRequestSchema(DomainSchema).is(request.body)) {
@@ -46,7 +46,7 @@ export function disableDomain(
         requestTimeoutMS: config.odisServices.timeoutMilliSeconds,
         responseSchema: disableDomainResponseSchema(SequentialDelayDomainStateSchema),
         shouldCheckKeyVersion: false,
-      }
+      },
     )
 
     logDomainResponseDiscrepancies(response.locals.logger, signerResponses)
@@ -54,7 +54,7 @@ export function disableDomain(
       const disableDomainStatus = findThresholdDomainState(
         keyVersionInfo,
         signerResponses,
-        signers.length
+        signers.length,
       )
       if (disableDomainStatus.disabled) {
         return {
@@ -69,7 +69,7 @@ export function disableDomain(
     } catch (err) {
       response.locals.logger.error(
         { err },
-        'Error combining signer disable domain status responses'
+        'Error combining signer disable domain status responses',
       )
     }
 

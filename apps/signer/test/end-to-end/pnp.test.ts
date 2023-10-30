@@ -207,7 +207,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const req = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           blindedMessage,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, ACCOUNT_ADDRESS2)
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
@@ -227,8 +227,8 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
           threshold_bls.partialVerifyBlindSignature(
             Buffer.from(contextSpecificParams.pnpPolynomial, 'hex'),
             Buffer.from(blindedMessage, 'base64'),
-            Buffer.from(resBody.signature, 'base64')
-          )
+            Buffer.from(resBody.signature, 'base64'),
+          ),
         )
       })
 
@@ -241,7 +241,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const req = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           blindedMessage,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, ACCOUNT_ADDRESS2)
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
@@ -261,8 +261,8 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
           threshold_bls.partialVerifyBlindSignature(
             Buffer.from(contextSpecificParams.pnpPolynomial, 'hex'),
             Buffer.from(blindedMessage, 'base64'),
-            Buffer.from(resBody.signature, 'base64')
-          )
+            Buffer.from(resBody.signature, 'base64'),
+          ),
         )
       })
 
@@ -272,7 +272,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const req = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           blindedMessage,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(req, authorization)
@@ -291,8 +291,8 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
           threshold_bls.partialVerifyBlindSignature(
             Buffer.from(contextSpecificParams.pnpPolynomial, 'hex'),
             Buffer.from(blindedMessage, 'base64'),
-            Buffer.from(resBody.signature, 'base64')
-          )
+            Buffer.from(resBody.signature, 'base64'),
+          ),
         )
 
         await sleep(5 * 1000) // sleep for cache ttl
@@ -318,7 +318,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const badRequest = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           blindedMessage,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         // @ts-ignore Intentionally deleting required field
         delete badRequest.blindedQueryPhoneNumber
@@ -337,7 +337,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const badRequest = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           blindedMessage,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization, 'asd')
@@ -354,7 +354,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const badRequest = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           PHONE_NUMBER,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
@@ -371,7 +371,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const badRequest = getPnpSignRequest(
           '0xnotanaddress',
           blindedMessage,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
@@ -388,7 +388,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const badRequest = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           blindedMessage,
-          AuthenticationMethod.WALLET_KEY
+          AuthenticationMethod.WALLET_KEY,
         )
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
@@ -406,7 +406,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const badRequest = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
           blindedMessage,
-          AuthenticationMethod.ENCRYPTION_KEY
+          AuthenticationMethod.ENCRYPTION_KEY,
         )
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
@@ -423,7 +423,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const badRequest = getPnpSignRequest(
           ACCOUNT_ADDRESS1,
           blindedMessage,
-          AuthenticationMethod.ENCRYPTION_KEY
+          AuthenticationMethod.ENCRYPTION_KEY,
         )
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
@@ -464,7 +464,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
 
 async function queryPnpQuotaEndpoint(
   req: PnpQuotaRequest,
-  authorization: string
+  authorization: string,
 ): Promise<Response> {
   const body = JSON.stringify(req)
   return fetch(ODIS_SIGNER_URL + SignerEndpoint.PNP_QUOTA, {
@@ -481,7 +481,7 @@ async function queryPnpQuotaEndpoint(
 async function queryPnpSignEndpoint(
   req: SignMessageRequest,
   authorization: string,
-  keyVersion?: string
+  keyVersion?: string,
 ): Promise<Response> {
   const body = JSON.stringify(req)
   const headers: any = {
@@ -503,7 +503,7 @@ async function queryPnpSignEndpoint(
 async function sendCUSDToOdisPayments(
   amountInWei: string | number,
   recipient: string,
-  sender: string
+  sender: string,
 ) {
   const stableToken = await kit.contracts.getStableToken(StableToken.cUSD)
   const odisPayments = await kit.contracts.getOdisPayments()

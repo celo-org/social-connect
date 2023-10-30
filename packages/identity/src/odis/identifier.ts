@@ -113,7 +113,7 @@ export async function getObfuscatedIdentifier(
   blsBlindingClient?: BlsBlindingClient,
   sessionID?: string,
   keyVersion?: number,
-  abortController?: AbortController
+  abortController?: AbortController,
 ): Promise<IdentifierHashDetails> {
   debug('Getting identifier pepper')
 
@@ -134,7 +134,7 @@ export async function getObfuscatedIdentifier(
     plaintextIdentifier,
     identifierPrefix,
     blsBlindingClient,
-    seed
+    seed,
   )
 
   const base64BlindSig = await getBlindedIdentifierSignature(
@@ -145,14 +145,14 @@ export async function getObfuscatedIdentifier(
     clientVersion,
     sessionID,
     keyVersion,
-    abortController
+    abortController,
   )
 
   return getObfuscatedIdentifierFromSignature(
     plaintextIdentifier,
     identifierPrefix,
     base64BlindSig,
-    blsBlindingClient
+    blsBlindingClient,
   )
 }
 
@@ -170,7 +170,7 @@ export async function getBlindedIdentifier(
   plaintextIdentifier: string,
   identifierPrefix: IdentifierPrefix,
   blsBlindingClient: BlsBlindingClient,
-  seed?: Buffer
+  seed?: Buffer,
 ): Promise<string> {
   debug('Retrieving blinded message')
   // phone number identifiers don't have prefixes in the blinding stage
@@ -209,7 +209,7 @@ export async function getBlindedIdentifierSignature(
   clientVersion?: string,
   sessionID?: string,
   keyVersion?: number,
-  abortControlller?: AbortController
+  abortControlller?: AbortController,
 ): Promise<string> {
   const body: SignMessageRequest = {
     account,
@@ -228,7 +228,7 @@ export async function getBlindedIdentifierSignature(
       [KEY_VERSION_HEADER]: keyVersion?.toString(),
       Authorization: await getOdisPnpRequestAuth(body, signer),
     },
-    abortControlller
+    abortControlller,
   )
 
   if (!response.success) {
@@ -250,7 +250,7 @@ export async function getObfuscatedIdentifierFromSignature(
   plaintextIdentifier: string,
   identifierPrefix: IdentifierPrefix,
   base64BlindedSignature: string,
-  blsBlindingClient: BlsBlindingClient
+  blsBlindingClient: BlsBlindingClient,
 ): Promise<IdentifierHashDetails> {
   debug('Retrieving unblinded signature')
   const base64UnblindedSig = await blsBlindingClient.unblindAndVerifyMessage(base64BlindedSignature)
@@ -281,7 +281,7 @@ export async function getObfuscatedIdentifierFromSignature(
 export const getIdentifierHash = (
   plaintextIdentifier: string,
   identifierPrefix: IdentifierPrefix,
-  pepper: string
+  pepper: string,
 ): string => {
   return baseGetIdentifierHash(sha3, plaintextIdentifier, identifierPrefix, pepper)
 }

@@ -155,7 +155,7 @@ const mockGetDataEncryptionKey = jest.fn<string, []>()
 const mockContractKit = createMockContractKit({
   [ContractRetrieval.getAccounts]: createMockAccounts(
     mockGetWalletAddress,
-    mockGetDataEncryptionKey
+    mockGetDataEncryptionKey,
   ),
   [ContractRetrieval.getOdisPayments]: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
 })
@@ -198,7 +198,7 @@ describe('pnpService', () => {
     req: SignMessageRequest,
     authorization: string,
     app: any,
-    keyVersionHeader?: string
+    keyVersionHeader?: string,
   ) => {
     let reqWithHeaders = request(app)
       .post(CombinerEndpoint.PNP_SIGN)
@@ -237,7 +237,7 @@ describe('pnpService', () => {
   const getCombinerQuotaResponse = async (
     req: PnpQuotaRequest,
     authorization: string,
-    _app: any = app
+    _app: any = app,
   ) => {
     const res = await request(_app)
       .post(CombinerEndpoint.PNP_QUOTA)
@@ -268,21 +268,21 @@ describe('pnpService', () => {
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, PNP_THRESHOLD_DEV_PK_SHARE_1_V1],
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-2`, PNP_THRESHOLD_DEV_PK_SHARE_1_V2],
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-3`, PNP_THRESHOLD_DEV_PK_SHARE_1_V3],
-        ])
+        ]),
       )
       keyProvider2 = new MockKeyProvider(
         new Map([
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, PNP_THRESHOLD_DEV_PK_SHARE_2_V1],
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-2`, PNP_THRESHOLD_DEV_PK_SHARE_2_V2],
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-3`, PNP_THRESHOLD_DEV_PK_SHARE_2_V3],
-        ])
+        ]),
       )
       keyProvider3 = new MockKeyProvider(
         new Map([
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, PNP_THRESHOLD_DEV_PK_SHARE_3_V1],
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-2`, PNP_THRESHOLD_DEV_PK_SHARE_3_V2],
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-3`, PNP_THRESHOLD_DEV_PK_SHARE_3_V3],
-        ])
+        ]),
       )
       app = startCombiner(combinerConfig, mockKit)
     })
@@ -324,7 +324,7 @@ describe('pnpService', () => {
         const weiTocusd = new BigNumber(1e18)
         beforeAll(async () => {
           mockOdisPaymentsTotalPaidCUSD.mockReturnValue(
-            weiTocusd.multipliedBy(totalQuota).multipliedBy(signerConfig.quota.queryPriceInCUSD)
+            weiTocusd.multipliedBy(totalQuota).multipliedBy(signerConfig.quota.queryPriceInCUSD),
           )
         })
 
@@ -454,7 +454,9 @@ describe('pnpService', () => {
 
         it('Should respond with a warning when there are slight discrepancies in total quota', async () => {
           mockOdisPaymentsTotalPaidCUSD.mockReturnValueOnce(
-            weiTocusd.multipliedBy(totalQuota + 1).multipliedBy(signerConfig.quota.queryPriceInCUSD)
+            weiTocusd
+              .multipliedBy(totalQuota + 1)
+              .multipliedBy(signerConfig.quota.queryPriceInCUSD),
           )
           const req = {
             account: ACCOUNT_ADDRESS1,
@@ -575,7 +577,7 @@ describe('pnpService', () => {
 
         it('Should respond with 503 on disabled api', async () => {
           const configWithApiDisabled: typeof combinerConfig = JSON.parse(
-            JSON.stringify(combinerConfig)
+            JSON.stringify(combinerConfig),
           )
           configWithApiDisabled.phoneNumberPrivacy.enabled = false
           const appWithApiDisabled = startCombiner(configWithApiDisabled, mockKit)
@@ -620,7 +622,7 @@ describe('pnpService', () => {
           })
           const unblindedSig = threshold_bls.unblind(
             Buffer.from(res.body.signature, 'base64'),
-            blindedMsgResult.blindingFactor
+            blindedMsgResult.blindingFactor,
           )
 
           expect(Buffer.from(unblindedSig).toString('base64')).toEqual(expectedUnblindedSig)
@@ -644,11 +646,11 @@ describe('pnpService', () => {
 
             const unblindedSig = threshold_bls.unblind(
               Buffer.from(res.body.signature, 'base64'),
-              blindedMsgResult.blindingFactor
+              blindedMsgResult.blindingFactor,
             )
 
             expect(Buffer.from(unblindedSig).toString('base64')).toEqual(
-              expectedUnblindedSigs[i - 1]
+              expectedUnblindedSigs[i - 1],
             )
           })
         }
@@ -788,11 +790,11 @@ describe('pnpService', () => {
           expect(res2.status).toBe(200)
           const unblindedSig1 = threshold_bls.unblind(
             Buffer.from(res1.body.signature, 'base64'),
-            blindedMsgResult.blindingFactor
+            blindedMsgResult.blindingFactor,
           )
           const unblindedSig2 = threshold_bls.unblind(
             Buffer.from(res2.body.signature, 'base64'),
-            blindedMsgResult2.blindingFactor
+            blindedMsgResult2.blindingFactor,
           )
           expect(Buffer.from(unblindedSig1).toString('base64')).toEqual(expectedUnblindedSig)
           expect(unblindedSig1).toEqual(unblindedSig2)
@@ -866,7 +868,7 @@ describe('pnpService', () => {
 
         it('Should respond with 503 on disabled api', async () => {
           const configWithApiDisabled: typeof combinerConfig = JSON.parse(
-            JSON.stringify(combinerConfig)
+            JSON.stringify(combinerConfig),
           )
           configWithApiDisabled.phoneNumberPrivacy.enabled = false
           const appWithApiDisabled = startCombiner(configWithApiDisabled, mockKit)
@@ -892,11 +894,11 @@ describe('pnpService', () => {
             const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
 
             const combinerConfigWithFailOpenDisabled: typeof combinerConfig = JSON.parse(
-              JSON.stringify(combinerConfig)
+              JSON.stringify(combinerConfig),
             )
             const appWithFailOpenDisabled = startCombiner(
               combinerConfigWithFailOpenDisabled,
-              mockKit
+              mockKit,
             )
             const res = await sendPnpSignRequest(req, authorization, appWithFailOpenDisabled)
 
@@ -923,7 +925,7 @@ describe('pnpService', () => {
             '000000002e50aa714ef6b865b5de89c56969ef9f8f27b6b0a6d157c9cc01c574ac9df604'
 
           const badKeyProvider1 = new MockKeyProvider(
-            new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare1]])
+            new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare1]]),
           )
           signer1 = startSigner(signerConfig, signerDB1, badKeyProvider1, mockKit).listen(3001)
           signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockKit).listen(3002)
@@ -948,7 +950,7 @@ describe('pnpService', () => {
             })
             const unblindedSig = threshold_bls.unblind(
               Buffer.from(res.body.signature, 'base64'),
-              blindedMsgResult.blindingFactor
+              blindedMsgResult.blindingFactor,
             )
             expect(Buffer.from(unblindedSig).toString('base64')).toEqual(expectedUnblindedSig)
           })
@@ -963,11 +965,11 @@ describe('pnpService', () => {
             '01000000b8f0ef841dcf8d7bd1da5e8025e47d729eb67f513335784183b8fa227a0b9a0b'
 
           const badKeyProvider1 = new MockKeyProvider(
-            new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare1]])
+            new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare1]]),
           )
 
           const badKeyProvider2 = new MockKeyProvider(
-            new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare2]])
+            new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare2]]),
           )
 
           signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
@@ -997,10 +999,10 @@ describe('pnpService', () => {
           configWithApiDisabled.api.phoneNumberPrivacy.enabled = false
           signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
           signer2 = startSigner(configWithApiDisabled, signerDB2, keyProvider2, mockKit).listen(
-            3002
+            3002,
           )
           signer3 = startSigner(configWithApiDisabled, signerDB3, keyProvider3, mockKit).listen(
-            3003
+            3003,
           )
         })
 
@@ -1043,7 +1045,7 @@ describe('pnpService', () => {
           signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
           signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockKit).listen(3002)
           signer3 = startSigner(configWithApiDisabled, signerDB3, keyProvider3, mockKit).listen(
-            3003
+            3003,
           )
         })
 
@@ -1093,13 +1095,13 @@ describe('pnpService', () => {
           configWithShortTimeout.timeout = testTimeoutMS
           // Test this with all signers timing out to decrease possibility of race conditions
           signer1 = startSigner(configWithShortTimeout, signerDB1, keyProvider1, mockKit).listen(
-            3001
+            3001,
           )
           signer2 = startSigner(configWithShortTimeout, signerDB2, keyProvider2, mockKit).listen(
-            3002
+            3002,
           )
           signer3 = startSigner(configWithShortTimeout, signerDB3, keyProvider3, mockKit).listen(
-            3003
+            3003,
           )
         })
 
@@ -1187,7 +1189,7 @@ describe('pnpService', () => {
             `${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`,
             '00000000a49c8a293839ccb24bbcc7b833b0d57fe2f6087d33271750e7d6cf40897f520c',
           ],
-        ])
+        ]),
       )
       keyProvider2 = new MockKeyProvider(
         new Map([
@@ -1195,7 +1197,7 @@ describe('pnpService', () => {
             `${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`,
             '01000000c0866754b43a0e7c6f86c6732c1bc1bc1900f71a0ccab81fcd4048c5ff2edb02',
           ],
-        ])
+        ]),
       )
       keyProvider3 = new MockKeyProvider(
         new Map([
@@ -1203,7 +1205,7 @@ describe('pnpService', () => {
             `${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`,
             '02000000c24271a9dd0827e2939e5afbd5cd1c6705fa40d6e962fb288bbc7201921efa10',
           ],
-        ])
+        ]),
       )
       keyProvider4 = new MockKeyProvider(
         new Map([
@@ -1211,7 +1213,7 @@ describe('pnpService', () => {
             `${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`,
             '030000006320e2a99d4ce6a491a6354feda06051966a056dffbb0e7c8431b246d863ac09',
           ],
-        ])
+        ]),
       )
       keyProvider5 = new MockKeyProvider(
         new Map([
@@ -1219,7 +1221,7 @@ describe('pnpService', () => {
             `${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`,
             '04000000606ff4d6ddae61ac454009af2a49aeb4c297410ef9d3f3ab751c1c4fe5a99c0a',
           ],
-        ])
+        ]),
       )
       app = startCombiner(combinerConfigLargerN, mockKit)
     })
@@ -1278,7 +1280,7 @@ describe('pnpService', () => {
       })
       threshold_bls.unblind(
         Buffer.from(res.body.signature, 'base64'),
-        blindedMsgResult.blindingFactor
+        blindedMsgResult.blindingFactor,
       )
     })
 

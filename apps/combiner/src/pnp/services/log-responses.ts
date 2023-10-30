@@ -15,7 +15,7 @@ import {
 
 export function logPnpSignerResponseDiscrepancies(
   logger: Logger,
-  responses: Array<SignerResponse<PnpQuotaRequest | SignMessageRequest>>
+  responses: Array<SignerResponse<PnpQuotaRequest | SignMessageRequest>>,
 ): ErrorType[] {
   const warnings: ErrorType[] = []
 
@@ -58,7 +58,7 @@ export function logPnpSignerResponseDiscrepancies(
 
   // totalQuota
   const sortedByTotalQuota = parsedResponses.sort(
-    (a, b) => a.values.totalQuota - b.values.totalQuota
+    (a, b) => a.values.totalQuota - b.values.totalQuota,
   )
   if (
     sortedByTotalQuota[sortedByTotalQuota.length - 1].values.totalQuota -
@@ -74,7 +74,7 @@ export function logPnpSignerResponseDiscrepancies(
 
   // performedQueryCount
   const sortedByQueryCount = parsedResponses.sort(
-    (a, b) => a.values.performedQueryCount - b.values.performedQueryCount
+    (a, b) => a.values.performedQueryCount - b.values.performedQueryCount,
   )
   if (
     sortedByQueryCount[sortedByQueryCount.length - 1].values.performedQueryCount -

@@ -68,8 +68,8 @@ export function decrypt(key: Buffer, ciphertext: Buffer): Result<Buffer, Decrypt
   if (len < 28) {
     return Err(
       new DecryptionError(
-        new Error(`ciphertext is too short: expected at least 28 bytes, but got ${len}`)
-      )
+        new Error(`ciphertext is too short: expected at least 28 bytes, but got ${len}`),
+      ),
     )
   }
 
@@ -147,7 +147,7 @@ export function scrypt(key: Buffer, options: ScryptOptions): Promise<Result<Buff
 
 export function computationalHardenKey(
   key: Buffer,
-  config: ComputationalHardeningConfig
+  config: ComputationalHardeningConfig,
 ): Promise<Result<Buffer, PbkdfError | ScryptError>> {
   switch (config.function) {
     case ComputationalHardeningFunction.PBKDF:

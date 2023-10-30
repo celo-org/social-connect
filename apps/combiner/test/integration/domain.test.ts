@@ -162,13 +162,13 @@ describe('domainService', () => {
   const signatureRequest = async (
     _domain?: SequentialDelayDomain,
     _nonce?: number,
-    _pubKey: string = DEFAULT_PUB_KEY
+    _pubKey: string = DEFAULT_PUB_KEY,
   ): Promise<[DomainRestrictedSignatureRequest<SequentialDelayDomain>, PoprfClient]> => {
     const domain = _domain ?? authenticatedDomain()
     const poprfClient = new PoprfClient(
       Buffer.from(_pubKey, 'base64'),
       domainHash(domain),
-      Buffer.from('test message', 'utf8')
+      Buffer.from('test message', 'utf8'),
     )
 
     const req: DomainRestrictedSignatureRequest<SequentialDelayDomain> = {
@@ -182,7 +182,7 @@ describe('domainService', () => {
       sessionID: defined(genSessionID()),
     }
     req.options.signature = defined(
-      await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req))
+      await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req)),
     )
     return [req, poprfClient]
   }
@@ -198,14 +198,14 @@ describe('domainService', () => {
       sessionID: defined(genSessionID()),
     }
     req.options.signature = defined(
-      await wallet.signTypedData(walletAddress, domainQuotaStatusRequestEIP712(req))
+      await wallet.signTypedData(walletAddress, domainQuotaStatusRequestEIP712(req)),
     )
     return req
   }
 
   // Build and sign an example disable domain request.
   const disableRequest = async (
-    _domain?: SequentialDelayDomain
+    _domain?: SequentialDelayDomain,
   ): Promise<DisableDomainRequest<SequentialDelayDomain>> => {
     const req: DisableDomainRequest<SequentialDelayDomain> = {
       type: DomainRequestTypeTag.DISABLE,
@@ -217,7 +217,7 @@ describe('domainService', () => {
       sessionID: defined(genSessionID()),
     }
     req.options.signature = defined(
-      await wallet.signTypedData(walletAddress, disableDomainRequestEIP712(req))
+      await wallet.signTypedData(walletAddress, disableDomainRequestEIP712(req)),
     )
     return req
   }
@@ -249,21 +249,21 @@ describe('domainService', () => {
           [`${DefaultKeyName.DOMAINS}-1`, DOMAINS_THRESHOLD_DEV_PK_SHARE_1_V1],
           [`${DefaultKeyName.DOMAINS}-2`, DOMAINS_THRESHOLD_DEV_PK_SHARE_1_V2],
           [`${DefaultKeyName.DOMAINS}-3`, DOMAINS_THRESHOLD_DEV_PK_SHARE_1_V3],
-        ])
+        ]),
       )
       keyProvider2 = new MockKeyProvider(
         new Map([
           [`${DefaultKeyName.DOMAINS}-1`, DOMAINS_THRESHOLD_DEV_PK_SHARE_2_V1],
           [`${DefaultKeyName.DOMAINS}-2`, DOMAINS_THRESHOLD_DEV_PK_SHARE_2_V2],
           [`${DefaultKeyName.DOMAINS}-3`, DOMAINS_THRESHOLD_DEV_PK_SHARE_2_V3],
-        ])
+        ]),
       )
       keyProvider3 = new MockKeyProvider(
         new Map([
           [`${DefaultKeyName.DOMAINS}-1`, DOMAINS_THRESHOLD_DEV_PK_SHARE_3_V1],
           [`${DefaultKeyName.DOMAINS}-2`, DOMAINS_THRESHOLD_DEV_PK_SHARE_3_V2],
           [`${DefaultKeyName.DOMAINS}-3`, DOMAINS_THRESHOLD_DEV_PK_SHARE_3_V3],
-        ])
+        ]),
       )
 
       app = startCombiner(combinerConfig, getContractKitWithAgent(combinerConfig.blockchain))
@@ -409,12 +409,12 @@ describe('domainService', () => {
 
         it('Should respond with 503 on disabled api', async () => {
           const configWithApiDisabled: typeof combinerConfig = JSON.parse(
-            JSON.stringify(combinerConfig)
+            JSON.stringify(combinerConfig),
           )
           configWithApiDisabled.domains.enabled = false
           const appWithApiDisabled = startCombiner(
             configWithApiDisabled,
-            getContractKitWithAgent(configWithApiDisabled.blockchain)
+            getContractKitWithAgent(configWithApiDisabled.blockchain),
           )
           const req = await disableRequest()
 
@@ -558,12 +558,12 @@ describe('domainService', () => {
 
         it('Should respond with 503 on disabled api', async () => {
           const configWithApiDisabled: typeof combinerConfig = JSON.parse(
-            JSON.stringify(combinerConfig)
+            JSON.stringify(combinerConfig),
           )
           configWithApiDisabled.domains.enabled = false
           const appWithApiDisabled = startCombiner(
             configWithApiDisabled,
-            getContractKitWithAgent(configWithApiDisabled.blockchain)
+            getContractKitWithAgent(configWithApiDisabled.blockchain),
           )
 
           const req = await quotaRequest()
@@ -607,7 +607,7 @@ describe('domainService', () => {
             const [req, poprfClient] = await signatureRequest(
               undefined,
               undefined,
-              TestUtils.Values.DOMAINS_THRESHOLD_DEV_PUBKEYS[i - 1]
+              TestUtils.Values.DOMAINS_THRESHOLD_DEV_PUBKEYS[i - 1],
             )
 
             const res = await request(app)
@@ -628,7 +628,7 @@ describe('domainService', () => {
               },
             })
             const evaluation = poprfClient.unblindResponse(
-              Buffer.from(res.body.signature, 'base64')
+              Buffer.from(res.body.signature, 'base64'),
             )
             expect(evaluation.toString('base64')).toEqual(expectedEvals[i - 1])
           })
@@ -678,7 +678,7 @@ describe('domainService', () => {
           req1.options.nonce = defined(1)
           req1.options.signature = noString
           req1.options.signature = defined(
-            await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req1))
+            await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req1)),
           )
           const res2 = await request(app).post(CombinerEndpoint.DOMAIN_SIGN).send(req1)
 
@@ -888,12 +888,12 @@ describe('domainService', () => {
 
         it('Should respond with 503 on disabled api', async () => {
           const configWithApiDisabled: typeof combinerConfig = JSON.parse(
-            JSON.stringify(combinerConfig)
+            JSON.stringify(combinerConfig),
           )
           configWithApiDisabled.domains.enabled = false
           const appWithApiDisabled = startCombiner(
             configWithApiDisabled,
-            getContractKitWithAgent(configWithApiDisabled.blockchain)
+            getContractKitWithAgent(configWithApiDisabled.blockchain),
           )
 
           const [req, _] = await signatureRequest()
@@ -919,10 +919,10 @@ describe('domainService', () => {
         beforeEach(async () => {
           // Signer 1 & 2's v1 keys are misconfigured to point to the v3 share
           const badKeyProvider1 = new MockKeyProvider(
-            new Map([[`${DefaultKeyName.DOMAINS}-1`, DOMAINS_THRESHOLD_DEV_PK_SHARE_1_V3]])
+            new Map([[`${DefaultKeyName.DOMAINS}-1`, DOMAINS_THRESHOLD_DEV_PK_SHARE_1_V3]]),
           )
           const badKeyProvider2 = new MockKeyProvider(
-            new Map([[`${DefaultKeyName.DOMAINS}-1`, DOMAINS_THRESHOLD_DEV_PK_SHARE_2_V3]])
+            new Map([[`${DefaultKeyName.DOMAINS}-1`, DOMAINS_THRESHOLD_DEV_PK_SHARE_2_V3]]),
           )
           signer1 = startSigner(signerConfig, signerDB1, badKeyProvider1).listen(3001)
           signer2 = startSigner(signerConfig, signerDB2, badKeyProvider2).listen(3002)
@@ -935,7 +935,7 @@ describe('domainService', () => {
             const [req, poprfClient] = await signatureRequest(
               undefined,
               undefined,
-              TestUtils.Values.DOMAINS_THRESHOLD_DEV_PUBKEY_V1
+              TestUtils.Values.DOMAINS_THRESHOLD_DEV_PUBKEY_V1,
             )
             const res = await request(app).post(CombinerEndpoint.DOMAIN_SIGN).send(req)
 
@@ -952,7 +952,7 @@ describe('domainService', () => {
               },
             })
             expect(() =>
-              poprfClient.unblindResponse(Buffer.from(res.body.signature, 'base64'))
+              poprfClient.unblindResponse(Buffer.from(res.body.signature, 'base64')),
             ).toThrow(/verification failed/)
           })
         })
@@ -1064,7 +1064,7 @@ describe('domainService', () => {
               },
             })
             const evaluation = poprfClient.unblindResponse(
-              Buffer.from(res.body.signature, 'base64')
+              Buffer.from(res.body.signature, 'base64'),
             )
             expect(evaluation.toString('base64')).toEqual(expectedEval)
           })
@@ -1180,7 +1180,7 @@ describe('domainService', () => {
             `${DefaultKeyName.DOMAINS}-1`,
             '01000000fa9f3c7a0ed050b3b4ab9df241e3e3e2069e36c96369b2bf378d7edd66e37a0e',
           ],
-        ])
+        ]),
       )
       keyProvider2 = new MockKeyProvider(
         new Map([
@@ -1188,7 +1188,7 @@ describe('domainService', () => {
             `${DefaultKeyName.DOMAINS}-1`,
             '02000000b03e8d5203edb8b27a9c56185df0ee94e8be45f0c91e116beac68c851cc4ba10',
           ],
-        ])
+        ]),
       )
       keyProvider3 = new MockKeyProvider(
         new Map([
@@ -1196,7 +1196,7 @@ describe('domainService', () => {
             `${DefaultKeyName.DOMAINS}-1`,
             '03000000bad95bc039a5418bd57e7f5bad4bf6c19ff85e523462925e226e6ac0a6770005',
           ],
-        ])
+        ]),
       )
       keyProvider4 = new MockKeyProvider(
         new Map([
@@ -1204,7 +1204,7 @@ describe('domainService', () => {
             `${DefaultKeyName.DOMAINS}-1`,
             '040000002ffdcc94fd5322e4f3e0d7ba00b591c38f77e584b61b59dd6e62cc6cfed5fd06',
           ],
-        ])
+        ]),
       )
       keyProvider5 = new MockKeyProvider(
         new Map([
@@ -1212,11 +1212,11 @@ describe('domainService', () => {
             `${DefaultKeyName.DOMAINS}-1`,
             '05000000243505a19a546f5002511f9527fe03401908cd6427991f69b2380e355fec0d0d',
           ],
-        ])
+        ]),
       )
       app = startCombiner(
         combinerConfigLargerN,
-        getContractKitWithAgent(combinerConfigLargerN.blockchain)
+        getContractKitWithAgent(combinerConfigLargerN.blockchain),
       )
     })
 

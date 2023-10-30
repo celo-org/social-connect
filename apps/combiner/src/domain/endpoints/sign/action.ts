@@ -25,7 +25,7 @@ import { findThresholdDomainState } from '../../services/threshold-state'
 
 export function domainSign(
   signers: Signer[],
-  config: OdisConfig
+  config: OdisConfig,
 ): ResultHandler<DomainRestrictedSignatureRequest> {
   return async (request, response) => {
     const { logger } = response.locals
@@ -53,7 +53,7 @@ export function domainSign(
     const crypto = new DomainCryptoClient(keyVersionInfo)
 
     const processResult = async (
-      res: OdisResponse<DomainRestrictedSignatureRequest>
+      res: OdisResponse<DomainRestrictedSignatureRequest>,
     ): Promise<boolean> => {
       assert(res.success)
       // TODO remove the need to pass url here
@@ -87,7 +87,7 @@ export function domainSign(
         responseSchema: domainRestrictedSignatureResponseSchema(SequentialDelayDomainStateSchema),
         shouldCheckKeyVersion: true,
       },
-      processResult
+      processResult,
     )
 
     logDomainResponseDiscrepancies(response.locals.logger, signerResponses)
@@ -96,7 +96,7 @@ export function domainSign(
       try {
         const combinedSignature = crypto.combineBlindedSignatureShares(
           request.body.blindedMessage,
-          ctx
+          ctx,
         )
 
         return {

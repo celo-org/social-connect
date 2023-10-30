@@ -67,7 +67,7 @@ const resource = Resource.default().merge(
     [SemanticResourceAttributes.SERVICE_NAME]: process.env.TRACING_SERVICE_NAME,
     // 'testing-signer-tracing',
     [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0', // should be the same as package.json version?
-  })
+  }),
 )
 
 const provider = new NodeTracerProvider({

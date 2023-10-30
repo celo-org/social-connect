@@ -31,7 +31,7 @@ export class DomainQuotaService {
     domain: SequentialDelayDomain,
     trx: Knex.Transaction<DomainStateRecord>,
     logger: Logger,
-    attemptTime?: number
+    attemptTime?: number,
   ): Promise<OdisQuotaStatusResult<QuotaDependentDomainRequest>> {
     // Timestamp precision is lowered to seconds to reduce the chance of effective timing attacks.
     attemptTime = attemptTime ?? Math.floor(Date.now() / 1000)
@@ -39,7 +39,7 @@ export class DomainQuotaService {
       const result = checkSequentialDelayRateLimit(
         domain,
         attemptTime,
-        toSequentialDelayDomainState(state, attemptTime)
+        toSequentialDelayDomainState(state, attemptTime),
       )
       if (result.accepted) {
         const newState = toDomainStateRecord(domain, result.state)
@@ -58,7 +58,7 @@ export class DomainQuotaService {
   async getQuotaStatus(
     domain: SequentialDelayDomain,
     logger: Logger,
-    trx?: Knex.Transaction<DomainStateRecord>
+    trx?: Knex.Transaction<DomainStateRecord>,
   ): Promise<DomainStateRecord> {
     return getDomainStateRecordOrEmpty(this.db, domain, logger, trx)
   }

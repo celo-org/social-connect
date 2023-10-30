@@ -93,7 +93,7 @@ describe('CircuitBreakerClient', () => {
       const plaintext = crypto.privateDecrypt(
         //@ts-ignore support for OAEP hash option, was added in Node 12.9.0.
         { key: MockCircuitBreaker.privateKey, oaepHash: 'sha256' },
-        ciphertext.result
+        ciphertext.result,
       )
       expect(plaintext.toString('utf8')).toEqual(testData)
     })

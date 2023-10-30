@@ -4,7 +4,7 @@ import { OdisRequest, OdisResponse, WarningMessage } from '..'
 
 export function send<
   I extends OdisRequest = OdisRequest,
-  O extends OdisResponse<I> = OdisResponse<I>
+  O extends OdisResponse<I> = OdisResponse<I>,
 >(response: Response<O>, body: O, status: number, logger: Logger) {
   if (!response.headersSent) {
     if (!body.success) {

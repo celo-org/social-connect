@@ -161,7 +161,7 @@ export type OdisRequest<D extends Domain = Domain> = DomainRequest<D> | PhoneNum
 
 /** Parameterized schema for checking unknown input against DomainRestrictedSignatureRequest */
 export function domainRestrictedSignatureRequestSchema<D extends Domain = Domain>(
-  domain: t.Type<D>
+  domain: t.Type<D>,
 ): t.Type<DomainRestrictedSignatureRequest<D>> {
   // The schema defined here does most of the work, but does not guarantee consistency between the
   // domain and options fields. We wrap the schema below to add a consistency check.
@@ -175,7 +175,7 @@ export function domainRestrictedSignatureRequestSchema<D extends Domain = Domain
 
   const validation = (
     unk: unknown,
-    ctx: t.Context
+    ctx: t.Context,
   ): t.Validation<DomainRestrictedSignatureRequest<D>> =>
     pipe(
       schema.validate(unk, ctx),
@@ -194,20 +194,20 @@ export function domainRestrictedSignatureRequestSchema<D extends Domain = Domain
         const canary = (x: never) => x
         canary(value.domain)
         throw new Error('Implementation error: validated domain is not of any known type')
-      })
+      }),
     )
 
   return new t.Type<DomainRestrictedSignatureRequest<D>, DomainRestrictedSignatureRequest<D>>(
     `DomainRestrictedSignatureRequestSchema<${domain.name}>`,
     (unk: unknown): unk is DomainRestrictedSignatureRequest<D> => isRight(validation(unk, [])),
     validation,
-    (req: DomainRestrictedSignatureRequest<D>) => req
+    (req: DomainRestrictedSignatureRequest<D>) => req,
   )
 }
 
 /** Parameterized schema for checking unknown input against DomainQuotaStatusRequest */
 export function domainQuotaStatusRequestSchema<D extends Domain = Domain>(
-  domain: t.Type<D>
+  domain: t.Type<D>,
 ): t.Type<DomainQuotaStatusRequest<D>> {
   // The schema defined here does most of the work, but does not guarantee consistency between the
   // domain and options fields. We wrap the schema below to add a consistency check.
@@ -236,20 +236,20 @@ export function domainQuotaStatusRequestSchema<D extends Domain = Domain>(
         const canary = (x: never) => x
         canary(value.domain)
         throw new Error('Implementation error: validated domain is not of any known type')
-      })
+      }),
     )
 
   return new t.Type<DomainQuotaStatusRequest<D>, DomainQuotaStatusRequest<D>>(
     `DomainQuotaStatusRequestSchema<${domain.name}>`,
     (unk: unknown): unk is DomainQuotaStatusRequest<D> => isRight(validation(unk, [])),
     validation,
-    (req: DomainQuotaStatusRequest<D>) => req
+    (req: DomainQuotaStatusRequest<D>) => req,
   )
 }
 
 /** Parameterized schema for checking unknown input against DisableDomainRequest */
 export function disableDomainRequestSchema<D extends Domain = Domain>(
-  domain: t.Type<D>
+  domain: t.Type<D>,
 ): t.Type<DisableDomainRequest<D>> {
   // The schema defined here does most of the work, but does not guarantee consistency between the
   // domain and options fields. We wrap the schema below to add a consistency check.
@@ -278,20 +278,20 @@ export function disableDomainRequestSchema<D extends Domain = Domain>(
         const canary = (x: never) => x
         canary(value.domain)
         throw new Error('Implementation error: validated domain is not of any known type')
-      })
+      }),
     )
 
   return new t.Type<DisableDomainRequest<D>, DisableDomainRequest<D>>(
     `DisableDomainRequestSchema<${domain.name}>`,
     (unk: unknown): unk is DisableDomainRequest<D> => isRight(validation(unk, [])),
     validation,
-    (req: DisableDomainRequest<D>) => req
+    (req: DisableDomainRequest<D>) => req,
   )
 }
 
 /** Wraps the signature request as an EIP-712 typed data structure for hashing and signing */
 export function domainRestrictedSignatureRequestEIP712<D extends Domain>(
-  request: DomainRestrictedSignatureRequest<D>
+  request: DomainRestrictedSignatureRequest<D>,
 ): EIP712TypedData {
   const domainTypes = domainEIP712Types(request.domain)
   const optionsTypes = domainOptionsEIP712Types(request.domain)
@@ -323,7 +323,7 @@ export function domainRestrictedSignatureRequestEIP712<D extends Domain>(
 
 /** Wraps the domain quota request as an EIP-712 typed data structure for hashing and signing */
 export function domainQuotaStatusRequestEIP712<D extends Domain>(
-  request: DomainQuotaStatusRequest<D>
+  request: DomainQuotaStatusRequest<D>,
 ): EIP712TypedData {
   const domainTypes = domainEIP712Types(request.domain)
   const optionsTypes = domainOptionsEIP712Types(request.domain)
@@ -354,7 +354,7 @@ export function domainQuotaStatusRequestEIP712<D extends Domain>(
 
 /** Wraps the disable domain request as an EIP-712 typed data structure for hashing and signing */
 export function disableDomainRequestEIP712<D extends Domain>(
-  request: DisableDomainRequest<D>
+  request: DisableDomainRequest<D>,
 ): EIP712TypedData {
   const domainTypes = domainEIP712Types(request.domain)
   const optionsTypes = domainOptionsEIP712Types(request.domain)
@@ -395,7 +395,7 @@ export function disableDomainRequestEIP712<D extends Domain>(
  */
 function verifyRequestSignature<R extends DomainRequest<SequentialDelayDomain>>(
   typedDataBuilder: (request: R) => EIP712TypedData,
-  request: R
+  request: R,
 ): boolean {
   // If the address field is undefined, then this domain is unauthenticated.
   // Return false as the signature cannot be checked.
@@ -435,7 +435,7 @@ function verifyRequestSignature<R extends DomainRequest<SequentialDelayDomain>>(
  * to the undefined value for type EIP712Optional<string>).
  */
 export function verifyDomainRestrictedSignatureRequestAuthenticity(
-  request: DomainRestrictedSignatureRequest<SequentialDelayDomain>
+  request: DomainRestrictedSignatureRequest<SequentialDelayDomain>,
 ): boolean {
   return verifyRequestSignature(domainRestrictedSignatureRequestEIP712, request)
 }
@@ -449,7 +449,7 @@ export function verifyDomainRestrictedSignatureRequestAuthenticity(
  * to the undefined value for type EIP712Optional<string>).
  */
 export function verifyDomainQuotaStatusRequestAuthenticity(
-  request: DomainQuotaStatusRequest<SequentialDelayDomain>
+  request: DomainQuotaStatusRequest<SequentialDelayDomain>,
 ): boolean {
   return verifyRequestSignature(domainQuotaStatusRequestEIP712, request)
 }
@@ -463,7 +463,7 @@ export function verifyDomainQuotaStatusRequestAuthenticity(
  * to the undefined value for type EIP712Optional<string>).
  */
 export function verifyDisableDomainRequestAuthenticity(
-  request: DisableDomainRequest<SequentialDelayDomain>
+  request: DisableDomainRequest<SequentialDelayDomain>,
 ): boolean {
   return verifyRequestSignature(disableDomainRequestEIP712, request)
 }

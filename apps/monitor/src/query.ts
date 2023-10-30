@@ -34,7 +34,7 @@ export const queryOdisForSalt = async (
   bypassQuota: boolean = false,
   useDEK: boolean = false,
   privateKey?: string,
-  privateKeyPercentage: number = 100
+  privateKeyPercentage: number = 100,
 ) => {
   let authSigner: AuthSigner
   let accountAddress: string
@@ -83,7 +83,7 @@ export const queryOdisForSalt = async (
       undefined,
       bypassQuota ? testSessionId : genSessionID(),
       undefined,
-      abortController
+      abortController,
     )
     clearTimeout(timeout)
 
@@ -99,7 +99,7 @@ export const queryOdisForQuota = async (
   contextName: OdisContextName,
   timeoutMs: number = 10000,
   privateKey?: string,
-  privateKeyPercentage: number = 100
+  privateKeyPercentage: number = 100,
 ) => {
   console.log(`contextName: ${contextName}`) // tslint:disable-line:no-console
   console.log(`blockchain provider: ${blockchainProvider}`) // tslint:disable-line:no-console
@@ -131,7 +131,7 @@ export const queryOdisForQuota = async (
       serviceContext,
       undefined,
       undefined,
-      abortController
+      abortController,
     )
 
     clearTimeout(timeout)

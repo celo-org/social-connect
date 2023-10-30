@@ -66,7 +66,7 @@ export interface OffchainDataWrapper {
     account: Address,
     dataPath: string,
     checkOffchainSigners: boolean,
-    type?: t.Type<DataType>
+    type?: t.Type<DataType>,
   ): Promise<Result<Buffer, OffchainErrors>>
 }
 
@@ -74,7 +74,11 @@ export class BasicDataWrapper implements OffchainDataWrapper {
   storageWriter: StorageWriter | undefined
   signer: string
 
-  constructor(readonly self: string, readonly kit: ContractKit, signer?: string) {
+  constructor(
+    readonly self: string,
+    readonly kit: ContractKit,
+    signer?: string,
+  ) {
     this.signer = signer || self
   }
 
@@ -82,7 +86,7 @@ export class BasicDataWrapper implements OffchainDataWrapper {
     account: Address,
     dataPath: string,
     checkOffchainSigners: boolean,
-    type?: t.Type<DataType>
+    type?: t.Type<DataType>,
   ): Promise<Result<Buffer, OffchainErrors>> {
     const accounts = await this.kit.contracts.getAccounts()
     const metadataURL = await accounts.getMetadataURL(account)
@@ -98,7 +102,7 @@ export class BasicDataWrapper implements OffchainDataWrapper {
     }
 
     const results = await Promise.all(
-      storageRoots.map(async (s) => s.readAndVerifySignature(dataPath, checkOffchainSigners, type))
+      storageRoots.map(async (s) => s.readAndVerifySignature(dataPath, checkOffchainSigners, type)),
     )
     const item = results.find((s) => s.ok)
 
@@ -114,7 +118,7 @@ export class BasicDataWrapper implements OffchainDataWrapper {
   async writeDataTo(
     data: Buffer,
     signature: Buffer,
-    dataPath: string
+    dataPath: string,
   ): Promise<OffchainErrors | void> {
     if (this.storageWriter === undefined) {
       return new NoStorageProvider()
@@ -135,13 +139,13 @@ class StorageRoot {
   constructor(
     readonly wrapper: OffchainDataWrapper,
     readonly account: Address,
-    readonly root: string
+    readonly root: string,
   ) {}
 
   async readAndVerifySignature<DataType>(
     dataPath: string,
     checkOffchainSigners: boolean,
-    type?: t.Type<DataType>
+    type?: t.Type<DataType>,
   ): Promise<Result<Buffer, OffchainErrors>> {
     let dataResponse, signatureResponse
 
@@ -202,7 +206,7 @@ class StorageRoot {
         const authorizedSignerAccessor = new AuthorizedSignerAccessor(this.wrapper)
         const authorizedSigner = await authorizedSignerAccessor.readAsResult(
           this.account,
-          guessedSigner
+          guessedSigner,
         )
         if (authorizedSigner.ok) {
           return Ok(body)

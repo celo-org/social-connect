@@ -260,7 +260,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       expect(res.headers.get(KEY_VERSION_HEADER)).toEqual(contextSpecificParams.domainsKeyVersion)
       poprf.unblindPartialResponse(
         // throws if verification fails
-        Buffer.from(resBody.signature, 'base64')
+        Buffer.from(resBody.signature, 'base64'),
       )
     })
 
@@ -287,7 +287,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       req.options.nonce = defined(1)
       req.options.signature = noString
       req.options.signature = defined(
-        await wallet.signTypedData(ACCOUNT_ADDRESS1, domainRestrictedSignatureRequestEIP712(req))
+        await wallet.signTypedData(ACCOUNT_ADDRESS1, domainRestrictedSignatureRequestEIP712(req)),
       )
 
       // TODO(ODIS 2.0.0 e2e fix) clean up this duplicated logic
@@ -323,7 +323,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         ACCOUNT_ADDRESS1,
         `${signSalt}-${Date.now()}`,
         undefined,
-        5
+        5,
       )
       const res = await queryDomainEndpoint(newReq, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(200)
@@ -346,12 +346,12 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const [newReq, _poprf] = await signatureRequest(
         wallet,
         ACCOUNT_ADDRESS1,
-        `${signSalt}-${Date.now() + 1}`
+        `${signSalt}-${Date.now() + 1}`,
       )
       const res = await queryDomainEndpoint(
         newReq,
         SignerEndpoint.DOMAIN_SIGN,
-        contextSpecificParams.domainsKeyVersion
+        contextSpecificParams.domainsKeyVersion,
       )
       expect(res.status).toBe(200)
       const resBody: DomainRestrictedSignatureResponseSuccess = await res.json()
@@ -374,7 +374,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const [badRequest, _] = await signatureRequest(
         wallet,
         ACCOUNT_ADDRESS1,
-        `${signSalt}-${Date.now()}`
+        `${signSalt}-${Date.now()}`,
       )
       // @ts-ignore Intentionally deleting required field
       delete badRequest.domain.version
@@ -392,7 +392,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const [badRequest, _] = await signatureRequest(
         wallet,
         ACCOUNT_ADDRESS1,
-        `${signSalt}-${Date.now()}`
+        `${signSalt}-${Date.now()}`,
       )
       // @ts-ignore UnknownDomain is (intentionally) not a valid domain identifier.
       badRequest.domain.name = 'UnknownDomain'
@@ -410,7 +410,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const [badRequest, _] = await signatureRequest(
         wallet,
         ACCOUNT_ADDRESS1,
-        `${signSalt}-${Date.now()}`
+        `${signSalt}-${Date.now()}`,
       )
       // @ts-ignore Intentionally not JSON
       badRequest.domain = 'Freddy'
@@ -428,7 +428,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const [badRequest, _] = await signatureRequest(
         wallet,
         ACCOUNT_ADDRESS1,
-        `${signSalt}-${Date.now()}`
+        `${signSalt}-${Date.now()}`,
       )
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_SIGN, 'a')
       expect(res.status).toBe(400)
@@ -444,7 +444,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const [badRequest, _] = await signatureRequest(
         wallet,
         ACCOUNT_ADDRESS1,
-        `${signSalt}-${Date.now()}`
+        `${signSalt}-${Date.now()}`,
       )
       badRequest.domain.salt = defined('badSalt')
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_SIGN)
@@ -487,7 +487,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         wallet,
         ACCOUNT_ADDRESS1,
         `${signSalt}-${Date.now()}`,
-        disableReq.domain
+        disableReq.domain,
       )
       const res = await queryDomainEndpoint(signReq, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(429)
@@ -510,7 +510,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
 async function queryDomainEndpoint(
   req: DomainRequest,
   endpoint: DomainEndpoint,
-  keyVersion?: string
+  keyVersion?: string,
 ): Promise<Response> {
   const body = JSON.stringify(req)
   const headers: any = {
@@ -539,7 +539,7 @@ const domainStages = (): SequentialDelayStage[] => [
 const authenticatedDomain = (
   address: string,
   salt: string,
-  _stages?: SequentialDelayStage[]
+  _stages?: SequentialDelayStage[],
 ): SequentialDelayDomain => ({
   name: DomainIdentifiers.SequentialDelay,
   version: '1',
@@ -551,7 +551,7 @@ const authenticatedDomain = (
 const quotaRequest = async (
   wallet: LocalWallet,
   address: string,
-  salt: string
+  salt: string,
 ): Promise<DomainQuotaStatusRequest<SequentialDelayDomain>> => {
   const req: DomainQuotaStatusRequest<SequentialDelayDomain> = {
     type: DomainRequestTypeTag.QUOTA,
@@ -563,7 +563,7 @@ const quotaRequest = async (
     sessionID: defined(genSessionID()),
   }
   req.options.signature = defined(
-    await wallet.signTypedData(address, domainQuotaStatusRequestEIP712(req))
+    await wallet.signTypedData(address, domainQuotaStatusRequestEIP712(req)),
   )
   return req
 }
@@ -571,7 +571,7 @@ const quotaRequest = async (
 const disableRequest = async (
   wallet: LocalWallet,
   address: string,
-  salt: string
+  salt: string,
 ): Promise<DisableDomainRequest<SequentialDelayDomain>> => {
   const req: DisableDomainRequest<SequentialDelayDomain> = {
     type: DomainRequestTypeTag.DISABLE,
@@ -583,7 +583,7 @@ const disableRequest = async (
     sessionID: defined(genSessionID()),
   }
   req.options.signature = defined(
-    await wallet.signTypedData(address, disableDomainRequestEIP712(req))
+    await wallet.signTypedData(address, disableDomainRequestEIP712(req)),
   )
   return req
 }
@@ -593,14 +593,14 @@ const signatureRequest = async (
   address: string,
   salt: string,
   _domain?: SequentialDelayDomain,
-  _nonce?: number
+  _nonce?: number,
 ): Promise<[DomainRestrictedSignatureRequest<SequentialDelayDomain>, ThresholdPoprfClient]> => {
   const domain = _domain ?? authenticatedDomain(address, salt)
   const thresholdPoprfClient = new ThresholdPoprfClient(
     Buffer.from(contextSpecificParams.domainsPubKey, 'base64'),
     Buffer.from(contextSpecificParams.domainsPolynomial, 'hex'),
     domainHash(domain),
-    Buffer.from('test message', 'utf8')
+    Buffer.from('test message', 'utf8'),
   )
 
   const req: DomainRestrictedSignatureRequest<SequentialDelayDomain> = {
@@ -614,7 +614,7 @@ const signatureRequest = async (
     sessionID: defined(genSessionID()),
   }
   req.options.signature = defined(
-    await wallet.signTypedData(address, domainRestrictedSignatureRequestEIP712(req))
+    await wallet.signTypedData(address, domainRestrictedSignatureRequestEIP712(req)),
   )
   return [req, thresholdPoprfClient]
 }

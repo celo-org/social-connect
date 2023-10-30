@@ -44,7 +44,7 @@ export function domainQuota(quota: DomainQuotaService): ResultHandler<DomainQuot
 }
 
 function isValidRequest(
-  request: Request<{}, {}, unknown>
+  request: Request<{}, {}, unknown>,
 ): request is Request<{}, {}, DomainQuotaStatusRequest> {
   return domainQuotaStatusRequestSchema(DomainSchema).is(request.body)
 }

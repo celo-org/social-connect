@@ -17,7 +17,7 @@ import { PnpRequestService } from '../../services/request-service'
 
 export function pnpQuota(
   requestService: PnpRequestService,
-  accountService: AccountService
+  accountService: AccountService,
 ): ResultHandler<PnpQuotaRequest> {
   return async (request, response) => {
     const logger = response.locals.logger
@@ -59,7 +59,7 @@ export function pnpQuota(
 }
 
 function isValidRequest(
-  request: Request<{}, {}, unknown>
+  request: Request<{}, {}, unknown>,
 ): request is Request<{}, {}, PnpQuotaRequest> {
   return (
     PnpQuotaRequestSchema.is(request.body) &&

@@ -17,7 +17,7 @@ export async function testPNPSignQuery(
   bypassQuota?: boolean,
   useDEK?: boolean,
   privateKey?: string,
-  privateKeyPercentage: number = 100
+  privateKeyPercentage: number = 100,
 ) {
   try {
     const odisResponse: IdentifierHashDetails = await queryOdisForSalt(
@@ -27,14 +27,14 @@ export async function testPNPSignQuery(
       bypassQuota,
       useDEK,
       privateKey,
-      privateKeyPercentage
+      privateKeyPercentage,
     )
     logger.debug({ odisResponse }, 'ODIS salt request successful. System is healthy.')
   } catch (err) {
     if ((err as Error).message === ErrorMessages.ODIS_QUOTA_ERROR) {
       logger.warn(
         { error: err },
-        'ODIS salt request out of quota. This is expected. System is healthy.'
+        'ODIS salt request out of quota. This is expected. System is healthy.',
       )
     } else {
       logger.error('ODIS salt request failed.')
@@ -49,7 +49,7 @@ export async function testPNPQuotaQuery(
   contextName: OdisContextName,
   timeoutMs?: number,
   privateKey?: string,
-  privateKeyPercentage: number = 100
+  privateKeyPercentage: number = 100,
 ) {
   logger.info(`Performing test PNP query for ${CombinerEndpointPNP.PNP_QUOTA}`)
   try {
@@ -58,7 +58,7 @@ export async function testPNPQuotaQuery(
       contextName,
       timeoutMs,
       privateKey,
-      privateKeyPercentage
+      privateKeyPercentage,
     )
     logger.info({ odisResponse }, 'ODIS quota request successful. System is healthy.')
   } catch (err) {
@@ -98,7 +98,7 @@ export async function concurrentRPSLoadTest(
   useDEK: boolean = false,
   movingAverageRequests: number = 50,
   privateKey?: string,
-  privateKeyPercentage: number = 100
+  privateKeyPercentage: number = 100,
 ) {
   const latencyQueue: number[] = []
   let movingAvgLatencySum = 0
@@ -145,14 +145,14 @@ export async function concurrentRPSLoadTest(
             bypassQuota,
             useDEK,
             privateKey,
-            privateKeyPercentage
+            privateKeyPercentage,
           )
         : testPNPQuotaQuery(
             blockchainProvider,
             contextName,
             undefined,
             privateKey,
-            privateKeyPercentage
+            privateKeyPercentage,
           ))
     } catch (_) {
       logger.error('load test request failed')
@@ -165,7 +165,7 @@ export async function concurrentRPSLoadTest(
 async function doRPSTest(
   testFn: () => Promise<void>,
   rps: number,
-  duration: number = 0
+  duration: number = 0,
 ): Promise<void> {
   const inFlightRequests: Array<Promise<void>> = []
   let shouldRun = true

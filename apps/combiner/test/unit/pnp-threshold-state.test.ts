@@ -148,7 +148,7 @@ describe('pnp threshold state', () => {
       if (warning) {
         expect(warnings).toContain(
           WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS +
-            ', using threshold signer as best guess'
+            ', using threshold signer as best guess',
         )
       }
     })
@@ -201,7 +201,7 @@ describe('pnp threshold state', () => {
       if (warning) {
         expect(warnings).toContain(
           WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS +
-            ', using threshold signer as best guess'
+            ', using threshold signer as best guess',
         )
       }
     })
@@ -228,7 +228,7 @@ describe('pnp threshold state', () => {
 
     const warnings: string[] = []
     expect(() => findCombinerQuotaState(keyVersionInfo, responses, warnings)).toThrow(
-      WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS
+      WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS,
     )
   })
 })
