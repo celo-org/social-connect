@@ -104,7 +104,7 @@ jobs:
           path: |
             packages/**/lib
             packages/**/dist
-            packages/**/build
+            apps/**/dist
           key: code-${{ github.sha }}
           restore-keys: |
             code-${{ github.sha }}
