@@ -30,7 +30,7 @@ COPY .git .git
 ARG ONLY_PUBLISHED_DEPENDENCIES=""
 ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+apps/monitor}
 COPY --from=packages celo-phone-number-privacy/packages/${PACKAGE_SELECTOR} packages/${PACKAGE_SELECTOR}
-
+COPY --from=apps celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${PACKAGE_SELECTOR}
 # Install dependencies and build.
 RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
 
