@@ -14,7 +14,7 @@ import { normalizeAddressWith0x } from '@celo/utils/lib/address'
 import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
 import fetch from 'node-fetch'
-import { config as signerConfig } from '../../../signer/src/config'
+import { config as signerConfig } from '@celo/phone-number-privacy-signer/src/config'
 import { getCombinerVersion } from '../../src'
 import {
   ACCOUNT_ADDRESS,
