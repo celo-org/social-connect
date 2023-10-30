@@ -108,7 +108,6 @@ jobs:
         run : sudo corepack enable yarn
       - name: Install yarn dependencies
         run: git config --global url."https://".insteadOf ssh:// && yarn install
-        if: steps.cache_node.outputs.cache-hit == 'true'
       - name: Fail if any file changed on git
         run: |
           # This fails if there is any change
