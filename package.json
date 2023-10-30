@@ -23,12 +23,10 @@
     "test:watch": "node node_modules/jest/bin/jest.js --watch",
     "cs": "yarn changeset",
     "bump": "yarn changeset version",
-    "release": "yarn build && yarn cs publish"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern '**/*.+(ts|js)'"
-    }
+    "release": "yarn build && yarn cs publish",
+    "beta-enter": "bash scripts/beta-mode.sh",
+    "beta-exit": "yarn cs pre exit && git commit -am 'Complete beta releasing'",
+    "postinstall": "yarn husky install && yarn workspaces foreach --all -piv run postinstall"
   },
   "workspaces": [
     "packages/*",
@@ -53,7 +51,7 @@
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "husky": "^3.1.0",
+    "husky": "^8.0.0",
     "jest": "^29.0.2",
     "jest-circus": "^29.0.2",
     "jest-junit": "^14.0.1",
