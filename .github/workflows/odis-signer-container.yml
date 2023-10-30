@@ -4,13 +4,13 @@ name: Build ODIS signer image
 on:
   push:
     paths:
-      - 'dockerfiles//Dockerfile-signer'
+      - 'dockerfiles/Dockerfile-signer'
       - 'apps/signer/**'
     branches:
       - main
   pull_request:
     paths:
-      - 'dockerfiles//Dockerfile-signer'
+      - 'dockerfiles/Dockerfile-signer'
       - 'apps/signer/**'
   workflow_dispatch:
 
@@ -26,7 +26,7 @@ jobs:
       artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
       tag: ${{ github.sha }}
       context: .
-      file: dockerfiles//Dockerfile-signer
+      file: dockerfiles/Dockerfile-signer
       trivy: true
 
   odis-signer-build:
@@ -40,5 +40,5 @@ jobs:
       artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
       tag: ${{ github.sha }}
       context: .
-      file: dockerfiles//Dockerfile-signer
+      file: dockerfiles/Dockerfile-signer
       trivy: true

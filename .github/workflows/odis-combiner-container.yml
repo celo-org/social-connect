@@ -4,13 +4,13 @@ name: Build ODIS combiner image
 on:
   push:
     paths:
-      - 'dockerfiles//Dockerfile-combiner'
+      - 'dockerfiles/Dockerfile-combiner'
       - 'apps/combiner/**'
     branches:
       - main
   pull_request:
     paths:
-      - 'dockerfiles//Dockerfile-combiner'
+      - 'dockerfiles/Dockerfile-combiner'
       - 'apps/combiner/**'
   workflow_dispatch:
 
@@ -26,7 +26,7 @@ jobs:
       artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-combiner
       tag: ${{ github.sha }}
       context: .
-      file: dockerfiles//Dockerfile-combiner
+      file: dockerfiles/Dockerfile-combiner
       trivy: true
 
   odis-combiner-build:
@@ -40,5 +40,5 @@ jobs:
       artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner
       tag: ${{ github.sha }}
       context: .
-      file: dockerfiles//Dockerfile-combiner
+      file: dockerfiles/Dockerfile-combiner
       trivy: true
