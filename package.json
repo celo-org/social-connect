@@ -15,7 +15,7 @@
     "reset-modules": "rm -rf node_modules/ packages/*/node_modules",
     "reset-yarn": "yarn cache clean",
     "test": "yarn workspaces foreach --all run test",
-    "test:fast": "yarn workspaces foreach -ip --since --exclude '{odis,packages/phone-number-privacy/combiner}' run test",
+    "test:fast": "yarn workspaces foreach -ip --since --exclude '{odis,apps/combiner}' run test",
     "build": "yarn workspaces foreach --all -pitv run build",
     "build:fast": "yarn workspaces foreach -pitv --since run build",
     "clean": "yarn workspaces foreach --all -piv run clean",
@@ -32,8 +32,7 @@
   },
   "workspaces": [
     "packages/*",
-    "packages/phone-number-privacy/*",
-    "packages/sdk/*",
+    "apps/*",
     "docs/examples"
   ],
   "devDependencies": {

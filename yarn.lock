@@ -1772,9 +1772,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/encrypted-backup@npm:^5.0.4, @celo/encrypted-backup@workspace:packages/sdk/encrypted-backup":
+"@celo/encrypted-backup@npm:^5.0.4, @celo/encrypted-backup@workspace:packages/encrypted-backup":
   version: 0.0.0-use.local
-  resolution: "@celo/encrypted-backup@workspace:packages/sdk/encrypted-backup"
+  resolution: "@celo/encrypted-backup@workspace:packages/encrypted-backup"
   dependencies:
     "@celo/base": "npm:^5.0.4"
     "@celo/connect": "npm:^5.0.4"
@@ -1793,9 +1793,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/identity@npm:^5.0.4, @celo/identity@workspace:packages/sdk/identity":
+"@celo/identity@npm:^5.0.4, @celo/identity@workspace:packages/identity":
   version: 0.0.0-use.local
-  resolution: "@celo/identity@workspace:packages/sdk/identity"
+  resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
     "@celo/base": "npm:^5.0.4"
     "@celo/celo-devchain": "npm:6.0.0"
@@ -1830,15 +1830,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/phone-number-privacy-combiner@workspace:packages/phone-number-privacy/combiner":
+"@celo/phone-number-privacy-combiner@workspace:apps/combiner":
   version: 0.0.0-use.local
-  resolution: "@celo/phone-number-privacy-combiner@workspace:packages/phone-number-privacy/combiner"
+  resolution: "@celo/phone-number-privacy-combiner@workspace:apps/combiner"
   dependencies:
     "@celo/base": "npm:^5.0.4"
     "@celo/contractkit": "npm:^5.0.4"
     "@celo/encrypted-backup": "npm:^5.0.4"
     "@celo/identity": "npm:^5.0.4"
     "@celo/phone-number-privacy-common": "npm:^3.1.0"
+    "@celo/phone-number-privacy-signer": "workspace:^"
     "@celo/phone-utils": "npm:^5.0.4"
     "@celo/poprf": "npm:^0.1.9"
     "@celo/utils": "npm:^5.0.4"
@@ -1894,9 +1895,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/phone-number-privacy-common@npm:^3.0.3, @celo/phone-number-privacy-common@npm:^3.1.0, @celo/phone-number-privacy-common@workspace:packages/phone-number-privacy/common":
+"@celo/phone-number-privacy-common@npm:^3.0.3, @celo/phone-number-privacy-common@npm:^3.1.0, @celo/phone-number-privacy-common@workspace:packages/common":
   version: 0.0.0-use.local
-  resolution: "@celo/phone-number-privacy-common@workspace:packages/phone-number-privacy/common"
+  resolution: "@celo/phone-number-privacy-common@workspace:packages/common"
   dependencies:
     "@celo/base": "npm:^5.0.4"
     "@celo/contractkit": "npm:^5.0.4"
@@ -1931,9 +1932,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/phone-number-privacy-monitor@workspace:packages/phone-number-privacy/monitor":
+"@celo/phone-number-privacy-monitor@workspace:apps/monitor":
   version: 0.0.0-use.local
-  resolution: "@celo/phone-number-privacy-monitor@workspace:packages/phone-number-privacy/monitor"
+  resolution: "@celo/phone-number-privacy-monitor@workspace:apps/monitor"
   dependencies:
     "@celo/base": "npm:^5.0.4"
     "@celo/contractkit": "npm:^5.0.4"
@@ -1952,9 +1953,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/phone-number-privacy-signer@workspace:packages/phone-number-privacy/signer":
+"@celo/phone-number-privacy-signer@workspace:^, @celo/phone-number-privacy-signer@workspace:apps/signer":
   version: 0.0.0-use.local
-  resolution: "@celo/phone-number-privacy-signer@workspace:packages/phone-number-privacy/signer"
+  resolution: "@celo/phone-number-privacy-signer@workspace:apps/signer"
   dependencies:
     "@celo/base": "npm:^5.0.4"
     "@celo/contractkit": "npm:^5.0.4"

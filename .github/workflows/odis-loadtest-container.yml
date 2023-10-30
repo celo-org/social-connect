@@ -4,14 +4,14 @@ name: Build ODIS loadtest image
 on:
   push:
     paths:
-      - 'dockerfiles/phone-number-privacy/Dockerfile-loadtest'
-      - 'packages/phone-number-privacy/monitor/**'
+      - 'dockerfiles/Dockerfile-loadtest'
+      - 'apps/monitor/**'
     branches:
       - main
   pull_request:
     paths:
-      - 'dockerfiles/phone-number-privacy/Dockerfile-loadtest'
-      - 'packages/phone-number-privacy/monitor/**'
+      - 'dockerfiles/Dockerfile-loadtest'
+      - 'apps/monitor/**'
   workflow_dispatch:
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
       artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
       tag: ${{ github.sha }}
       context: .
-      file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
+      file: dockerfiles/Dockerfile-loadtest
       trivy: true
 
   odis-loadtest-build:
@@ -40,5 +40,5 @@ jobs:
       artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
       tag: ${{ github.sha }}
       context: .
-      file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
+      file: dockerfiles/Dockerfile-loadtest
       trivy: true

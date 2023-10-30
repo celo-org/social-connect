@@ -174,4 +174,4 @@ You can test your mainnet service is set up correctly by running specific tests 
 
 ### Logs
 
-Error logs will be prefixed with `CELO_ODIS_ERROR_XX`. You can see a full list of them in [errors.ts](https://github.com/celo-org/celo-monorepo/blob/master/packages/phone-number-privacy/common/src/interfaces/errors.ts) in the common package.
+Error logs will be prefixed with `CELO_ODIS_ERROR_XX`. You can see a full list of them in [errors.ts](https://github.com/celo-org/celo-monorepo/blob/master/packages/common/src/interfaces/errors.ts) in the common package.
