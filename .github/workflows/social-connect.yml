@@ -160,18 +160,22 @@ jobs:
         id: changes
         uses: dorny/paths-filter@v2
         with:
+          list-files: 'shell'
           filters: |
             workflows: .github/workflows/*.yml
             markdown:
-              - added|deleted|modified: '*.md'
+              - added|deleted|modified: '**/*.md'
             others:
-              - added|deleted|modified: "!('*.md')"
+              - added|deleted|modified: "!('**/*.md')"
       - name: What changed?
         run: |
-          echo "workflows ${{ steps.changes.outputs.workflows }}"
-          echo "others ${{ steps.changes.outputs.others }}"
-          echo "markdown ${{ steps.changes.outputs.markdown }}"
           echo ${{ steps.changes.outputs.changes }}
+          echo "workflows ${{ steps.changes.outputs.workflows }}"
+          echo ${{ steps.changes.outputs.workflows_files }}
+          echo "others ${{ steps.changes.outputs.others }}"
+          echo ${{ steps.changes.outputs.others_files }}
+          echo "markdown ${{ steps.changes.outputs.markdown }}"
+          echo ${{ steps.changes.outputs.markdown_files }}
       - name: Find ChangeSet in PR
         uses: peter-evans/find-comment@v2
         id: fc
