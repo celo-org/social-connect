@@ -165,6 +165,11 @@ jobs:
               - added|deleted|modified: '*.md'
             others:
               - added|deleted|modified: "!('*.md')"
+      - name: What changed?
+        run: |
+          echo ${{ steps.changes.outputs.others }}
+          echo ${{ steps.changes.outputs.markdown }}
+          echo ${{ steps.changes.outputs.changes }}
       - name: Find ChangeSet in PR
         uses: peter-evans/find-comment@v2
         id: fc
