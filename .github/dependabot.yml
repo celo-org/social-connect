@@ -18,6 +18,8 @@ updates:
     groups:
       celo-dependencies:
         patterns: ["^@celo/"]
+      open-telemetry:
+        patterns: ["@opentelemetry/"]
       development-dependencies:
         dependency-type: "development"
         update-types:
