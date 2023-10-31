@@ -164,9 +164,9 @@ jobs:
           filters: |
             workflows: .github/workflows/*.yml
             markdown:
-              - added|deleted|modified: '**/*.md'
+              - added|deleted|modified: "((**/*.md)|(**.md))"
             others:
-              - added|deleted|modified: "!('**/*.md')"
+              - added|deleted|modified: "!((**/*.md)|(**.md))"
       - name: What changed?
         run: |
           echo ${{ steps.changes.outputs.changes }}
