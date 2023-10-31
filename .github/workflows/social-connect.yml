@@ -161,10 +161,11 @@ jobs:
         uses: dorny/paths-filter@v2
         with:
           filters: |
+            workflows: .github/workflows/*.yml
             markdown:
               - added|deleted|modified: '*.md'
             others:
-              - added|deleted|modified: "!('*.md')"
+              - added|deleted|modified: !('*.md')
       - name: What changed?
         run: |
           echo ${{ steps.changes.outputs.others }}
