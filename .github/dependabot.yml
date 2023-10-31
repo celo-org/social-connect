@@ -16,6 +16,8 @@ updates:
       day: "monday"
       interval: "weekly"
     groups:
+      celo-dependencies:
+        patterns: ["^@celo/"]
       development-dependencies:
         dependency-type: "development"
         update-types:

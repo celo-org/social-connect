@@ -24,9 +24,7 @@ COPY .yarn/releases/ .yarn/releases/
 # Makes build fail if it doesn't copy git, will be removed after build
 COPY .git .git
 
-# I dont get how this was supposed to work
-ARG ONLY_PUBLISHED_DEPENDENCIES=""
-ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+apps/monitor}
+ARG PACKAGE_SELECTOR=monitor
 COPY --from=packages celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${PACKAGE_SELECTOR}
 # COMMENT OUT THIS LINE TO USE PUBLISHED DEPENDENCIES
 COPY --from=packages celo-phone-number-privacy/packages packages
