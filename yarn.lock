@@ -1937,7 +1937,7 @@ __metadata:
     "@celo/wallet-local": "npm:^5.0.4"
     firebase-admin: "npm:^9.12.0"
     firebase-functions: "npm:^3.15.7"
-    firebase-functions-test: "npm:^0.3.3"
+    firebase-functions-test: "npm:^3.1.0"
     firebase-tools: "npm:9.20.0"
     jest: "npm:^29.7.0"
     yargs: "npm:^14.0.0"
@@ -12481,16 +12481,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"firebase-functions-test@npm:^0.3.3":
-  version: 0.3.3
-  resolution: "firebase-functions-test@npm:0.3.3"
+"firebase-functions-test@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "firebase-functions-test@npm:3.1.0"
   dependencies:
     "@types/lodash": "npm:^4.14.104"
     lodash: "npm:^4.17.5"
+    ts-deepmerge: "npm:^2.0.1"
   peerDependencies:
-    firebase-admin: ">=6.0.0"
-    firebase-functions: ">=2.0.0"
-  checksum: b050d0ecd1521af9005dc7fd08168b1736cb9249715a9de22e99c21a49c648a0388ccc731a62f60408c8382b13615564f6544ba66358de7ce479f1c8ebab1c0a
+    firebase-admin: ^8.0.0 || ^9.0.0 || ^10.0.0 || ^11.0.0
+    firebase-functions: ">=4.3.0"
+    jest: ">=28.0.0"
+  checksum: b39aac00a45090d8149e472041c06fd9959ac94bb6e5e8ada40f85bbba910d70fe8ee2a7047e3e75cd9b94777ceac2a8fe1298c73dde0386e28f12215fbd1721
   languageName: node
   linkType: hard
 
@@ -22230,6 +22232,13 @@ __metadata:
   peerDependencies:
     typescript: ">=4.2.0"
   checksum: 1350a5110eb1e534e9a6178f4081fb8a4fcc439749e19f4ad699baec9090fcb90fe532d5e191d91a062dc6e454a14a8d7eb2ad202f57135a30c4a44a3024f039
+  languageName: node
+  linkType: hard
+
+"ts-deepmerge@npm:^2.0.1":
+  version: 2.0.7
+  resolution: "ts-deepmerge@npm:2.0.7"
+  checksum: 7b99fe89240c9dd7d57dfc0d96aa5cca4c04ffba3243402339d7270fcf50fa0437b5b9044dd522eee5ecb3220954c3733ea20482bf04497a659a73d21d6b9630
   languageName: node
   linkType: hard
 
