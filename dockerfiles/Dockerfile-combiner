@@ -33,6 +33,8 @@ COPY --from=packages celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${P
 # Install dependencies and build.
 RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
 RUN yarn workspaces list
+# delete tests so they dont get built because signer is needed by them
+RUN rm -rf apps/combiner/test
 RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-combiner run build
 
 RUN rm -r .git
