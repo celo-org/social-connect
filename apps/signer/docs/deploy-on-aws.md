@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- awscli (https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)
-- AWS credentials configured (https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html)
+- awscli (<https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html>)
+- AWS credentials configured (<https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html>)
 
 ## Steps
 
@@ -35,7 +35,7 @@ For the DB Instance size, `Free tier` should be enough.
 ### Running the Signer on Fargate
 
 ECS Fargate is a container execution service provided by AWS. It runs containers without requiring explicit management of hosts or virtual machines.
-Alternatively the signer service can be run using any other service that allows to run containers, such as EC2 or EKS. In the case of EC2, you will need to install docker, configure the instance profile and follow the documentation from [the signer readme](https://github.com/celo-org/celo-monorepo/tree/master/packages/phone-number-privacy/signer).
+Alternatively the signer service can be run using any other service that allows to run containers, such as EC2 or EKS. In the case of EC2, you will need to install docker, configure the instance profile and follow the documentation from [the signer readme](https://github.com/celo-org/celo-monorepo/tree/master/apps/signer).
 
 1. Create the service-linked role. If it is the first time you run ECS on your account you will need to run this command.
 
@@ -44,7 +44,7 @@ Alternatively the signer service can be run using any other service that allows 
     ```
 
 1. Create a Task Role for the signer ([documentation](https://docs.amazonaws.cn/en_us/AmazonECS/latest/userguide/ecs-cli-tutorial-fargate.html)).
-First we will create the `assume-role` policy that allows ECS tasks to be assigned to this task role. 
+First we will create the `assume-role` policy that allows ECS tasks to be assigned to this task role.
 
     ```bash
     cat <<'EOF' > /tmp/task-execution-assume-role.json
@@ -70,7 +70,7 @@ First we will create the `assume-role` policy that allows ECS tasks to be assign
     aws iam --region us-east-2 create-role --role-name signerTaskExecutionRole --assume-role-policy-document file:///tmp/task-execution-assume-role.json
     ```
 
-    Finally we create the policy assigned to this task-role that allows retrieval of secrets from AWS Secret Manager. Then we attach that policy to the task role. 
+    Finally we create the policy assigned to this task-role that allows retrieval of secrets from AWS Secret Manager. Then we attach that policy to the task role.
 
     ```bash
     cat <<'EOF' > /tmp/secret-manager-signer-policy.json

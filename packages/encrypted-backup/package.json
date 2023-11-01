@@ -7,7 +7,7 @@
   "author": "Celo",
   "license": "Apache-2.0",
   "homepage": "https://celo-sdk-docs.readthedocs.io/en/latest/encrypted-backup",
-  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/sdk/encrypted-backup",
+  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/encrypted-backup",
   "keywords": [
     "celo",
     "blockchain",
@@ -39,8 +39,8 @@
   },
   "devDependencies": {
     "@celo/dev-utils": "0.0.1-beta.1",
-    "fetch-mock": "9.10.4",
-    "jest": "^29.0.2"
+    "fetch-mock": "9.11.0",
+    "jest": "^29.7.0"
   },
   "engines": {
     "node": ">=16"
