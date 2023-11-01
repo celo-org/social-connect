@@ -8,12 +8,12 @@
   ],
   "references": [
     {"path":"./docs/examples","name":"odis-example-scripts"},
-    {"path":"./packages/phone-number-privacy/combiner","name":"@celo/phone-number-privacy-combiner"},
-    {"path":"./packages/phone-number-privacy/common","name":"@celo/phone-number-privacy-common"},
-    {"path":"./packages/phone-number-privacy/monitor","name":"@celo/phone-number-privacy-monitor"},
-    {"path":"./packages/phone-number-privacy/signer","name":"@celo/phone-number-privacy-signer"},
-    {"path":"./packages/sdk/encrypted-backup","name":"@celo/encrypted-backup"},
-    {"path":"./packages/sdk/identity","name":"@celo/identity"},
+    {"path":"./apps/combiner","name":"@celo/phone-number-privacy-combiner"},
+    {"path":"./packages/common","name":"@celo/phone-number-privacy-common"},
+    {"path":"./apps/monitor","name":"@celo/phone-number-privacy-monitor"},
+    {"path":"./apps/signer","name":"@celo/phone-number-privacy-signer"},
+    {"path":"./packages/encrypted-backup","name":"@celo/encrypted-backup"},
+    {"path":"./packages/identity","name":"@celo/identity"},
   ]
 }
 
