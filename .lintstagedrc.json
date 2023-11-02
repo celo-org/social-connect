@@ -1,0 +1,4 @@
+{
+  "apps/**/*.ts": "prettier --list-different",
+  "packages/**/*.ts": "prettier --list-different"
+}

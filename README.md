@@ -1,5 +1,7 @@
 # SocialConnect
 
+*For Dev Setup see [CONTRIBUTING.MD](.github/CONTRIBUTING.md)*
+
 SocialConnect is an open source protocol that maps off-chain personal **identifiers** (such as phone numbers, twitter handles, etc.) to on-chain account **addresses**. This enables a convenient and interoperable user experience for use cases such as:
 
 - payments - send money directly to your friend's phone number!

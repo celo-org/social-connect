@@ -1,0 +1,7 @@
+dist/
+
+gcp-service-account.json
+server.cert
+server.key
+
+package-lock.json

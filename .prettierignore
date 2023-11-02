@@ -2,9 +2,11 @@ package.json
 **/.next
 **/coverage
 **/node_modules
-**/privacy/*
 .git/
 
+apps/**/dist
 packages/**/dist
 packages/**/lib
+docs/examples/**/lib
+
 

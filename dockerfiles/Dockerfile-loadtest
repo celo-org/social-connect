@@ -1,0 +1,44 @@
+##### Gathering dependencies
+FROM scratch AS packages
+
+# Copy phone-number-privacy package and its dependency closure.
+# Assemble all dependencies into the packages folder so the second stage can select whether to
+# include all packages, or just the phone-number-privacy packages.
+WORKDIR /celo-phone-number-privacy/
+COPY apps/monitor apps/monitor
+COPY packages/common packages/common
+COPY packages/encrypted-backup packages/encrypted-backup
+COPY packages/identity packages/identity
+COPY packages/odis-identifiers packages/odis-identifiers
+
+##### Main stage
+FROM node:18
+LABEL org.opencontainers.image.authors="devops@clabs.co"
+
+WORKDIR /celo-phone-number-privacy/
+
+# Copy monorepo settings
+COPY .yarnrc.yml package.json yarn.lock ./
+COPY .yarn/releases/ .yarn/releases/
+
+# Makes build fail if it doesn't copy git, will be removed after build
+COPY .git .git
+
+ARG PACKAGE_SELECTOR=monitor
+COPY --from=packages celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${PACKAGE_SELECTOR}
+# COMMENT OUT THIS LINE TO USE PUBLISHED DEPENDENCIES
+COPY --from=packages celo-phone-number-privacy/packages packages
+
+# Install dependencies and build.
+RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
+RUN yarn workspaces list
+RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-monitor run build
+# clean up dev dependencies after build
+RUN yarn workspaces focus @celo/phone-number-privacy-monitor --production
+RUN rm -r .git
+
+# Setup and run the signer application.
+ENV NODE_ENV production
+WORKDIR /celo-phone-number-privacy/apps/monitor
+EXPOSE 8080
+ENTRYPOINT ["yarn", "loadTest"]

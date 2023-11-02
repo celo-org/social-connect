@@ -10,5 +10,25 @@ updates:
     schedule:
       day: "monday"
       interval: "weekly"
-  # To be added when a package manager decision has been taken
-  # - package-ecosystem: "npm" / "pnpm" # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#package-ecosystem
+  - package-ecosystem: "npm" # is value for yarn
+    directory: "/"
+    schedule:
+      day: "monday"
+      interval: "weekly"
+    groups:
+      celo-dependencies:
+        patterns: ["^@celo/"]
+      open-telemetry:
+        patterns: ["@opentelemetry/"]
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"

@@ -1,13 +1,20 @@
 {
-  "name": "example-scripts",
+  "name": "odis-example-scripts",
   "version": "1.0.0",
   "main": "index.js",
+  "private": true,
   "license": "MIT",
+  "scripts": {
+    "build": "yarn run --top-level tsc -b .",
+    "lint": "yarn run --top-level eslint ."
+  },
   "dependencies": {
-    "@celo/base": "^5.0.4",
+    "@celo/base": "^5.0.5",
     "@celo/identity": "^5.0.4",
     "blind-threshold-bls": "https://github.com/celo-org/blind-threshold-bls-wasm#3d1013a",
     "ethers": "^5.7.2",
+    "react": "^16.8.1",
+    "react-native": ">=0.60.0-rc.0 <1.0.x",
     "react-native-blind-threshold-bls": "^1.0.1",
     "web3": "^1.8.0",
     "web3-utils": "^1.8.0"
