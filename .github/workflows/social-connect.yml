@@ -151,7 +151,7 @@ jobs:
       - run: yarn run lint
       - name: Dump GitHub context
         # Use to debug github event and check user ids
-        if: true
+        if: false
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
@@ -160,11 +160,12 @@ jobs:
         id: changes
         uses: dorny/paths-filter@v2
         with:
+          list-files: 'shell'
           filters: |
             markdown:
-              - added|deleted|modified: '*.md'
+              - added|deleted|modified: "((**/*.md)|(**.md))"
             others:
-              - added|deleted|modified: "!('*.md')"
+              - added|deleted|modified: "!((**/*.md)|(**.md))"
       - name: Find ChangeSet in PR
         uses: peter-evans/find-comment@v2
         id: fc
