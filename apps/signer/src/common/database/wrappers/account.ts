@@ -11,7 +11,7 @@ import { doMeteredSql } from '../utils'
 export async function getPerformedQueryCount(
   db: Knex,
   account: string,
-  logger: Logger
+  logger: Logger,
 ): Promise<number> {
   logger.debug({ account }, 'Getting performed query count')
   return doMeteredSql(
@@ -25,7 +25,7 @@ export async function getPerformedQueryCount(
         .first()
         .timeout(config.db.timeout)
       return queryCounts === undefined ? 0 : queryCounts[ACCOUNTS_COLUMNS.numLookups]
-    }
+    },
   )
 }
 
@@ -33,7 +33,7 @@ async function getAccountExists(
   db: Knex,
   account: string,
   logger: Logger,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ): Promise<boolean> {
   return doMeteredSql('getAccountExists', ErrorMessage.DATABASE_GET_FAILURE, logger, async () => {
     const sql = db<AccountRecord>(ACCOUNTS_TABLE)
@@ -53,7 +53,7 @@ export async function incrementQueryCount(
   db: Knex,
   account: string,
   logger: Logger,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ): Promise<void> {
   logger.debug({ account }, 'Incrementing query count')
   return doMeteredSql(
@@ -73,6 +73,6 @@ export async function incrementQueryCount(
           .timeout(config.db.timeout)
         await (trx != null ? sql.transacting(trx) : sql)
       }
-    }
+    },
   )
 }

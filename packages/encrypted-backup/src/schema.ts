@@ -23,9 +23,9 @@ export const BufferFromBase64 = new t.Type<Buffer, string, unknown>(
           return t.failure(unk, context, 'provided string is not base64')
         }
         return t.success(Buffer.from(str, 'base64'))
-      })
+      }),
     ),
-  (buffer: Buffer) => buffer.toString('base64')
+  (buffer: Buffer) => buffer.toString('base64'),
 )
 
 /** io-ts codec used to encode and decode backups from JSON objects */
@@ -85,8 +85,8 @@ export function deserializeBackup(data: string): Result<Backup, DecodeError> {
   if (isLeft(decoding)) {
     return Err(
       new DecodeError(
-        new Error(`error in validating backup object: ${JSON.stringify(decoding.left)}`)
-      )
+        new Error(`error in validating backup object: ${JSON.stringify(decoding.left)}`),
+      ),
     )
   }
   const backup = decoding.right
@@ -94,8 +94,8 @@ export function deserializeBackup(data: string): Result<Backup, DecodeError> {
   if (backup.nonce.length !== 32) {
     return Err(
       new DecodeError(
-        new Error(`expected backup nonce to be 32 bytes but got ${backup.nonce.length}`)
-      )
+        new Error(`expected backup nonce to be 32 bytes but got ${backup.nonce.length}`),
+      ),
     )
   }
 

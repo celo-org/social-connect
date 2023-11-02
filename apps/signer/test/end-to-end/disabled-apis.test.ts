@@ -71,7 +71,7 @@ describe('Running against a deployed service with disabled APIs', () => {
         sessionID: defined(genSessionID()),
       }
       req.options.signature = defined(
-        await wallet.signTypedData(walletAddress, disableDomainRequestEIP712(req))
+        await wallet.signTypedData(walletAddress, disableDomainRequestEIP712(req)),
       )
       const body = JSON.stringify(req)
       const response = await fetch(ODIS_SIGNER + SignerEndpoint.DISABLE_DOMAIN, {
@@ -102,7 +102,7 @@ describe('Running against a deployed service with disabled APIs', () => {
         sessionID: defined(genSessionID()),
       }
       req.options.signature = defined(
-        await wallet.signTypedData(walletAddress, domainQuotaStatusRequestEIP712(req))
+        await wallet.signTypedData(walletAddress, domainQuotaStatusRequestEIP712(req)),
       )
       const body = JSON.stringify(req)
       const response = await fetch(ODIS_SIGNER + SignerEndpoint.DOMAIN_QUOTA_STATUS, {
@@ -135,7 +135,7 @@ describe('Running against a deployed service with disabled APIs', () => {
         sessionID: defined(genSessionID()),
       }
       req.options.signature = defined(
-        await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req))
+        await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req)),
       )
       const body = JSON.stringify(req)
       const response = await fetch(ODIS_SIGNER + SignerEndpoint.DOMAIN_SIGN, {

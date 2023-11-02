@@ -56,7 +56,7 @@ export let config: CombinerConfig
 
 const defaultServiceName = 'odis-combiner'
 const defaultMockDEK = ensureLeading0x(
-  'bf8a2b73baf8402f8fe906ad3f42b560bf14b39f7df7797ece9e293d6f162188'
+  'bf8a2b73baf8402f8fe906ad3f42b560bf14b39f7df7797ece9e293d6f162188',
 )
 
 if (DEV_MODE) {

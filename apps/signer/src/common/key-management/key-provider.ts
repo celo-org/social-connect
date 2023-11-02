@@ -44,7 +44,7 @@ export async function initKeyProvider(config: SignerConfig): Promise<KeyProvider
 
   logger.info(`Fetching keys: ${JSON.stringify(keysToPrefetch(config))}`)
   await Promise.all(
-    keysToPrefetch(config).map(keyProvider.fetchPrivateKeyFromStore.bind(keyProvider))
+    keysToPrefetch(config).map(keyProvider.fetchPrivateKeyFromStore.bind(keyProvider)),
   )
   logger.info('Done fetching key. Key provider initialized successfully.')
 

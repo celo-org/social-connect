@@ -45,7 +45,7 @@ export function startSigner(
   config: SignerConfig,
   db: Knex,
   keyProvider: KeyProvider,
-  kit?: ContractKit
+  kit?: ContractKit,
 ): Express | https.Server<typeof IncomingMessage, typeof ServerResponse> {
   const logger = rootLogger(config.serviceName)
 
@@ -88,24 +88,28 @@ export function startSigner(
     createHandler(
       timeout,
       phoneNumberPrivacy.enabled,
-      pnpSign(config, pnpRequestService, accountService, keyProvider)
-    )
+      pnpSign(config, pnpRequestService, accountService, keyProvider),
+    ),
   )
   app.post(
     SignerEndpoint.PNP_QUOTA,
-    createHandler(timeout, phoneNumberPrivacy.enabled, pnpQuota(pnpRequestService, accountService))
+    createHandler(timeout, phoneNumberPrivacy.enabled, pnpQuota(pnpRequestService, accountService)),
   )
   app.post(
     SignerEndpoint.DOMAIN_QUOTA_STATUS,
-    createHandler(timeout, domains.enabled, domainQuota(domainQuotaService))
+    createHandler(timeout, domains.enabled, domainQuota(domainQuotaService)),
   )
   app.post(
     SignerEndpoint.DOMAIN_SIGN,
-    createHandler(timeout, domains.enabled, domainSign(db, config, domainQuotaService, keyProvider))
+    createHandler(
+      timeout,
+      domains.enabled,
+      domainSign(db, config, domainQuotaService, keyProvider),
+    ),
   )
   app.post(
     SignerEndpoint.DISABLE_DOMAIN,
-    createHandler(timeout, domains.enabled, domainDisable(db))
+    createHandler(timeout, domains.enabled, domainDisable(db)),
   )
 
   const sslOptions = getSslOptions(config)
@@ -139,7 +143,7 @@ function getSslOptions(config: SignerConfig) {
 function createHandler<R extends OdisRequest>(
   timeoutMs: number,
   enabled: boolean,
-  action: ResultHandler<R>
+  action: ResultHandler<R>,
 ): RequestHandler<{}, {}, R, {}, Locals> {
   return catchErrorHandler(
     tracingHandler(
@@ -147,9 +151,9 @@ function createHandler<R extends OdisRequest>(
         Histograms.responseLatency,
         timeoutHandler(
           timeoutMs,
-          enabled ? connectionClosedHandler(resultHandler(action)) : disabledHandler
-        )
-      )
-    )
+          enabled ? connectionClosedHandler(resultHandler(action)) : disabledHandler,
+        ),
+      ),
+    ),
   )
 }

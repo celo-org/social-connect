@@ -66,7 +66,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         domain,
         SERVICE_CONTEXT,
         genSessionID(),
-        authorizer.wallet
+        authorizer.wallet,
       )
 
       expect(res.ok).toBe(true)
@@ -100,7 +100,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         Buffer.from('password'),
         domain,
         SERVICE_CONTEXT,
-        authorizer.wallet
+        authorizer.wallet,
       )
       // odisHardenKey verifies the signature against the service public key
       expect(res.ok).toBe(true)
@@ -118,12 +118,12 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
     const signatureRequest = async (
       keyVersion: number,
       nonce: number,
-      _domain: SequentialDelayDomain = domain
+      _domain: SequentialDelayDomain = domain,
     ): Promise<[DomainRestrictedSignatureRequest<SequentialDelayDomain>, PoprfClient]> => {
       const poprfClient = new PoprfClient(
         Buffer.from(TestUtils.Values.DOMAINS_THRESHOLD_DEV_PUBKEYS[keyVersion - 1], 'base64'),
         domainHash(_domain),
-        Buffer.from('test message', 'utf8')
+        Buffer.from('test message', 'utf8'),
       )
 
       const req: DomainRestrictedSignatureRequest<SequentialDelayDomain> = {
@@ -139,8 +139,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       req.options.signature = defined(
         await authorizer.wallet.signTypedData(
           authorizer.address,
-          domainRestrictedSignatureRequestEIP712(req)
-        )
+          domainRestrictedSignatureRequestEIP712(req),
+        ),
       )
       return [req, poprfClient]
     }
@@ -151,7 +151,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           domain,
           SERVICE_CONTEXT,
           genSessionID(),
-          authorizer.wallet
+          authorizer.wallet,
         )
 
         let nonce = 0
@@ -180,7 +180,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           domainRestrictedSignatureResponseSchema(SequentialDelayDomainStateSchema),
           {
             [KEY_VERSION_HEADER]: keyVersion.toString(),
-          }
+          },
         )
 
         expect(res.success).toBe(true)
@@ -205,7 +205,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         domain,
         SERVICE_CONTEXT,
         genSessionID(),
-        authorizer.wallet
+        authorizer.wallet,
       )
 
       let nonce = 0
@@ -238,8 +238,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           domainRestrictedSignatureResponseSchema(SequentialDelayDomainStateSchema),
           {
             [KEY_VERSION_HEADER]: keyVersion.toString(),
-          }
-        )
+          },
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)
     })
 
@@ -249,7 +249,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         Buffer.from('password'),
         noQuotaDomain,
         SERVICE_CONTEXT,
-        authorizer.wallet
+        authorizer.wallet,
       )
       expect(res.ok).toBe(false)
       if (!res.ok) {
@@ -262,7 +262,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
     const domainForDisabling = buildOdisDomain(
       E2E_TESTING_ALFAJORES_CONFIG.odis!,
       authorizer.address,
-      'e2e testing, okay to disable ' + crypto.randomBytes(16).toString('base64')
+      'e2e testing, okay to disable ' + crypto.randomBytes(16).toString('base64'),
     )
     const disableRequest = async (): Promise<DisableDomainRequest<SequentialDelayDomain>> => {
       const req: DisableDomainRequest<SequentialDelayDomain> = {
@@ -275,7 +275,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         sessionID: defined(genSessionID()),
       }
       req.options.signature = defined(
-        await authorizer.wallet.signTypedData(authorizer.address, disableDomainRequestEIP712(req))
+        await authorizer.wallet.signTypedData(authorizer.address, disableDomainRequestEIP712(req)),
       )
       return req
     }
@@ -285,7 +285,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         domainForDisabling,
         SERVICE_CONTEXT,
         genSessionID(),
-        authorizer.wallet
+        authorizer.wallet,
       )
       expect(quotaRes.ok).toBe(true)
       if (quotaRes.ok) {
@@ -307,7 +307,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         await disableRequest(),
         SERVICE_CONTEXT,
         CombinerEndpoint.DISABLE_DOMAIN,
-        disableDomainResponseSchema(SequentialDelayDomainStateSchema)
+        disableDomainResponseSchema(SequentialDelayDomainStateSchema),
       )
 
       expect(res.success).toBe(true)

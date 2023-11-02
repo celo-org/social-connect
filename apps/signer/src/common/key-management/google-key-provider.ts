@@ -26,7 +26,7 @@ export class GoogleKeyProvider extends KeyProviderBase {
     client: SecretManagerServiceClient,
     projectId: string,
     secretName: string,
-    secretVersion: string
+    secretVersion: string,
   ) {
     // check for empty strings from undefined env vars
     if (!(projectId && secretName && secretVersion)) {

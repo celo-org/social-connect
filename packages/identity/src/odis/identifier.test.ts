@@ -58,13 +58,13 @@ describe(getObfuscatedIdentifier, () => {
       const base64BlindedMessage = await getBlindedIdentifier(
         mockOffchainIdentifier,
         IdentifierPrefix.TWITTER,
-        blsBlindingClient
+        blsBlindingClient,
       )
       const base64BlindSig = await getBlindedIdentifierSignature(
         mockAccount,
         authSigner,
         serviceContext,
-        base64BlindedMessage
+        base64BlindedMessage,
       )
       const base64UnblindedSig = await blsBlindingClient.unblindAndVerifyMessage(base64BlindSig)
 
@@ -74,8 +74,8 @@ describe(getObfuscatedIdentifier, () => {
           IdentifierPrefix.TWITTER,
           mockAccount,
           authSigner,
-          serviceContext
-        )
+          serviceContext,
+        ),
       ).resolves.toMatchObject({
         plaintextIdentifier: mockOffchainIdentifier,
         pepper: expectedPepper,
@@ -97,21 +97,21 @@ describe(getObfuscatedIdentifier, () => {
       const base64BlindedMessage = await getBlindedIdentifier(
         mockOffchainIdentifier,
         IdentifierPrefix.TWITTER,
-        blsBlindingClient
+        blsBlindingClient,
       )
 
       const base64BlindSig = await getBlindedIdentifierSignature(
         mockAccount,
         authSigner,
         serviceContext,
-        base64BlindedMessage
+        base64BlindedMessage,
       )
 
       const obfuscatedIdentifierDetails = await getObfuscatedIdentifierFromSignature(
         mockOffchainIdentifier,
         IdentifierPrefix.TWITTER,
         base64BlindSig,
-        blsBlindingClient
+        blsBlindingClient,
       )
 
       expect(obfuscatedIdentifierDetails.obfuscatedIdentifier).toEqual(expectedIdentifierHash)
@@ -128,8 +128,8 @@ describe(getObfuscatedIdentifier, () => {
         IdentifierPrefix.TWITTER,
         mockAccount,
         authSigner,
-        serviceContext
-      )
+        serviceContext,
+      ),
     ).rejects.toThrow(ErrorMessages.ODIS_QUOTA_ERROR)
   })
 
@@ -141,8 +141,8 @@ describe(getObfuscatedIdentifier, () => {
         IdentifierPrefix.TWITTER,
         mockAccount,
         authSigner,
-        serviceContext
-      )
+        serviceContext,
+      ),
     ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)
   })
 })

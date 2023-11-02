@@ -36,7 +36,7 @@ const resource = Resource.default().merge(
   new Resource({
     [SemanticResourceAttributes.SERVICE_NAME]: process.env.TRACING_SERVICE_NAME,
     [SemanticResourceAttributes.SERVICE_VERSION]: '0.1.0',
-  })
+  }),
 )
 
 const provider = new NodeTracerProvider({

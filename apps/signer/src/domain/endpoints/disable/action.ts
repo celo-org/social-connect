@@ -37,7 +37,7 @@ export function domainDisable(db: Knex): ResultHandler<DisableDomainRequest> {
         version: domain.version,
         hash: domainHash(domain).toString('hex'),
       },
-      'Processing request to disable domain'
+      'Processing request to disable domain',
     )
 
     const res = await db.transaction(async (trx) => {
@@ -70,7 +70,7 @@ export function domainDisable(db: Knex): ResultHandler<DisableDomainRequest> {
 }
 
 function isValidRequest(
-  request: Request<{}, {}, unknown>
+  request: Request<{}, {}, unknown>,
 ): request is Request<{}, {}, DisableDomainRequest> {
   return disableDomainRequestSchema(DomainSchema).is(request.body)
 }

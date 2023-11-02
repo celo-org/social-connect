@@ -79,7 +79,7 @@ describe(`BLS service computes signature`, () => {
 
     const unblindedSignedMessage = threshold_bls.unblind(
       Buffer.from(actual, 'base64'),
-      blindedMsgResult.blindingFactor
+      blindedMsgResult.blindingFactor,
     )
     const publicKey = Buffer.from(PUBLIC_KEY, 'base64')
     expect(threshold_bls.verify(publicKey, message, unblindedSignedMessage))
@@ -125,7 +125,7 @@ describe(`BLS service computes signature`, () => {
 
     const unblindedSignedMessage = threshold_bls.unblind(
       Buffer.from(actual, 'base64'),
-      blindedMsgResult.blindingFactor
+      blindedMsgResult.blindingFactor,
     )
     const publicKey = Buffer.from(PUBLIC_KEY, 'base64')
     expect(threshold_bls.verify(publicKey, message, unblindedSignedMessage))
@@ -229,7 +229,7 @@ describe(`BLS service computes signature`, () => {
 
     const unblindedSignedMessage = threshold_bls.unblind(
       Buffer.from(actual, 'base64'),
-      blindedMsgResult.blindingFactor
+      blindedMsgResult.blindingFactor,
     )
     const publicKey = Buffer.from(PUBLIC_KEY, 'base64')
     expect(threshold_bls.verify(publicKey, message, unblindedSignedMessage))
@@ -291,7 +291,7 @@ describe(`BLS service computes signature`, () => {
 
     const unblindedSignedMessage = threshold_bls.unblind(
       Buffer.from(actual, 'base64'),
-      blindedMsgResult.blindingFactor
+      blindedMsgResult.blindingFactor,
     )
     const publicKey = Buffer.from(PUBLIC_KEY, 'base64')
     expect(threshold_bls.verify(publicKey, message, unblindedSignedMessage))

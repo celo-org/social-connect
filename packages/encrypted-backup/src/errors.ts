@@ -54,13 +54,19 @@ export class InvalidBackupError extends RootError<BackupErrorTypes.INVALID_BACKU
 }
 
 export class OdisServiceError extends RootError<BackupErrorTypes.ODIS_SERVICE_ERROR> {
-  constructor(readonly error?: Error, readonly version?: string) {
+  constructor(
+    readonly error?: Error,
+    readonly version?: string,
+  ) {
     super(BackupErrorTypes.ODIS_SERVICE_ERROR)
   }
 }
 
 export class OdisRateLimitingError extends RootError<BackupErrorTypes.ODIS_RATE_LIMITING_ERROR> {
-  constructor(readonly notBefore?: number, readonly error?: Error) {
+  constructor(
+    readonly notBefore?: number,
+    readonly error?: Error,
+  ) {
     super(BackupErrorTypes.ODIS_RATE_LIMITING_ERROR)
   }
 }
@@ -72,13 +78,19 @@ export class OdisVerificationError extends RootError<BackupErrorTypes.ODIS_VERIF
 }
 
 export class PbkdfError extends RootError<BackupErrorTypes.PBKDF_ERROR> {
-  constructor(readonly iterations: number, readonly error?: Error) {
+  constructor(
+    readonly iterations: number,
+    readonly error?: Error,
+  ) {
     super(BackupErrorTypes.PBKDF_ERROR)
   }
 }
 
 export class ScryptError extends RootError<BackupErrorTypes.SCRYPT_ERROR> {
-  constructor(readonly options: ScryptOptions, readonly error?: Error) {
+  constructor(
+    readonly options: ScryptOptions,
+    readonly error?: Error,
+  ) {
     super(BackupErrorTypes.SCRYPT_ERROR)
   }
 }

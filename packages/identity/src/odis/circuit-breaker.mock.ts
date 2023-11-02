@@ -89,7 +89,7 @@ export class MockCircuitBreaker {
       plaintext = crypto.privateDecrypt(
         // @ts-ignore support for OAEP hash option, was added in Node 12.9.0.
         { key: MOCK_CIRCUIT_BREAKER_PRIVATE_KEY, oaepHash: 'sha256' },
-        Buffer.from(ciphertext, 'base64')
+        Buffer.from(ciphertext, 'base64'),
       )
     } catch (error) {
       return {
@@ -114,7 +114,7 @@ export class MockCircuitBreaker {
         ((url: string, req: unknown) => {
           debug('Mocking request', { url, req })
           return this.status()
-        })
+        }),
     )
   }
 
@@ -128,7 +128,7 @@ export class MockCircuitBreaker {
         ((url: string, req: { body: string }) => {
           debug('Mocking request', { url, req })
           return this.unwrapKey(JSON.parse(req.body) as CircuitBreakerUnwrapKeyRequest)
-        })
+        }),
     )
   }
 

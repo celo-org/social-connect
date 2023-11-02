@@ -31,7 +31,7 @@ export function createMockToken(balanceOf: jest.Mock<BigNumber, []>) {
 
 export function createMockAccounts(
   getWalletAddress: jest.Mock<string, []>,
-  getDataEncryptionKey: jest.Mock<string, []>
+  getDataEncryptionKey: jest.Mock<string, []>,
 ) {
   return {
     getWalletAddress,
@@ -49,7 +49,7 @@ export function createMockOdisPayments(totalPaidCUSDFunc: jest.Mock<BigNumber, [
 
 export function createMockContractKit(
   c: { [contractName in ContractRetrieval]?: any },
-  mockWeb3?: any
+  mockWeb3?: any,
 ) {
   const contracts: any = {}
   for (const t of Object.keys(c)) {
@@ -101,13 +101,13 @@ export async function registerWalletAddress(
   accountAddress: string,
   walletAddress: string,
   walletAddressPk: string,
-  contractKit: any
+  contractKit: any,
 ) {
   const accounts = await contractKit.contracts.getAccounts()
   const pop = await accounts.generateProofOfKeyPossessionLocally(
     accountAddress,
     walletAddress,
-    walletAddressPk
+    walletAddressPk,
   )
   await accounts
     .setWalletAddress(walletAddress, pop as Signature)
@@ -116,7 +116,7 @@ export async function registerWalletAddress(
 
 export function getPnpQuotaRequest(
   account: string,
-  authenticationMethod?: string
+  authenticationMethod?: string,
 ): PnpQuotaRequest {
   return {
     account,
@@ -128,7 +128,7 @@ export function getPnpQuotaRequest(
 export function getPnpSignRequest(
   account: string,
   blindedQueryPhoneNumber: string,
-  authenticationMethod?: string
+  authenticationMethod?: string,
 ): SignMessageRequest {
   return {
     account,

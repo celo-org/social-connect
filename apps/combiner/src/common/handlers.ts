@@ -25,11 +25,11 @@ export interface Locals {
 
 export type PromiseHandler<R extends OdisRequest> = (
   request: Request<{}, {}, R>,
-  res: Response<OdisResponse<R>, Locals>
+  res: Response<OdisResponse<R>, Locals>,
 ) => Promise<void>
 
 export function catchErrorHandler<R extends OdisRequest>(
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     try {
@@ -56,7 +56,7 @@ export function catchErrorHandler<R extends OdisRequest>(
 }
 
 export function tracingHandler<R extends OdisRequest>(
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     return tracer.startActiveSpan(
@@ -83,19 +83,19 @@ export function tracingHandler<R extends OdisRequest>(
         } finally {
           span.end()
         }
-      }
+      },
     )
   }
 }
 
 export function meteringHandler<R extends OdisRequest>(
   histogram: client.Histogram<string>,
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) =>
     newMeter(
       histogram,
-      req.url
+      req.url,
     )(async () => {
       const logger: Logger = res.locals.logger
       logger.info({ req: req.body }, 'Request received')
@@ -116,7 +116,7 @@ export function meteringHandler<R extends OdisRequest>(
 
 export function timeoutHandler<R extends OdisRequest>(
   timeoutMs: number,
-  handler: PromiseHandler<R>
+  handler: PromiseHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     const timeoutSignal = (AbortSignal as any).timeout(timeoutMs)
@@ -127,7 +127,7 @@ export function timeoutHandler<R extends OdisRequest>(
           sendFailure(ErrorMessage.TIMEOUT_FROM_SIGNER, 500, res, req.url)
         }
       },
-      { once: true }
+      { once: true },
     )
 
     await handler(req, res)
@@ -136,7 +136,7 @@ export function timeoutHandler<R extends OdisRequest>(
 
 export async function disabledHandler<R extends OdisRequest>(
   req: Request<{}, {}, R>,
-  response: Response<OdisResponse<R>, Locals>
+  response: Response<OdisResponse<R>, Locals>,
 ): Promise<void> {
   Counters.warnings.labels(req.url, WarningMessage.API_UNAVAILABLE).inc()
   sendFailure(WarningMessage.API_UNAVAILABLE, 503, response, req.url)
@@ -147,7 +147,7 @@ export function sendFailure(
   status: number,
   response: Response,
   _endpoint: string,
-  body?: Record<any, any> // TODO remove any
+  body?: Record<any, any>, // TODO remove any
 ) {
   send(
     response,
@@ -158,7 +158,7 @@ export function sendFailure(
       ...body,
     },
     status,
-    response.locals.logger
+    response.locals.logger,
   )
 }
 
@@ -169,11 +169,11 @@ export interface Result<R extends OdisRequest> {
 
 export type ResultHandler<R extends OdisRequest> = (
   request: Request<{}, {}, R>,
-  res: Response<OdisResponse<R>, Locals>
+  res: Response<OdisResponse<R>, Locals>,
 ) => Promise<Result<R>>
 
 export function resultHandler<R extends OdisRequest>(
-  resHandler: ResultHandler<R>
+  resHandler: ResultHandler<R>,
 ): PromiseHandler<R> {
   return async (req, res) => {
     const result = await resHandler(req, res)
@@ -184,7 +184,7 @@ export function resultHandler<R extends OdisRequest>(
 export function errorResult(
   status: number,
   error: string,
-  quotaStatus?: PnpQuotaStatus | { status: SequentialDelayDomainState }
+  quotaStatus?: PnpQuotaStatus | { status: SequentialDelayDomainState },
 ): Result<any> {
   // TODO remove any
   return {

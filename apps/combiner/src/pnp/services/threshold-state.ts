@@ -12,21 +12,21 @@ import { MAX_TOTAL_QUOTA_DISCREPANCY_THRESHOLD } from '../../config'
 export function findCombinerQuotaState<R extends OdisRequest>(
   keyVersionInfo: KeyVersionInfo,
   rawSignerResponses: Array<SignerResponse<R>>,
-  warnings: string[]
+  warnings: string[],
 ): PnpQuotaStatus {
   const { threshold } = keyVersionInfo
   const signerResponses = rawSignerResponses
     .map((signerResponse) => signerResponse.res)
     .filter((res) => res.success) as PnpQuotaStatus[]
   const sortedResponses = signerResponses.sort(
-    (a, b) => b.totalQuota - b.performedQueryCount - (a.totalQuota - a.performedQueryCount)
+    (a, b) => b.totalQuota - b.performedQueryCount - (a.totalQuota - a.performedQueryCount),
   )
 
   const totalQuotaAvg =
     sortedResponses.map((r) => r.totalQuota).reduce((a, b) => a + b) / sortedResponses.length
   const totalQuotaStDev = Math.sqrt(
     sortedResponses.map((r) => (r.totalQuota - totalQuotaAvg) ** 2).reduce((a, b) => a + b) /
-      sortedResponses.length
+      sortedResponses.length,
   )
   if (totalQuotaStDev > MAX_TOTAL_QUOTA_DISCREPANCY_THRESHOLD) {
     // TODO(2.0.0): add alerting for this
@@ -37,7 +37,7 @@ export function findCombinerQuotaState<R extends OdisRequest>(
       .inc()
     warnings.push(
       WarningMessage.INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS +
-        ', using threshold signer as best guess'
+        ', using threshold signer as best guess',
     )
   }
 

@@ -32,11 +32,11 @@ class ASv2 {
   federatedAttestationsContract = new this.web3.eth.Contract(FA_CONTRACT.abi, FA_PROXY_ADDRESS)
   odisPaymentsContract = new this.web3.eth.Contract(
     ODIS_PAYMENTS_CONTRACT.abi,
-    ODIS_PAYMENTS_PROXY_ADDRESS
+    ODIS_PAYMENTS_PROXY_ADDRESS,
   )
   stableTokenContract = new this.web3.eth.Contract(
     STABLE_TOKEN_CONTRACT.abi,
-    ALFAJORES_CUSD_ADDRESS
+    ALFAJORES_CUSD_ADDRESS,
   )
 
   constructor() {
@@ -57,7 +57,7 @@ class ASv2 {
         OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
         this.issuer.address,
         this.authSigner,
-        this.serviceContext
+        this.serviceContext,
       )
     ).obfuscatedIdentifier
 
@@ -75,7 +75,7 @@ class ASv2 {
         OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
         this.issuer.address,
         this.authSigner,
-        this.serviceContext
+        this.serviceContext,
       )
     ).obfuscatedIdentifier
 
@@ -92,7 +92,7 @@ class ASv2 {
     const { remainingQuota } = await OdisUtils.Quota.getPnpQuotaStatus(
       this.issuer.address,
       this.authSigner,
-      this.serviceContext
+      this.serviceContext,
     )
 
     console.log('remaining ODIS quota', remainingQuota)
@@ -100,7 +100,7 @@ class ASv2 {
       // give odis payment contract permission to use cUSD
       const currentAllowance = await this.stableTokenContract.methods.allowance(
         this.issuer.address,
-        this.odisPaymentsContract.options.address
+        this.odisPaymentsContract.options.address,
       )
       console.log('current allowance:', currentAllowance.toString())
       let enoughAllowance: boolean = false

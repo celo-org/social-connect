@@ -64,7 +64,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       const res = await OdisUtils.Quota.getPnpQuotaStatus(
         ACCOUNT_ADDRESS,
         walletAuthSigner,
-        SERVICE_CONTEXT
+        SERVICE_CONTEXT,
       )
       expect(res).toStrictEqual<PnpClientQuotaStatus>({
         version: expectedVersion,
@@ -79,7 +79,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       const res = await OdisUtils.Quota.getPnpQuotaStatus(
         ACCOUNT_ADDRESS,
         dekAuthSigner(0),
-        SERVICE_CONTEXT
+        SERVICE_CONTEXT,
       )
       expect(res).toStrictEqual<PnpClientQuotaStatus>({
         version: expectedVersion,
@@ -94,7 +94,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       const res1 = await OdisUtils.Quota.getPnpQuotaStatus(
         ACCOUNT_ADDRESS,
         dekAuthSigner(0),
-        SERVICE_CONTEXT
+        SERVICE_CONTEXT,
       )
       const expectedRes: PnpClientQuotaStatus = {
         version: expectedVersion,
@@ -107,14 +107,14 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       const res2 = await OdisUtils.Quota.getPnpQuotaStatus(
         ACCOUNT_ADDRESS,
         dekAuthSigner(0),
-        SERVICE_CONTEXT
+        SERVICE_CONTEXT,
       )
       expect(res2).toStrictEqual<PnpClientQuotaStatus>(expectedRes)
     })
 
     it(`Should reject to throw ${ErrorMessages.ODIS_INPUT_ERROR} with invalid address`, async () => {
       await expect(
-        OdisUtils.Quota.getPnpQuotaStatus('not an address', dekAuthSigner(0), SERVICE_CONTEXT)
+        OdisUtils.Quota.getPnpQuotaStatus('not an address', dekAuthSigner(0), SERVICE_CONTEXT),
       ).rejects.toThrow(ErrorMessages.ODIS_INPUT_ERROR)
     })
 
@@ -132,10 +132,10 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           {
             Authorization: await walletAuthSigner.contractKit.connection.sign(
               JSON.stringify(req),
-              ACCOUNT_ADDRESS_NO_QUOTA
+              ACCOUNT_ADDRESS_NO_QUOTA,
             ),
-          }
-        )
+          },
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)
     })
 
@@ -144,8 +144,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         OdisUtils.Quota.getPnpQuotaStatus(
           ACCOUNT_ADDRESS,
           dekAuthSigner(1), // DEK auth signer doesn't match the registered DEK for ACCOUNT_ADDRESS
-          SERVICE_CONTEXT
-        )
+          SERVICE_CONTEXT,
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)
     })
   })
@@ -160,7 +160,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         .times(numQueriesToReplenish)
         .toString()
       const stableToken = await walletAuthSigner.contractKit.contracts.getStableToken(
-        StableToken.cUSD
+        StableToken.cUSD,
       )
       const odisPayments = await walletAuthSigner.contractKit.contracts.getOdisPayments()
       await stableToken
@@ -183,7 +183,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         const res = await OdisUtils.Quota.getPnpQuotaStatus(
           ACCOUNT_ADDRESS,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         startingPerformedQueryCount = res.performedQueryCount
         startingTotalQuota = res.totalQuota
@@ -198,12 +198,12 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           IdentifierPrefix.PHONE_NUMBER,
           ACCOUNT_ADDRESS,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         const quotaRes = await OdisUtils.Quota.getPnpQuotaStatus(
           ACCOUNT_ADDRESS,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         expect(quotaRes).toStrictEqual<PnpClientQuotaStatus>({
           version: expectedVersion,
@@ -224,12 +224,12 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           ACCOUNT_ADDRESS,
           walletAuthSigner,
           SERVICE_CONTEXT,
-          Buffer.from(randomBytes(32)).toString('base64')
+          Buffer.from(randomBytes(32)).toString('base64'),
         )
         const quotaRes = await OdisUtils.Quota.getPnpQuotaStatus(
           ACCOUNT_ADDRESS,
           walletAuthSigner,
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         expect(quotaRes).toStrictEqual<PnpClientQuotaStatus>({
           version: expectedVersion,
@@ -246,7 +246,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
 
     describe('replayed requests', () => {
       const replayedBlindingFactor = Buffer.from('test string for blinding factor').toString(
-        'base64'
+        'base64',
       )
       beforeAll(async () => {
         // Ensure that these are each called at least once for the first test runs
@@ -256,14 +256,14 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           ACCOUNT_ADDRESS,
           walletAuthSigner,
           SERVICE_CONTEXT,
-          replayedBlindingFactor
+          replayedBlindingFactor,
         )
         await OdisUtils.Identifier.getObfuscatedIdentifier(
           PHONE_NUMBER,
           IdentifierPrefix.PHONE_NUMBER,
           ACCOUNT_ADDRESS,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
       })
 
@@ -275,7 +275,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         const res = await OdisUtils.Quota.getPnpQuotaStatus(
           ACCOUNT_ADDRESS,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         startingPerformedQueryCount = res.performedQueryCount
         startingTotalQuota = res.totalQuota
@@ -288,17 +288,17 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           ACCOUNT_ADDRESS,
           walletAuthSigner,
           SERVICE_CONTEXT,
-          replayedBlindingFactor
+          replayedBlindingFactor,
         )
         threshold_bls.verify(
           Buffer.from(SERVICE_CONTEXT.odisPubKey, 'base64'),
           Buffer.from(PHONE_NUMBER),
-          Buffer.from(res.unblindedSignature!, 'base64')
+          Buffer.from(res.unblindedSignature!, 'base64'),
         )
         const quotaRes = await OdisUtils.Quota.getPnpQuotaStatus(
           ACCOUNT_ADDRESS,
           walletAuthSigner,
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         expect(quotaRes.performedQueryCount).toEqual(startingPerformedQueryCount)
         expect(quotaRes.totalQuota).toEqual(startingTotalQuota)
@@ -310,17 +310,17 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           IdentifierPrefix.PHONE_NUMBER,
           ACCOUNT_ADDRESS,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         threshold_bls.verify(
           Buffer.from(SERVICE_CONTEXT.odisPubKey, 'base64'),
           Buffer.from(PHONE_NUMBER),
-          Buffer.from(res.unblindedSignature!, 'base64')
+          Buffer.from(res.unblindedSignature!, 'base64'),
         )
         const quotaRes = await OdisUtils.Quota.getPnpQuotaStatus(
           ACCOUNT_ADDRESS,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
+          SERVICE_CONTEXT,
         )
         expect(quotaRes.performedQueryCount).toEqual(startingPerformedQueryCount)
         expect(quotaRes.totalQuota).toEqual(startingTotalQuota)
@@ -340,12 +340,12 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           undefined,
           undefined,
           undefined,
-          i
+          i,
         )
         threshold_bls.verify(
           Buffer.from(SERVICE_CONTEXT.odisPubKey, 'base64'),
           Buffer.from(PHONE_NUMBER),
-          Buffer.from(res.unblindedSignature!, 'base64')
+          Buffer.from(res.unblindedSignature!, 'base64'),
         )
       })
     }
@@ -361,12 +361,12 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         undefined,
         undefined,
         undefined,
-        1.5
+        1.5,
       )
       threshold_bls.verify(
         Buffer.from(SERVICE_CONTEXT.odisPubKey, 'base64'),
         Buffer.from(PHONE_NUMBER),
-        Buffer.from(res.unblindedSignature!, 'base64')
+        Buffer.from(res.unblindedSignature!, 'base64'),
       )
     })
 
@@ -382,8 +382,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           undefined,
           undefined,
           undefined,
-          10
-        )
+          10,
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_INPUT_ERROR)
     })
 
@@ -399,8 +399,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           undefined,
           undefined,
           undefined,
-          1
-        )
+          1,
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_INPUT_ERROR)
     })
 
@@ -416,8 +416,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           undefined,
           undefined,
           undefined,
-          1
-        )
+          1,
+        ),
       ).rejects.toThrow('Invalid phone number: 12345')
     })
 
@@ -436,10 +436,10 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           {
             Authorization: await walletAuthSigner.contractKit.connection.sign(
               JSON.stringify(req),
-              ACCOUNT_ADDRESS_NO_QUOTA
+              ACCOUNT_ADDRESS_NO_QUOTA,
             ),
-          }
-        )
+          },
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)
     })
 
@@ -450,8 +450,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           IdentifierPrefix.PHONE_NUMBER,
           ACCOUNT_ADDRESS,
           dekAuthSigner(1), // DEK auth signer doesn't match the registered DEK for ACCOUNT_ADDRESS
-          SERVICE_CONTEXT
-        )
+          SERVICE_CONTEXT,
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)
     })
 
@@ -462,8 +462,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           IdentifierPrefix.PHONE_NUMBER,
           ACCOUNT_ADDRESS_NO_QUOTA,
           dekAuthSigner(0),
-          SERVICE_CONTEXT
-        )
+          SERVICE_CONTEXT,
+        ),
       ).rejects.toThrow(ErrorMessages.ODIS_QUOTA_ERROR)
     })
   })

@@ -15,7 +15,7 @@ export async function setDomainDisabled<D extends Domain>(
   db: Knex,
   domain: D,
   trx: Knex.Transaction<DomainStateRecord>,
-  logger: Logger
+  logger: Logger,
 ): Promise<void> {
   const hash = domainHash(domain).toString('hex')
   logger.debug({ hash, domain }, 'Disabling domain')
@@ -32,7 +32,7 @@ export async function getDomainStateRecordOrEmpty(
   db: Knex,
   domain: Domain,
   logger: Logger,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ): Promise<DomainStateRecord> {
   return (
     (await getDomainStateRecord(db, domain, logger, trx)) ?? createEmptyDomainStateRecord(domain)
@@ -52,7 +52,7 @@ export async function getDomainStateRecord<D extends Domain>(
   db: Knex,
   domain: D,
   logger: Logger,
-  trx?: Knex.Transaction<DomainStateRecord>
+  trx?: Knex.Transaction<DomainStateRecord>,
 ): Promise<DomainStateRecord | null> {
   const hash = domainHash(domain).toString('hex')
   logger.debug({ hash, domain }, 'Getting domain state from db')
@@ -73,7 +73,7 @@ export async function getDomainStateRecord<D extends Domain>(
       }
 
       return result ?? null
-    }
+    },
   )
 }
 
@@ -82,7 +82,7 @@ export async function updateDomainStateRecord<D extends Domain>(
   domain: D,
   domainState: DomainStateRecord,
   trx: Knex.Transaction<DomainStateRecord>,
-  logger: Logger
+  logger: Logger,
 ): Promise<void> {
   const hash = domainHash(domain).toString('hex')
   logger.debug({ hash, domain, domainState }, 'Update domain state')
@@ -106,7 +106,7 @@ export async function updateDomainStateRecord<D extends Domain>(
           .update(domainState)
           .timeout(config.db.timeout)
       }
-    }
+    },
   )
 }
 
@@ -114,7 +114,7 @@ export async function insertDomainStateRecord(
   db: Knex,
   domainState: DomainStateRecord,
   trx: Knex.Transaction<DomainStateRecord>,
-  logger: Logger
+  logger: Logger,
 ): Promise<DomainStateRecord> {
   logger.debug({ domainState }, 'Insert domain state')
   return doMeteredSql(
@@ -127,6 +127,6 @@ export async function insertDomainStateRecord(
         .insert(domainState)
         .timeout(config.db.timeout)
       return domainState
-    }
+    },
   )
 }

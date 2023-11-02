@@ -31,7 +31,7 @@ export function pnpSign(
   signers: Signer[],
   config: OdisConfig,
   accountService: AccountService,
-  noQuotaCache: NoQuotaCache
+  noQuotaCache: NoQuotaCache,
 ): ResultHandler<SignMessageRequest> {
   return async (request, response) => {
     const logger = response.locals.logger
@@ -103,7 +103,7 @@ export function pnpSign(
         responseSchema: SignMessageResponseSchema,
         shouldCheckKeyVersion: true,
       },
-      processResult
+      processResult,
     )
 
     warnings.push(...logPnpSignerResponseDiscrepancies(logger, signerResponses))
@@ -112,7 +112,7 @@ export function pnpSign(
       try {
         const combinedSignature = crypto.combineBlindedSignatureShares(
           request.body.blindedQueryPhoneNumber,
-          ctx
+          ctx,
         )
 
         return {
@@ -136,7 +136,7 @@ export function pnpSign(
     // If the error is 403 it means that we don't have quota for the signer
     if (errorCode === 403) {
       const exceededResponse = signerResponses.find(
-        (e) => !e.res.success && e.res.error === WarningMessage.EXCEEDED_QUOTA
+        (e) => !e.res.success && e.res.error === WarningMessage.EXCEEDED_QUOTA,
       )
       if (exceededResponse && exceededResponse.res.totalQuota !== undefined) {
         noQuotaCache.setNoMoreQuota(account, exceededResponse.res.totalQuota)
@@ -154,7 +154,7 @@ export function pnpSign(
 }
 
 function isValidRequest(
-  request: Request<{}, {}, unknown>
+  request: Request<{}, {}, unknown>,
 ): request is Request<{}, {}, SignMessageRequest> {
   return (
     SignMessageRequestSchema.is(request.body) &&

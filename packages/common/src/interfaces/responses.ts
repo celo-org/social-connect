@@ -170,7 +170,7 @@ export type DomainResponse<
   | R extends DisableDomainRequest<infer D3> ? DisableDomainResponse<D3> : never
 
 export function domainRestrictedSignatureResponseSchema<D extends Domain>(
-  state: t.Type<DomainState<D>>
+  state: t.Type<DomainState<D>>,
 ): t.Type<DomainRestrictedSignatureResponse<D>> {
   return t.union([
     t.type({
@@ -193,7 +193,7 @@ export function domainRestrictedSignatureResponseSchema<D extends Domain>(
 }
 
 export function domainQuotaStatusResponseSchema<D extends Domain>(
-  state: t.Type<DomainState<D>>
+  state: t.Type<DomainState<D>>,
 ): t.Type<DomainQuotaStatusResponse<D>> {
   return t.union([
     t.type({
@@ -210,7 +210,7 @@ export function domainQuotaStatusResponseSchema<D extends Domain>(
 }
 
 export function disableDomainResponseSchema<D extends Domain>(
-  state: t.Type<DomainState<D>>
+  state: t.Type<DomainState<D>>,
 ): t.Type<DisableDomainResponse<D>> {
   return t.union([
     t.type({

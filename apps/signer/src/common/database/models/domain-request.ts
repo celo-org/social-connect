@@ -15,7 +15,7 @@ export interface DomainRequestRecord {
 
 export function toDomainRequestRecord<D extends Domain>(
   domain: D,
-  blindedMessage: string
+  blindedMessage: string,
 ): DomainRequestRecord {
   return {
     [DOMAIN_REQUESTS_COLUMNS.domainHash]: domainHash(domain).toString('hex'),

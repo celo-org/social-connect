@@ -50,7 +50,7 @@ import { deriveKey, EIP712Wallet, KDFInfo } from './utils'
 export function buildOdisDomain(
   config: OdisHardeningConfig,
   authorizer: Address,
-  salt?: string
+  salt?: string,
 ): SequentialDelayDomain {
   return {
     name: DomainIdentifiers.SequentialDelay,
@@ -75,7 +75,7 @@ export async function odisHardenKey(
   key: Buffer,
   domain: SequentialDelayDomain,
   environment: OdisServiceContext,
-  wallet?: EIP712Wallet
+  wallet?: EIP712Wallet,
 ): Promise<Result<Buffer, BackupError>> {
   // Session ID for logging requests.
   const sessionID = genSessionID()
@@ -95,14 +95,14 @@ export async function odisHardenKey(
     domain,
     // Use the local clock as a fallback. Divide by 1000 to get seconds from ms.
     quotaState.now ?? Date.now() / 1000,
-    quotaState
+    quotaState,
   )
   if (!quotaResult.accepted) {
     return Err(
       new OdisRateLimitingError(
         quotaResult.notBefore,
-        new Error('client does not currently have quota based on status response.')
-      )
+        new Error('client does not currently have quota based on status response.'),
+      ),
     )
   }
 
@@ -114,7 +114,7 @@ export async function odisHardenKey(
     Buffer.from(environment.odisPubKey, 'base64'),
     domainHash(domain),
     key,
-    blindingSeed
+    blindingSeed,
   )
 
   // Request the partial oblivious signature from ODIS.
@@ -125,7 +125,7 @@ export async function odisHardenKey(
     domain,
     environment,
     sessionID,
-    wallet
+    wallet,
   )
   if (!signatureResp.ok) {
     return signatureResp
@@ -135,7 +135,7 @@ export async function odisHardenKey(
   let odisOutput: Buffer
   try {
     odisOutput = await poprfClient.unblindResponse(
-      Buffer.from(signatureResp.result.signature, 'base64')
+      Buffer.from(signatureResp.result.signature, 'base64'),
     )
   } catch (error) {
     return Err(new OdisVerificationError(error as Error))
@@ -180,7 +180,7 @@ export async function requestOdisDomainQuotaStatus(
   domain: SequentialDelayDomain,
   environment: OdisServiceContext,
   sessionID: string,
-  wallet?: EIP712Wallet
+  wallet?: EIP712Wallet,
 ): Promise<Result<DomainQuotaStatusResponseSuccess, BackupError>> {
   const quotaStatusReq: DomainQuotaStatusRequest<SequentialDelayDomain> = {
     type: DomainRequestTypeTag.QUOTA,
@@ -198,12 +198,12 @@ export async function requestOdisDomainQuotaStatus(
     if (wallet === undefined || !wallet.hasAccount(authorizer)) {
       return Err(
         new AuthorizationError(
-          new Error('key for signing ODIS quota status request is unavailable')
-        )
+          new Error('key for signing ODIS quota status request is unavailable'),
+        ),
       )
     }
     quotaStatusReq.options.signature = defined(
-      await wallet.signTypedData(authorizer, domainQuotaStatusRequestEIP712(quotaStatusReq))
+      await wallet.signTypedData(authorizer, domainQuotaStatusRequestEIP712(quotaStatusReq)),
     )
   } else if (wallet !== undefined) {
     return Err(new UsageError(new Error('wallet provided but the domain is unauthenticated')))
@@ -215,7 +215,7 @@ export async function requestOdisDomainQuotaStatus(
       quotaStatusReq,
       environment,
       DomainEndpoint.DOMAIN_QUOTA_STATUS,
-      domainQuotaStatusResponseSchema(SequentialDelayDomainStateSchema)
+      domainQuotaStatusResponseSchema(SequentialDelayDomainStateSchema),
     )
   } catch (error) {
     if ((error as Error).message?.includes(ErrorMessages.ODIS_FETCH_ERROR)) {
@@ -236,7 +236,7 @@ async function requestOdisDomainSignature(
   domain: SequentialDelayDomain,
   environment: OdisServiceContext,
   sessionID: string,
-  wallet?: EIP712Wallet
+  wallet?: EIP712Wallet,
 ): Promise<Result<DomainRestrictedSignatureResponseSuccess, BackupError>> {
   const signatureReq: DomainRestrictedSignatureRequest<SequentialDelayDomain> = {
     type: DomainRequestTypeTag.SIGN,
@@ -255,12 +255,12 @@ async function requestOdisDomainSignature(
     if (wallet === undefined || !wallet.hasAccount(authorizer)) {
       return Err(
         new AuthorizationError(
-          new Error('key for signing ODIS domain signature request is unavailable')
-        )
+          new Error('key for signing ODIS domain signature request is unavailable'),
+        ),
       )
     }
     signatureReq.options.signature = defined(
-      await wallet.signTypedData(authorizer, domainRestrictedSignatureRequestEIP712(signatureReq))
+      await wallet.signTypedData(authorizer, domainRestrictedSignatureRequestEIP712(signatureReq)),
     )
   } else if (wallet !== undefined) {
     return Err(new UsageError(new Error('wallet provided but the domain is unauthenticated')))
@@ -272,7 +272,7 @@ async function requestOdisDomainSignature(
       signatureReq,
       environment,
       DomainEndpoint.DOMAIN_SIGN,
-      domainRestrictedSignatureResponseSchema(SequentialDelayDomainStateSchema)
+      domainRestrictedSignatureResponseSchema(SequentialDelayDomainStateSchema),
     )
   } catch (error) {
     if ((error as Error).message?.includes(ErrorMessages.ODIS_FETCH_ERROR)) {

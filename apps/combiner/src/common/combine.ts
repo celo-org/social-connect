@@ -32,7 +32,7 @@ export interface ThresholdCallToSignersOptions<R extends OdisRequest> {
 export async function thresholdCallToSigners<R extends OdisRequest>(
   ctx: Context,
   options: ThresholdCallToSignersOptions<R>,
-  processResult: (res: OdisResponse<R>) => Promise<boolean> = (_) => Promise.resolve(false)
+  processResult: (res: OdisResponse<R>) => Promise<boolean> = (_) => Promise.resolve(false),
 ): Promise<{ signerResponses: Array<SignerResponse<R>>; maxErrorCode?: number }> {
   const {
     signers,
@@ -72,8 +72,8 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
             request,
             logger,
             // @ts-ignore
-            abortSignal
-          )
+            abortSignal,
+          ),
         )
 
         Counters.sigResponses
@@ -100,7 +100,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
           errorCount++
           errorCodes.set(
             signerFetchResult.status,
-            (errorCodes.get(signerFetchResult.status) ?? 0) + 1
+            (errorCodes.get(signerFetchResult.status) ?? 0) + 1,
           )
 
           if (signers.length - errorCount < requiredThreshold) {
@@ -121,14 +121,14 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
         const data: any = await signerFetchResult.json()
         logger.info(
           { signer, res: data, status: signerFetchResult.status },
-          `received 'OK' response from signer`
+          `received 'OK' response from signer`,
         )
 
         const odisResponse: OdisResponse<R> = parseSchema(responseSchema, data, logger)
         if (!odisResponse.success) {
           logger.error(
             { err: odisResponse.error, signer: signer.url },
-            `Signer request to failed with 'OK' status`
+            `Signer request to failed with 'OK' status`,
           )
           throw new Error(ErrorMessage.SIGNER_RESPONSE_FAILED_WITH_OK_STATUS)
         }
@@ -161,7 +161,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
           }
         }
       }
-    })
+    }),
   )
 
   if (errorCodes.size > 0) {
@@ -169,7 +169,7 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
       Counters.sigInconsistenciesErrors.labels(request.url).inc()
       logger.error(
         { errorCodes: JSON.stringify([...errorCodes]) },
-        ErrorMessage.INCONSISTENT_SIGNER_RESPONSES
+        ErrorMessage.INCONSISTENT_SIGNER_RESPONSES,
       )
     }
 
@@ -227,7 +227,7 @@ function abortSignalAny(signals: AbortSignal[]): AbortSignal {
       (e) => {
         ac.abort(e)
       },
-      { once: true }
+      { once: true },
     )
   }
   return ac.signal

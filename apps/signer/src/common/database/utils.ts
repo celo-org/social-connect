@@ -12,7 +12,7 @@ export type DatabaseErrorMessage =
 export function countAndThrowDBError(
   err: any,
   logger: Logger,
-  errorMsg: DatabaseErrorMessage
+  errorMsg: DatabaseErrorMessage,
 ): never {
   let label: Labels
   switch (errorMsg) {
@@ -41,7 +41,7 @@ export function doMeteredSql<A>(
   sqlLabel: string,
   errorMsg: DatabaseErrorMessage,
   logger: Logger,
-  fn: () => Promise<A>
+  fn: () => Promise<A>,
 ): Promise<A> {
   const meter = newMeter(Histograms.dbOpsInstrumentation, sqlLabel)
 

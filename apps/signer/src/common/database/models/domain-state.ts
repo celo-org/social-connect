@@ -22,7 +22,7 @@ export interface DomainStateRecord {
 
 export function toDomainStateRecord<D extends Domain>(
   domain: D,
-  domainState: DomainState<D>
+  domainState: DomainState<D>,
 ): DomainStateRecord {
   return {
     [DOMAIN_STATE_COLUMNS.domainHash]: domainHash(domain).toString('hex'),
@@ -34,7 +34,7 @@ export function toDomainStateRecord<D extends Domain>(
 
 export function toSequentialDelayDomainState(
   record: DomainStateRecord,
-  attemptTime?: number
+  attemptTime?: number,
 ): SequentialDelayDomainState {
   return {
     disabled: record[DOMAIN_STATE_COLUMNS.disabled],

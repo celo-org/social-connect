@@ -256,7 +256,7 @@ export async function createBackup({
   // Safety measure to prevent users from accidentally using this API without any hardening.
   if (hardening.odis === undefined && hardening.computational === undefined) {
     return Err(
-      new UsageError(new Error('createBackup cannot be used with a empty hardening config'))
+      new UsageError(new Error('createBackup cannot be used with a empty hardening config')),
     )
   }
 
@@ -326,7 +326,7 @@ export async function createBackup({
       updatedKey,
       domain,
       hardening.odis.environment,
-      authorizer.wallet
+      authorizer.wallet,
     )
     if (!odisHardening.ok) {
       return Err(odisHardening.error)
@@ -410,15 +410,17 @@ export async function openBackup({
     if (backup.environment?.circuitBreaker === undefined) {
       return Err(
         new InvalidBackupError(
-          new Error('encrypted fuse key is provided but no circuit breaker environment is provided')
-        )
+          new Error(
+            'encrypted fuse key is provided but no circuit breaker environment is provided',
+          ),
+        ),
       )
     }
     const circuitBreakerClient = new CircuitBreakerClient(backup.environment.circuitBreaker)
 
     debug(
       'requesting the circuit breaker service unwrap the encrypted circuit breaker key',
-      backup.environment.circuitBreaker
+      backup.environment.circuitBreaker,
     )
     const unwrap = await circuitBreakerClient.unwrapKey(backup.encryptedFuseKey)
     if (!unwrap.ok) {
@@ -446,16 +448,16 @@ export async function openBackup({
       return Err(
         new InvalidBackupError(
           new Error(
-            'domain query authorizer address is provided but is not derived from the backup nonce'
-          )
-        )
+            'domain query authorizer address is provided but is not derived from the backup nonce',
+          ),
+        ),
       )
     }
     if (backup.environment?.odis === undefined) {
       return Err(
         new InvalidBackupError(
-          new Error('ODIS domain is provided by no ODIS environment information')
-        )
+          new Error('ODIS domain is provided by no ODIS environment information'),
+        ),
       )
     }
 
@@ -464,7 +466,7 @@ export async function openBackup({
       updatedKey,
       domain,
       backup.environment.odis,
-      authorizer.wallet
+      authorizer.wallet,
     )
     if (!odisHardening.ok) {
       return Err(odisHardening.error)
@@ -479,7 +481,7 @@ export async function openBackup({
     debug('hardening user key with computational function', backup.computationalHardening)
     const computationalHardening = await computationalHardenKey(
       updatedKey,
-      backup.computationalHardening
+      backup.computationalHardening,
     )
     if (!computationalHardening.ok) {
       return Err(computationalHardening.error)

@@ -27,7 +27,7 @@ export function pnpQuota(
   signers: Signer[],
   config: OdisConfig,
   accountService: AccountService,
-  noQuotaCache: NoQuotaCache
+  noQuotaCache: NoQuotaCache,
 ): ResultHandler<PnpQuotaRequest> {
   return async (request, response) => {
     const logger = response.locals.logger
@@ -111,7 +111,7 @@ export function pnpQuota(
 }
 
 function isValidRequest(
-  request: Request<{}, {}, unknown>
+  request: Request<{}, {}, unknown>,
 ): request is Request<{}, {}, PnpQuotaRequest> {
   return (
     PnpQuotaRequestSchema.is(request.body) &&

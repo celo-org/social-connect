@@ -70,7 +70,7 @@ export class PoprfClient {
     readonly publicKey: Uint8Array,
     readonly tag: Uint8Array,
     readonly message: Uint8Array,
-    readonly seed?: Uint8Array
+    readonly seed?: Uint8Array,
   ) {
     const blinded = poprf().blindMsg(message, seed ?? randomBytes(32))
 
@@ -131,7 +131,7 @@ export class PoprfCombiner {
     }
 
     return Buffer.from(
-      poprf().blindAggregate(this.threshold, Buffer.concat(blindedResponses.map(Buffer.from)))
+      poprf().blindAggregate(this.threshold, Buffer.concat(blindedResponses.map(Buffer.from))),
     )
   }
 
@@ -180,7 +180,7 @@ export class ThresholdPoprfClient extends PoprfClient {
     readonly polynomial: Uint8Array,
     readonly tag: Uint8Array,
     readonly message: Uint8Array,
-    readonly seed?: Uint8Array
+    readonly seed?: Uint8Array,
   ) {
     super(publicKey, tag, message, seed)
   }
@@ -196,7 +196,7 @@ export class ThresholdPoprfClient extends PoprfClient {
    */
   public unblindPartialResponse(response: Uint8Array): Buffer {
     return Buffer.from(
-      poprf().unblindPartialResp(this.polynomial, this.blindingFactor, this.tag, response)
+      poprf().unblindPartialResp(this.polynomial, this.blindingFactor, this.tag, response),
     )
   }
 }

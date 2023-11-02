@@ -23,7 +23,7 @@ export function newContractKitFetcher(
   logger: Logger,
   fullNodeTimeoutMs: number = FULL_NODE_TIMEOUT_IN_MS,
   fullNodeRetryCount: number = RETRY_COUNT,
-  fullNodeRetryDelayMs: number = RETRY_DELAY_IN_MS
+  fullNodeRetryDelayMs: number = RETRY_DELAY_IN_MS,
 ): DataEncryptionKeyFetcher {
   return (address: string) =>
     getDataEncryptionKey(
@@ -32,7 +32,7 @@ export function newContractKitFetcher(
       logger,
       fullNodeTimeoutMs,
       fullNodeRetryCount,
-      fullNodeRetryDelayMs
+      fullNodeRetryDelayMs,
     )
 }
 
@@ -44,7 +44,7 @@ export async function authenticateUser<R extends PhoneNumberPrivacyRequest>(
   request: Request<{}, {}, R>,
   logger: Logger,
   fetchDEK: DataEncryptionKeyFetcher,
-  warnings: ErrorType[] = []
+  warnings: ErrorType[] = [],
 ): Promise<boolean> {
   logger.debug('Authenticating user')
 
@@ -86,7 +86,7 @@ export async function authenticateUser<R extends PhoneNumberPrivacyRequest>(
   // Fallback to previous signing pattern
   logger.info(
     { account: signer, message, messageSignature },
-    'Message was not authenticated with DEK, attempting to authenticate using wallet key'
+    'Message was not authenticated with DEK, attempting to authenticate using wallet key',
   )
   // TODO This uses signature utils, why doesn't DEK authentication?
   // (https://github.com/celo-org/celo-monorepo/issues/9803)
@@ -116,7 +116,7 @@ export function verifyDEKSignature(
   message: string,
   messageSignature: string,
   registeredEncryptionKey: string,
-  logger?: Logger
+  logger?: Logger,
 ) {
   logger = logger ?? rootLogger(fetchEnv('SERVICE_NAME'))
   try {
@@ -145,7 +145,7 @@ export async function getDataEncryptionKey(
   logger: Logger,
   fullNodeTimeoutMs: number,
   fullNodeRetryCount: number,
-  fullNodeRetryDelayMs: number
+  fullNodeRetryDelayMs: number,
 ): Promise<string> {
   try {
     const res = await retryAsyncWithBackOffAndTimeout(
@@ -157,7 +157,7 @@ export async function getDataEncryptionKey(
       [],
       fullNodeRetryDelayMs,
       1.5,
-      fullNodeTimeoutMs
+      fullNodeTimeoutMs,
     )
     return res
   } catch (error) {

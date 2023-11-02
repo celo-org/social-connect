@@ -58,7 +58,7 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     res.header(
       'Access-Control-Allow-Headers',
-      `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${KEY_VERSION_HEADER}`
+      `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${KEY_VERSION_HEADER}`,
     )
     next()
   })
@@ -85,27 +85,27 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
     CombinerEndpoint.PNP_QUOTA,
     createHandler(
       phoneNumberPrivacy.enabled,
-      pnpQuota(pnpSigners, config.phoneNumberPrivacy, accountService, noQuotaCache)
-    )
+      pnpQuota(pnpSigners, config.phoneNumberPrivacy, accountService, noQuotaCache),
+    ),
   )
   app.post(
     CombinerEndpoint.PNP_SIGN,
     createHandler(
       phoneNumberPrivacy.enabled,
-      pnpSign(pnpSigners, config.phoneNumberPrivacy, accountService, noQuotaCache)
-    )
+      pnpSign(pnpSigners, config.phoneNumberPrivacy, accountService, noQuotaCache),
+    ),
   )
   app.post(
     CombinerEndpoint.DOMAIN_QUOTA_STATUS,
-    createHandler(domains.enabled, domainQuota(domainSigners, config.domains))
+    createHandler(domains.enabled, domainQuota(domainSigners, config.domains)),
   )
   app.post(
     CombinerEndpoint.DOMAIN_SIGN,
-    createHandler(domains.enabled, domainSign(domainSigners, domains))
+    createHandler(domains.enabled, domainSign(domainSigners, domains)),
   )
   app.post(
     CombinerEndpoint.DISABLE_DOMAIN,
-    createHandler(domains.enabled, disableDomain(domainSigners, domains))
+    createHandler(domains.enabled, disableDomain(domainSigners, domains)),
   )
   app.get(CombinerEndpoint.METRICS, (_req, res) => {
     res.send(register.metrics())
@@ -140,11 +140,14 @@ function getSslOptions(config: CombinerConfig) {
 
 function createHandler<R extends OdisRequest>(
   enabled: boolean,
-  action: ResultHandler<R>
+  action: ResultHandler<R>,
 ): RequestHandler<{}, {}, R, {}, Locals> {
   return catchErrorHandler(
     tracingHandler(
-      meteringHandler(Histograms.responseLatency, enabled ? resultHandler(action) : disabledHandler)
-    )
+      meteringHandler(
+        Histograms.responseLatency,
+        enabled ? resultHandler(action) : disabledHandler,
+      ),
+    ),
   )
 }

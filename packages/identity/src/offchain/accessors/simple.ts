@@ -24,7 +24,7 @@ export class PublicSimpleAccessor<DataType> implements PublicAccessor<DataType> 
   constructor(
     readonly wrapper: OffchainDataWrapper,
     readonly type: t.Type<DataType>,
-    readonly dataPath: string
+    readonly dataPath: string,
   ) {}
 
   private async sign(data: DataType) {
@@ -42,7 +42,7 @@ export class PublicSimpleAccessor<DataType> implements PublicAccessor<DataType> 
     const error = await this.wrapper.writeDataTo(
       serialize(data),
       Buffer.from(trimLeading0x(signature), 'hex'),
-      this.dataPath
+      this.dataPath,
     )
     if (error) {
       return new OffchainError(error)
@@ -75,7 +75,7 @@ export class PrivateSimpleAccessor<DataType> implements PrivateAccessor<DataType
   constructor(
     readonly wrapper: OffchainDataWrapper,
     readonly type: t.Type<DataType>,
-    readonly dataPath: string
+    readonly dataPath: string,
   ) {}
 
   write(data: DataType, toAddresses: Address[], symmetricKey?: Buffer) {
