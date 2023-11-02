@@ -15151,15 +15151,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-junit@npm:^14.0.1":
-  version: 14.0.1
-  resolution: "jest-junit@npm:14.0.1"
+"jest-junit@npm:^16.0.0":
+  version: 16.0.0
+  resolution: "jest-junit@npm:16.0.0"
   dependencies:
     mkdirp: "npm:^1.0.4"
     strip-ansi: "npm:^6.0.1"
     uuid: "npm:^8.3.2"
     xml: "npm:^1.0.1"
-  checksum: a3a960c233d3be178327be1d34a52b97f90177d0aee0be5c92d060a97aefc0e0b18ef26cbdb96a8305ecd7b5b9e033a9ee1eab4223af2a6cc316bffb51387598
+  checksum: 2c33ee8bfd0c83b9aa1f8ba5905084890d5f519d294ccc2829d778ac860d5adffffec75d930f44f1d498aa8370c783e0aa6a632d947fb7e81205f0e7b926669d
   languageName: node
   linkType: hard
 
@@ -18391,7 +18391,7 @@ __metadata:
     husky: "npm:^8.0.0"
     jest: "npm:^29.7.0"
     jest-circus: "npm:^29.7.0"
-    jest-junit: "npm:^14.0.1"
+    jest-junit: "npm:^16.0.0"
     jest-snapshot: "npm:^29.7.0"
     lint-staged: "npm:^15.0.2"
     patch-package: "npm:^6.2.2"
