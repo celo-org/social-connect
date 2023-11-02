@@ -12,6 +12,10 @@ Here is a short demo of a payment from a [Kaala](https://kaala.app/) wallet user
 
 [<img width="800" alt="image" src="https://user-images.githubusercontent.com/46296830/207285114-6ef73be4-10f2-4afc-a066-811e1f3e1042.png">](https://www.loom.com/share/8afddd73ba324ec18aeb63fc96d568f9)
 
+## Introduction to SocialConnect
+
+[![Introduction to SocialConnect](https://img.youtube.com/vi/XO_33vb45V4/0.jpg)](https://www.youtube.com/watch?v=XO_33vb45V4)
+
 ## 🛠 How it Works
 
 SocialConnect uses a federated model, meaning that anyone has the power to be an **issuer** of attestation mappings. Issuers have the freedom to decide how to verify that the user actually has ownership of their identifier. After verification, issuers register the mapping as an attestation to the [on-chain smart contract registry](https://github.com/celo-org/celo-monorepo/blob/master/packages/protocol/contracts/identity/FederatedAttestations.sol). Attestations are stored under the issuer that registered them. When looking up attestations, we then have to decide which issuers are trusted.
@@ -152,6 +156,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 |                              [EthersJS (v5)](examples/ethers.ts)                              |
 |                                  [web3.js](examples/web3.ts)                                  |
 |         [NextJS based web app (Phone Number)](https://github.com/celo-org/emisianto)          |
+|         [NextJS based templated](https://github.com/celo-org/socialconnect-template)          |
 | [React Native App (Phone Number)](https://github.com/celo-org/SocialConnect-ReactNative-Demo) |
 |      [NextJS based web app (Twitter)](https://github.com/celo-org/SocialConnect-Twitter)      |
 | [Server side NextJS (Twitter)](https://github.com/celo-org/SocialConnect-Twitter-Server-Side) |
