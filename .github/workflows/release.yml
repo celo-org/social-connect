@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'prerelease/*'
+      - jcortejoso/using-gh-pat-token
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -46,9 +47,17 @@ jobs:
         shell: bash
         run: yarn
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 60
+        if: true
+        with:
+          limit-access-to-actor: true
+
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
+        if: false
         env:
           GITHUB_TOKEN: ${{ env.PAT }}
           NPM_TOKEN: ${{ env.NPM_TOKEN }}
