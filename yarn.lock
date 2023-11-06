@@ -1828,8 +1828,8 @@ __metadata:
     "@types/debug": "npm:^4.1.10"
     debug: "npm:^4.1.1"
     fetch-mock: "npm:9.11.0"
-    fp-ts: "npm:2.1.1"
-    io-ts: "npm:2.0.1"
+    fp-ts: "npm:2.16.1"
+    io-ts: "npm:2.2.20"
     jest: "npm:^29.7.0"
   languageName: unknown
   linkType: soft
@@ -1855,9 +1855,9 @@ __metadata:
     elliptic: "npm:^6.5.4"
     ethereum-cryptography: "npm:1.2.0"
     fetch-mock: "npm:9.11.0"
-    fp-ts: "npm:2.1.1"
+    fp-ts: "npm:2.16.1"
     ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
-    io-ts: "npm:2.0.1"
+    io-ts: "npm:2.2.20"
     jest: "npm:^29.7.0"
     old-identity-sdk: "npm:@celo/identity@1.5.2"
   languageName: unknown
@@ -1965,8 +1965,8 @@ __metadata:
     dotenv: "npm:^8.2.0"
     elliptic: "npm:^6.5.4"
     express: "npm:^4.17.6"
-    fp-ts: "npm:2.1.1"
-    io-ts: "npm:2.0.1"
+    fp-ts: "npm:2.16.1"
+    io-ts: "npm:2.2.20"
     is-base64: "npm:^1.1.0"
     jest: "npm:^29.7.0"
     node-fetch: "npm:^2.6.9"
@@ -2021,7 +2021,7 @@ __metadata:
     "@types/express": "npm:^4.17.20"
     "@types/node": "npm:18.15.13"
     "@types/supertest": "npm:^2.0.15"
-    aws-sdk: "npm:^2.1484.0"
+    aws-sdk: "npm:^2.1488.0"
     bignumber.js: "npm:^9.1.2"
     blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
     bunyan: "npm:1.8.15"
@@ -7485,9 +7485,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"aws-sdk@npm:^2.1484.0":
-  version: 2.1484.0
-  resolution: "aws-sdk@npm:2.1484.0"
+"aws-sdk@npm:^2.1488.0":
+  version: 2.1488.0
+  resolution: "aws-sdk@npm:2.1488.0"
   dependencies:
     buffer: "npm:4.9.2"
     events: "npm:1.1.1"
@@ -7499,7 +7499,7 @@ __metadata:
     util: "npm:^0.12.4"
     uuid: "npm:8.0.0"
     xml2js: "npm:0.5.0"
-  checksum: 9f10780610a706a59ba25c30a21c65c398694fcdcb6b7842906a051678e2243b8b3f1ed959c90ea56e4dab0b80aa9e795ea7705cc06e7d5625dfe2b36db8d6ba
+  checksum: 3160d0234ee02b0c61267a60de5b7009353a16fb765f3c70c99b0fe8fcbbfd5432707d52f01f421522d8d4423f3b4cf6bfb7eb6b4371b29dc902a18ae246928d
   languageName: node
   linkType: hard
 
@@ -11999,6 +11999,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fp-ts@npm:2.16.1":
+  version: 2.16.1
+  resolution: "fp-ts@npm:2.16.1"
+  checksum: 31d2fe47ffc1420044fe60322b2e72c05013aa0c3bfd19c68de92a44d793c70f423794a46b53f99f7c6ca489975401235219219e88790e5ba34095198b950c16
+  languageName: node
+  linkType: hard
+
 "fresh@npm:0.5.2":
   version: 0.5.2
   resolution: "fresh@npm:0.5.2"
@@ -13427,6 +13434,15 @@ __metadata:
   peerDependencies:
     fp-ts: ^2.0.0
   checksum: 40d4e76cfafdd2ddfd7d842748ed174cae8f1db5b6e3937b2ccaaff89ea9a9fb04f303a4fbb30d2f551fac754189b2b11ab9e28e4a192a1069ca65021f410e65
+  languageName: node
+  linkType: hard
+
+"io-ts@npm:2.2.20":
+  version: 2.2.20
+  resolution: "io-ts@npm:2.2.20"
+  peerDependencies:
+    fp-ts: ^2.5.0
+  checksum: c4508f666dec87ac5e343f11a1d69f4026509b0add3a88c9a39b71ca2d5117396af14ee2b6d1324a17763857d97dd3933095a6b99d885c3b38a89b548e5e32b3
   languageName: node
   linkType: hard
 

@@ -58,7 +58,7 @@
     "@opentelemetry/sdk-trace-web": "^1.17.1",
     "@opentelemetry/semantic-conventions": "^1.17.1",
     "@types/bunyan": "^1.8.10",
-    "aws-sdk": "^2.1484.0",
+    "aws-sdk": "^2.1488.0",
     "bignumber.js": "^9.1.2",
     "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
     "bunyan": "1.8.15",
