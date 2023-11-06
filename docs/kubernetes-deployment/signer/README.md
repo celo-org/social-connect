@@ -34,6 +34,14 @@ ODIS signer is deployed in the following clusters:
     - URL: `http://odis-signer1-staging.odis-signer1-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
   - Signer2 in namespace `odis-signer2-staging` with this [`values-signer2-staging.yaml` file](./values/staging/values-signer2-staging.yaml).
     - URL: `http://odis-signer2-staging.odis-signer2-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+- Alfajores: cluster `alfajores`
+  - Signer0 in namespace `odis-signer0-alfajores` with this [`values-signer0-alfajores.yaml` file](./values/alfajores/values-signer0-alfajores.yaml).
+    - URL: `http://odis-signer0-alfajores.odis-signer0-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+  - Signer1 in namespace `odis-signer1-alfajores` with this [`values-signer1-alfajores.yaml` file](./values/alfajores/values-signer1-alfajores.yaml).
+    - URL: `http://odis-signer1-staging.odis-signer1-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+  - Signer2 in namespace `odis-signer2-alfajores` with this [`values-signer2-alfajores.yaml` file](./values/alfajores/values-signer2-alfajores.yaml).
+    - URL: `http://odis-signer2-alfajores.odis-signer2-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+
 
 ### Modifying the deployment
 
@@ -50,21 +58,25 @@ You can access the ODIS deployment by following these links. There you can edit 
   - [Signer0](https://console.cloud.google.com/kubernetes/deployment/us-west1-b/integration-tests/odis-signer0-staging/odis-signer0-staging/yaml/view?project=celo-testnet&supportedpurview=project)
   - [Signer1](https://console.cloud.google.com/kubernetes/deployment/us-west1-b/integration-tests/odis-signer1-staging/odis-signer1-staging/yaml/view?project=celo-testnet&supportedpurview=project)
   - [Signer2](https://console.cloud.google.com/kubernetes/deployment/us-west1-b/integration-tests/odis-signer2-staging/odis-signer2-staging/yaml/view?project=celo-testnet&supportedpurview=project)
+- Alfajores:
+  - [Signer0](https://console.cloud.google.com/kubernetes/deployment/us-west1-a/alfajores/odis-signer0-alfajores/odis-signer0-alfajores/yaml/view?project=celo-testnet-production&supportedpurview=project)
+  - [Signer1](https://console.cloud.google.com/kubernetes/deployment/us-west1-a/alfajores/odis-signer1-alfajores/odis-signer1-alfajores/yaml/view?project=celo-testnet-production&supportedpurview=project)
+  - [Signer2](https://console.cloud.google.com/kubernetes/deployment/us-west1-a/alfajores/odis-signer2-alfajores/odis-signer2-alfajores/yaml/view?project=celo-testnet-production&supportedpurview=project)
 
 #### Use Helm
 
-1. Ensure you are connected to the correct Kubernetes cluster (currently, only staging).
+1. Ensure you are connected to the correct Kubernetes cluster (currently, only staging and alfajores).
 2. Get the currently deployed Helm chart values:
 
    ```bash
-   helm get values -n odis-signer<0|1|2>-staging odis-signer<0|1|2>-staging -o yaml > ./values/values-signer<0|1|2>-staging.yaml
+   helm get values -n odis-signer<0|1|2>-<staging|alfajores> odis-signer<0|1|2>-<staging|alfajores> -o yaml > ./values/values-signer<0|1|2>-<staging|alfajores>.yaml
    ```
 
 3. Modify the values file accordingly
 4. Deploy the new release:
 
    ```bash
-   helm upgrade -install odis-signer<0|1|2>-staging oci://us-west1-docker.pkg.dev/devopsre/clabs-public-oci/odis-signer -n odis-signer<0|1|2>-staging -f ./values/values-signer<0|1|2>-staging --create-namespace --version <VERSION>
+   helm upgrade -install odis-signer<0|1|2>-<staging|alfajores> oci://us-west1-docker.pkg.dev/devopsre/clabs-public-oci/odis-signer -n odis-signer<0|1|2>-<staging|alfajores> -f ./values/<staging|alfajores>/values-signer<0|1|2>-<staging|alfajores> --create-namespace --version <VERSION>
    ```
 
 5. Ensure there are no sensitive values in the values `.yaml` file and commit it to this repo.
@@ -80,9 +92,17 @@ Each signer has an associated Postgres DB running in its same Kubernetes namespa
     - Deployment: [`odis-signer1-staging-db-postgresql`](https://console.cloud.google.com/kubernetes/statefulset/us-west1-b/integration-tests/odis-signer1-staging/odis-signer1-staging-db-postgresql/details?project=celo-testnet&supportedpurview=project)
   - Signer2 DB host: `odis-signer2-staging-db-postgresql-hl`, port 5432. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
     - Deployment: [`odis-signer2-staging-db-postgresql`](https://console.cloud.google.com/kubernetes/statefulset/us-west1-b/integration-tests/odis-signer2-staging/odis-signer2-staging-db-postgresql/details?project=celo-testnet&supportedpurview=project)
+- Alfajores:
+  - Signer0 DB host: `odis-signer0-alfajores-db-postgresql-hl`, port 5432. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - Deployment: [`odis-signer0-alfajores-db-postgresql`](https://console.cloud.google.com/kubernetes/statefulset/us-west1-a/alfajores/odis-signer0-alfajores/odis-signer0-alfajores-db-postgresql/details?project=celo-testnet-production&supportedpurview=project)
+  - Signer1 DB host: `odis-signer1-alfajores-db-postgresql-hl`, port 5432. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - Deployment: [`odis-signer1-alfajores-db-postgresql`](https://console.cloud.google.com/kubernetes/statefulset/us-west1-a/alfajores/odis-signer1-alfajores/odis-signer1-alfajores-db-postgresql/details?project=celo-testnet-production&supportedpurview=project)
+  - Signer2 DB host: `odis-signer2-alfajores-db-postgresql-hl`, port 5432. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - Deployment: [`odis-signer2-alfajores-db-postgresql`](https://console.cloud.google.com/kubernetes/statefulset/us-west1-a/alfajores/odis-signer2-alfajores/odis-signer2-alfajores-db-postgresql/details?project=celo-testnet-production&supportedpurview=project)
 
 ### Tracing
 
 Tracing is enabled in the ODIS signer. The signers send traces to a Grafana Agent deployed in the same cluster as the signers.
 
 - Staging Grafana Agent URL: `http://grafana-agent.monitoring:14268/api/traces`
+- Alfajores Grafana Agent URL: `http://grafana-agent.monitoring:14268/api/traces`

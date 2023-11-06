@@ -72,3 +72,4 @@ You can access the ODIS deployment by following these links. There you can edit 
 Tracing is enabled in the ODIS combiner. The combiners send traces to a Grafana Agent deployed in the same cluster as the combiners.
 
 - Staging Grafana Agent URL: `http://grafana-agent.monitoring:14268/api/traces`
+- Alfajores Grafana Agent URL: `http://grafana-agent.monitoring:14268/api/traces`

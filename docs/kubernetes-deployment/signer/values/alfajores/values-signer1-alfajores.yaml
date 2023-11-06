@@ -9,24 +9,24 @@ env:
     domainsAPIEnabled: true
     pnpAPIEnabled: true
   blockchain:
-    blockchainApiKeyExistingSecret: odis-signer-forno-key
+    blockchainApiKeyExistingSecret: odis-signer1-forno-key
     blockchainProvider: https://alfajores-forno.celo-testnet.org
   db:
     cloudSqlProxy: false
     database: phoneNumberPrivacy
-    host: odis-signer2-staging-db-postgresql-hl
-    passwordExistingSecret: odis-signer-db-password
+    host: odis-signer1-alfajores-db-postgresql-hl
+    passwordExistingSecret: odis-signer1-db-password
     port: 5432
     type: postgres
     useSsl: false
-    username: pgpnp
+    username: cLabs
   keystore:
     domainsKeyLatestVersion: null
-    domainsKeyNameBase: odis-signer2-staging-domains
+    domainsKeyNameBase: odis-signer1-alfajores-domains
     gcp:
-      projectID: celo-testnet
+      projectID: celo-testnet-production
     pnpKeyLatestVersion: null
-    pnpKeyNameBase: odis-signer2-staging-phoneNumberPrivacy
+    pnpKeyNameBase: odis-signer1-alfajores-phoneNumberPrivacy
     type: GoogleSecretManager
   log:
     format: stackdriver
@@ -40,7 +40,7 @@ env:
   tracing:
     enabled: true
     endpoint: "http://grafana-agent.monitoring:14268/api/traces"
-    serviceName: "odis-signer2-staging-k8s"
+    serviceName: "odis-signer1-alfajores-k8s"
 fullnameOverride: ""
 image:
   pullPolicy: Always
@@ -64,7 +64,7 @@ resources: {}
 securityContext: {}
 serviceAccount:
   annotations:
-    iam.gke.io/gcp-service-account: odis-signer2-staging@celo-testnet.iam.gserviceaccount.com
+    iam.gke.io/gcp-service-account: odis-signer1-alfajores@celo-testnet-production.iam.gserviceaccount.com
   create: true
   name: ""
 tolerations: []

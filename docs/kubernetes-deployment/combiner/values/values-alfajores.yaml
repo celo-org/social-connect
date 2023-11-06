@@ -12,12 +12,12 @@ replicaCount: 1
 
 image:
   # -- Image repository
-  repository: us-west1-docker.pkg.dev/devopsre/dev-images/odis-combiner
+  repository: us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner
   # -- Image pullpolicy
   pullPolicy: Always
   # -- Image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "85baf6c3854aff588d88332addd709d544ebd6c4"
+  tag: "odis-combiner-3.3.1"
 
 # -- Image pull secrets
 imagePullSecrets: []
@@ -35,7 +35,7 @@ env:
     # -- Enable tracing
     enabled: true
     # -- Env. Var TRACER_ENDPOINT. If enabled is false, will not be added to the deployment.
-    endpoint: "https://grafana-agent.odis-alfajores-signer-3.celo-networks-dev.org/api/traces"
+    endpoint: "http://grafana-agent.monitoring:14268/api/traces"
     # -- Env. Var TRACING_SERVICE_NAME. If enabled is false, will not be added to the deployment.
     serviceName: "odis-combiner-alfajores-k8s"
   log:
@@ -95,18 +95,17 @@ env:
     # -- Env. Var PNP_SHOULD_AUTHENTICATE
     pnpShouldAuthenticate: true
     # -- Env. Var PNP_SHOULD_CHECK_QUOTA
-    pnpShoulñdCheckQuota: false
+    pnpShouldCheckQuota: false
     # -- Env. Var PNP_SHOULD_MOCK_ACCOUNT_SERVICE
     pnpShouldMockAccountService: false
   service:
     # -- Env. Var SERVICE_NAME
     serviceName: "odis-combiner-k8s"
+    # -- Env. Var SERVICE_PORT
+    serverPort: 8081
 
 # -- Custom pod annotations
-podAnnotations:
-  prometheus.io/path: /metrics
-  prometheus.io/port: "8080"
-  prometheus.io/scrape: "true"
+podAnnotations: {}
 
 # -- Custom pod security context
 podSecurityContext: {}
