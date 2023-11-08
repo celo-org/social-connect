@@ -73,3 +73,4 @@ Tracing is enabled in the ODIS combiner. The combiners send traces to a Grafana 
 
 - Staging Grafana Agent URL: `http://grafana-agent.monitoring:14268/api/traces`
 - Alfajores Grafana Agent URL: `http://grafana-agent.monitoring:14268/api/traces`
+- Mainnet Grafana Agent URL: `http://grafana-agent.monitoring:14268/api/traces`
