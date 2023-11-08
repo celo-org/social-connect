@@ -5,7 +5,6 @@ import {
   WalletKeySigner,
 } from '@celo/identity/lib/odis/query'
 import { AuthenticationMethod } from '@celo/phone-number-privacy-common'
-import { PhoneNumberUtils } from '@celo/phone-utils'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,
@@ -48,8 +47,6 @@ export const BLINDING_FACTOR = Buffer.from('0IsBvRfkBrkKCIW6HV0/T1zrzjQSe8wRyU3P
 // hardcoding to avoid importing blind_threshols_bls library
 export const BLINDED_PHONE_NUMBER =
   'hZXDhpC5onzBSFa1agZ9vfHzqwJ/QeJg77NGvWiQG/sFWsvHETzZvdWr2GpF3QkB'
-
-export const PHONE_HASH_IDENTIFIER = PhoneNumberUtils.getPhoneHash(PHONE_NUMBER)
 
 export const CONTACT_PHONE_NUMBER = '+14155559999'
 export const CONTACT_PHONE_NUMBERS = [CONTACT_PHONE_NUMBER]

@@ -1,9 +1,3 @@
-// These functions were moved from the identity SDK because the protocol package
-// and @celo/phone-utils both need these core identifier generation functions as well.
-// The protocol package cannot depend on the identity SDK as is since this creates
-// a non-trivial dependency cycle (currently, if A->B means "A depends on B",
-// identity -> phone-number-privacy-common -> contractkit -> protocol).
-
 export const PEPPER_SEPARATOR = '__'
 
 // Docstring is duplicated in @celo/identity; make sure to update in both places.

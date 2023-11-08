@@ -1,4 +1,4 @@
-import { getPhoneHash } from '@celo/base'
+import { getPhoneHash } from 'old-celo-base'
 import { soliditySha3 } from '@celo/utils/lib/solidity'
 import { OdisUtils as OdisUtilsOld } from 'old-identity-sdk'
 import { OdisUtils } from '../../lib'
