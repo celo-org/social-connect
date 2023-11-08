@@ -59,7 +59,6 @@
   },
   "devDependencies": {
     "@celo/phone-number-privacy-signer": "workspace:^",
-    "@celo/phone-utils": "^5.0.5",
     "@celo/utils": "^5.0.5",
     "jest": "^29.7.0",
     "knex": "^2.1.0",
