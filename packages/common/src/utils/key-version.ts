@@ -12,7 +12,7 @@ export interface KeyVersionInfo {
 
 export function requestHasValidKeyVersion(
   request: Request<{}, {}, OdisRequest>,
-  logger: Logger
+  logger: Logger,
 ): boolean {
   try {
     getRequestKeyVersion(request, logger)
@@ -26,7 +26,7 @@ export function requestHasValidKeyVersion(
 
 export function getRequestKeyVersion(
   request: Request<{}, {}, OdisRequest>,
-  logger: Logger
+  logger: Logger,
 ): number | undefined {
   const keyVersionHeader = request.headers[KEY_VERSION_HEADER]
   const keyVersion = parseKeyVersionFromHeader(keyVersionHeader)
@@ -46,7 +46,7 @@ export function getRequestKeyVersion(
 export function responseHasExpectedKeyVersion(
   response: FetchResponse,
   expectedKeyVersion: number,
-  logger: Logger
+  logger: Logger,
 ): boolean {
   let responseKeyVersion
   try {
@@ -60,7 +60,7 @@ export function responseHasExpectedKeyVersion(
   if (responseKeyVersion !== expectedKeyVersion) {
     logger.error(
       { expectedKeyVersion, responseKeyVersion },
-      ErrorMessage.INVALID_KEY_VERSION_RESPONSE
+      ErrorMessage.INVALID_KEY_VERSION_RESPONSE,
     )
     return false
   }
@@ -85,7 +85,7 @@ export function getResponseKeyVersion(response: FetchResponse, logger: Logger): 
 }
 
 function parseKeyVersionFromHeader(
-  keyVersionHeader: string | string[] | undefined | null
+  keyVersionHeader: string | string[] | undefined | null,
 ): number | undefined {
   if (keyVersionHeader === undefined || keyVersionHeader === null) {
     return undefined

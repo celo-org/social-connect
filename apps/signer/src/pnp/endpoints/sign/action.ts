@@ -28,7 +28,7 @@ export function pnpSign(
   config: SignerConfig,
   requestService: PnpRequestService,
   accountService: AccountService,
-  keyProvider: KeyProvider
+  keyProvider: KeyProvider,
 ): ResultHandler<SignMessageRequest> {
   return async (request, response) => {
     const logger = response.locals.logger
@@ -63,7 +63,7 @@ export function pnpSign(
     const duplicateRequest = await requestService.getDuplicateRequest(
       request.body.account,
       request.body.blindedQueryPhoneNumber,
-      ctx
+      ctx,
     )
 
     Histograms.userRemainingQuotaAtRequest
@@ -111,7 +111,7 @@ export function pnpSign(
         account.address,
         request.body.blindedQueryPhoneNumber,
         signature,
-        ctx
+        ctx,
       )
       if (!bypassQuotaForE2ETesting(config.test_quota_bypass_percentage, request.body)) {
         usedQuota++
@@ -142,7 +142,7 @@ async function sign(
   blindedMessage: string,
   key: Key,
   keyProvider: KeyProvider,
-  logger: Logger
+  logger: Logger,
 ): Promise<string> {
   let privateKey: string
   return traceAsyncFunction('pnpSign', async () => {
@@ -158,7 +158,7 @@ async function sign(
 }
 
 function isValidRequest(
-  request: Request<{}, {}, unknown>
+  request: Request<{}, {}, unknown>,
 ): request is Request<{}, {}, SignMessageRequest> {
   return (
     SignMessageRequestSchema.is(request.body) &&
@@ -170,7 +170,7 @@ function isValidRequest(
 
 function bypassQuotaForE2ETesting(
   bypassQuotaPercentage: number,
-  requestBody: SignMessageRequest
+  requestBody: SignMessageRequest,
 ): boolean {
   const sessionID = Number(requestBody.sessionID) // TODO revisit whether to remove sessionID
   return !Number.isNaN(sessionID) && sessionID % 100 < bypassQuotaPercentage

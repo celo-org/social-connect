@@ -152,11 +152,11 @@ export class MockOdis {
       override ??
         ((url: string, req: { body: string }) => {
           const res = this.quota(
-            JSON.parse(req.body) as DomainQuotaStatusRequest<SequentialDelayDomain>
+            JSON.parse(req.body) as DomainQuotaStatusRequest<SequentialDelayDomain>,
           )
           debug('Mocking request', JSON.stringify({ url, req, res }))
           return res
-        })
+        }),
     )
   }
 
@@ -169,11 +169,11 @@ export class MockOdis {
       override ??
         ((url: string, req: { body: string }) => {
           const res = this.sign(
-            JSON.parse(req.body) as DomainRestrictedSignatureRequest<SequentialDelayDomain>
+            JSON.parse(req.body) as DomainRestrictedSignatureRequest<SequentialDelayDomain>,
           )
           debug('Mocking request', JSON.stringify({ url, req, res }))
           return res
-        })
+        }),
     )
   }
 

@@ -437,7 +437,7 @@ describe('pnp response logger', () => {
       testCase.expectedLogs.forEach((log) => {
         expect(logSpys[log.level].spy).toHaveBeenNthCalledWith(
           ++logSpys[log.level].callCount,
-          ...log.params
+          ...log.params,
         )
       })
       Object.values(logSpys).forEach((level) => {

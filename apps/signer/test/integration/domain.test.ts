@@ -62,14 +62,14 @@ describe('domain', () => {
   const signatureRequest = async (
     _domain?: SequentialDelayDomain,
     _nonce?: number,
-    keyVersion: number = config.keystore.keys.domains.latest
+    keyVersion: number = config.keystore.keys.domains.latest,
   ): Promise<[DomainRestrictedSignatureRequest<SequentialDelayDomain>, ThresholdPoprfClient]> => {
     const domain = _domain ?? authenticatedDomain()
     const thresholdPoprfClient = new ThresholdPoprfClient(
       Buffer.from(TestUtils.Values.DOMAINS_THRESHOLD_DEV_PUBKEYS[keyVersion - 1], 'base64'),
       Buffer.from(TestUtils.Values.DOMAINS_THRESHOLD_DEV_POLYNOMIALS[keyVersion - 1], 'hex'),
       domainHash(domain),
-      Buffer.from('test message', 'utf8')
+      Buffer.from('test message', 'utf8'),
     )
 
     const req: DomainRestrictedSignatureRequest<SequentialDelayDomain> = {
@@ -83,7 +83,7 @@ describe('domain', () => {
       sessionID: defined(genSessionID()),
     }
     req.options.signature = defined(
-      await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req))
+      await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req)),
     )
     return [req, thresholdPoprfClient]
   }
@@ -99,7 +99,7 @@ describe('domain', () => {
       sessionID: defined(genSessionID()),
     }
     req.options.signature = defined(
-      await wallet.signTypedData(walletAddress, domainQuotaStatusRequestEIP712(req))
+      await wallet.signTypedData(walletAddress, domainQuotaStatusRequestEIP712(req)),
     )
     return req
   }
@@ -116,7 +116,7 @@ describe('domain', () => {
       sessionID: defined(genSessionID()),
     }
     req.options.signature = defined(
-      await wallet.signTypedData(walletAddress, disableDomainRequestEIP712(req))
+      await wallet.signTypedData(walletAddress, disableDomainRequestEIP712(req)),
     )
     return req
   }
@@ -313,14 +313,14 @@ describe('domain', () => {
         const spy = jest
           .spyOn(
             jest.requireActual('../../src/common/database/wrappers/domain-state'),
-            'insertDomainStateRecord'
+            'insertDomainStateRecord',
           )
           .mockImplementationOnce(() => {
             // Handle errors in the same way as in insertDomainStateRecord
             countAndThrowDBError(
               new Error(),
               rootLogger(_config.serviceName),
-              ErrorMessage.DATABASE_INSERT_FAILURE
+              ErrorMessage.DATABASE_INSERT_FAILURE,
             )
           })
         const res = await request(app).post(SignerEndpoint.DISABLE_DOMAIN).send(req)
@@ -332,7 +332,7 @@ describe('domain', () => {
           error: ErrorMessage.DATABASE_INSERT_FAILURE,
         })
         expect(await getDomainStateRecord(db, req.domain, rootLogger(_config.serviceName))).toBe(
-          null
+          null,
         )
       })
 
@@ -348,7 +348,7 @@ describe('domain', () => {
         const spy = jest
           .spyOn(
             jest.requireActual('../../src/common/database/wrappers/domain-state'),
-            'getDomainStateRecord'
+            'getDomainStateRecord',
           )
           .mockImplementationOnce(async () => {
             await new Promise((resolve) => setTimeout(resolve, testTimeoutMS + delay))
@@ -520,13 +520,13 @@ describe('domain', () => {
         const spy = jest
           .spyOn(
             jest.requireActual('../../src/common/database/wrappers/domain-state'),
-            'getDomainStateRecordOrEmpty'
+            'getDomainStateRecordOrEmpty',
           )
           .mockImplementationOnce(() => {
             countAndThrowDBError(
               new Error(),
               rootLogger(_config.serviceName),
-              ErrorMessage.DATABASE_GET_FAILURE
+              ErrorMessage.DATABASE_GET_FAILURE,
             )
           })
         const res = await request(app).post(SignerEndpoint.DOMAIN_QUOTA_STATUS).send(req)
@@ -538,7 +538,7 @@ describe('domain', () => {
           error: ErrorMessage.DATABASE_GET_FAILURE,
         })
         expect(await getDomainStateRecord(db, req.domain, rootLogger(_config.serviceName))).toBe(
-          null
+          null,
         )
       })
     })
@@ -555,7 +555,7 @@ describe('domain', () => {
       const spy = jest
         .spyOn(
           jest.requireActual('../../src/common/database/wrappers/domain-state'),
-          'getDomainStateRecordOrEmpty'
+          'getDomainStateRecordOrEmpty',
         )
         .mockImplementationOnce(async () => {
           await new Promise((resolve) => setTimeout(resolve, testTimeoutMS + delay))
@@ -605,7 +605,7 @@ describe('domain', () => {
         },
       })
       const evaluation = thresholdPoprfClient.unblindPartialResponse(
-        Buffer.from(res.body.signature, 'base64')
+        Buffer.from(res.body.signature, 'base64'),
       )
       expect(evaluation.toString('base64')).toEqual(expectedEval)
       expect(res.get(KEY_VERSION_HEADER)).toEqual(_config.keystore.keys.domains.latest.toString())
@@ -633,7 +633,7 @@ describe('domain', () => {
           },
         })
         const evaluation = thresholdPoprfClient.unblindPartialResponse(
-          Buffer.from(res.body.signature, 'base64')
+          Buffer.from(res.body.signature, 'base64'),
         )
         expect(evaluation.toString('base64')).toEqual(expectedEvals[i - 1])
         expect(res.get(KEY_VERSION_HEADER)).toEqual(i.toString())
@@ -658,7 +658,7 @@ describe('domain', () => {
         },
       })
       const eval1 = thresholdPoprfClient.unblindPartialResponse(
-        Buffer.from(res1.body.signature, 'base64')
+        Buffer.from(res1.body.signature, 'base64'),
       )
       expect(eval1.toString('base64')).toEqual(expectedEval)
 
@@ -667,7 +667,7 @@ describe('domain', () => {
       // This is how
       req.options.signature = noString
       req.options.signature = defined(
-        await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req))
+        await wallet.signTypedData(walletAddress, domainRestrictedSignatureRequestEIP712(req)),
       )
       const res2 = await request(app).post(SignerEndpoint.DOMAIN_SIGN).send(req)
       expect(res2.status).toBe(200)
@@ -683,7 +683,7 @@ describe('domain', () => {
         },
       })
       const eval2 = thresholdPoprfClient.unblindPartialResponse(
-        Buffer.from(res2.body.signature, 'base64')
+        Buffer.from(res2.body.signature, 'base64'),
       )
       expect(eval2).toEqual(eval1)
     })
@@ -704,7 +704,7 @@ describe('domain', () => {
         },
       })
       const evaluation = thresholdPoprfClient.unblindPartialResponse(
-        Buffer.from(res.body.signature, 'base64')
+        Buffer.from(res.body.signature, 'base64'),
       )
       expect(evaluation.toString('base64')).toEqual(expectedEval)
     })
@@ -729,7 +729,7 @@ describe('domain', () => {
         },
       })
       const evaluation = thresholdPoprfClient.unblindPartialResponse(
-        Buffer.from(res.body.signature, 'base64')
+        Buffer.from(res.body.signature, 'base64'),
       )
       expect(evaluation.toString('base64')).toEqual(expectedEval)
     })
@@ -948,13 +948,13 @@ describe('domain', () => {
         const spy = jest
           .spyOn(
             jest.requireActual('../../src/common/database/wrappers/domain-state'),
-            'getDomainStateRecordOrEmpty'
+            'getDomainStateRecordOrEmpty',
           )
           .mockImplementationOnce(() => {
             countAndThrowDBError(
               new Error(),
               rootLogger(_config.serviceName),
-              ErrorMessage.DATABASE_GET_FAILURE
+              ErrorMessage.DATABASE_GET_FAILURE,
             )
           })
         const res = await request(app).post(SignerEndpoint.DOMAIN_SIGN).send(req)
@@ -966,7 +966,7 @@ describe('domain', () => {
           error: ErrorMessage.DATABASE_GET_FAILURE,
         })
         expect(await getDomainStateRecord(db, req.domain, rootLogger(_config.serviceName))).toBe(
-          null
+          null,
         )
       })
 
@@ -978,13 +978,13 @@ describe('domain', () => {
         const spy = jest
           .spyOn(
             jest.requireActual('../../src/common/database/wrappers/domain-state'),
-            'updateDomainStateRecord'
+            'updateDomainStateRecord',
           )
           .mockImplementationOnce(() => {
             countAndThrowDBError(
               new Error(),
               rootLogger(_config.serviceName),
-              ErrorMessage.DATABASE_UPDATE_FAILURE
+              ErrorMessage.DATABASE_UPDATE_FAILURE,
             )
           })
         const res = await request(app).post(SignerEndpoint.DOMAIN_SIGN).send(req)
@@ -996,7 +996,7 @@ describe('domain', () => {
           error: ErrorMessage.DATABASE_UPDATE_FAILURE,
         })
         expect(await getDomainStateRecord(db, req.domain, rootLogger(_config.serviceName))).toBe(
-          null
+          null,
         )
       })
 
@@ -1008,7 +1008,7 @@ describe('domain', () => {
         const spy = jest
           .spyOn(
             jest.requireActual('../../src/common/database/wrappers/domain-state'),
-            'getDomainStateRecordOrEmpty'
+            'getDomainStateRecordOrEmpty',
           )
           .mockImplementationOnce(async () => {
             await new Promise((resolve) => setTimeout(resolve, testTimeoutMS + delay))

@@ -18,7 +18,7 @@ export async function getDomainRequestRecordExists<D extends Domain>(
   domain: D,
   blindedMessage: string,
   trx: Knex.Transaction<DomainRequestRecord>,
-  logger: Logger
+  logger: Logger,
 ): Promise<boolean> {
   const hash = domainHash(domain).toString('hex')
   logger.debug({ domain, blindedMessage, hash }, 'Checking if domain request exists')
@@ -36,7 +36,7 @@ export async function getDomainRequestRecordExists<D extends Domain>(
         .first()
         .timeout(config.db.timeout)
       return !!existingRequest
-    }
+    },
   )
 }
 
@@ -45,7 +45,7 @@ export async function storeDomainRequestRecord<D extends Domain>(
   domain: D,
   blindedMessage: string,
   trx: Knex.Transaction<DomainRequestRecord>,
-  logger: Logger
+  logger: Logger,
 ) {
   logger.debug({ domain, blindedMessage }, 'Storing domain restricted signature request')
   return doMeteredSql(
@@ -57,7 +57,7 @@ export async function storeDomainRequestRecord<D extends Domain>(
         .transacting(trx)
         .insert(toDomainRequestRecord(domain, blindedMessage))
         .timeout(config.db.timeout)
-    }
+    },
   )
 }
 
@@ -65,7 +65,7 @@ export async function deleteDomainRequestsOlderThan(
   db: Knex,
   date: Date,
   logger: Logger,
-  trx?: Knex.Transaction
+  trx?: Knex.Transaction,
 ): Promise<number> {
   logger.debug(`Removing request older than: ${date}`)
   if (date > new Date()) {
@@ -81,6 +81,6 @@ export async function deleteDomainRequestsOlderThan(
         .where(DOMAIN_REQUESTS_COLUMNS.timestamp, '<=', date)
         .del()
       return trx != null ? sql.transacting(trx) : sql
-    }
+    },
   )
 }

@@ -1,0 +1,70 @@
+affinity: {}
+autoscaling:
+  enabled: false
+  maxReplicas: 3
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 80
+env:
+  api:
+    domainsAPIEnabled: true
+    pnpAPIEnabled: true
+  blockchain:
+    blockchainApiKeyExistingSecret: odis-signer-forno-key
+    blockchainProvider: https://alfajores-forno.celo-testnet.org
+  db:
+    cloudSqlProxy: false
+    database: phoneNumberPrivacy
+    host: odis-signer0-staging-db-postgresql-hl
+    passwordExistingSecret: odis-signer-db-password
+    port: 5432
+    type: postgres
+    useSsl: false
+    username: pgpnp
+  keystore:
+    domainsKeyLatestVersion: null
+    domainsKeyNameBase: odis-signer0-staging-domains
+    gcp:
+      projectID: celo-testnet
+    pnpKeyLatestVersion: null
+    pnpKeyNameBase: odis-signer0-staging-phoneNumberPrivacy
+    type: GoogleSecretManager
+  log:
+    format: stackdriver
+    level: trace
+  odis:
+    mockDek: 0x034846bc781cacdafc66f3a77aa9fc3c56a9dadcd683c72be3c446fee8da041070
+    odisSignerTimeout: "6000"
+    shouldMockAccountService: "false"
+    shouldMockRequestService: "false"
+    testQuotaBypassPercentage: "50"
+  tracing:
+    enabled: true
+    endpoint: "http://grafana-agent.monitoring:14268/api/traces"
+    serviceName: "odis-signer0-staging-k8s"
+fullnameOverride: ""
+image:
+  pullPolicy: Always
+  repository: us.gcr.io/celo-testnet/celo-monorepo
+  tag: oblivious-decentralized-identifier-service-3.0.1
+imagePullSecrets: []
+ingress:
+  annotations: {}
+  className: nginx
+  enabled: false
+  hosts: []
+  tls: []
+livenessProbe: {}
+nameOverride: ""
+nodeSelector: {}
+podAnnotations: {}
+podSecurityContext: {}
+readinessProbe: {}
+replicaCount: 1
+resources: {}
+securityContext: {}
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: odis-signer0-staging@celo-testnet.iam.gserviceaccount.com
+  create: true
+  name: ""
+tolerations: []

@@ -25,19 +25,23 @@ COPY .yarn/releases/ .yarn/releases/
 # Makes build fail if it doesn't copy git, will be removed after build
 COPY .git .git
 
-# Setting ONLY_PUBLISHED_DEPENDENCIES to true or any non-empty string results in only the
-# phone-number-privacy package being copied into the image, and therefore it will only build using
-# published dependencies. Setting ONLY_PUBLISHED_DEPENDENCIES to "" will copy in all dependecies.
-ARG ONLY_PUBLISHED_DEPENDENCIES=""
-ARG PACKAGE_SELECTOR=${ONLY_PUBLISHED_DEPENDENCIES:+combiner}
+ARG PACKAGE_SELECTOR=combiner
+# COMMENT OUT THIS LINE TO USE PUBLISHED DEPENDENCIES
 COPY --from=packages celo-phone-number-privacy/packages/ packages/
 COPY --from=packages celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${PACKAGE_SELECTOR}
 
+# delete tests so they dont get built because signer is needed by them,
+RUN rm -rf apps/combiner/test
+# remove signer dep as its only used in tests and we dont want to build it
+RUN yarn --cwd=apps/combiner remove @celo/phone-number-privacy-signer
 # Install dependencies and build.
+
 RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
 RUN yarn workspaces list
-RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-combiner run build
 
+RUN yarn workspaces foreach -ipv --topological-dev  -R --from @celo/phone-number-privacy-combiner run build
+# once we are built trim down the dependencies
+RUN yarn workspaces focus @celo/phone-number-privacy-combiner --production
 RUN rm -r .git
 
 # Setup and run the combiner application.

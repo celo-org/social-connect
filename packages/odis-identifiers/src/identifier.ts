@@ -50,7 +50,7 @@ export enum IdentifierPrefix {
  */
 export const getPrefixedIdentifier = (
   plaintextIdentifier: string,
-  identifierPrefix: IdentifierPrefix
+  identifierPrefix: IdentifierPrefix,
 ): string => identifierPrefix + '://' + plaintextIdentifier
 
 /**
@@ -70,7 +70,7 @@ export const getIdentifierHash = (
   sha3: (a: string) => string | null,
   plaintextIdentifier: string,
   identifierPrefix: IdentifierPrefix,
-  pepper: string
+  pepper: string,
 ): string => {
   // hashing the identifier before appending the pepper to avoid domain collisions where the
   // identifier may contain underscores

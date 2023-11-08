@@ -19,29 +19,19 @@ Each time a changeset is merged into main a "Version Packages" PR will automatic
 
 ## For pre releasing
 
-changesets has 2 strategies for pre release versions.
+For Detailed Steps read scripts/beta-mode.sh
 
-The first is to enter `pre` mode on changesets. [docs here](https://github.com/changesets/changesets/blob/main/docs/prereleases.md)
+1. Run `yarn beta-enter`
+This will enter into the pre mode of changesets and create a prerelease/beta branch and push it up to origin(github)
 
-```
-yarn changeset pre enter beta
-yarn changeset version
-git add .
-git commit -m "Enter prerelease mode and version packages"
-yarn changeset publish
-git push --follow-tags
-```
+Any time a commit is pushed to prerelease/** github will go and open a specially Version Packages (Beta) PR. You can merge this and packages will be published as specified in the branch (should be beta)
 
-The other is to append --snapshot. which is great for daily releases.
+2. If you need to release another beta make a changeset and commit it up.
 
-```
-yarn changeset version --snapshot canary
+3. When done run `yarn beta-exit`
+This will exit changeset pre mode. Push up.
 
-yarn changeset publish --no-git-tag --snapshot
-
-```
-
-<https://github.com/changesets/changesets/blob/main/docs/snapshot-releases.md>
+4. Now you can Open a Pr with your prerelease/? branch against main.
 
 ## Package Versioning
 

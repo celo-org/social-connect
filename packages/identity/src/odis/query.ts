@@ -94,7 +94,7 @@ export enum OdisContextName {
 
 export function getServiceContext(
   contextName: OdisContextName = OdisContextName.MAINNET,
-  api: OdisAPI = OdisAPI.PNP
+  api: OdisAPI = OdisAPI.PNP,
 ) {
   switch (contextName) {
     case OdisContextName.ALFAJORES:
@@ -124,7 +124,7 @@ export function signWithDEK(msg: string, signer: EncryptionKeySigner) {
 
 export async function getOdisPnpRequestAuth(
   body: PhoneNumberPrivacyRequest,
-  signer: AuthSigner
+  signer: AuthSigner,
 ): Promise<string> {
   // Sign payload using provided account and authentication method.
   const bodyString = JSON.stringify(body)
@@ -152,7 +152,7 @@ export async function queryOdis<R extends OdisRequest>(
   endpoint: CombinerEndpoint,
   responseSchema: t.Type<OdisResponse<R>, OdisResponse<R>, unknown>,
   headers: OdisRequestHeader<R>,
-  abortController?: AbortController
+  abortController?: AbortController,
 ): Promise<OdisResponse<R>> {
   debug(`Posting to ${endpoint}`)
 
@@ -215,7 +215,7 @@ export async function queryOdis<R extends OdisRequest>(
     },
     3,
     dontRetry,
-    []
+    [],
   )
 }
 
@@ -233,13 +233,13 @@ export async function sendOdisDomainRequest<R extends DomainRequest>(
   context: ServiceContext,
   endpoint: DomainEndpoint,
   responseSchema: t.Type<OdisResponse<R>>,
-  headers?: DomainRequestHeader<R>
+  headers?: DomainRequestHeader<R>,
 ): Promise<DomainResponse<R>> {
   return queryOdis(
     body,
     context,
     endpoint,
     responseSchema,
-    headers as OdisRequestHeader<R>
+    headers as OdisRequestHeader<R>,
   ) as Promise<DomainResponse<R>>
 }

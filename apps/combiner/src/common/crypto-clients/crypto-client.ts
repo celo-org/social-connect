@@ -38,10 +38,10 @@ export abstract class CryptoClient {
       const { threshold } = this.keyVersionInfo
       ctx.logger.error(
         { signatures: this.allSignaturesLength, required: threshold },
-        ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES
+        ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES,
       )
       throw new Error(
-        `${ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES} ${this.allSignaturesLength}/${threshold}`
+        `${ErrorMessage.NOT_ENOUGH_PARTIAL_SIGNATURES} ${this.allSignaturesLength}/${threshold}`,
       )
     }
 

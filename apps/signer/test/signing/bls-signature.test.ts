@@ -17,24 +17,24 @@ describe(`BLS service computes signature`, () => {
     const actual = computeBlindedSignature(
       blindedMsg,
       TestUtils.Values.PNP_DEV_SIGNER_PRIVATE_KEY,
-      rootLogger(config.serviceName)
+      rootLogger(config.serviceName),
     )
     expect(actual).toEqual(
-      'MAAAAAAAAADDilSaA/xvbtE4NV3agMzHIf8PGPQ83Cu8gQy5E2mRWyUIges8bjE4EBe1L7pcY4AAAAAA'
+      'MAAAAAAAAADDilSaA/xvbtE4NV3agMzHIf8PGPQ83Cu8gQy5E2mRWyUIges8bjE4EBe1L7pcY4AAAAAA',
     )
 
     expect(
       threshold_bls.partialVerifyBlindSignature(
         Buffer.from(TestUtils.Values.PNP_DEV_ODIS_POLYNOMIAL, 'hex'),
         blindedMsgResult.message,
-        Buffer.from(actual, 'base64')
-      )
+        Buffer.from(actual, 'base64'),
+      ),
     )
 
     const combinedSignature = threshold_bls.combine(1, Buffer.from(actual, 'base64'))
     const unblindedSignedMessage = threshold_bls.unblind(
       combinedSignature,
-      blindedMsgResult.blindingFactor
+      blindedMsgResult.blindingFactor,
     )
     const publicKey = Buffer.from(TestUtils.Values.PNP_DEV_ODIS_PUBLIC_KEY, 'base64')
     expect(threshold_bls.verify(publicKey, message, unblindedSignedMessage))
@@ -48,8 +48,8 @@ describe(`BLS service computes signature`, () => {
       computeBlindedSignature(
         blindedMsg,
         TestUtils.Values.PNP_DEV_SIGNER_PRIVATE_KEY,
-        rootLogger(config.serviceName)
-      )
+        rootLogger(config.serviceName),
+      ),
     ).toThrow()
   })
 })

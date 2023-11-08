@@ -37,7 +37,7 @@ export function rootLogger(serviceName: string): Logger {
 }
 
 export function loggerMiddleware(
-  serviceName: string
+  serviceName: string,
 ): (req: Request, res: Response, next?: NextFunction) => Logger {
   return (req, res, next) => {
     const requestLogger = rootLogger(serviceName).child({

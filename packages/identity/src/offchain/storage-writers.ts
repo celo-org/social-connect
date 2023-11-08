@@ -36,7 +36,10 @@ export class GitStorageWriter extends LocalStorageWriter {
 export class GoogleStorageWriter extends LocalStorageWriter {
   private readonly bucket: string
 
-  constructor(readonly local: string, bucket: string) {
+  constructor(
+    readonly local: string,
+    bucket: string,
+  ) {
     super(local)
     this.bucket = bucket
   }
@@ -52,7 +55,10 @@ export class GoogleStorageWriter extends LocalStorageWriter {
 export class AwsStorageWriter extends LocalStorageWriter {
   private readonly bucket: string
 
-  constructor(readonly local: string, bucket: string) {
+  constructor(
+    readonly local: string,
+    bucket: string,
+  ) {
     super(local)
     this.bucket = bucket
   }
@@ -66,7 +72,11 @@ export class AwsStorageWriter extends LocalStorageWriter {
 }
 
 export class MockStorageWriter extends LocalStorageWriter {
-  constructor(readonly root: string, readonly mockedStorageRoot: string, readonly fetchMock: any) {
+  constructor(
+    readonly root: string,
+    readonly mockedStorageRoot: string,
+    readonly fetchMock: any,
+  ) {
     super(root)
   }
   async write(data: Buffer, dataPath: string): Promise<void> {

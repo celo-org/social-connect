@@ -9,14 +9,17 @@ import { PrivateAccessor, PublicAccessor } from './interfaces'
  * Schema for writing any generic binary data
  */
 export class PublicBinaryAccessor implements PublicAccessor<Buffer> {
-  constructor(readonly wrapper: OffchainDataWrapper, readonly dataPath: string) {}
+  constructor(
+    readonly wrapper: OffchainDataWrapper,
+    readonly dataPath: string,
+  ) {}
 
   async write(data: Buffer) {
     const signature = await signBuffer(this.wrapper, this.dataPath, data)
     const error = await this.wrapper.writeDataTo(
       data,
       Buffer.from(trimLeading0x(signature), 'hex'),
-      this.dataPath
+      this.dataPath,
     )
     if (error) {
       return new OffchainError(error)
@@ -39,7 +42,10 @@ export class PublicBinaryAccessor implements PublicAccessor<Buffer> {
  * Schema for writing any encrypted binary data.
  */
 export class PrivateBinaryAccessor implements PrivateAccessor<Buffer> {
-  constructor(readonly wrapper: OffchainDataWrapper, readonly dataPath: string) {}
+  constructor(
+    readonly wrapper: OffchainDataWrapper,
+    readonly dataPath: string,
+  ) {}
 
   async write(data: Buffer, toAddresses: Address[], symmetricKey?: Buffer) {
     return writeEncrypted(this.wrapper, this.dataPath, data, toAddresses, symmetricKey)

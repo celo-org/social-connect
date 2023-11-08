@@ -39,7 +39,7 @@ describe('backwards compatibility of phone number identifiers', () => {
       mockE164Number,
       mockAccount,
       authSigner,
-      oldServiceContext
+      oldServiceContext,
     )
 
     const currRes = await getObfuscatedIdentifier(
@@ -47,7 +47,7 @@ describe('backwards compatibility of phone number identifiers', () => {
       IdentifierPrefix.PHONE_NUMBER,
       mockAccount,
       authSigner,
-      currentServiceContext
+      currentServiceContext,
     )
 
     expect(oldRes.e164Number).toEqual(currRes.plaintextIdentifier)
@@ -61,18 +61,18 @@ describe('backwards compatibility of phone number identifiers', () => {
     const blsBlindingClient = new WasmBlsBlindingClient('')
     const seed = Buffer.from(
       '44714c0a2b2bacec757a67822a4fbbdfe043cca8c6ae936545ef992f246df1a9',
-      'hex'
+      'hex',
     )
     const oldRes = await OdisUtilsOld.PhoneNumberIdentifier.getBlindedPhoneNumber(
       mockE164Number,
       blsBlindingClient,
-      seed
+      seed,
     )
     const currentRes = await getBlindedIdentifier(
       mockE164Number,
       IdentifierPrefix.PHONE_NUMBER,
       blsBlindingClient,
-      seed
+      seed,
     )
 
     const expectedBlindedIdentifier =
@@ -97,7 +97,7 @@ describe('backwards compatibility of phone number identifiers', () => {
       mockE164Number,
       mockAccount,
       authSigner,
-      oldServiceContext
+      oldServiceContext,
     )
 
     const currRes = await getObfuscatedIdentifier(
@@ -105,7 +105,7 @@ describe('backwards compatibility of phone number identifiers', () => {
       '' as typeof IdentifierPrefix.PHONE_NUMBER,
       mockAccount,
       authSigner,
-      currentServiceContext
+      currentServiceContext,
     )
 
     expect(oldRes.e164Number).toEqual(currRes.plaintextIdentifier)

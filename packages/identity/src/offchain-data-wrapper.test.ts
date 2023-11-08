@@ -57,7 +57,7 @@ testWithGanache('Offchain Data', (web3) => {
   async function setupAccount(
     privateKey: string,
     dek?: string,
-    compressedDEK = false
+    compressedDEK = false,
   ): Promise<RegisteredAccount> {
     const publicKey = privateKeyToPublicKey(privateKey)
     const address = publicKeyToAddress(publicKey)
@@ -73,7 +73,7 @@ testWithGanache('Offchain Data', (web3) => {
         .setAccountDataEncryptionKey(
           compressedDEK
             ? ensureLeading0x(ensureCompressed(privateKeyToPublicKey(dek)))
-            : privateKeyToPublicKey(dek)
+            : privateKeyToPublicKey(dek),
         )
         .sendAndWaitForReceipt({ from: address })
       kit.connection.addAccount(dek)
@@ -173,14 +173,14 @@ testWithGanache('Offchain Data', (web3) => {
     // Mock the 404
     fetchMock.mock(
       writer.storageRoot + `/account/authorizedSigners/${toChecksumAddress(signer.address)}`,
-      404
+      404,
     )
 
     const wrapper = new BasicDataWrapper(signer.address, kit)
     wrapper.storageWriter = new MockStorageWriter(
       writer.localStorageRoot,
       writer.storageRoot,
-      fetchMock
+      fetchMock,
     )
     const nameAccessor = new PublicNameAccessor(wrapper)
     await nameAccessor.write(testPayload)
@@ -190,7 +190,7 @@ testWithGanache('Offchain Data', (web3) => {
     const authorizedSignerAccessor = new AuthorizedSignerAccessor(writer.wrapper)
     const authorization = await authorizedSignerAccessor.readAsResult(
       writer.address,
-      signer.address
+      signer.address,
     )
     expect(authorization.ok).toEqual(false)
   })
@@ -206,7 +206,7 @@ testWithGanache('Offchain Data', (web3) => {
       const authorizedSignerAccessor = new AuthorizedSignerAccessor(reader.wrapper)
       const authorization = await authorizedSignerAccessor.readAsResult(
         writer.address,
-        signer.address
+        signer.address,
       )
       expect(authorization).toBeDefined()
     })

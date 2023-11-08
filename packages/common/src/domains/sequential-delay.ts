@@ -196,7 +196,7 @@ interface IndexedSequentialDelayStage extends SequentialDelayStage {
 export const checkSequentialDelayRateLimit = (
   domain: SequentialDelayDomain,
   attemptTime: number,
-  state: SequentialDelayDomainState = INITIAL_SEQUENTIAL_DELAY_DOMAIN_STATE
+  state: SequentialDelayDomainState = INITIAL_SEQUENTIAL_DELAY_DOMAIN_STATE,
 ): SequentialDelayResult => {
   // If the domain has been disabled, all queries are to be rejected.
   if (state.disabled) {
@@ -239,7 +239,7 @@ export const checkSequentialDelayRateLimit = (
  */
 const getIndexedStage = (
   domain: SequentialDelayDomain,
-  counter: number
+  counter: number,
 ): IndexedSequentialDelayStage | undefined => {
   // The attempt index marking the beginning of the current stage
   let start = 0

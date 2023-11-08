@@ -27,7 +27,7 @@ function getCiphertextLabel(
   path: string,
   sharedSecret: Buffer,
   senderPublicKey: string,
-  receiverPublicKey: string
+  receiverPublicKey: string,
 ) {
   const senderPublicKeyBuffer = Buffer.from(ensureCompressed(senderPublicKey), 'hex')
   const receiverPublicKeyBuffer = Buffer.from(ensureCompressed(receiverPublicKey), 'hex')
@@ -54,7 +54,7 @@ const distributeSymmetricKey = async (
   wrapper: OffchainDataWrapper,
   dataPath: string,
   key: Buffer,
-  toAddress: Address
+  toAddress: Address,
 ): Promise<void | SchemaErrors> => {
   const accounts = await wrapper.kit.contracts.getAccounts()
   const [fromPubKey, toPubKey] = await Promise.all([
@@ -74,14 +74,14 @@ const distributeSymmetricKey = async (
   const computedDataPath = getCiphertextLabel(`${dataPath}.key`, sharedSecret, fromPubKey, toPubKey)
   const encryptedData = Encrypt(
     Buffer.from(trimUncompressedPrefix(ensureUncompressed(toPubKey)), 'hex'),
-    key
+    key,
   )
 
   const signature = await signBuffer(wrapper, computedDataPath, encryptedData)
   const writeError = await wrapper.writeDataTo(
     encryptedData,
     Buffer.from(trimLeading0x(signature), 'hex'),
-    computedDataPath
+    computedDataPath,
   )
   if (writeError) {
     return new OffchainError(writeError)
@@ -101,7 +101,7 @@ const distributeSymmetricKey = async (
 async function fetchOrGenerateKey(
   wrapper: OffchainDataWrapper,
   dataPath: string,
-  symmetricKey?: Buffer
+  symmetricKey?: Buffer,
 ) {
   if (symmetricKey) {
     return Ok(symmetricKey)
@@ -138,7 +138,7 @@ export const writeEncrypted = async (
   dataPath: string,
   data: Buffer,
   toAddresses: Address[],
-  symmetricKey?: Buffer
+  symmetricKey?: Buffer,
 ): Promise<SchemaErrors | void> => {
   const fetchKey = await fetchOrGenerateKey(wrapper, dataPath, symmetricKey)
   if (!fetchKey.ok) {
@@ -152,7 +152,7 @@ export const writeEncrypted = async (
   const writeError = await wrapper.writeDataTo(
     payload,
     Buffer.from(trimLeading0x(signature), 'hex'),
-    `${dataPath}.enc`
+    `${dataPath}.enc`,
   )
   if (writeError) {
     return new OffchainError(writeError)
@@ -162,8 +162,8 @@ export const writeEncrypted = async (
     await Promise.all(
       // here we encrypt the key to ourselves so we can retrieve it later
       [wrapper.self, ...toAddresses].map(async (toAddress) =>
-        distributeSymmetricKey(wrapper, dataPath, fetchKey.result, toAddress)
-      )
+        distributeSymmetricKey(wrapper, dataPath, fetchKey.result, toAddress),
+      ),
     )
   ).find(Boolean)
   return firstWriteError
@@ -173,7 +173,7 @@ export const writeSymmetricKeys = async (
   wrapper: OffchainDataWrapper,
   dataPath: string,
   toAddresses: Address[],
-  symmetricKey?: Buffer
+  symmetricKey?: Buffer,
 ): Promise<SchemaErrors | void> => {
   const fetchKey = await fetchOrGenerateKey(wrapper, dataPath, symmetricKey)
   if (!fetchKey.ok) {
@@ -183,8 +183,8 @@ export const writeSymmetricKeys = async (
   const firstWriteError = (
     await Promise.all(
       toAddresses.map(async (toAddress) =>
-        distributeSymmetricKey(wrapper, dataPath, fetchKey.result, toAddress)
-      )
+        distributeSymmetricKey(wrapper, dataPath, fetchKey.result, toAddress),
+      ),
     )
   ).find(Boolean)
   return firstWriteError
@@ -201,7 +201,7 @@ export const writeSymmetricKeys = async (
 const readSymmetricKey = async (
   wrapper: OffchainDataWrapper,
   dataPath: string,
-  senderAddress: Address
+  senderAddress: Address,
 ): Promise<Result<Buffer, SchemaErrors>> => {
   const accounts = await wrapper.kit.contracts.getAccounts()
   const wallet = wrapper.kit.getWallet()!
@@ -227,7 +227,7 @@ const readSymmetricKey = async (
     `${dataPath}.key`,
     sharedSecret,
     senderPubKey,
-    readerPubKey
+    readerPubKey,
   )
   const encryptedPayload = await wrapper.readDataFromAsResult(senderAddress, computedDataPath, true)
 
@@ -250,7 +250,7 @@ const readSymmetricKey = async (
 export const readEncrypted = async (
   wrapper: OffchainDataWrapper,
   dataPath: string,
-  senderAddress: Address
+  senderAddress: Address,
 ): Promise<Result<Buffer, SchemaErrors>> => {
   const encryptedPayloadPath = `${dataPath}.enc`
   const [payload, key] = await Promise.all([
@@ -273,13 +273,13 @@ export const readEncrypted = async (
   }
 
   return Ok(
-    AES128Decrypt(key.result, payload.result.slice(0, IV_LENGTH), payload.result.slice(IV_LENGTH))
+    AES128Decrypt(key.result, payload.result.slice(0, IV_LENGTH), payload.result.slice(IV_LENGTH)),
   )
 }
 
 export const deserialize = <DataType>(
   type: t.Type<DataType>,
-  buf: Buffer
+  buf: Buffer,
 ): Result<DataType, SchemaErrors> => {
   const dataAsJson = parseJsonAsResult(buf.toString())
   if (!dataAsJson.ok) {
@@ -298,7 +298,7 @@ export const buildEIP712TypedData = async <DataType>(
   wrapper: OffchainDataWrapper,
   path: string,
   data: DataType | Buffer,
-  type?: t.Type<DataType>
+  type?: t.Type<DataType>,
 ): Promise<EIP712TypedData> => {
   const chainId = await wrapper.kit.connection.chainId()
   const EIP712Domain = [

@@ -33,7 +33,7 @@ describe(getPnpQuotaStatus, () => {
     })
 
     await expect(
-      getPnpQuotaStatus(mockAccount, authSigner, serviceContext)
+      getPnpQuotaStatus(mockAccount, authSigner, serviceContext),
     ).resolves.toStrictEqual<PnpClientQuotaStatus>({
       performedQueryCount,
       totalQuota,

@@ -6,7 +6,7 @@ import { Counters } from '../../common/metrics'
 
 export function logDomainResponseDiscrepancies<R extends DomainRequest>(
   logger: Logger,
-  responses: Array<SignerResponse<R>>
+  responses: Array<SignerResponse<R>>,
 ) {
   const parsedResponses: Array<{
     signerUrl: string

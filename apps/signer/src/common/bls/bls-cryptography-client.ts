@@ -9,7 +9,7 @@ import { Counters } from '../metrics'
 export function computeBlindedSignature(
   base64BlindedMessage: string,
   privateKey: string,
-  logger: Logger
+  logger: Logger,
 ) {
   try {
     const keyBuffer = Buffer.from(privateKey, 'hex')

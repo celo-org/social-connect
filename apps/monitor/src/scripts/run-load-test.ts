@@ -92,7 +92,7 @@ yargs
         args.useDEK,
         args.movingAvgRequests,
         args.privateKey,
-        args.privateKeyPercentage
+        args.privateKeyPercentage,
       )
-    }
+    },
   ).argv

@@ -155,7 +155,7 @@ describe('domain threshold state', () => {
     })
 
     expect(() => findThresholdDomainState(keyVersionInfo, responses, totalSigners)).toThrow(
-      'Insufficient number of signer responses. Domain may be disabled'
+      'Insufficient number of signer responses. Domain may be disabled',
     )
   })
 })

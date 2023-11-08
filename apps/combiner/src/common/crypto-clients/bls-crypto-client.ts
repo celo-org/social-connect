@@ -50,7 +50,7 @@ export class BLSCryptographyClient extends CryptoClient {
   private verifyCombinedSignature(
     blindedMessage: string,
     combinedSignature: Uint8Array,
-    logger: Logger
+    logger: Logger,
   ) {
     try {
       // TODO: Address bad documentation in threshold-bls lib.
@@ -59,7 +59,7 @@ export class BLSCryptographyClient extends CryptoClient {
       threshold_bls.verifyBlindSignature(
         Buffer.from(this.keyVersionInfo.pubKey, 'base64'),
         Buffer.from(blindedMessage, 'base64'),
-        combinedSignature
+        combinedSignature,
       )
     } catch (error) {
       logger.error('Combined signature verification failed')
@@ -70,7 +70,7 @@ export class BLSCryptographyClient extends CryptoClient {
   private verifyPartialSignature(
     blindedMessage: string,
     unverifiedSignature: ServicePartialSignature,
-    ctx: Context
+    ctx: Context,
   ) {
     const sigBuffer = Buffer.from(unverifiedSignature.signature, 'base64')
     if (this.isValidPartialSignature(sigBuffer, blindedMessage)) {
@@ -81,7 +81,7 @@ export class BLSCryptographyClient extends CryptoClient {
       Counters.blsComputeErrors.labels(ctx.url, unverifiedSignature.url).inc()
       ctx.logger.error(
         { url: unverifiedSignature.url },
-        ErrorMessage.VERIFY_PARTIAL_SIGNATURE_ERROR
+        ErrorMessage.VERIFY_PARTIAL_SIGNATURE_ERROR,
       )
     }
   }
@@ -95,7 +95,7 @@ export class BLSCryptographyClient extends CryptoClient {
       threshold_bls.partialVerifyBlindSignature(
         Buffer.from(this.keyVersionInfo.polynomial, 'hex'),
         Buffer.from(blindedMessage, 'base64'),
-        signature
+        signature,
       )
       return true
     } catch {

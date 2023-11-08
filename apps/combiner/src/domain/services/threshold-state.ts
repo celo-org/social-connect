@@ -4,7 +4,7 @@ import { SignerResponse } from '../../common/io'
 export function findThresholdDomainState<R extends DomainRequest>(
   keyVersionInfo: KeyVersionInfo,
   rawSignerResponses: Array<SignerResponse<R>>,
-  totalSigners: number
+  totalSigners: number,
 ): DomainState {
   const { threshold } = keyVersionInfo
   // Get the domain status from the responses, filtering out responses that don't have the status.
@@ -45,11 +45,11 @@ export function findThresholdDomainState<R extends DomainRequest>(
   // Client should submit requests with nonce === thresholdCounter
 
   const domainStatesWithThresholdCounter = domainStatesEnabled.filter(
-    (ds) => ds.counter <= thresholdCounter
+    (ds) => ds.counter <= thresholdCounter,
   )
 
   const domainStatesAscendingByTimestampRestrictiveness = domainStatesWithThresholdCounter.sort(
-    (a, b) => a.timer - a.now - (b.timer - b.now)
+    (a, b) => a.timer - a.now - (b.timer - b.now),
     /**
      * Please see '@celo/phone-number-privacy-common/src/domains/sequential-delay.ts'
      * and https://github.com/celo-org/celo-proposals/blob/master/CIPs/CIP-0040/sequentialDelayDomain.md

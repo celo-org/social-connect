@@ -13,7 +13,7 @@ const TEST_THRESHOLD_T = 2
 const TEST_THRESHOLD_POPRF_KEYS = poprf.thresholdKeygen(
   TEST_THRESHOLD_N,
   TEST_THRESHOLD_T,
-  Buffer.from('TEST THRESHOLD POPRF KEYPAIR SEED')
+  Buffer.from('TEST THRESHOLD POPRF KEYPAIR SEED'),
 )
 
 const TEST_MESSAGE_A = Buffer.from('TEST MESSAGE A')
@@ -34,13 +34,13 @@ describe('PoprfClient', () => {
       TEST_POPRF_KEYPAIR.publicKey,
       TEST_TAG_A,
       TEST_MESSAGE_A,
-      TEST_BLINDING_SEED
+      TEST_BLINDING_SEED,
     )
     const clientB = new PoprfClient(
       TEST_POPRF_KEYPAIR.publicKey,
       TEST_TAG_A,
       TEST_MESSAGE_A,
-      TEST_BLINDING_SEED
+      TEST_BLINDING_SEED,
     )
     expect(clientA.blindedMessage).toEqual(clientB.blindedMessage)
   })
@@ -89,17 +89,17 @@ describe('end-to-end', () => {
 
   it('successfully completes client-server exchange with combiner', () => {
     const servers = [...Array(TEST_THRESHOLD_N).keys()].map(
-      (i) => new ThresholdPoprfServer(TEST_THRESHOLD_POPRF_KEYS.getShare(i))
+      (i) => new ThresholdPoprfServer(TEST_THRESHOLD_POPRF_KEYS.getShare(i)),
     )
     const combiner = new PoprfCombiner(TEST_THRESHOLD_T)
     const client = new PoprfClient(
       TEST_THRESHOLD_POPRF_KEYS.thresholdPublicKey,
       TEST_TAG_A,
-      TEST_MESSAGE_A
+      TEST_MESSAGE_A,
     )
 
     const blindedPartials = servers.map((s) =>
-      s.blindPartialEval(client.tag, client.blindedMessage)
+      s.blindPartialEval(client.tag, client.blindedMessage),
     )
     const response = combiner.blindAggregate(blindedPartials)
     expect(response).toBeDefined()
@@ -115,17 +115,17 @@ describe('end-to-end', () => {
 
   it('successfully completes client-server exchange with threshold client and server', () => {
     const servers = [...Array(TEST_THRESHOLD_N).keys()].map(
-      (i) => new ThresholdPoprfServer(TEST_THRESHOLD_POPRF_KEYS.getShare(i))
+      (i) => new ThresholdPoprfServer(TEST_THRESHOLD_POPRF_KEYS.getShare(i)),
     )
     const client = new ThresholdPoprfClient(
       TEST_THRESHOLD_POPRF_KEYS.thresholdPublicKey,
       TEST_THRESHOLD_POPRF_KEYS.polynomial,
       TEST_TAG_A,
-      TEST_MESSAGE_A
+      TEST_MESSAGE_A,
     )
 
     const blindedPartials = servers.map((s) =>
-      s.blindPartialEval(client.tag, client.blindedMessage)
+      s.blindPartialEval(client.tag, client.blindedMessage),
     )
     const partials = blindedPartials.map((r) => client.unblindPartialResponse(r))
     expect(partials.map((p) => p.toString('base64'))).toEqual([
