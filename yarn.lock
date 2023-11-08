@@ -1809,7 +1809,7 @@ __metadata:
     "@types/elliptic": "npm:^6.4.12"
     bignumber.js: "npm:^9.0.0"
     blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
-    cross-fetch: "npm:3.0.6"
+    cross-fetch: "npm:3.1.5"
     debug: "npm:^4.1.1"
     elliptic: "npm:^6.5.4"
     ethereum-cryptography: "npm:1.2.0"
@@ -10416,21 +10416,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cross-fetch@npm:3.1.5, cross-fetch@npm:^3.1.4":
+  version: 3.1.5
+  resolution: "cross-fetch@npm:3.1.5"
+  dependencies:
+    node-fetch: "npm:2.6.7"
+  checksum: 5d101a3b1e6cb172f0e5e8168cbc927eeff2ef915f33ceef50fed85441df870e1fdff195b56eca36fae8b78ddba5d8e913b8927f73d11b19d27e96301438cd30
+  languageName: node
+  linkType: hard
+
 "cross-fetch@npm:^3.0.6":
   version: 3.1.8
   resolution: "cross-fetch@npm:3.1.8"
   dependencies:
     node-fetch: "npm:^2.6.12"
   checksum: ac8c4ca87d2ac0e17a19b6a293a67ee8934881aee5ec9a5a8323c30e9a9a60a0f5291d3c0d633ec2a2f970cbc60978d628804dfaf03add92d7e720b6d37f392c
-  languageName: node
-  linkType: hard
-
-"cross-fetch@npm:^3.1.4":
-  version: 3.1.5
-  resolution: "cross-fetch@npm:3.1.5"
-  dependencies:
-    node-fetch: "npm:2.6.7"
-  checksum: 5d101a3b1e6cb172f0e5e8168cbc927eeff2ef915f33ceef50fed85441df870e1fdff195b56eca36fae8b78ddba5d8e913b8927f73d11b19d27e96301438cd30
   languageName: node
   linkType: hard
 
@@ -15227,18 +15227,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-junit@npm:^14.0.1":
-  version: 14.0.1
-  resolution: "jest-junit@npm:14.0.1"
-  dependencies:
-    mkdirp: "npm:^1.0.4"
-    strip-ansi: "npm:^6.0.1"
-    uuid: "npm:^8.3.2"
-    xml: "npm:^1.0.1"
-  checksum: a3a960c233d3be178327be1d34a52b97f90177d0aee0be5c92d060a97aefc0e0b18ef26cbdb96a8305ecd7b5b9e033a9ee1eab4223af2a6cc316bffb51387598
-  languageName: node
-  linkType: hard
-
 "jest-leak-detector@npm:^29.5.0":
   version: 29.5.0
   resolution: "jest-leak-detector@npm:29.5.0"
@@ -18605,7 +18593,6 @@ __metadata:
     husky: "npm:^3.1.0"
     jest: "npm:^29.0.2"
     jest-circus: "npm:^29.0.2"
-    jest-junit: "npm:^14.0.1"
     jest-snapshot: "npm:^29.0.2"
     patch-package: "npm:^6.2.2"
     prettier: "npm:^2.7.1"
@@ -24882,13 +24869,6 @@ __metadata:
     sax: "npm:>=0.6.0"
     xmlbuilder: "npm:~11.0.0"
   checksum: 27c4d759214e99be5ec87ee5cb1290add427fa43df509d3b92d10152b3806fd2f7c9609697a18b158ccf2caa01e96af067cdba93196f69ca10c90e4f79a08896
-  languageName: node
-  linkType: hard
-
-"xml@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "xml@npm:1.0.1"
-  checksum: 6c4c31a1308e45732e5ac6b50edbca0e8f7abe5cb5de10215d8e3c688819fe7c7706e056f6fb59b1a23fdf1000c2d7a8bba0a89e94aa1796cd2376d9a5ba401e
   languageName: node
   linkType: hard
 
