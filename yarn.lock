@@ -17528,7 +17528,6 @@ __metadata:
     eslint-plugin-prettier: "npm:^5.0.1"
     husky: "npm:^8.0.0"
     jest: "npm:^29.7.0"
-    jest-circus: "npm:^29.7.0"
     jest-snapshot: "npm:^29.7.0"
     lint-staged: "npm:^15.0.2"
     patch-package: "npm:^6.2.2"
