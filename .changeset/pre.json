@@ -11,5 +11,15 @@
     "@celo/identity": "5.1.0",
     "@celo/odis-identifiers": "1.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "brave-hats-smoke",
+    "dull-feet-hear",
+    "friendly-dots-compete",
+    "gold-insects-tease",
+    "hip-buckets-shake",
+    "light-apples-share",
+    "quiet-taxis-crash",
+    "rare-lobsters-smash",
+    "tidy-cups-kneel"
+  ]
 }
