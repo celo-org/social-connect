@@ -1,5 +1,5 @@
 {
-  "mode": "exit",
+  "mode": "pre",
   "tag": "beta",
   "initialVersions": {
     "@celo/phone-number-privacy-combiner": "3.3.1",
@@ -11,5 +11,17 @@
     "@celo/identity": "5.1.0",
     "@celo/odis-identifiers": "1.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "brave-hats-smoke",
+    "cold-roses-compete",
+    "dull-feet-hear",
+    "friendly-dots-compete",
+    "gold-insects-tease",
+    "good-oranges-sit",
+    "hip-buckets-shake",
+    "light-apples-share",
+    "quiet-taxis-crash",
+    "rare-lobsters-smash",
+    "tidy-cups-kneel"
+  ]
 }
