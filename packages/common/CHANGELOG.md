@@ -1,5 +1,12 @@
 # @celo/phone-number-privacy-common
 
+## 3.1.1
+
+### Patch Changes
+
+- 8f95181: Upgraded Dependencies https://github.com/celo-org/social-connect/pull/144
+- 8638c3a: Remove erroneos imports / dependent of @celo/phone-utils
+
 ## 3.1.0
 
 ### Minor Changes
