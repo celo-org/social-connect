@@ -41,4 +41,5 @@ RUN rm -r .git
 ENV NODE_ENV production
 WORKDIR /celo-phone-number-privacy/apps/monitor
 EXPOSE 8080
+RUN yarn
 ENTRYPOINT ["yarn", "loadTest"]
