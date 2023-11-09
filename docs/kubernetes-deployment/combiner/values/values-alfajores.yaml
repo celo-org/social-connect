@@ -17,7 +17,7 @@ image:
   pullPolicy: Always
   # -- Image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "odis-combiner-3.3.1"
+  tag: "odis-combiner-3.3.2"
 
 # -- Image pull secrets
 imagePullSecrets: []
@@ -62,7 +62,7 @@ env:
     # -- Env. Var DOMAIN_KEYS_VERSIONS
     domainKeysVersions: '[{"keyVersion":1,"threshold":2,"polynomial":"0200000000000000f99af1c8fbcb0a15945ff0f23f0e93b86c101f48250c911b4ab4b15004723f93eea98c8ffd4e166535757b46c0522a0167a40224c88ba43c13685bf2f159e63394416cb41432b320e69e3e0810aa8fa1e1b0c7dcc948fc5742f2b8d752b65081f10d83821b4e2cf90b56cc4fc8c98dc00e5f24f2c5b53fa8ad7c2ebd3963c9223cf95209692d267a4f8084edfc0b5f01f7a31d82bf5421c544b6258749c691b79e6f36d9ba963ead6f25b9986b6bcb7d45b5edb33a616af630b4ce17bf552c81","pubKey":"+ZrxyPvLChWUX/DyPw6TuGwQH0glDJEbSrSxUARyP5PuqYyP/U4WZTV1e0bAUioBZ6QCJMiLpDwTaFvy8VnmM5RBbLQUMrMg5p4+CBCqj6HhsMfcyUj8V0LyuNdStlCB"},{"keyVersion":2,"threshold":2,"polynomial":"0200000000000000f99af1c8fbcb0a15945ff0f23f0e93b86c101f48250c911b4ab4b15004723f93eea98c8ffd4e166535757b46c0522a0167a40224c88ba43c13685bf2f159e63394416cb41432b320e69e3e0810aa8fa1e1b0c7dcc948fc5742f2b8d752b65081f10d83821b4e2cf90b56cc4fc8c98dc00e5f24f2c5b53fa8ad7c2ebd3963c9223cf95209692d267a4f8084edfc0b5f01f7a31d82bf5421c544b6258749c691b79e6f36d9ba963ead6f25b9986b6bcb7d45b5edb33a616af630b4ce17bf552c81","pubKey":"+ZrxyPvLChWUX/DyPw6TuGwQH0glDJEbSrSxUARyP5PuqYyP/U4WZTV1e0bAUioBZ6QCJMiLpDwTaFvy8VnmM5RBbLQUMrMg5p4+CBCqj6HhsMfcyUj8V0LyuNdStlCB"}]'
     # -- Env. Var DOMAIN_ODIS_SERVICES_SIGNERS
-    domainOdisServicesSigners: '[{"url": "https://odis-alfajores-signer2.azurefd.net"},{"url": "https://odis-alfajores-signer3.azurefd.net"},{"url": "https://odis-alfajores-signer-1-b.azurefd.net"}]'
+    domainOdisServicesSigners: '[{"url": "http://odis-signer0-alfajores.odis-signer0-alfajores:3000"},{"url": "http://odis-signer1-alfajores.odis-signer1-alfajores:3000"},{"url": "http://odis-signer2-alfajores.odis-signer2-alfajores:3000"}]'
     # -- Env. Var DOMAIN_ODIS_SERVICES_TIMEOUT_MILLISECONDS
     domainOdisServicesTimeoutMillisecond: "5000"
     # -- Env. Var DOMAIN_SERVICE_NAME
@@ -87,7 +87,7 @@ env:
     # -- Env. Var PNP_MOCK_DECK
     pnpMockDeck: "0xbf8a2b73baf8402f8fe906ad3f42b560bf14b39f7df7797ece9e293d6f162188"
     # -- Env. Var PNP_ODIS_SERVICES_SIGNERS
-    pnpOdisServicesSigners: '[{"url": "https://odis-alfajores-signer2.azurefd.net"},{"url": "https://odis-alfajores-signer3.azurefd.net"},{"url": "https://odis-alfajores-signer-1-b.azurefd.net"}]'
+    pnpOdisServicesSigners: '[{"url": "http://odis-signer0-alfajores.odis-signer0-alfajores:3000"},{"url": "http://odis-signer1-alfajores.odis-signer1-alfajores:3000"},{"url": "http://odis-signer2-alfajores.odis-signer2-alfajores:3000"}]'
     # -- Env. Var PNP_ODIS_SERVICES_TIMEOUT_MILLISECONDS
     pnpOdisServicesTimeoutMilliseconds: "5000"
     # -- Env. Var PNP_SERVICE_NAME
@@ -143,16 +143,16 @@ ingress:
 
 # -- Liveness probe configuration
 livenessProbe:
-  timeoutSeconds: 30
-  initialDelaySeconds: 60
+  timeoutSeconds: 60
+  initialDelaySeconds: 90
   httpGet:
     path: /status
     port: http
 
 # -- Readiness probe configuration
 readinessProbe:
-  timeoutSeconds: 30
-  initialDelaySeconds: 60
+  timeoutSeconds: 60
+  initialDelaySeconds: 90
   httpGet:
     path: /status
     port: http
