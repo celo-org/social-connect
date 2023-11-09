@@ -112,7 +112,7 @@ sequenceDiagram
 
 The [`@celo/identity`](https://www.npmjs.com/package/@celo/identity) package is an SDK that provides useful helper functions to handle querying ODIS and deriving the obfuscated identifier.
 
-> ❗️ Make sure you are using version `3.0.1` or later
+> ❗️ Make sure you are using version `5.1.0` or later
 
 Import the `OdisUtils` module into your project for all relevant functions
 ```typescript
