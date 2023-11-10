@@ -4,9 +4,6 @@ autoscaling:
   maxReplicas: 3
   minReplicas: 1
   targetCPUUtilizationPercentage: 80
-command: 
-  - |
-    yarn && yarn start:docker
 env:
   api:
     domainsAPIEnabled: true
