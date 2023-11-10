@@ -11,6 +11,7 @@ env:
   blockchain:
     blockchainApiKeyExistingSecret: odis-signer0-forno-key
     blockchainProvider: https://forno.celo.org
+    fullNodeTimeoutMs: 10000
   db:
     cloudSqlProxy: false
     database: phoneNumberPrivacy
@@ -20,6 +21,8 @@ env:
     type: postgres
     useSsl: false
     username: clabs
+    poolMaxSize: 100
+    timeout: 10000
   keystore:
     domainsKeyLatestVersion: null
     domainsKeyNameBase: odis-signer0-mainnet-domains
@@ -32,7 +35,7 @@ env:
     format: stackdriver
     level: trace
   odis:
-    odisSignerTimeout: "6000"
+    odisSignerTimeout: "10000"
     shouldMockAccountService: "false"
     shouldMockRequestService: "false"
     testQuotaBypassPercentage: "50"

@@ -11,6 +11,7 @@ env:
   blockchain:
     blockchainApiKeyExistingSecret: odis-signer-forno-key
     blockchainProvider: https://alfajores-forno.celo-testnet.org
+    fullNodeTimeoutMs: 10000
   db:
     cloudSqlProxy: false
     database: phoneNumberPrivacy
@@ -20,6 +21,8 @@ env:
     type: postgres
     useSsl: false
     username: pgpnp
+    poolMaxSize: 100
+    timeout: 10000
   keystore:
     domainsKeyLatestVersion: null
     domainsKeyNameBase: odis-signer2-staging-domains
