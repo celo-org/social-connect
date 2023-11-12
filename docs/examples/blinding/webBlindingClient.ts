@@ -1,6 +1,6 @@
-import { randomBytes } from 'crypto'
-import thresholdBls from 'blind-threshold-bls'
 import { BlsBlindingClient } from '@celo/identity/lib/odis/bls-blinding-client'
+import thresholdBls from 'blind-threshold-bls'
+import { randomBytes } from 'crypto'
 
 interface BlindedMessage {
   blindingFactor: Uint8Array
@@ -18,6 +18,7 @@ export class WebBlsBlindingClient implements BlsBlindingClient {
   }
 
   async init() {
+    // @ts-ignore
     await thresholdBls.init('/blind_threshold_bls_bg.wasm')
   }
 
@@ -25,7 +26,7 @@ export class WebBlsBlindingClient implements BlsBlindingClient {
     const userSeed = seed ?? randomBytes(32)
     if (!seed) {
       console.warn(
-        'Warning: Use a private deterministic seed (e.g. DEK private key) to preserve user quota when requests are replayed.'
+        'Warning: Use a private deterministic seed (e.g. DEK private key) to preserve user quota when requests are replayed.',
       )
     }
     this.rawMessage = Buffer.from(base64PhoneNumber, 'base64')
@@ -42,7 +43,7 @@ export class WebBlsBlindingClient implements BlsBlindingClient {
     const blindedSignature = Buffer.from(base64BlindSig, 'base64')
     const unblindMessage = await thresholdBls.unblind(
       blindedSignature,
-      this.blindedValue.blindingFactor
+      this.blindedValue.blindingFactor,
     )
     // this throws on error
     await thresholdBls.verify(this.odisPubKey, this.rawMessage, unblindMessage)

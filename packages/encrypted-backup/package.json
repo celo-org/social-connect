@@ -1,0 +1,48 @@
+{
+  "name": "@celo/encrypted-backup",
+  "version": "5.0.5",
+  "description": "Libraries for implemented password encrypted account backups",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "author": "Celo",
+  "license": "Apache-2.0",
+  "homepage": "https://celo-sdk-docs.readthedocs.io/en/latest/encrypted-backup",
+  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/encrypted-backup",
+  "keywords": [
+    "celo",
+    "blockchain",
+    "odis",
+    "backup",
+    "encrypted",
+    "encrypted-backup"
+  ],
+  "scripts": {
+    "build": "yarn run --top-level tsc ",
+    "clean": "yarn run --top-level tsc --build  --clean",
+    "docs": "typedoc",
+    "test": "yarn jest --runInBand",
+    "lint": "yarn run --top-level eslint .",
+    "prepublish": "yarn build"
+  },
+  "dependencies": {
+    "@celo/base": "^5.0.5",
+    "@celo/connect": "^5.1.0",
+    "@celo/identity": "^5.1.1",
+    "@celo/phone-number-privacy-common": "^3.1.1",
+    "@celo/poprf": "^0.1.9",
+    "@celo/utils": "^5.0.5",
+    "@celo/wallet-local": "^5.1.0",
+    "@types/debug": "^4.1.10",
+    "debug": "^4.1.1",
+    "fp-ts": "2.1.1",
+    "io-ts": "2.0.1"
+  },
+  "devDependencies": {
+    "@celo/dev-utils": "0.0.1-beta.1",
+    "fetch-mock": "9.11.0",
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

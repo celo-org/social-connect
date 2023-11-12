@@ -32,7 +32,7 @@ class ASv2 {
       OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
       this.issuer.address,
       this.authSigner,
-      this.serviceContext
+      this.serviceContext,
     )
 
     const federatedAttestationsContract = await this.kit.contracts.getFederatedAttestations()
@@ -50,7 +50,7 @@ class ASv2 {
       OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
       this.issuer.address,
       this.authSigner,
-      this.serviceContext
+      this.serviceContext,
     )
 
     const federatedAttestationsContract = await this.kit.contracts.getFederatedAttestations()
@@ -58,7 +58,7 @@ class ASv2 {
     // query on-chain mappings
     const attestations = await federatedAttestationsContract.lookupAttestations(
       obfuscatedIdentifier,
-      [this.issuer.address]
+      [this.issuer.address],
     )
 
     return attestations.accounts
@@ -69,7 +69,7 @@ class ASv2 {
     const { remainingQuota } = await OdisUtils.Quota.getPnpQuotaStatus(
       this.issuer.address,
       this.authSigner,
-      this.serviceContext
+      this.serviceContext,
     )
 
     console.log('remaining ODIS quota', remainingQuota)
@@ -80,7 +80,7 @@ class ASv2 {
       // give odis payment contract permission to use cUSD
       const currentAllowance = await stableTokenContract.allowance(
         this.issuer.address,
-        odisPaymentsContract.address
+        odisPaymentsContract.address,
       )
       console.log('current allowance:', currentAllowance.toString())
       let enoughAllowance: boolean = false

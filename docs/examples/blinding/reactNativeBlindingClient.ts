@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-imports */
 import { hexToBuffer } from '@celo/base/lib/address'
 import { BlsBlindingClient } from '@celo/identity/lib/odis/bls-blinding-client'
 import crypto from 'crypto'
@@ -20,8 +21,9 @@ export class ReactNativeBlsBlindingClient implements BlsBlindingClient {
 
   async blindMessage(base64PhoneNumber: string): Promise<string> {
     return (
-      await BlindThresholdBls.blindMessageWithRandom(base64PhoneNumber, this.base64Random)
-    ).trim()
+      // @ts-expect-error
+      (await BlindThresholdBls.blindMessageWithRandom(base64PhoneNumber, this.base64Random)).trim()
+    )
   }
 
   unblindAndVerifyMessage(base64BlindSig: string): Promise<string> {
@@ -33,7 +35,7 @@ export class ReactNativeBlsBlindingClient implements BlsBlindingClient {
     const key = ec.keyFromPrivate(hexToBuffer(privateKeyHex))
     const sig = JSON.stringify(key.sign(e164Number).toDER())
     const sigHash = crypto.createHash('sha256').update(sig).digest('base64')
-    const byteBuffer = []
+    const byteBuffer: number[] = []
     const buffer = Buffer.from(sigHash, 'utf16le')
     for (let i = 0; i < 32; i++) {
       byteBuffer.push(buffer[i])
