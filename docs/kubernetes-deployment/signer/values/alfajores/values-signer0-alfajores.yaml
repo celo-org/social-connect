@@ -1,4 +1,15 @@
-affinity: {}
+affinity:
+  podAntiAffinity: 
+    preferredDuringSchedulingIgnoredDuringExecution: 
+    - weight: 100  
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In 
+            values:
+            - odis-signer
+        topologyKey: kubernetes.io/hostname
 autoscaling:
   enabled: false
   maxReplicas: 3
@@ -58,7 +69,8 @@ ingress:
   tls: []
 livenessProbe: {}
 nameOverride: ""
-nodeSelector: {}
+nodeSelector:
+  node.kubernetes.io/instance-type: e2-standard-4
 podAnnotations:
   prometheus.io/path: /metrics
   prometheus.io/port: "3000"
@@ -66,11 +78,18 @@ podAnnotations:
 podSecurityContext: {}
 readinessProbe: {}
 replicaCount: 1
-resources: {}
+resources:
+  requests:
+    cpu: 1000m
+    memory: 1Gi
 securityContext: {}
 serviceAccount:
   annotations:
     iam.gke.io/gcp-service-account: odis-signer0-alfajores@celo-testnet-production.iam.gserviceaccount.com
   create: true
   name: ""
-tolerations: []
+tolerations:
+  - key: "service"
+    operator: "Equal"
+    value: "odis"
+    effect: "NoSchedule"
