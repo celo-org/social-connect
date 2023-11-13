@@ -1989,6 +1989,7 @@ __metadata:
     firebase-functions-test: "npm:^3.1.0"
     firebase-tools: "npm:9.20.0"
     jest: "npm:^29.7.0"
+    ts-node: "npm:^10.9.1"
     yargs: "npm:^14.0.0"
   languageName: unknown
   linkType: soft
