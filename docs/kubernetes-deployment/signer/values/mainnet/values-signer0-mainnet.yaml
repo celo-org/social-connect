@@ -38,7 +38,7 @@ env:
     odisSignerTimeout: "10000"
     shouldMockAccountService: "false"
     shouldMockRequestService: "false"
-    testQuotaBypassPercentage: "50"
+    testQuotaBypassPercentage: "0"
   tracing:
     enabled: true
     endpoint: "http://grafana-agent.monitoring:14268/api/traces"
