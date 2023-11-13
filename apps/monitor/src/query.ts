@@ -13,15 +13,16 @@ import {
   OdisAPI,
   OdisContextName,
 } from '@celo/identity/lib/odis/query'
-import { fetchEnv } from '@celo/phone-number-privacy-common'
 import { genSessionID } from '@celo/phone-number-privacy-common/lib/utils/logger'
 import { normalizeAddressWith0x, privateKeyToAddress } from '@celo/utils/lib/address'
 import { defined } from '@celo/utils/lib/sign-typed-data-utils'
 import { LocalWallet } from '@celo/wallet-local'
+import { defineString } from 'firebase-functions/params'
 import { dekAuthSigner, generateRandomPhoneNumber, PRIVATE_KEY } from './resources'
 
-let phoneNumber = fetchEnv('PHONE_NUMBER')
+let phoneNumber: string
 
+const defaultPhoneNumber = defineString('PHONE_NUMBER')
 const newPrivateKey = async () => {
   const mnemonic = await generateMnemonic(MnemonicStrength.s256_24words)
   return (await generateKeys(mnemonic)).privateKey
@@ -63,6 +64,7 @@ export const queryOdisForSalt = async (
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
       contractKit,
     }
+    phoneNumber = defaultPhoneNumber.value()
   }
 
   const abortController = new AbortController()
