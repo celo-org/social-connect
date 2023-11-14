@@ -42,9 +42,9 @@ ODIS signer is deployed in the following clusters:
   - Signer2 in namespace `odis-signer2-alfajores` with this [`values-signer2-alfajores.yaml` file](./values/alfajores/values-signer2-alfajores.yaml).
     - URL: `http://odis-signer2-alfajores.odis-signer2-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
 - Mainnet: cluster `rc1-europe-west1`
-  - Signer0 in namespace `odis-signer0-mainnet` with this [`values-signer0-mainnet.yaml` file](./values/mainnet/values-signer0-mainnet.yaml).
+  - Signer0 in namespace `odis-signer0-mainnet` with this [`values-signer0-mainnet.yaml` file](./values/mainnet/values-signer0-mainnet.yaml). **This signer has the same key as `odis-mainnet-brazilsouth-a-v2`.**
     - URL: `http://odis-signer0-mainnet.odis-signer0-mainnet:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
-  - Signer1 in namespace `odis-signer1-mainnet` with this [`values-signer1-mainnet.yaml` file](./values/mainnet/values-signer1-mainnet.yaml).
+  - Signer1 in namespace `odis-signer1-mainnet` with this [`values-signer1-mainnet.yaml` file](./values/mainnet/values-signer1-mainnet.yaml). **This signer has the same key as `odis-mainnet-eastasia-a-v2`.**
     - URL: `http://odis-signer1-mainnet.odis-signer1-mainnet:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
 
 ### Modifying the deployment
