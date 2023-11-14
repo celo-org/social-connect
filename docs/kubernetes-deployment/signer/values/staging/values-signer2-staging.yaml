@@ -11,7 +11,6 @@ env:
   blockchain:
     blockchainApiKeyExistingSecret: odis-signer-forno-key
     blockchainProvider: https://alfajores-forno.celo-testnet.org
-    fullNodeTimeoutMs: 10000
   db:
     cloudSqlProxy: false
     database: phoneNumberPrivacy
@@ -39,7 +38,7 @@ env:
     odisSignerTimeout: "6000"
     shouldMockAccountService: "false"
     shouldMockRequestService: "false"
-    testQuotaBypassPercentage: "0"
+    fullNodeTimeoutMs: 10000
   tracing:
     enabled: true
     endpoint: "http://grafana-agent.monitoring:14268/api/traces"
@@ -51,11 +50,19 @@ image:
   tag: "odis-signer-3.1.1"
 imagePullSecrets: []
 ingress:
-  annotations: {}
-  className: nginx
-  enabled: false
-  hosts: []
-  tls: []
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  hosts: 
+    - host: odis-signer2-staging.integration-tests.celo-networks-dev.org
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: odis-signer2-staging.integration-tests.celo-networks-dev.org-tls
+      hosts:
+        - odis-signer2-staging.integration-tests.celo-networks-dev.org
 livenessProbe: {}
 nameOverride: ""
 nodeSelector: {}
