@@ -17,7 +17,7 @@ image:
   pullPolicy: Always
   # -- Image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "odis-combiner-3.3.1"
+  tag: "odis-combiner-3.3.2"
 
 # -- Image pull secrets
 imagePullSecrets: []
@@ -35,7 +35,7 @@ env:
     # -- Enable tracing
     enabled: true
     # -- Env. Var TRACER_ENDPOINT. If enabled is false, will not be added to the deployment.
-    endpoint: "https://grafana-agent.odis-mainnet-signer-westus2.celo-networks-dev.org/api/traces"
+    endpoint: "http://grafana-agent.monitoring:14268/api/traces"
     # -- Env. Var TRACING_SERVICE_NAME. If enabled is false, will not be added to the deployment.
     serviceName: "odis-combiner-mainnet-k8s"
   log:
@@ -62,7 +62,7 @@ env:
     # -- Env. Var DOMAIN_KEYS_VERSIONS
     domainKeysVersions: '[{"keyVersion":1,"threshold":5,"polynomial":"05000000000000002d7e2d2e2b989bc81e677ced987ee8216cf8a215eddde3d14ddf416c6f513bce8d32b0297e58a888ecca62d22cca3100d2e6ab9d7f049a8fa5b936386f0116a60643c8f604e9431602805a641772e8d0cc800c526dd36d69012ae757c18c250029d97c8a3d4b81e305780b49d511c80dc3009c02b8f651a06c8ec2d5530937a1f7eadf730ad46762a4c089bbd973a000ba77717ec36ebb6fd58904b444a6cde7dd3b3b7ac6fa37f9cd8d00aa67e7cfe81adee5ed45218f7f78b4f8473b564601f4361d228dc6dabf7decd3f61f5bb0ad2c7bd7fe5b7a88054959543e82f4deb08d4fe9af4ac775c9353e038e79f82200863ac9cb7fd6b5fa263eb9d1dead51002607f3eadac153596b671b854715bdb07bee1b0bc8d5178f0dac1b4d00ed0700f46e37135e96604d389f3a323028e29b07f36279e829da00eee1794f3ad6e5dca24eba65a7821755cc464add27c7a601c7e187756e79a5ec3c847f4d91b037fe3cd40590fc1a46b46c2f68c0edcbe5cd7727162a195a711008e4e956eb8a81011b290057cee3f14b9a4198a3e9909cac69a9e7d648fa3dd185794acc4c1e4b994637dca36621d463b42e015115ac2c015fc176d8f143bf99cca654ae95a3101afbdc0c5026f95fbf31af1ac115399f5b6b6d1de09af367745415be9533f8c080","pubKey":"LX4tLiuYm8geZ3ztmH7oIWz4ohXt3ePRTd9BbG9RO86NMrApflioiOzKYtIsyjEA0uarnX8Emo+luTY4bwEWpgZDyPYE6UMWAoBaZBdy6NDMgAxSbdNtaQEq51fBjCUA"}]'
     # -- Env. Var DOMAIN_ODIS_SERVICES_SIGNERS
-    domainOdisServicesSigners: '[{"url": "https://odis.vladiatorlabs.io"},{"url": "https://mainnet-pgpnp-brazilsouth.azurefd.net"},{"url": "https://phone.chainlayerattestations.com"},{"url": "https://pnprivacy.wotrust.us"},{"url": "https://pgpnp.census.works"},{"url": "https://odis.keyko.rocks"},{"url": "https://odis.celo.spruceid.xyz"}]'
+    domainOdisServicesSigners: '[{"url": "https://odis.vladiatorlabs.io"},{"url": "http://odis-signer0-mainnet.odis-signer0-mainnet:3000"},{"url": "https://phone.chainlayerattestations.com"},{"url": "https://pnprivacy.wotrust.us"},{"url": "https://pgpnp.census.works"},{"url": "https://odis.keyko.rocks"},{"url": "https://odis.celo.spruceid.xyz"}]'
     # -- Env. Var DOMAIN_ODIS_SERVICES_TIMEOUT_MILLISECONDS
     domainOdisServicesTimeoutMillisecond: "5000"
     # -- Env. Var DOMAIN_SERVICE_NAME
@@ -87,7 +87,7 @@ env:
     # -- Env. Var PNP_MOCK_DECK
     pnpMockDeck: "0xbf8a2b73baf8402f8fe906ad3f42b560bf14b39f7df7797ece9e293d6f162188"
     # -- Env. Var PNP_ODIS_SERVICES_SIGNERS
-    pnpOdisServicesSigners: '[{"url": "https://odis.vladiatorlabs.io"},{"url": "https://mainnet-pgpnp-brazilsouth.azurefd.net"},{"url": "https://mainnet-pgpnp-eastasia.azurefd.net"},{"url": "https://phone.chainlayerattestations.com"},{"url": "https://pnprivacy.wotrust.us"},{"url": "https://pgpnp.census.works"},{"url": "https://odis.keyko.rocks"},{"url": "https://odis.celo.spruceid.xyz"}]'
+    pnpOdisServicesSigners: '[{"url": "https://odis.vladiatorlabs.io"},{"url": "http://odis-signer0-mainnet.odis-signer0-mainnet:3000"},{"url": "http://odis-signer1-mainnet.odis-signer1-mainnet:3000"},{"url": "https://phone.chainlayerattestations.com"},{"url": "https://pnprivacy.wotrust.us"},{"url": "https://pgpnp.census.works"},{"url": "https://odis.keyko.rocks"},{"url": "https://odis.celo.spruceid.xyz"}]'
     # -- Env. Var PNP_ODIS_SERVICES_TIMEOUT_MILLISECONDS
     pnpOdisServicesTimeoutMilliseconds: "5000"
     # -- Env. Var PNP_SERVICE_NAME
@@ -158,7 +158,7 @@ readinessProbe:
     port: http
 
 # -- Container resources
-resources: {}
+resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -166,9 +166,9 @@ resources: {}
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    cpu: 2000m
+    memory: 1Gi
 
 autoscaling:
   # -- Enable autoscaling
@@ -182,10 +182,15 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 # -- Kubernetes node selector
-nodeSelector: {}
+nodeSelector:
+  node.kubernetes.io/instance-type: e2-standard-4
 
 # -- Kubernetes tolerations
-tolerations: []
+tolerations:
+  - key: "service"
+    operator: "Equal"
+    value: "odis"
+    effect: "NoSchedule"
 
 # -- Kubernetes pod affinity
 affinity: {}
