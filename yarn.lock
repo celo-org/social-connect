@@ -1996,7 +1996,7 @@ __metadata:
     firebase-admin: "npm:^11.11.0"
     firebase-functions: "npm:^4.5.0"
     firebase-functions-test: "npm:^3.1.0"
-    firebase-tools: "npm:12.8.1"
+    firebase-tools: "npm:12.9.1"
     jest: "npm:^29.7.0"
     ts-node: "npm:^10.9.1"
     yargs: "npm:^14.0.0"
@@ -11689,9 +11689,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"firebase-tools@npm:12.8.1":
-  version: 12.8.1
-  resolution: "firebase-tools@npm:12.8.1"
+"firebase-tools@npm:12.9.1":
+  version: 12.9.1
+  resolution: "firebase-tools@npm:12.9.1"
   dependencies:
     "@google-cloud/pubsub": "npm:^3.0.1"
     abort-controller: "npm:^3.0.0"
@@ -11755,7 +11755,7 @@ __metadata:
     ws: "npm:^7.2.3"
   bin:
     firebase: lib/bin/firebase.js
-  checksum: bb74f8ce52dec18be93b5119d1e92b3206574a290df75f8eaefb65142b246aca965c52112b8c654e01846b4fe5fd751248d78c2c685e03c959c3a7ac18d174bc
+  checksum: 400d4e4352c31f36b2a3e436c982be459d14e7f4cc48f7d1ab3af8a721007e073e9e9bccbeaacd2e0a068832cb850994ebb748ec7561a4e8a74d394dac75d86b
   languageName: node
   linkType: hard
 
