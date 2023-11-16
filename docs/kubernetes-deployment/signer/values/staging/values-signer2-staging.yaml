@@ -20,6 +20,8 @@ env:
     type: postgres
     useSsl: false
     username: pgpnp
+    poolMaxSize: 100
+    timeout: 10000
   keystore:
     domainsKeyLatestVersion: null
     domainsKeyNameBase: odis-signer2-staging-domains
@@ -36,7 +38,7 @@ env:
     odisSignerTimeout: "6000"
     shouldMockAccountService: "false"
     shouldMockRequestService: "false"
-    testQuotaBypassPercentage: "50"
+    fullNodeTimeoutMs: 10000
   tracing:
     enabled: true
     endpoint: "http://grafana-agent.monitoring:14268/api/traces"
@@ -44,19 +46,30 @@ env:
 fullnameOverride: ""
 image:
   pullPolicy: Always
-  repository: us.gcr.io/celo-testnet/celo-monorepo
-  tag: oblivious-decentralized-identifier-service-3.0.1
+  repository: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
+  tag: "odis-signer-3.1.1"
 imagePullSecrets: []
 ingress:
-  annotations: {}
-  className: nginx
-  enabled: false
-  hosts: []
-  tls: []
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  hosts: 
+    - host: odis-signer2-staging.integration-tests.celo-networks-dev.org
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: odis-signer2-staging.integration-tests.celo-networks-dev.org-tls
+      hosts:
+        - odis-signer2-staging.integration-tests.celo-networks-dev.org
 livenessProbe: {}
 nameOverride: ""
 nodeSelector: {}
-podAnnotations: {}
+podAnnotations:
+  prometheus.io/path: /metrics
+  prometheus.io/port: "3000"
+  prometheus.io/scrape: "true"
 podSecurityContext: {}
 readinessProbe: {}
 replicaCount: 1
