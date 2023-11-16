@@ -1989,6 +1989,7 @@ __metadata:
     firebase-functions-test: "npm:^3.1.0"
     firebase-tools: "npm:9.20.0"
     jest: "npm:^29.7.0"
+    ts-node: "npm:^10.9.1"
     yargs: "npm:^14.0.0"
   languageName: unknown
   linkType: soft
@@ -2038,7 +2039,7 @@ __metadata:
     sqlite3: "npm:^5.0.8"
     supertest: "npm:^6.2.3"
     ts-mockito: "npm:^2.6.1"
-    ts-node: "npm:^8.3.0"
+    ts-node: "npm:^10.9.1"
     typescript: "npm:^5.2.2"
   languageName: unknown
   linkType: soft
@@ -21580,7 +21581,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^8.3.0, ts-node@npm:^8.4.1":
+"ts-node@npm:^8.4.1":
   version: 8.10.2
   resolution: "ts-node@npm:8.10.2"
   dependencies:

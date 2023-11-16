@@ -42,7 +42,7 @@ ODIS signer is deployed in the following clusters:
     - URL: `http://odis-signer0-alfajores.odis-signer0-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
     - URL external: `https://odis-signer0-alfajores.alfajores.celo-testnet.org`.
   - Signer1 in namespace `odis-signer1-alfajores` with this [`values-signer1-alfajores.yaml` file](./values/alfajores/values-signer1-alfajores.yaml).
-    - URL: `http://odis-signer1-staging.odis-signer1-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL: `http://odis-signer1-alfajores.odis-signer1-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
     - URL external: `https://odis-signer1-alfajores.alfajores.celo-testnet.org`.
   - Signer2 in namespace `odis-signer2-alfajores` with this [`values-signer2-alfajores.yaml` file](./values/alfajores/values-signer2-alfajores.yaml).
     - URL: `http://odis-signer2-alfajores.odis-signer2-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!

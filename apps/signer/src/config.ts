@@ -12,7 +12,9 @@ import BigNumber from 'bignumber.js'
 require('dotenv').config()
 
 export function getSignerVersion(): string {
-  return process.env.npm_package_version ?? '0.0.0'
+  return (
+    process.env.DEPLOYED_SIGNER_SERVICE_VERSION ?? require('../package.json').version ?? '0.0.0'
+  )
 }
 export const DEV_MODE = process.env.NODE_ENV !== 'production'
 export const VERBOSE_DB_LOGGING = toBool(process.env.VERBOSE_DB_LOGGING, false)
@@ -102,6 +104,7 @@ export interface SignerConfig {
 }
 
 const env = process.env as any
+
 export const config: SignerConfig = {
   serviceName: env.SERVICE_NAME ?? 'odis-signer',
   server: {
