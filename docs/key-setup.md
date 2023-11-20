@@ -2,6 +2,8 @@
 
 To interact with the SocialConnect protocol, you can use the test keys in the SocialConnect repository we included for convenience. Once you've gained enough experience, the next step is to set up your own keys. Here's how:
 
+[![DEK Setup](https://img.youtube.com/vi/_HhIXvN5L5U/0.jpg)](https://youtu.be/_HhIXvN5L5U)
+
 - Pro tip: Watch the second video of our mini-series ([Celo Spark: SocialConnect Mini-Series (2/3) — How Does It Work?](https://www.youtube.com/watch?v=bzZbfoPLYM4&list=PLsQbsop73cfErtQwacE4WgqQwoVcLvLZS&index=2)) for a detailed explanation of how different account roles interact with each other.
 
 ## Roles
