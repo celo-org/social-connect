@@ -63,7 +63,7 @@
     "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
     "bunyan": "1.8.15",
     "cron": "^2.4.1",
-    "dotenv": "^8.2.0",
+    "dotenv": "^16.3.1",
     "express": "^4.17.1",
     "knex": "^2.1.0",
     "lru-cache": "^10.0.1",
