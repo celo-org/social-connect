@@ -1,18 +1,16 @@
-import * as functions from 'firebase-functions'
+import { defineString } from 'firebase-functions/params'
+import * as functions from 'firebase-functions/v2/scheduler'
 import { testDomainSignQuery, testPNPSignQuery } from './test'
 
-const contextName = functions.config().monitor.context_name
-const blockchainProvider = functions.config().blockchain.provider
-if (!contextName || !blockchainProvider) {
-  throw new Error('blockchain provider and context name must be set in function config')
-}
+const contextName = defineString('MONITOR_CONTEXT_NAME')
+const blockchainProvider = defineString('BLOCKCHAIN_PROVIDER')
 
-export const odisMonitorScheduleFunctionPNP = functions
-  .region('us-central1')
-  .pubsub.schedule('every 5 minutes')
-  .onRun(async () => testPNPSignQuery(blockchainProvider, contextName))
+export const odisMonitorScheduleFunctionPNPGen2 = functions.onSchedule(
+  'every 5 minutes',
+  async () => testPNPSignQuery(blockchainProvider.value(), contextName.value() as any),
+)
 
-export const odisMonitorScheduleFunctionDomains = functions
-  .region('us-central1')
-  .pubsub.schedule('every 5 minutes')
-  .onRun(async () => testDomainSignQuery(contextName))
+export const odisMonitorScheduleFunctionDomainsGen2 = functions.onSchedule(
+  'every 5 minutes',
+  async () => testDomainSignQuery(contextName.value() as any),
+)
