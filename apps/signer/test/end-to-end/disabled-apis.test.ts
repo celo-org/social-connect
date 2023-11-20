@@ -20,7 +20,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import { defined, noBool, noNumber, noString } from '@celo/utils/lib/sign-typed-data-utils'
 import { LocalWallet } from '@celo/wallet-local'
-import 'isomorphic-fetch'
+import { getSignerVersion } from '../../src/config'
 require('dotenv').config()
 
 const { ACCOUNT_ADDRESS1, BLINDED_PHONE_NUMBER, PRIVATE_KEY1 } = TestUtils.Values
@@ -30,7 +30,7 @@ const ODIS_SIGNER = process.env.ODIS_SIGNER_SERVICE_URL
 
 jest.setTimeout(30000)
 
-const expectedVersion = process.env.DEPLOYED_SIGNER_SERVICE_VERSION!
+const expectedVersion = getSignerVersion()
 
 // These tests should be run when the individual APIs are disabled.
 // When run against enabled APIs, they should fail.
