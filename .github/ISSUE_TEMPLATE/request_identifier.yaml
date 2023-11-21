@@ -1,5 +1,5 @@
 name: Request Identifier
-description: File a request to add a new identifier type to SocialConnect
+description: File a request to add a new identifier type to Social-Connect
 title: "[Identifier Request]: "
 body:
     - type: input
