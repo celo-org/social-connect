@@ -24,6 +24,7 @@
     "cs": "yarn changeset",
     "bump": "yarn changeset version",
     "release": "yarn build && yarn cs publish",
+    "version_and_reinstall": "yarn changeset version && yarn",
     "beta-enter": "bash scripts/beta-mode.sh",
     "beta-exit": "yarn cs pre exit && git commit -am 'Complete beta releasing'",
     "postinstall": "yarn husky install && yarn workspaces foreach --all -piv run postinstall"
