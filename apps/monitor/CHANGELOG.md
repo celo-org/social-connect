@@ -1,5 +1,15 @@
 # @celo/phone-number-privacy-monitor
 
+## 3.1.0
+
+### Minor Changes
+
+- 89dc2a999: Updated to run on cloud function gen2 using node18. Updated test script to point to latest Clabs Signer deployments.
+
+### Patch Changes
+
+- 14269eb2b: Added `ts-node` to monitor package
+
 ## 3.0.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @celo/phone-number-privacy-signer
 
+## 3.1.2
+
+### Patch Changes
+
+- 14269eb2b: Updated the e2e test script.
+
 ## 3.1.1
 
 ### Patch Changes
