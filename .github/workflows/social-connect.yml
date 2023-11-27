@@ -52,12 +52,12 @@ jobs:
           key: git-${{ github.ref }}
           restore-keys: |
             git-
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Detect files changed in PR, and expose as output
         id: changed-files
-        uses: tj-actions/changed-files@v39
+        uses: tj-actions/changed-files@v40
         with:
           # Using comma as separator to be able to easily match full paths (using ,<path>)
           separator: ','
@@ -264,7 +264,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
