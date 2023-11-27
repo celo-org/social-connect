@@ -1907,7 +1907,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": "npm:^1.17.1"
     "@types/bunyan": "npm:^1.8.10"
     "@types/express": "npm:^4.17.20"
-    "@types/node": "npm:18.15.13"
+    "@types/node": "npm:20.10.0"
     "@types/supertest": "npm:^2.0.15"
     "@types/uuid": "npm:^7.0.3"
     blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
@@ -2028,7 +2028,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": "npm:^1.17.1"
     "@types/bunyan": "npm:^1.8.10"
     "@types/express": "npm:^4.17.20"
-    "@types/node": "npm:18.15.13"
+    "@types/node": "npm:20.10.0"
     "@types/supertest": "npm:^2.0.15"
     aws-sdk: "npm:^2.1484.0"
     bignumber.js: "npm:^9.1.2"
@@ -6362,7 +6362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:18.7.16":
+"@types/node@npm:*":
   version: 18.7.16
   resolution: "@types/node@npm:18.7.16"
   checksum: 630d1865df80c8f88f2e9769b13f06cebd6a8d2739cbee6ac411108ef56dc19e619709be6808decc51f4d6439961494ca36753bb8ff8769c35759a6e7d0f8fe7
@@ -6383,7 +6383,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.15.13, @types/node@npm:>=12.12.47, @types/node@npm:>=13.7.0, @types/node@npm:^18.7.16":
+"@types/node@npm:20.10.0":
+  version: 20.10.0
+  resolution: "@types/node@npm:20.10.0"
+  dependencies:
+    undici-types: "npm:~5.26.4"
+  checksum: c7d5ddbdbf3491e2363135c9611eb6bfae90eda2957279237fa232bcb29cd0df1cc3ee149d6de9915b754262a531ee2d57d33c9ecd58d763e8ad4856113822f3
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:>=12.12.47, @types/node@npm:>=13.7.0, @types/node@npm:^18.7.16":
   version: 18.15.13
   resolution: "@types/node@npm:18.15.13"
   checksum: b9bbe923573797ef7c5fd2641a6793489e25d9369c32aeadcaa5c7c175c85b42eb12d6fe173f6781ab6f42eaa1ebd9576a419eeaa2a1ec810094adb8adaa9a54
@@ -17435,7 +17444,7 @@ __metadata:
     "@tsconfig/node18": "npm:^18.2.2"
     "@tsconfig/recommended": "npm:^1.0.3"
     "@types/jest": "npm:^29.5.7"
-    "@types/node": "npm:18.7.16"
+    "@types/node": "npm:20.10.0"
     "@types/prompt": "npm:1.1.7"
     "@types/semver": "npm:7.5.4"
     "@typescript-eslint/eslint-plugin": "npm:^6.9.1"
@@ -21751,6 +21760,13 @@ __metadata:
   version: 1.13.6
   resolution: "underscore@npm:1.13.6"
   checksum: 58cf5dc42cb0ac99c146ae4064792c0a2cc84f3a3c4ad88f5082e79057dfdff3371d896d1ec20379e9ece2450d94fa78f2ef5bfefc199ba320653e32c009bd66
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~5.26.4":
+  version: 5.26.5
+  resolution: "undici-types@npm:5.26.5"
+  checksum: 0097779d94bc0fd26f0418b3a05472410408877279141ded2bd449167be1aed7ea5b76f756562cb3586a07f251b90799bab22d9019ceba49c037c76445f7cddd
   languageName: node
   linkType: hard
 
