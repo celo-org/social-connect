@@ -1,4 +1,15 @@
-affinity: {}
+affinity:
+  podAntiAffinity: 
+    preferredDuringSchedulingIgnoredDuringExecution: 
+    - weight: 100  
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: app.kubernetes.io/name
+            operator: In 
+            values:
+            - odis-signer
+        topologyKey: kubernetes.io/hostname
 autoscaling:
   enabled: false
   maxReplicas: 3
@@ -20,6 +31,8 @@ env:
     type: postgres
     useSsl: false
     username: clabs
+    poolMaxSize: 100
+    timeout: 10000
   keystore:
     domainsKeyLatestVersion: null
     domainsKeyNameBase: odis-signer0-mainnet-domains
@@ -32,10 +45,10 @@ env:
     format: stackdriver
     level: trace
   odis:
-    odisSignerTimeout: "6000"
+    odisSignerTimeout: "10000"
     shouldMockAccountService: "false"
     shouldMockRequestService: "false"
-    testQuotaBypassPercentage: "50"
+    fullNodeTimeoutMs: 10000
   tracing:
     enabled: true
     endpoint: "http://grafana-agent.monitoring:14268/api/traces"
@@ -43,27 +56,46 @@ env:
 fullnameOverride: ""
 image:
   pullPolicy: Always
-  repository: us.gcr.io/celo-testnet/celo-monorepo
-  tag: oblivious-decentralized-identifier-service-3.0.1
+  repository: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
+  tag: "odis-signer-3.1.1"
 imagePullSecrets: []
 ingress:
-  annotations: {}
-  className: nginx
-  enabled: false
-  hosts: []
-  tls: []
+  enabled: true
+  className: "nginx"
+  annotations:
+    kubernetes.io/tls-acme: "true"
+  hosts: 
+    - host: odis-signer0-mainnet.rc1-europe-west1.celo-testnet.org
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: odis-signer0-mainnet.rc1-europe-west1.celo-testnet.org-tls
+      hosts:
+        - odis-signer0-mainnet.rc1-europe-west1.celo-testnet.org
 livenessProbe: {}
 nameOverride: ""
-nodeSelector: {}
-podAnnotations: {}
+nodeSelector:
+  node.kubernetes.io/instance-type: e2-standard-4
+podAnnotations:
+  prometheus.io/path: /metrics
+  prometheus.io/port: "3000"
+  prometheus.io/scrape: "true"
 podSecurityContext: {}
 readinessProbe: {}
 replicaCount: 1
-resources: {}
+resources:
+  requests:
+    cpu: 1000m
+    memory: 1Gi
 securityContext: {}
 serviceAccount:
   annotations:
     iam.gke.io/gcp-service-account: odis-signer0-mainnet@celo-testnet-production.iam.gserviceaccount.com
   create: true
   name: ""
-tolerations: []
+tolerations:
+  - key: "service"
+    operator: "Equal"
+    value: "odis"
+    effect: "NoSchedule"

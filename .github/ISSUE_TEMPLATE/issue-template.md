@@ -1,6 +1,6 @@
 ---
 name: Add a New Issue
-about: Use this template raise an issue in the Celo Monorepo.
+about: Use this template to raise an issue in Social-Connect.
 title: "[Issue Title]"
 labels: 
 assignees:

@@ -15,8 +15,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
-import 'isomorphic-fetch'
-import { config } from '../../src/config'
+import { config, getSignerVersion } from '../../src/config'
 import { getBlindedPhoneNumber, getTestParamsForContext } from './utils'
 
 require('dotenv').config()
@@ -43,7 +42,7 @@ kit.addAccount(PRIVATE_KEY3)
 
 jest.setTimeout(60000)
 
-const expectedVersion = process.env.DEPLOYED_SIGNER_SERVICE_VERSION!
+const expectedVersion = getSignerVersion()
 
 describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
   const singleQueryCost = config.quota.queryPriceInCUSD.times(1e18).toString()

@@ -29,23 +29,31 @@ ODIS signer is deployed in the following clusters:
 
 - Staging: cluster `integration-tests`
   - Signer0 in namespace `odis-signer0-staging` with this [`values-signer0-staging.yaml` file](./values/staging/values-signer0-staging.yaml).
-    - URL: `http://odis-signer0-staging.odis-signer0-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL internal: `http://odis-signer0-staging.odis-signer0-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL external: `https://odis-signer0-staging.integration-tests.celo-networks-dev.org`.
   - Signer1 in namespace `odis-signer1-staging` with this [`values-signer1-staging.yaml` file](./values/staging/values-signer1-staging.yaml).
     - URL: `http://odis-signer1-staging.odis-signer1-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL external: `https://odis-signer1-staging.integration-tests.celo-networks-dev.org`.
   - Signer2 in namespace `odis-signer2-staging` with this [`values-signer2-staging.yaml` file](./values/staging/values-signer2-staging.yaml).
     - URL: `http://odis-signer2-staging.odis-signer2-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL external: `https://odis-signer2-staging.integration-tests.celo-networks-dev.org`.
 - Alfajores: cluster `alfajores`
   - Signer0 in namespace `odis-signer0-alfajores` with this [`values-signer0-alfajores.yaml` file](./values/alfajores/values-signer0-alfajores.yaml).
     - URL: `http://odis-signer0-alfajores.odis-signer0-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL external: `https://odis-signer0-alfajores.alfajores.celo-testnet.org`.
   - Signer1 in namespace `odis-signer1-alfajores` with this [`values-signer1-alfajores.yaml` file](./values/alfajores/values-signer1-alfajores.yaml).
-    - URL: `http://odis-signer1-staging.odis-signer1-staging:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL: `http://odis-signer1-alfajores.odis-signer1-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL external: `https://odis-signer1-alfajores.alfajores.celo-testnet.org`.
   - Signer2 in namespace `odis-signer2-alfajores` with this [`values-signer2-alfajores.yaml` file](./values/alfajores/values-signer2-alfajores.yaml).
     - URL: `http://odis-signer2-alfajores.odis-signer2-alfajores:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL external: `https://odis-signer2-alfajores.alfajores.celo-testnet.org`.
 - Mainnet: cluster `rc1-europe-west1`
-  - Signer0 in namespace `odis-signer0-mainnet` with this [`values-signer0-mainnet.yaml` file](./values/mainnet/values-signer0-mainnet.yaml).
+  - Signer0 in namespace `odis-signer0-mainnet` with this [`values-signer0-mainnet.yaml` file](./values/mainnet/values-signer0-mainnet.yaml). **This signer has the same key as `odis-mainnet-brazilsouth-a-v2`.**
     - URL: `http://odis-signer0-mainnet.odis-signer0-mainnet:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
-  - Signer1 in namespace `odis-signer1-mainnet` with this [`values-signer1-mainnet.yaml` file](./values/mainnet/values-signer1-mainnet.yaml).
+    - URL external: `https://odis-signer0-mainnet.rc1-europe-west1.celo-testnet.org`.
+  - Signer1 in namespace `odis-signer1-mainnet` with this [`values-signer1-mainnet.yaml` file](./values/mainnet/values-signer1-mainnet.yaml). **This signer has the same key as `odis-mainnet-eastasia-a-v2`.**
     - URL: `http://odis-signer1-mainnet.odis-signer1-mainnet:3000`. :warning: This is a URL internal to the cluster (i.e. not accessible from outside)!!
+    - URL external: `https://odis-signer1-mainnet.rc1-europe-west1.celo-testnet.org`.
 
 ### Modifying the deployment
 
