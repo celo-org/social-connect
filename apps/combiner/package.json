@@ -62,7 +62,7 @@
     "@celo/utils": "^5.0.5",
     "jest": "^29.7.0",
     "knex": "^2.1.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.2"
   },
   "engines": {
     "node": "18"
