@@ -1,6 +1,35 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
-  ]
+  "extends": ["config:recommended", ":dependencyDashboard", ":rebaseStalePrs", ":gitSignOff"],
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "devDependencies (non-major)"
+    },
+    {
+      "matchPackagePatterns": ["@celo"],
+      "groupName": "celo"
+    },
+    {
+      "matchPackagePatterns": ["eslint"],
+      "groupName": "eslint",
+      "enabled": false
+    }
+  ],
+  "prConcurrentLimit": 8,
+  "major": {
+    "minimumReleaseAge": "12 days"
+  },
+  "minor": {
+    "minimumReleaseAge": "6 days"
+  },
+  "patch": {
+    "minimumReleaseAge": "4 days"
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["type:security"]
+  },
+  "schedule": ["on tuesday and thursday", "every weekend"]
 }
