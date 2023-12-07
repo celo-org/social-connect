@@ -13,13 +13,12 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 
 ## Directory Structure
 
-
 <pre>
 ├── <a href="./docs">docs</a>: Documentation on how SocialConnect works and how to use it
 ├── <a href="./kubernetes-deployments">kubernetes-deployments</a>: YAML config files and instructions for ODIS deployment
 ├── <a href="./odis">odis</a>: Decentralized Identifier Service for SocialConnect
-│   ├── <a href="./odis/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures. 
-│   ├── <a href="./odis/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing. 
+│   ├── <a href="./odis/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures.
+│   ├── <a href="./odis/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing.
 │   ├── <a href="./odis/signer">signer</a>: Generates unique partial signatures for blinded messages
 ├── <a href="./packages">packages</a>: TODO(how to describe this)
 │   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS
@@ -86,11 +85,14 @@ TODO (doesn't currently work for odis)
 yarn test
 ```
 
-ODIS also has e2e tests that can be run from within `./odis/*` directories by running 
+ODIS also has e2e tests that can be run from within `./odis/*` directories by running
+
 ```bash
+cd odis/signer
 yarn test:e2e
 ````
-or specify the environment (see package.json) 
+
+or specify the environment (see package.json)
 
 ```bash
 yarn test:e2e:mainnet
