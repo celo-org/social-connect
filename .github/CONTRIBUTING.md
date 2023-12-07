@@ -20,13 +20,13 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 │   ├── <a href="./odis/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures.
 │   ├── <a href="./odis/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing.
 │   ├── <a href="./odis/signer">signer</a>: Generates unique partial signatures for blinded messages
-├── <a href="./packages">packages</a>: TODO(how to describe this)
+├── <a href="./packages">packages</a>: TODO
 │   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS
 │   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS.
 │   ├── <a href="./packages/identity">identity</a>: SDK for using SocialConnect
-│   ├── <a href="./packages/odis-identifiers">odis-identifiers</a>: TODO(what is this?)
-│   ├── <a href="./packages/phone-number-privacy">phone-number-privacy</a>: TODO (Why is this here?)
-│   ├── <a href="./packages/sdk">sdk</a>: TODO (why is this here)
+│   ├── <a href="./packages/odis-identifiers">odis-identifiers</a>: TODO
+│   ├── <a href="./packages/phone-number-privacy">phone-number-privacy</a>: TODO
+│   ├── <a href="./packages/sdk">sdk</a>: TODO
 ├── <a href="./scripts">scripts</a>: Misc. deployment and release scripts
 </pre>
 
@@ -71,7 +71,7 @@ To install dependencies, run
 yarn
 ```
 
-To build all packages (TODO doesn't currently include ODIS)
+To build all packages (excluding ODIS)
 
 ```bash
 yarn build
@@ -79,23 +79,25 @@ yarn build
 
 #### Running tests
 
-TODO (doesn't currently work for odis)
+To run all tests in `/packages` run
 
 ```bash
 yarn test
 ```
 
-ODIS also has e2e tests that can be run from within `./odis/*` directories by running
+To run ODIS tests, navigate to the desired ODIS component subdirectory, install dependencies, build and run tests as in the following example.
 
 ```bash
 cd odis/signer
-yarn test:e2e
+yarn
+yarn build
+yarn test
 ````
 
-or specify the environment (see package.json)
+ODIS also has e2e tests (see `package.json` for all available test commands)
 
 ```bash
-yarn test:e2e:mainnet
+yarn test:e2e:alfajores
 ```
 
 For load tests, checkout [odis/monitor](../odis/monitor/README.md)
