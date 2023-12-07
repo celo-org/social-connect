@@ -12,6 +12,10 @@
       "groupName": "celo"
     },
     {
+      "matchPackagePatterns": ["@opentelemetry"],
+      "groupName": "opentelemetry"
+    },
+    {
       "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
       "enabled": false
