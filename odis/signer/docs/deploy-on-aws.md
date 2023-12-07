@@ -35,7 +35,7 @@ For the DB Instance size, `Free tier` should be enough.
 ### Running the Signer on Fargate
 
 ECS Fargate is a container execution service provided by AWS. It runs containers without requiring explicit management of hosts or virtual machines.
-Alternatively the signer service can be run using any other service that allows to run containers, such as EC2 or EKS. In the case of EC2, you will need to install docker, configure the instance profile and follow the documentation from [the signer readme](https://github.com/celo-org/celo-monorepo/tree/master/apps/signer).
+Alternatively the signer service can be run using any other service that allows to run containers, such as EC2 or EKS. In the case of EC2, you will need to install docker, configure the instance profile and follow the documentation from [the signer readme](https://github.com/celo-org/celo-monorepo/tree/master/odis/signer).
 
 1. Create the service-linked role. If it is the first time you run ECS on your account you will need to run this command.
 

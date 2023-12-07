@@ -4,7 +4,7 @@ package.json
 **/node_modules
 .git/
 
-apps/**/dist
+odis/**/dist
 packages/**/dist
 packages/**/lib
 docs/examples/**/lib

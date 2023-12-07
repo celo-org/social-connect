@@ -5,8 +5,8 @@ FROM scratch AS packages
 # Assemble all dependencies into the packages folder so the second stage can select whether to
 # include all packages, or just the phone-number-privacy packages.
 WORKDIR /celo-phone-number-privacy/
-COPY apps/combiner apps/combiner
-COPY apps/signer apps/signer
+COPY odis/combiner odis/combiner
+COPY odis/signer odis/signer
 COPY packages/common packages/common
 COPY packages/encrypted-backup packages/encrypted-backup
 COPY packages/identity packages/identity
@@ -28,12 +28,12 @@ COPY .git .git
 ARG PACKAGE_SELECTOR=combiner
 # COMMENT OUT THIS LINE TO USE PUBLISHED DEPENDENCIES
 COPY --from=packages celo-phone-number-privacy/packages/ packages/
-COPY --from=packages celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${PACKAGE_SELECTOR}
+COPY --from=packages celo-phone-number-privacy/odis/${PACKAGE_SELECTOR} odis/${PACKAGE_SELECTOR}
 
 # delete tests so they dont get built because signer is needed by them,
-RUN rm -rf apps/combiner/test
+RUN rm -rf odis/combiner/test
 # remove signer dep as its only used in tests and we dont want to build it
-RUN yarn --cwd=apps/combiner remove @celo/phone-number-privacy-signer
+RUN yarn --cwd=odis/combiner remove @celo/phone-number-privacy-signer
 # Install dependencies and build.
 
 RUN yarn install --network-timeout 100000  --inline-builds && yarn cache clean
@@ -46,7 +46,7 @@ RUN rm -r .git
 
 # Setup and run the combiner application.
 ENV NODE_ENV production
-WORKDIR /celo-phone-number-privacy/apps/combiner
+WORKDIR /celo-phone-number-privacy/odis/combiner
 EXPOSE 8080
 RUN yarn
 ENTRYPOINT ["yarn", "start:docker"]
