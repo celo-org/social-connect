@@ -86,7 +86,17 @@ TODO (doesn't currently work for odis)
 yarn test
 ```
 
-ODIS also has e2e tests that can be run from within `./odis/*`
+ODIS also has e2e tests that can be run from within `./odis/*` directories by running 
+```bash
+yarn test:e2e
+````
+or specify the environment (see package.json) 
+
+```bash
+yarn test:e2e:mainnet
+```
+
+For load tests, checkout [odis/monitor](../odis/monitor/README.md)
 
 #### PRs and Releases
 
