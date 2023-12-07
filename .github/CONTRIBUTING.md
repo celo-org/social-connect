@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for considering making a contribution to the Celo community!
+Thank you for considering making a contribution to SocialConnect and the Celo community!
 Everyone is encouraged to contribute, even the smallest fixes are welcome.
 
 If you'd like to contribute to Celo, please fork, fix, [write a changeset](../RELEASE.md), commit, and send a pull request for the maintainers to review.
@@ -9,8 +9,85 @@ If you wish to submit more complex changes, please sync with a core developer fi
 This will help ensure those changes are in line with the general philosophy of the project
 and enable you to get some early feedback.
 
-See the [contributing guide](https://docs.celo.org/community/contributing) for details on how to participate.
+See the [community contribution guide](https://docs.celo.org/community/contributing) for details on how to participate.
+
+## Directory Structure
+
+
+<pre>
+├── <a href="./docs">docs</a>: Documentation on how SocialConnect works and how to use it
+├── <a href="./kubernetes-deployments">kubernetes-deployments</a>: YAML config files and instructions for ODIS deployment
+├── <a href="./odis">odis</a>: Decentralized Identifier Service for SocialConnect
+│   ├── <a href="./odis/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures. 
+│   ├── <a href="./odis/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing. 
+│   ├── <a href="./odis/signer">signer</a>: Generates unique partial signatures for blinded messages
+├── <a href="./packages">packages</a>: TODO(how to describe this)
+│   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS
+│   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS.
+│   ├── <a href="./packages/identity">identity</a>: SDK for using SocialConnect
+│   ├── <a href="./packages/odis-identifiers">odis-identifiers</a>: TODO(what is this?)
+│   ├── <a href="./packages/phone-number-privacy">phone-number-privacy</a>: TODO (Why is this here?)
+│   ├── <a href="./packages/sdk">sdk</a>: TODO (why is this here)
+├── <a href="./scripts">scripts</a>: Misc. deployment and release scripts
+</pre>
 
 ## Dev Setup
 
-We use yarn berry. You may need to run `corepack enable`. This doesnt setup yarn itself but is a node.js feature for enabling package managers.
+### Pre-requisites
+
+* [Git](https://git-scm.com/downloads)
+* [NodeJS](https://nodejs.org/en/download/)
+* [Node Version Manager](https://github.com/nvm-sh/nvm)
+
+### Setup
+
+Clone the repository and open it:
+
+```bash
+git clone git@github.com:celo-org/social-connect.git
+cd social-connect
+```
+
+#### Install the Correct Version of NodeJS
+
+Install the correct node version with [nvm](https://github.com/nvm-sh/nvm)
+
+```bash
+nvm use
+```
+
+#### Install node modules and build with yarn
+
+We use yarn berry. You may need to run `corepack enable`. This doesn't setup yarn itself but is a node.js feature for enabling package managers.
+
+If you don't have yarn installed, run
+
+```bash
+npm i -g yarn
+```
+
+To install dependencies, run
+
+```bash
+yarn
+```
+
+To build all packages (TODO doesn't currently include ODIS)
+
+```bash
+yarn build
+```
+
+#### Running tests
+
+TODO (doesn't currently work for odis)
+
+```bash
+yarn test
+```
+
+ODIS also has e2e tests that can be run from within `./odis/*`
+
+#### PRs and Releases
+
+See [Release.md](../RELEASE.md) and [kubernetes-deployment](/kubernetes-deployment)
