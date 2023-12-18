@@ -46,8 +46,8 @@ env:
 fullnameOverride: ""
 image:
   pullPolicy: Always
-  repository: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
-  tag: "odis-signer-3.1.1"
+  repository: us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
+  tag: latest
 imagePullSecrets: []
 ingress:
   enabled: true
