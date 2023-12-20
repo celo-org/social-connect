@@ -268,7 +268,7 @@ Yes, Issuer needs to have ODIS Quota to register and lookup users.
 
 <details>
   <summary>Can I just lookup users and not register them?</summary>
-  Yes, you can lookup users under other Issuers. By doing this, you trusting that the Issuer took care about verifying that the identifier does actually belong to the user.
+  Yes, you can lookup users under other Issuers. By doing this, you are trusting that the Issuer took care about verifying that the identifier does actually belong to the user.
 
 You might want to do this if you don't want to create a registry of your own and use an already existing registry created by other Issuers.
 
