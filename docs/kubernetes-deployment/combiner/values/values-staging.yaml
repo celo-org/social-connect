@@ -12,12 +12,12 @@ replicaCount: 1
 
 image:
   # -- Image repository
-  repository: us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner
+  repository: us-west1-docker.pkg.dev/devopsre/dev-images/odis-combiner
   # -- Image pullpolicy
   pullPolicy: Always
   # -- Image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "odis-combiner-3.3.2"
+  tag: latest
 
 # -- Image pull secrets
 imagePullSecrets: []

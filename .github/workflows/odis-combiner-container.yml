@@ -6,6 +6,7 @@ on:
     paths:
       - 'dockerfiles/Dockerfile-combiner'
       - 'apps/combiner/**'
+      - 'yarn.lock'
     branches:
       - main
     tags:
@@ -14,6 +15,7 @@ on:
     paths:
       - 'dockerfiles/Dockerfile-combiner'
       - 'apps/combiner/**'
+      - 'yarn.lock'
   workflow_dispatch:
 
 jobs:
