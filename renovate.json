@@ -1,0 +1,35 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>celo-org/.github:renovate-config"],
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "devDependencies (non-major)"
+    },
+    {
+      "matchPackagePatterns": ["@celo"],
+      "groupName": "celo"
+    },
+    {
+      "matchPackagePatterns": ["@opentelemetry"],
+      "groupName": "opentelemetry"
+    },
+    {
+      "matchPackagePatterns": ["eslint"],
+      "groupName": "eslint",
+      "enabled": false
+    }
+  ],
+  "prConcurrentLimit": 8,
+  "major": {
+    "minimumReleaseAge": "12 days"
+  },
+  "minor": {
+    "minimumReleaseAge": "6 days"
+  },
+  "patch": {
+    "minimumReleaseAge": "4 days"
+  },
+  "schedule": ["on tuesday and thursday", "every weekend"]
+}

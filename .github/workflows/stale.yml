@@ -32,4 +32,3 @@ jobs:
         days-before-close: 30
         ascending: true
         operations-per-run: 50
-

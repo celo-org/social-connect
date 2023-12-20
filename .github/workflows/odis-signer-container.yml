@@ -6,6 +6,7 @@ on:
     paths:
       - 'dockerfiles/Dockerfile-signer'
       - 'apps/signer/**'
+      - 'yarn.lock'
     branches:
       - main
     tags:
@@ -14,11 +15,12 @@ on:
     paths:
       - 'dockerfiles/Dockerfile-signer'
       - 'apps/signer/**'
+      - 'yarn.lock'
   workflow_dispatch:
 
 jobs:
   odis-signer-build-dev:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.2
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.3
     name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
     if: |
       github.ref != 'refs/heads/main'
@@ -32,7 +34,7 @@ jobs:
       trivy: true
 
   odis-signer-build:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.2
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.3
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
     if: |
       github.ref == 'refs/heads/main'
@@ -46,7 +48,7 @@ jobs:
       trivy: true
 
   odis-signer-tag:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.2
+    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v1.12.3
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer tag
     if: |
       startsWith(github.ref, 'refs/tags/odis-signer-')
