@@ -8,7 +8,7 @@ coverage:
       packages:
         paths:
           - packages/
-      odis:
+      apps:
         paths:
-          - odis/
+          - apps/
     patch: off

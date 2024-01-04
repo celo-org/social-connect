@@ -5,7 +5,7 @@ FROM scratch AS packages
 # Assemble all dependencies into the packages folder so the second stage can select whether to
 # include all packages, or just the phone-number-privacy packages.
 WORKDIR /celo-phone-number-privacy/
-COPY odis/monitor odis/monitor
+COPY apps/monitor apps/monitor
 COPY packages/common packages/common
 COPY packages/encrypted-backup packages/encrypted-backup
 COPY packages/identity packages/identity
@@ -25,7 +25,7 @@ COPY .yarn/releases/ .yarn/releases/
 COPY .git .git
 
 ARG PACKAGE_SELECTOR=monitor
-COPY --from=packages celo-phone-number-privacy/odis/${PACKAGE_SELECTOR} odis/${PACKAGE_SELECTOR}
+COPY --from=packages celo-phone-number-privacy/apps/${PACKAGE_SELECTOR} apps/${PACKAGE_SELECTOR}
 # COMMENT OUT THIS LINE TO USE PUBLISHED DEPENDENCIES
 COPY --from=packages celo-phone-number-privacy/packages packages
 
@@ -39,7 +39,7 @@ RUN rm -r .git
 
 # Setup and run the signer application.
 ENV NODE_ENV production
-WORKDIR /celo-phone-number-privacy/odis/monitor
+WORKDIR /celo-phone-number-privacy/apps/monitor
 EXPOSE 8080
 RUN yarn
 ENTRYPOINT ["yarn", "loadTest"]

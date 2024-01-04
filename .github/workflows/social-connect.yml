@@ -107,7 +107,7 @@ jobs:
           path: |
             packages/**/lib
             packages/**/dist
-            odis/**/dist
+            apps/**/dist
           key: code-${{ github.sha }}
           restore-keys: |
             code-${{ github.sha }}
@@ -226,7 +226,7 @@ jobs:
     needs: install-dependencies
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'odis/combiner') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'apps/combiner') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
@@ -243,7 +243,7 @@ jobs:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
       - name: Run Tests for combiner
         run: |
-          yarn --cwd=odis/combiner test:coverage
+          yarn --cwd=apps/combiner test:coverage
   odis-test:
     name: ODIS (signer + common) test
     needs: install-dependencies
@@ -254,7 +254,7 @@ jobs:
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
       contains(needs.install-dependencies.outputs.all_modified_files, 'packages') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'odis/signer') ||
+      contains(needs.install-dependencies.outputs.all_modified_files, 'apps/signer') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
       contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
       false
@@ -274,4 +274,4 @@ jobs:
           yarn --cwd=packages/common test:coverage
       - name: Run Tests for signer
         run: |
-          yarn --cwd=odis/signer test:coverage
+          yarn --cwd=apps/signer test:coverage

@@ -1,4 +1,4 @@
 {
-  "odis/**/*.ts": "prettier --list-different",
+  "apps/**/*.ts": "prettier --list-different",
   "packages/**/*.ts": "prettier --list-different"
 }

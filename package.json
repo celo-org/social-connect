@@ -31,7 +31,7 @@
   },
   "workspaces": [
     "packages/*",
-    "odis/*",
+    "apps/*",
     "docs/examples"
   ],
   "devDependencies": {
