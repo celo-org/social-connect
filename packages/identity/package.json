@@ -43,11 +43,11 @@
     "@celo/dev-utils": "0.0.1-beta.1",
     "@celo/wallet-local": "^5.1.0",
     "@types/elliptic": "^6.4.16",
+    "celo-base-old-version": "npm:@celo/base@5.0.0",
+    "celo-identity-old-version": "npm:@celo/identity@1.5.2",
     "fetch-mock": "9.11.0",
     "ganache": "npm:@celo/ganache@7.8.0-unofficial.0",
-    "jest": "^29.7.0",
-    "@celo/base@5.0.0": "npm:@celo/base@5.0.0",
-    "@celo/identity@1.5.2": "npm:@celo/identity@1.5.2"
+    "jest": "^29.7.0"
   },
   "engines": {
     "node": ">=16"
