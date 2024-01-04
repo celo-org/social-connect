@@ -1,10 +1,10 @@
-import { getPhoneHash } from 'old-celo-base'
+import { getPhoneHash } from '@celo/base@5.0.0'
+import { OdisUtils as OdisUtilsOld } from '@celo/identity@1.5.2'
 import { soliditySha3 } from '@celo/utils/lib/solidity'
-import { OdisUtils as OdisUtilsOld } from 'old-identity-sdk'
 import { OdisUtils } from '../../lib'
+import fetchMock from '../__mocks__/cross-fetch'
 import { WasmBlsBlindingClient } from './bls-blinding-client'
 import { AuthenticationMethod, AuthSigner, getServiceContext, OdisContextName } from './query'
-import fetchMock from '../__mocks__/cross-fetch'
 
 const { getBlindedIdentifier, getIdentifierHash, getObfuscatedIdentifier, IdentifierPrefix } =
   OdisUtils.Identifier
