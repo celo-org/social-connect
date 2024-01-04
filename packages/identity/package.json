@@ -19,6 +19,7 @@
     "clean": "yarn run --top-level tsc --build . --clean",
     "docs": "typedoc",
     "test": "yarn jest --runInBand --testPathIgnorePatterns src/odis/identifier-backwards-compatibility.test.ts",
+    "test:backwards-compatibility": "yarn jest src/odis/identifier-backwards-compatibility.test.ts",
     "lint": "yarn run --top-level eslint .",
     "prepublish": "yarn build"
   },
@@ -46,8 +47,8 @@
     "fetch-mock": "9.11.0",
     "ganache": "npm:@celo/ganache@7.8.0-unofficial.0",
     "jest": "^29.7.0",
-    "old-celo-base": "npm:@celo/base@5.0.0",
-    "old-identity-sdk": "npm:@celo/identity@1.5.2"
+    "old-celo-base": "npm:@celo/base@1.5.2",
+    "old-identity-sdk": "npm:@celo/identity@5.1.0"
   },
   "engines": {
     "node": ">=16"
