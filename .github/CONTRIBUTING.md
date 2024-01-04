@@ -18,10 +18,10 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 ├── <a href="./kubernetes-deployments">kubernetes-deployments</a>: YAML config files and instructions for ODIS deployment
 ├── <a href="./apps">apps</a>: Contains deployed componentes of Oblivious Decentralized Identifier Service (ODIS) for SocialConnect
 │   ├── <a href="./apps/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures.
-│   ├── <a href="./apps/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing.
+│   ├── <a href="./apps/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing
 │   ├── <a href="./apps/signer">signer</a>: Generates unique partial signatures for blinded messages
 ├── <a href="./packages">packages</a>: Contains all published SocialConnect components
-│   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS
+│   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS, including API schemas
 │   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS.
 │   ├── <a href="./packages/identity">identity</a>: SDK for using SocialConnect
 │   ├── <a href="./packages/odis-identifiers">odis-identifiers</a>: Contains identifier prefixes and hashing functions for ODIS
@@ -69,7 +69,7 @@ To install dependencies, run
 yarn
 ```
 
-To build all packages (excluding ODIS)
+To build all packages (excluding ODIS) TODO
 
 ```bash
 yarn build
@@ -90,7 +90,7 @@ cd apps/signer
 yarn
 yarn build
 yarn test
-````
+```
 
 ODIS also has e2e tests (see `package.json` for all available test commands)
 
