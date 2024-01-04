@@ -16,17 +16,15 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 <pre>
 ├── <a href="./docs">docs</a>: Documentation on how SocialConnect works and how to use it
 ├── <a href="./kubernetes-deployments">kubernetes-deployments</a>: YAML config files and instructions for ODIS deployment
-├── <a href="./odis">odis</a>: Decentralized Identifier Service for SocialConnect
-│   ├── <a href="./odis/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures.
-│   ├── <a href="./odis/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing.
-│   ├── <a href="./odis/signer">signer</a>: Generates unique partial signatures for blinded messages
-├── <a href="./packages">packages</a>: TODO
+├── <a href="./apps">apps</a>: Contains deployed componentes of Oblivious Decentralized Identifier Service (ODIS) for SocialConnect
+│   ├── <a href="./apps/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures.
+│   ├── <a href="./apps/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing.
+│   ├── <a href="./apps/signer">signer</a>: Generates unique partial signatures for blinded messages
+├── <a href="./packages">packages</a>: Contains all published SocialConnect components
 │   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS
 │   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS.
 │   ├── <a href="./packages/identity">identity</a>: SDK for using SocialConnect
 │   ├── <a href="./packages/odis-identifiers">odis-identifiers</a>: Contains identifier prefixes and hashing functions for ODIS
-│   ├── <a href="./packages/phone-number-privacy">phone-number-privacy</a>: TODO
-│   ├── <a href="./packages/sdk">sdk</a>: TODO
 ├── <a href="./scripts">scripts</a>: Misc. deployment and release scripts
 </pre>
 
@@ -88,7 +86,7 @@ yarn test
 To run ODIS tests, navigate to the desired ODIS component subdirectory, install dependencies, build and run tests as in the following example.
 
 ```bash
-cd odis/signer
+cd apps/signer
 yarn
 yarn build
 yarn test
@@ -100,7 +98,7 @@ ODIS also has e2e tests (see `package.json` for all available test commands)
 yarn test:e2e:alfajores
 ```
 
-For load tests, checkout [odis/monitor](../odis/monitor/README.md)
+For load tests, checkout [apps/monitor](../apps/monitor/README.md)
 
 #### PRs and Releases
 
