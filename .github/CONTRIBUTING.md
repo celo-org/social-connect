@@ -17,12 +17,12 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 ├── <a href="./docs">docs</a>: Documentation on how SocialConnect works and how to use it
 ├── <a href="./kubernetes-deployments">kubernetes-deployments</a>: YAML config files and instructions for ODIS deployment
 ├── <a href="./apps">apps</a>: Contains deployed componentes of Oblivious Decentralized Identifier Service (ODIS) for SocialConnect
-│   ├── <a href="./apps/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures.
+│   ├── <a href="./apps/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures
 │   ├── <a href="./apps/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing
 │   ├── <a href="./apps/signer">signer</a>: Generates unique partial signatures for blinded messages
 ├── <a href="./packages">packages</a>: Contains all published SocialConnect components
 │   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS, including API schemas
-│   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS.
+│   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS
 │   ├── <a href="./packages/identity">identity</a>: SDK for using SocialConnect
 │   ├── <a href="./packages/odis-identifiers">odis-identifiers</a>: Contains identifier prefixes and hashing functions for ODIS
 ├── <a href="./scripts">scripts</a>: Misc. deployment and release scripts
@@ -69,7 +69,7 @@ To install dependencies, run
 yarn
 ```
 
-To build all packages (excluding ODIS) TODO
+To build all components (in both `/apps` and `/packages`) run
 
 ```bash
 yarn build
@@ -77,24 +77,19 @@ yarn build
 
 #### Running tests
 
-To run all tests in `/packages` run
+Our testing suite uses unit, integration and e2e tests. Integration tests spin up and run against local ODIS instances with in-memory DBs, while e2e tests run against actual deployed ODIS instances in staging, alfajores or mainnet environments.
+
+To run all unit and integration tests (in both `/apps` and `/packages`) run
 
 ```bash
 yarn test
 ```
 
-To run ODIS tests, navigate to the desired ODIS component subdirectory, install dependencies, build and run tests as in the following example.
+
+To run ODIS e2e tests, navigate to the desired ODIS component subdirectory (either the Combiner or Signer) and run `yarn test:e2e`. You can specify the environment to run against as in the following example (see the relevant `package.json` file for all available test commands).
 
 ```bash
 cd apps/signer
-yarn
-yarn build
-yarn test
-```
-
-ODIS also has e2e tests (see `package.json` for all available test commands)
-
-```bash
 yarn test:e2e:alfajores
 ```
 
