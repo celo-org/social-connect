@@ -1,10 +1,10 @@
-import { getPhoneHash } from 'old-celo-base'
 import { soliditySha3 } from '@celo/utils/lib/solidity'
-import { OdisUtils as OdisUtilsOld } from 'old-identity-sdk'
+import { getPhoneHash } from 'old-celo-base'
+import { OdisUtils as OdisUtilsOld } from 'old-celo-identity'
 import { OdisUtils } from '../../lib'
+import fetchMock from '../__mocks__/cross-fetch'
 import { WasmBlsBlindingClient } from './bls-blinding-client'
 import { AuthenticationMethod, AuthSigner, getServiceContext, OdisContextName } from './query'
-import fetchMock from '../__mocks__/cross-fetch'
 
 const { getBlindedIdentifier, getIdentifierHash, getObfuscatedIdentifier, IdentifierPrefix } =
   OdisUtils.Identifier
@@ -20,8 +20,11 @@ const authSigner: AuthSigner = {
   authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,
   rawKey: dekPrivateKey,
 }
-const oldServiceContext = OdisUtilsOld.Query.getServiceContext('alfajores')
+const oldServiceContext = OdisUtilsOld.Query.getServiceContext(
+  OdisUtilsOld.Query.OdisContextName.ALFAJORES,
+)
 const currentServiceContext = getServiceContext(OdisContextName.ALFAJORES)
+oldServiceContext.odisUrl = currentServiceContext.odisUrl
 
 const expectedObfuscatedIdentifier =
   '0xf82c6272fd57d3e5d4e291be16b3ebac5c616084a5e6f3730c73f62efd39c6ae'
