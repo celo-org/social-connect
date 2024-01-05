@@ -1861,7 +1861,7 @@ __metadata:
     "@opentelemetry/sdk-node": "npm:^0.44.0"
     "@opentelemetry/sdk-trace-web": "npm:^1.17.1"
     "@opentelemetry/semantic-conventions": "npm:^1.17.1"
-    "@types/bunyan": "npm:1.8.10"
+    "@types/bunyan": "npm:1.8.11"
     "@types/elliptic": "npm:^6.4.16"
     "@types/express": "npm:^4.17.20"
     "@types/is-base64": "npm:^1.1.2"
@@ -5570,12 +5570,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bunyan@npm:1.8.10, @types/bunyan@npm:^1.8.10":
-  version: 1.8.10
-  resolution: "@types/bunyan@npm:1.8.10"
+"@types/bunyan@npm:1.8.11":
+  version: 1.8.11
+  resolution: "@types/bunyan@npm:1.8.11"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 284416e115849be4cf83c0241d0b419685c77445bf77cb8d9fad9c0721d68c750bf82591e1111c5c1a1e3f0b4d9cc19f20ceb4d23052bca55a8bd2de6754737c
+  checksum: 8906ec6c0573f563139681344c2a1d220c394e4aa5b88ff99b011894734f74aafc9d0b3a71758dda3b0ee30e9b6370a8aa48ac26b5585f3c8d7e0fe8db6ca844
   languageName: node
   linkType: hard
 
@@ -5585,6 +5585,15 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 5d6e818cc324eee60ad4658fc169bad2a7ec794de383de5333327951c7be74804cf70230ac4a93b4e6ce5d86106e81e6fcc8c617454617bad6a721011b619435
+  languageName: node
+  linkType: hard
+
+"@types/bunyan@npm:^1.8.10":
+  version: 1.8.10
+  resolution: "@types/bunyan@npm:1.8.10"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 284416e115849be4cf83c0241d0b419685c77445bf77cb8d9fad9c0721d68c750bf82591e1111c5c1a1e3f0b4d9cc19f20ceb4d23052bca55a8bd2de6754737c
   languageName: node
   linkType: hard
 
