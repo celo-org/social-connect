@@ -20,7 +20,7 @@ const authSigner: AuthSigner = {
   authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,
   rawKey: dekPrivateKey,
 }
-const oldServiceContext = OdisUtilsOld.Query.getServiceContext('alfajores')
+const oldServiceContext = OdisUtilsOld.Query.getServiceContext(OdisUtilsOld.Query.OdisContextName.ALFAJORES)
 const currentServiceContext = getServiceContext(OdisContextName.ALFAJORES)
 oldServiceContext.odisUrl = currentServiceContext.odisUrl
 
