@@ -1,6 +1,6 @@
 import { soliditySha3 } from '@celo/utils/lib/solidity'
 import { getPhoneHash } from 'old-celo-base'
-import { OdisUtils as OdisUtilsOld } from 'old-identity-sdk'
+import { OdisUtils as OdisUtilsOld } from 'old-celo-identity'
 import { OdisUtils } from '../../lib'
 import fetchMock from '../__mocks__/cross-fetch'
 import { WasmBlsBlindingClient } from './bls-blinding-client'

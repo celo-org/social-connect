@@ -1789,7 +1789,7 @@ __metadata:
     io-ts: "npm:2.0.1"
     jest: "npm:^29.7.0"
     old-celo-base: "npm:@celo/base@1.5.2"
-    old-identity-sdk: "npm:@celo/identity@5.1.0"
+    old-celo-identity: "npm:@celo/identity@5.1.0"
   languageName: unknown
   linkType: soft
 
@@ -16402,7 +16402,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"old-identity-sdk@npm:@celo/identity@5.1.0":
+"old-celo-identity@npm:@celo/identity@5.1.0":
   version: 5.1.0
   resolution: "@celo/identity@npm:5.1.0"
   dependencies:
