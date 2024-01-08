@@ -55,13 +55,13 @@ nvm use
 
 #### Install node modules and build with yarn
 
-We use yarn berry. You may need to run `corepack enable`. This doesn't setup yarn itself but is a node.js feature for enabling package managers.
-
-If you don't have yarn installed, run
+First, run 
 
 ```bash
-npm i -g yarn
+corepack enable
 ```
+
+This will setup the required `yarn` version
 
 To install dependencies, run
 
