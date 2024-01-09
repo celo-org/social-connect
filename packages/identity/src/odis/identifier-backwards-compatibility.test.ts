@@ -30,6 +30,16 @@ const expectedObfuscatedIdentifier =
   '0xf82c6272fd57d3e5d4e291be16b3ebac5c616084a5e6f3730c73f62efd39c6ae'
 const expectedPepper = 'Pi4Z1NQnfsdvJ'
 
+/**
+ * Some context on these tests for future reference:
+ *
+ * We're keeping these tests to preserve identifier continuity when doing major upgrades in the
+ * future. If major upgrades were to break identifier continuity, this could lead to downstream
+ * problems with SocialConnect users.
+ *
+ * This test is flakey because it sends requests to the actual ODIS instance deployed on Alfajores.
+ * It’s basically an end-to-end test.
+ */
 describe('backwards compatibility of phone number identifiers', () => {
   beforeAll(() => {
     fetchMock.reset()
