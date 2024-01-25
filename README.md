@@ -152,9 +152,9 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 
 |                                             Type                                              |
 | :-------------------------------------------------------------------------------------------: |
-|                            [ContractKit](examples/contractKit.ts)                             |
-|                              [EthersJS (v5)](examples/ethers.ts)                              |
-|                                  [web3.js](examples/web3.ts)                                  |
+|                            [ContractKit](docs/examples/contractKit.ts)                             |
+|                              [EthersJS (v5)](docs/examples/ethers.ts)                              |
+|                                  [web3.js](docs/examples/web3.ts)                                  |
 |         [NextJS based web app (Phone Number)](https://github.com/celo-org/emisianto)          |
 |         [NextJS based templated](https://github.com/celo-org/socialconnect-template)          |
 | [React Native App (Phone Number)](https://github.com/celo-org/SocialConnect-ReactNative-Demo) |
