@@ -45,7 +45,7 @@ Here is a concrete example:
 
 Each identifier type has a corresponding prefix that is appended before the blinding and hashing. This prevents identifiers from different sources from having the same pepper (ie. if you have the same handle for twitter and instagram, the obfuscated identifier should be different for each).
 
-These are the prefixes currently defined in the SDK. We are using [DID methods](https://w3c.github.io/did-spec-registries/#did-methods) as prefixes when they exist. We welcome PRs here and [in the SDK](https://github.com/celo-org/celo-monorepo/blob/master/packages/identity/src/odis/identifier.ts#L27-L34) if you'd like to add a new identifier type and prefix! You can also cast an arbitrary string as your prefix if you would like.
+These are the prefixes currently defined in the SDK. We are using [DID methods](https://w3c.github.io/did-spec-registries/#did-methods) as prefixes when they exist. We welcome PRs here and [in the SDK](https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.ts) if you'd like to add a new identifier type and prefix! You can also cast an arbitrary string as your prefix if you would like.
 
 | Type | Prefix |
 |---------|--------|
@@ -169,7 +169,7 @@ await OdisUtils.Identifier.getObfuscatedIdentifier(
 //   unblindedSignature: '9as8duf98as...df80u'
 // }
 ```
-*Source code for `getObfuscatedIdentifier` and other relevant functions [here](https://github.com/celo-org/celo-monorepo/blob/master/packages/identity/src/odis/identifier.ts)*
+*Source code for `getObfuscatedIdentifier` and other relevant functions [here](https://github.com/celo-org/social-connect/tree/main/packages/identity/src/odis/identifier.ts)*
 
 -------------
 
@@ -224,7 +224,7 @@ There are two authentication methods for your `AuthSigner` when interacting with
     accountsContract.setAccountDataEncryptionKey(DEK_PUBLIC_KEY).send({from: issuerAddress})
     ```
 
-    Any key pair can be used as a DEK, but [this](https://github.com/celo-org/celo-monorepo/blob/0aea63826f8c7e7d2f3fe0c32eb314471e2c2f33/packages/sdk/cryptographic-utils/src/dataEncryptionKey.ts#L36-L54) or [this](https://github.com/celo-org/celo-monorepo/blob/0aea63826f8c7e7d2f3fe0c32eb314471e2c2f33/packages/sdk/cryptographic-utils/src/account.ts#L440-L459) function in [`@celo/cryptographic-utils`](https://www.npmjs.com/package/@celo/cryptographic-utils) can be used to generate the DEK. Or, using a private key, you can get the compressed public key using [ethers Signing Key](https://docs.ethers.org/v5/api/utils/signing-key/).
+    Any key pair can be used as a DEK, but [this](https://github.com/celo-org/developer-tooling/tree/master/packages/sdk/cryptographic-utils/src/dataEncryptionKey.ts#L36-L54) or [this](https://github.com/celo-org/developer-tooling/tree/master/packages/sdk/cryptographic-utils/src/account.ts#L444-L463) function in [`@celo/cryptographic-utils`](https://www.npmjs.com/package/@celo/cryptographic-utils) can be used to generate the DEK. Or, using a private key, you can get the compressed public key using [ethers Signing Key](https://docs.ethers.org/v5/api/utils/signing-key/).
 
     The `EncryptionKeySigner` authentication method is preferred, since it doesn't require the user to access the wallet key that manages their funds. Also, when using the DEK for authentication, ODIS will also use the DEK as the blinding factor, so that ODIS identifies repeat queries and doesn’t charge additional quota. The tradeoff is that the extra computation when using the DEK can add a tiny bit of latency.
 
