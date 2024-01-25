@@ -175,7 +175,7 @@ await OdisUtils.Identifier.getObfuscatedIdentifier(
 
 ### Rate Limit
 
-ODIS implements rate limiting on queries to prevent brute force attackers. Every account interacting with ODIS has a quota for the number of queries it can make.
+ODIS implements rate limiting on queries to prevent brute force attackers. Every account interacting with ODIS has a quota for the number of queries it can make and each query decreases the quota by 1.
 
 You can check how much quota is left on your account:
 
