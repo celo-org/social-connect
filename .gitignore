@@ -116,3 +116,6 @@ packages/protocol/types/typechain-mento/*.d.ts
 tmp
 docs/examples/lib
 packages/odis-identifiers/lib
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
