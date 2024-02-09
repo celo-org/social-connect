@@ -9,12 +9,12 @@ export const PEPPER_SEPARATOR = '__'
  * these prefixes prevent the ODIS identifers from being the same.
  *
  * If you would like to use a prefix that isn't included, please put up a PR
- * adding it to @celo/base (in celo-monorepo/packages/sdk/base/src/identifier.ts)
+ * adding it to @celo/odis-identifiers (https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.ts)
  * to ensure interoperability with other projects. When adding new prefixes,
  * please use either the full platform name in all lowercase (e.g. 'facebook')
  * or DID methods https://w3c.github.io/did-spec-registries/#did-methods.
  * Make sure to add the expected value for the unit test case in
- * `celo-monorepo/packages/sdk/base/src/identifier.test.ts`,
+ * `https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.test.ts`,
  * otherwise the test will fail.
  *
  * The NULL prefix is included to allow projects to use the sdk without selecting

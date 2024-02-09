@@ -152,9 +152,9 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 
 |                                             Type                                              |
 | :-------------------------------------------------------------------------------------------: |
-|                            [ContractKit](examples/contractKit.ts)                             |
-|                              [EthersJS (v5)](examples/ethers.ts)                              |
-|                                  [web3.js](examples/web3.ts)                                  |
+|                            [ContractKit](docs/examples/contractKit.ts)                             |
+|                              [EthersJS (v5)](docs/examples/ethers.ts)                              |
+|                                  [web3.js](docs/examples/web3.ts)                                  |
 |         [NextJS based web app (Phone Number)](https://github.com/celo-org/emisianto)          |
 |         [NextJS based templated](https://github.com/celo-org/socialconnect-template)          |
 | [React Native App (Phone Number)](https://github.com/celo-org/SocialConnect-ReactNative-Demo) |
@@ -219,7 +219,7 @@ This where `prefix` comes into play, the `plainTextIdentifier alicecodes` can be
 
 Moreover, it also helps in composability if dApps follow a standard and use prefix then the corresponding `obsfuscatedIdentifier` will be the same thus making it easier for dApps to lookup identifier verified by other issuers.
 
-You can keep an eye on prefixes suggested by us [here](https://github.com/celo-org/celo-monorepo/blob/8505d060fef3db3b0ce0cadf2bb879512bb20534/packages/sdk/base/src/identifier.ts#L31).
+You can keep an eye on prefixes suggested by us [here](https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.ts#L25).
 
 </details>
 
