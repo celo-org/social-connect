@@ -18,9 +18,9 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@celo/base": "^5.0.5",
-    "@celo/contractkit": "^5.1.0",
-    "@celo/utils": "^5.0.5",
+    "@celo/base": "^6.0.0",
+    "@celo/contractkit": "^7.0.0",
+    "@celo/utils": "^6.0.0",
     "@types/bunyan": "1.8.10",
     "bignumber.js": "^9.1.2",
     "bunyan": "1.8.15",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@celo/poprf": "^0.1.9",
-    "@celo/wallet-local": "^5.1.0",
+    "@celo/wallet-local": "^5.1.2",
     "@types/elliptic": "^6.4.16",
     "@types/express": "^4.17.20",
     "@types/is-base64": "^1.1.2",

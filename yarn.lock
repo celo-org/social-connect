@@ -43,6 +43,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/abort-controller@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@azure/abort-controller@npm:2.0.0"
+  dependencies:
+    tslib: "npm:^2.2.0"
+  checksum: fdb37cb91ef9a88bc9cc96a955d3033e2d563569ea9ec9e0f3cf6ff9d4d7a1e647f238c9848299a9bf86a2d8cf5007e738100e408e7343da58a41ae1016ae1fd
+  languageName: node
+  linkType: hard
+
 "@azure/core-auth@npm:^1.1.4":
   version: 1.5.0
   resolution: "@azure/core-auth@npm:1.5.0"
@@ -64,7 +73,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-client@npm:^1.0.0, @azure/core-client@npm:^1.3.0, @azure/core-client@npm:^1.5.0":
+"@azure/core-auth@npm:^1.5.0":
+  version: 1.6.0
+  resolution: "@azure/core-auth@npm:1.6.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.0.0"
+    "@azure/core-util": "npm:^1.1.0"
+    tslib: "npm:^2.2.0"
+  checksum: 227747bc790c8d73c2910d0982e459fb33a2bfffee297c12b230fadd7a4f2cf8ad6cdcc1d56bbf4b9ef8b18558deca8f5af301ee7930123e7b1153f039340644
+  languageName: node
+  linkType: hard
+
+"@azure/core-client@npm:^1.3.0, @azure/core-client@npm:^1.5.0":
   version: 1.7.2
   resolution: "@azure/core-client@npm:1.7.2"
   dependencies:
@@ -76,6 +96,21 @@ __metadata:
     "@azure/logger": "npm:^1.0.0"
     tslib: "npm:^2.2.0"
   checksum: 15846d4fc7df49d3849dae304c196eeeb70bd7aa8d20358add180219473592b1bfd1e30d6fa4d816635c11f0d402d6330f87877f3c37e2c45404df0b84bf3796
+  languageName: node
+  linkType: hard
+
+"@azure/core-client@npm:^1.4.0":
+  version: 1.8.0
+  resolution: "@azure/core-client@npm:1.8.0"
+  dependencies:
+    "@azure/abort-controller": "npm:^2.0.0"
+    "@azure/core-auth": "npm:^1.4.0"
+    "@azure/core-rest-pipeline": "npm:^1.9.1"
+    "@azure/core-tracing": "npm:^1.0.0"
+    "@azure/core-util": "npm:^1.0.0"
+    "@azure/logger": "npm:^1.0.0"
+    tslib: "npm:^2.2.0"
+  checksum: 5156321d5ea4b2e05848c55ea1f37bdd6acb6ae74131fc278f3a922a1f79afa3bc79440f1f8a80fac0c8a229bb98f87877bc2787de4279dc0b0b4bc46c1847c7
   languageName: node
   linkType: hard
 
@@ -128,13 +163,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/core-tracing@npm:1.0.0-preview.12":
-  version: 1.0.0-preview.12
-  resolution: "@azure/core-tracing@npm:1.0.0-preview.12"
+"@azure/core-rest-pipeline@npm:^1.8.1":
+  version: 1.14.0
+  resolution: "@azure/core-rest-pipeline@npm:1.14.0"
   dependencies:
-    "@opentelemetry/api": "npm:^1.0.0"
+    "@azure/abort-controller": "npm:^2.0.0"
+    "@azure/core-auth": "npm:^1.4.0"
+    "@azure/core-tracing": "npm:^1.0.1"
+    "@azure/core-util": "npm:^1.3.0"
+    "@azure/logger": "npm:^1.0.0"
+    http-proxy-agent: "npm:^5.0.0"
+    https-proxy-agent: "npm:^5.0.0"
     tslib: "npm:^2.2.0"
-  checksum: 0fdd6ae0adf5bdbd2062df71b6cd13db3cb9ccb28ad9c8beb6b0e07f9b843d29fa029fa2d4a0366d77d2b0901f2d1196a6d9ee1ca129a9d17fc78ce8b0d0bff7
+  checksum: d5b2f70d9e3852d5a2260b4fb189a8d4f8518738c63297a4f7baee79556186f8ce80af2bc0c5bbd39eadb511ced2823ff454de403288a3f2efa8e785ed688ea5
   languageName: node
   linkType: hard
 
@@ -167,37 +208,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/identity@npm:^1.1.0":
-  version: 1.5.2
-  resolution: "@azure/identity@npm:1.5.2"
+"@azure/identity@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "@azure/identity@npm:4.0.1"
   dependencies:
-    "@azure/core-auth": "npm:^1.3.0"
-    "@azure/core-client": "npm:^1.0.0"
+    "@azure/abort-controller": "npm:^1.0.0"
+    "@azure/core-auth": "npm:^1.5.0"
+    "@azure/core-client": "npm:^1.4.0"
     "@azure/core-rest-pipeline": "npm:^1.1.0"
-    "@azure/core-tracing": "npm:1.0.0-preview.12"
+    "@azure/core-tracing": "npm:^1.0.0"
+    "@azure/core-util": "npm:^1.3.0"
     "@azure/logger": "npm:^1.0.0"
-    "@azure/msal-node": "npm:1.0.0-beta.6"
-    "@types/stoppable": "npm:^1.1.0"
-    axios: "npm:^0.21.1"
+    "@azure/msal-browser": "npm:^3.5.0"
+    "@azure/msal-node": "npm:^2.5.1"
     events: "npm:^3.0.0"
     jws: "npm:^4.0.0"
-    keytar: "npm:^7.3.0"
-    msal: "npm:^1.0.2"
-    open: "npm:^7.0.0"
-    qs: "npm:^6.7.0"
+    open: "npm:^8.0.0"
     stoppable: "npm:^1.1.0"
-    tslib: "npm:^2.0.0"
-    uuid: "npm:^8.3.0"
-  dependenciesMeta:
-    keytar:
-      optional: true
-  checksum: 54e9e6a9c8058b0b392d9359e53d8aee80b6a0ba760095e7744a2d978515bf5197f78906e75c35c04511395dac04302fa80ba0dd8045817e41e9f2c16b67659c
+    tslib: "npm:^2.2.0"
+  checksum: d0e70b07be06b28f151963037b8746ada03e84bbed5b8c4ba7e1dad00eab682b1b83d26c0293a692a04e49b57d68cfccdef40ec061d9f5631bf8c8567c09b6f4
   languageName: node
   linkType: hard
 
-"@azure/keyvault-keys@npm:^4.1.0":
-  version: 4.7.0
-  resolution: "@azure/keyvault-keys@npm:4.7.0"
+"@azure/keyvault-keys@npm:^4.7.2":
+  version: 4.7.2
+  resolution: "@azure/keyvault-keys@npm:4.7.2"
   dependencies:
     "@azure/abort-controller": "npm:^1.0.0"
     "@azure/core-auth": "npm:^1.3.0"
@@ -205,16 +240,16 @@ __metadata:
     "@azure/core-http-compat": "npm:^1.3.0"
     "@azure/core-lro": "npm:^2.2.0"
     "@azure/core-paging": "npm:^1.1.1"
-    "@azure/core-rest-pipeline": "npm:^1.8.0"
+    "@azure/core-rest-pipeline": "npm:^1.8.1"
     "@azure/core-tracing": "npm:^1.0.0"
     "@azure/core-util": "npm:^1.0.0"
     "@azure/logger": "npm:^1.0.0"
     tslib: "npm:^2.2.0"
-  checksum: bf338a8f723d726b48b44415248bfec4d1e23df4f19291607a5fcfa0d46ee9474640481806d2bab4cda0098b350b13cfd4aac0975cba57236c3c41bd9f74c7b6
+  checksum: ad16e04111ed430211a308cdd13be0af9792d2f0138eac3256445d410ae7a0511272e1b1287864577ca4a93821d83cc10a421e878a3b4117fe3454d3a6d5f56b
   languageName: node
   linkType: hard
 
-"@azure/keyvault-secrets@npm:^4.1.0":
+"@azure/keyvault-secrets@npm:^4.7.0":
   version: 4.7.0
   resolution: "@azure/keyvault-secrets@npm:4.7.0"
   dependencies:
@@ -276,24 +311,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@azure/msal-common@npm:^4.0.0":
-  version: 4.5.1
-  resolution: "@azure/msal-common@npm:4.5.1"
+"@azure/msal-browser@npm:^3.5.0":
+  version: 3.9.0
+  resolution: "@azure/msal-browser@npm:3.9.0"
   dependencies:
-    debug: "npm:^4.1.1"
-  checksum: 997b8609dc7e470040668d7d6d2c5e2287a468ceccbde77cb8e10f5f2e0c9ad8a26174841b65185f7c36bbc491fc29897d1211c978720de7b0ee6c9fc6180f47
+    "@azure/msal-common": "npm:14.7.0"
+  checksum: 92a3dce32021259f4d17983fd30f6bc6ce5e4ccaa28a54900cc5d6d9723f29e70f9716c453a9a692ba676ee702e03add7ed4d4385f90741e866011af67c628cd
   languageName: node
   linkType: hard
 
-"@azure/msal-node@npm:1.0.0-beta.6":
-  version: 1.0.0-beta.6
-  resolution: "@azure/msal-node@npm:1.0.0-beta.6"
+"@azure/msal-common@npm:14.7.0":
+  version: 14.7.0
+  resolution: "@azure/msal-common@npm:14.7.0"
+  checksum: e0e0f78da210e2467a31495438429fcd402013c4fab4f4ac81c983d70b14cfd657abe417bc9b217ba70b5d53083c7e75562c1aa8f76f0f84644461069926c21f
+  languageName: node
+  linkType: hard
+
+"@azure/msal-node@npm:^2.5.1":
+  version: 2.6.3
+  resolution: "@azure/msal-node@npm:2.6.3"
   dependencies:
-    "@azure/msal-common": "npm:^4.0.0"
-    axios: "npm:^0.21.1"
-    jsonwebtoken: "npm:^8.5.1"
+    "@azure/msal-common": "npm:14.7.0"
+    jsonwebtoken: "npm:^9.0.0"
     uuid: "npm:^8.3.0"
-  checksum: 0a0bf6202077863a87a7bf888779b3e53e9a3164944a8ce98bdfac48123158de708b94ae5d612d138b075b55858b9eccf7f798ea01f51671646fb2690d392d9a
+  checksum: 4be0dde186e4ffe9b49ddf29fa950445854645eab4807bacca9ce06ed171bdb061b3adfdd66330721d68147f5a61415fc15ef0136d27000a241f2729971611d4
   languageName: node
   linkType: hard
 
@@ -1581,6 +1622,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@celo/abis@npm:10.0.0":
+  version: 10.0.0
+  resolution: "@celo/abis@npm:10.0.0"
+  checksum: 963571a9ed7d749df2437305df05cac7ed32c4902c00345fc678964faad01a28e3bc67dc7b29132945dec4ee0d177920d803bdf62b8250767a02a263cdee0213
+  languageName: node
+  linkType: hard
+
 "@celo/base@npm:5.0.4, @celo/base@npm:^5.0.4":
   version: 5.0.4
   resolution: "@celo/base@npm:5.0.4"
@@ -1588,10 +1636,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/base@npm:^5.0.5":
-  version: 5.0.5
-  resolution: "@celo/base@npm:5.0.5"
-  checksum: bf8725909ac67e138b3d5d7252bfb51a2f7c5bb0dda883c94bc4d9e1075f7e9f08b26467099a2896b89c1a370ca2755856e995d1d013428b50d3ac094fd2c1a6
+"@celo/base@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "@celo/base@npm:6.0.0"
+  checksum: 0ce49ce58f7824708967412cfcd30f3c981f74e93132475575ffa3f5cbd233652c8e8bb51ff999fff4f49c36f5ef8e61d2db30857310d0342d16a20585da4ccc
   languageName: node
   linkType: hard
 
@@ -1638,12 +1686,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/connect@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@celo/connect@npm:5.1.0"
+"@celo/connect@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@celo/connect@npm:5.1.2"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/utils": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/utils": "npm:^6.0.0"
     "@ethereumjs/util": "npm:8.0.5"
     "@types/debug": "npm:^4.1.5"
     "@types/utf8": "npm:^2.1.6"
@@ -1655,7 +1703,7 @@ __metadata:
     web3-eth-contract: "npm:1.10.0"
   peerDependencies:
     web3: 1.10.0
-  checksum: 3cb439214c3a75ee72ac7d17f3e00df3d43280a0fe20b98007ffe5d52109e413c71f872653cd069ae4f0aa7409150bdb28cdda4ea6a5f9cfd19ca1bfca378c87
+  checksum: 8682b3ddbb771a239f3fc1e9b02436305c8da8d7b80f9196ad693f882e2cf755523e74983e3b8ace176ad2cd5ce62af8c6e9b64c5f0355f6dc4dd63f8eb7720a
   languageName: node
   linkType: hard
 
@@ -1681,14 +1729,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/contractkit@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@celo/contractkit@npm:5.1.0"
+"@celo/contractkit@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "@celo/contractkit@npm:7.0.0"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/connect": "npm:^5.1.0"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-local": "npm:^5.1.0"
+    "@celo/abis": "npm:10.0.0"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/connect": "npm:^5.1.2"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-local": "npm:^5.1.2"
     "@types/bn.js": "npm:^5.1.0"
     "@types/debug": "npm:^4.1.5"
     bignumber.js: "npm:^9.0.0"
@@ -1699,17 +1748,17 @@ __metadata:
     semver: "npm:^7.3.5"
     web3: "npm:1.10.0"
     web3-core-helpers: "npm:1.10.0"
-  checksum: 1696902155f21fd660f3913dea7554bf572d887347ed88bb7ccef8d9b91816b7ae44b108bcff14219a77f6b37441fde205397864d2d5763a2676780106d726b1
+  checksum: 90c31d70c78035a9398be60c8e1503b139af977cc77946cebe611004900e7b31479c5da069689a09255575f20b6f3f809623d29c4e0be65790bd16cc23594b69
   languageName: node
   linkType: hard
 
-"@celo/cryptographic-utils@npm:^5.0.5":
-  version: 5.0.5
-  resolution: "@celo/cryptographic-utils@npm:5.0.5"
+"@celo/cryptographic-utils@npm:^5.0.7":
+  version: 5.0.7
+  resolution: "@celo/cryptographic-utils@npm:5.0.7"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
     "@celo/bls12377js": "npm:0.1.1"
-    "@celo/utils": "npm:^5.0.5"
+    "@celo/utils": "npm:^6.0.0"
     "@ethereumjs/util": "npm:8.0.5"
     "@types/bn.js": "npm:^5.1.0"
     "@types/elliptic": "npm:^6.4.9"
@@ -1717,13 +1766,13 @@ __metadata:
     "@types/randombytes": "npm:^2.0.0"
     bigi: "npm:^1.4.2"
     bip32: "npm:^3.1.0"
-    bip39: "git+https://github.com/bitcoinjs/bip39.git#d8ea080a18b40f301d4e2219a2991cd2417e83c2"
+    bip39: "git+https://github.com/bitcoinjs/bip39.git#a7ecbfe2e60d0214ce17163d610cad9f7b23140c"
     buffer-reverse: "npm:^1.0.1"
     elliptic: "npm:^6.5.4"
     ethereum-cryptography: "npm:1.2.0"
     randombytes: "npm:^2.0.1"
     tiny-secp256k1: "npm:2.2.1"
-  checksum: 3c35ba71d0f348edb2c5bb63f3a48484c04a5b79b43eb23e5c0d77109a9e41ec0d3799405d1db7296a2b8ceb2bb0dd5fe2f3df8ded0e9c21d9a699aafd75e11b
+  checksum: 1d8dfc8ae2f475340a7888bf29c95f15bde9893589f21e39cab34878dcaf664af000f237a9d897dda462b14fd7950ccf4d1191e87f7ebc4f10910e2e4b6f0700
   languageName: node
   linkType: hard
 
@@ -1746,14 +1795,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/encrypted-backup@workspace:packages/encrypted-backup"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/connect": "npm:^5.1.0"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/connect": "npm:^5.1.2"
     "@celo/dev-utils": "npm:0.0.1-beta.1"
     "@celo/identity": "npm:^5.1.1"
     "@celo/phone-number-privacy-common": "npm:^3.1.1"
     "@celo/poprf": "npm:^0.1.9"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-local": "npm:^5.1.0"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-local": "npm:^5.1.2"
     "@types/debug": "npm:^4.1.10"
     debug: "npm:^4.1.1"
     fetch-mock: "npm:9.11.0"
@@ -1767,14 +1816,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
     "@celo/celo-devchain": "npm:6.0.0"
-    "@celo/contractkit": "npm:^5.1.0"
+    "@celo/contractkit": "npm:^7.0.0"
     "@celo/dev-utils": "npm:0.0.1-beta.1"
     "@celo/odis-identifiers": "npm:^1.0.0"
     "@celo/phone-number-privacy-common": "npm:^3.1.1"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-local": "npm:^5.1.0"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-local": "npm:^5.1.2"
     "@types/debug": "npm:^4.1.10"
     "@types/elliptic": "npm:^6.4.16"
     bignumber.js: "npm:^9.1.2"
@@ -1805,14 +1854,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-combiner@workspace:apps/combiner"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/contractkit": "npm:^5.1.0"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/contractkit": "npm:^7.0.0"
     "@celo/encrypted-backup": "npm:^5.0.5"
     "@celo/identity": "npm:^5.1.1"
     "@celo/phone-number-privacy-common": "npm:^3.1.1"
     "@celo/phone-number-privacy-signer": "workspace:^"
     "@celo/poprf": "npm:^0.1.9"
-    "@celo/utils": "npm:^5.0.5"
+    "@celo/utils": "npm:^6.0.0"
     "@opentelemetry/api": "npm:^1.6.0"
     "@opentelemetry/auto-instrumentations-node": "npm:^0.39.4"
     "@opentelemetry/exporter-jaeger": "npm:^1.17.1"
@@ -1849,11 +1898,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-common@workspace:packages/common"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/contractkit": "npm:^5.1.0"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/contractkit": "npm:^7.0.0"
     "@celo/poprf": "npm:^0.1.9"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-local": "npm:^5.1.0"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-local": "npm:^5.1.2"
     "@types/bunyan": "npm:1.8.10"
     "@types/elliptic": "npm:^6.4.16"
     "@types/express": "npm:^4.17.20"
@@ -1878,14 +1927,14 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-monitor@workspace:apps/monitor"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/contractkit": "npm:^5.1.0"
-    "@celo/cryptographic-utils": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/contractkit": "npm:^7.0.0"
+    "@celo/cryptographic-utils": "npm:^5.0.7"
     "@celo/encrypted-backup": "npm:^5.0.5"
     "@celo/identity": "npm:^5.1.1"
     "@celo/phone-number-privacy-common": "npm:^3.1.1"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-local": "npm:^5.1.0"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-local": "npm:^5.1.2"
     firebase-admin: "npm:^11.11.0"
     firebase-functions: "npm:^4.5.0"
     firebase-functions-test: "npm:^3.1.0"
@@ -1900,12 +1949,12 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-signer@workspace:apps/signer"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/contractkit": "npm:^5.1.0"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/contractkit": "npm:^7.0.0"
     "@celo/phone-number-privacy-common": "npm:^3.1.1"
     "@celo/poprf": "npm:^0.1.9"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-hsm-azure": "npm:^5.1.0"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-hsm-azure": "npm:^5.1.2"
     "@google-cloud/secret-manager": "npm:3.0.0"
     "@opentelemetry/api": "npm:^1.6.0"
     "@opentelemetry/auto-instrumentations-node": "npm:^0.39.4"
@@ -1972,17 +2021,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/utils@npm:^5.0.5":
-  version: 5.0.5
-  resolution: "@celo/utils@npm:5.0.5"
+"@celo/utils@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "@celo/utils@npm:6.0.0"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
     "@ethereumjs/util": "npm:8.0.5"
-    "@types/bn.js": "npm:^5.1.0"
     "@types/elliptic": "npm:^6.4.9"
     "@types/node": "npm:^18.7.16"
     bignumber.js: "npm:^9.0.0"
-    bn.js: "npm:4.11.9"
     elliptic: "npm:^6.5.4"
     ethereum-cryptography: "npm:1.2.0"
     fp-ts: "npm:2.1.1"
@@ -1990,7 +2037,7 @@ __metadata:
     rlp: "npm:^2.2.4"
     web3-eth-abi: "npm:1.10.0"
     web3-utils: "npm:1.10.0"
-  checksum: 5d314391e8fa4b78a99bc2c09be41f8ebeaf97ee776173f3f5a60a4a3a911e3d0ca1b3fea10f9d1fb3a870fb13c8103bbb981ec41916745e4dc1196de5a6dfdb
+  checksum: e8828369726f958d2db7c3f5b321e07c0243d48cc16e0ebef938ae404b1e26aabb11203d971c9f578731bf58424ece5b1bcb5e7710b29653241179cd10473c8e
   languageName: node
   linkType: hard
 
@@ -2012,13 +2059,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/wallet-base@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@celo/wallet-base@npm:5.1.0"
+"@celo/wallet-base@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@celo/wallet-base@npm:5.1.2"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
-    "@celo/connect": "npm:^5.1.0"
-    "@celo/utils": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/connect": "npm:^5.1.2"
+    "@celo/utils": "npm:^6.0.0"
     "@ethereumjs/rlp": "npm:^5.0.0"
     "@ethereumjs/util": "npm:8.0.5"
     "@types/debug": "npm:^4.1.5"
@@ -2028,38 +2075,38 @@ __metadata:
     ethereum-cryptography: "npm:^2.1.2"
     web3: "npm:1.10.0"
     web3-eth-accounts: "npm:1.10.0"
-  checksum: 39a0e11ce35ab6fae4dad5ee885160e4d871e5ebea66973e4923b2f7c44b78768ae3af27731698700282627997e4380989d5b413212007754bbfde14759439aa
+  checksum: f9e8009310413c7c96d1bdc4c0965d08ac30ef7b41e1d7d006fe1fea391b19f57d432f2ea39a2b58dcdabd8b410b60bf1807162cbc81e9f9818f3edc506168fe
   languageName: node
   linkType: hard
 
-"@celo/wallet-hsm-azure@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@celo/wallet-hsm-azure@npm:5.1.0"
+"@celo/wallet-hsm-azure@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@celo/wallet-hsm-azure@npm:5.1.2"
   dependencies:
-    "@azure/identity": "npm:^1.1.0"
-    "@azure/keyvault-keys": "npm:^4.1.0"
-    "@azure/keyvault-secrets": "npm:^4.1.0"
-    "@celo/base": "npm:^5.0.5"
-    "@celo/connect": "npm:^5.1.0"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-base": "npm:^5.1.0"
-    "@celo/wallet-hsm": "npm:^5.1.0"
-    "@celo/wallet-remote": "npm:^5.1.0"
+    "@azure/identity": "npm:^4.0.1"
+    "@azure/keyvault-keys": "npm:^4.7.2"
+    "@azure/keyvault-secrets": "npm:^4.7.0"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/connect": "npm:^5.1.2"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-base": "npm:^5.1.2"
+    "@celo/wallet-hsm": "npm:^5.1.2"
+    "@celo/wallet-remote": "npm:^5.1.2"
     "@ethereumjs/util": "npm:8.0.5"
     "@types/secp256k1": "npm:^4.0.0"
     bignumber.js: "npm:^9.0.0"
     debug: "npm:^4.1.1"
     eth-lib: "npm:^0.2.8"
     secp256k1: "npm:^4.0.0"
-  checksum: e5a26a98e4efb2e8daa03929ba43bf7f9418d22aa23a52e6e23d5f6ac2a64a2090a8085f778cfa6f10d43cc0032435bc326da140033e2739febb357a7e43b179
+  checksum: 09be9d15ca7813f4e8fbf7fa9e21de1a287f19403a01e7686dfffe71513d9e892e8b8c87ad1cb92a7e1eab47dafc3db4017d476069fe48dc1319b148e6cfa64c
   languageName: node
   linkType: hard
 
-"@celo/wallet-hsm@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@celo/wallet-hsm@npm:5.1.0"
+"@celo/wallet-hsm@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@celo/wallet-hsm@npm:5.1.2"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
     "@ethereumjs/util": "npm:8.0.5"
     "@types/asn1js": "npm:^0.0.2"
     "@types/debug": "npm:^4.1.5"
@@ -2069,7 +2116,7 @@ __metadata:
     elliptic: "npm:^6.5.4"
     eth-lib: "npm:^0.2.8"
     secp256k1: "npm:^4.0.0"
-  checksum: 6480baa8438965489c447762f0035a58b1f33ecf5f3001d747ac48c01c268ddbb696c48166d1065414ee25a21faa0feb5eaabf192a6aed717ad465b26178b51a
+  checksum: 31db6aa602c0cede645028b43fce1eb3455ff5e6e3523ed3914dcc1a2758ccb781d0989175e3d32650d5a8400fbe60c18f325c5acc317e5ab0606a028d0580c6
   languageName: node
   linkType: hard
 
@@ -2086,30 +2133,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/wallet-local@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@celo/wallet-local@npm:5.1.0"
+"@celo/wallet-local@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@celo/wallet-local@npm:5.1.2"
   dependencies:
-    "@celo/connect": "npm:^5.1.0"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-base": "npm:^5.1.0"
+    "@celo/connect": "npm:^5.1.2"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-base": "npm:^5.1.2"
     "@ethereumjs/util": "npm:8.0.5"
     eth-lib: "npm:^0.2.8"
-  checksum: ebd0b5e13fd1d4773eaee2d3f04ec775be9be3ab1b7f775d35775a1372340afb49fb91bfa8c0f001e9a9f4709d19d67b8b31b2a35ecd30c119a98a31ce045a41
+  checksum: afd22d21c8470ae8202aead4fe5d62a09c3322dad1a695b470ffcebf38fd5c42aef89a5b15c6e1a789333a529590bf4259d2c0e09667540a62afb59bb48576c9
   languageName: node
   linkType: hard
 
-"@celo/wallet-remote@npm:^5.1.0":
-  version: 5.1.0
-  resolution: "@celo/wallet-remote@npm:5.1.0"
+"@celo/wallet-remote@npm:^5.1.2":
+  version: 5.1.2
+  resolution: "@celo/wallet-remote@npm:5.1.2"
   dependencies:
-    "@celo/connect": "npm:^5.1.0"
-    "@celo/utils": "npm:^5.0.5"
-    "@celo/wallet-base": "npm:^5.1.0"
+    "@celo/connect": "npm:^5.1.2"
+    "@celo/utils": "npm:^6.0.0"
+    "@celo/wallet-base": "npm:^5.1.2"
     "@ethereumjs/util": "npm:8.0.5"
     "@types/debug": "npm:^4.1.5"
     eth-lib: "npm:^0.2.8"
-  checksum: b6e8481a534607310e7fc5f3e85f1ffa07b80d9257485e6448d348458e7b6ff95416dcef6459689c6e66df034062bf8a3dee1896f3fd1aa146a8d69b22f5fea7
+  checksum: 76f09d28ee584531978c22773313d50d6d9c4df1557986b672c1bef3b386839781459b3201f743fca60c617226229baa2d646f508129ba4c7d455c753a9aaa12
   languageName: node
   linkType: hard
 
@@ -6347,15 +6394,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/stoppable@npm:^1.1.0":
-  version: 1.1.1
-  resolution: "@types/stoppable@npm:1.1.1"
-  dependencies:
-    "@types/node": "npm:*"
-  checksum: 65617648686469e7130a9c00a018c03ddcfed8527a162e50352780e9a1acb7187d646389a596c2aef3a5566e3d649f68f0de7822be7349cafde5c1ec863c37c6
-  languageName: node
-  linkType: hard
-
 "@types/superagent@npm:*":
   version: 4.1.18
   resolution: "@types/superagent@npm:4.1.18"
@@ -7645,13 +7683,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bn.js@npm:4.11.9":
-  version: 4.11.9
-  resolution: "bn.js@npm:4.11.9"
-  checksum: c5a2342f0bc3d0bbe53361d57aa51c489589ad2d7c726c1337e9af7f37b6bc2d2d1b63cfb1972a7aacbc053367832037f699f973c81d9c5844af247650968691
-  languageName: node
-  linkType: hard
-
 "bn.js@npm:^4.11.6, bn.js@npm:^4.11.9":
   version: 4.12.0
   resolution: "bn.js@npm:4.12.0"
@@ -8305,7 +8336,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chownr@npm:^1.0.1, chownr@npm:^1.1.1, chownr@npm:^1.1.4":
+"chownr@npm:^1.0.1, chownr@npm:^1.1.4":
   version: 1.1.4
   resolution: "chownr@npm:1.1.4"
   checksum: 115648f8eb38bac5e41c3857f3e663f9c39ed6480d1349977c4d96c95a47266fcacc5a5aabf3cb6c481e22d72f41992827db47301851766c4fd77ac21a4f081d
@@ -9376,6 +9407,13 @@ __metadata:
     gopd: "npm:^1.0.1"
     has-property-descriptors: "npm:^1.0.0"
   checksum: ddcbcf1986682115d37677f64bbc61b4081460ce807520f929852fc43458affb3ea9cb2cc4723ec856a941b105bd7fff6df73bdf54e29070820739e34ed7b18d
+  languageName: node
+  linkType: hard
+
+"define-lazy-prop@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "define-lazy-prop@npm:2.0.0"
+  checksum: 0115fdb065e0490918ba271d7339c42453d209d4cb619dfe635870d906731eff3e1ade8028bb461ea27ce8264ec5e22c6980612d332895977e89c1bbc80fcee2
   languageName: node
   linkType: hard
 
@@ -10528,13 +10566,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expand-template@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "expand-template@npm:2.0.3"
-  checksum: 588c19847216421ed92befb521767b7018dc88f88b0576df98cb242f20961425e96a92cbece525ef28cc5becceae5d544ae0f5b9b5e2aa05acb13716ca5b3099
-  languageName: node
-  linkType: hard
-
 "expect@npm:^29.0.0, expect@npm:^29.7.0":
   version: 29.7.0
   resolution: "expect@npm:29.7.0"
@@ -11587,13 +11618,6 @@ __metadata:
   dependencies:
     assert-plus: "npm:^1.0.0"
   checksum: ab18d55661db264e3eac6012c2d3daeafaab7a501c035ae0ccb193c3c23e9849c6e29b6ac762b9c2adae460266f925d55a3a2a3a3c8b94be2f222df94d70c046
-  languageName: node
-  linkType: hard
-
-"github-from-package@npm:0.0.0":
-  version: 0.0.0
-  resolution: "github-from-package@npm:0.0.0"
-  checksum: 2a091ba07fbce22205642543b4ea8aaf068397e1433c00ae0f9de36a3607baf5bcc14da97fbb798cfca6393b3c402031fca06d8b491a44206d6efef391c58537
   languageName: node
   linkType: hard
 
@@ -12739,7 +12763,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-docker@npm:^2.0.0":
+"is-docker@npm:^2.0.0, is-docker@npm:^2.1.1":
   version: 2.2.1
   resolution: "is-docker@npm:2.2.1"
   bin:
@@ -14068,24 +14092,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonwebtoken@npm:^8.5.1":
-  version: 8.5.1
-  resolution: "jsonwebtoken@npm:8.5.1"
-  dependencies:
-    jws: "npm:^3.2.2"
-    lodash.includes: "npm:^4.3.0"
-    lodash.isboolean: "npm:^3.0.3"
-    lodash.isinteger: "npm:^4.0.4"
-    lodash.isnumber: "npm:^3.0.3"
-    lodash.isplainobject: "npm:^4.0.6"
-    lodash.isstring: "npm:^4.0.1"
-    lodash.once: "npm:^4.0.0"
-    ms: "npm:^2.1.1"
-    semver: "npm:^5.6.0"
-  checksum: a7b52ea570f70bea183ceca970c003f223d9d3425d72498002e9775485c7584bfa3751d1c7291dbb59738074cba288effe73591b87bec5d467622ab3a156fdb6
-  languageName: node
-  linkType: hard
-
 "jsonwebtoken@npm:^9.0.0":
   version: 9.0.2
   resolution: "jsonwebtoken@npm:9.0.2"
@@ -14193,17 +14199,6 @@ __metadata:
     node-gyp-build: "npm:^4.2.0"
     readable-stream: "npm:^3.6.0"
   checksum: 30c652c39e935132eb92300eca974fad1f4ec4aed4c6e2f21d774b06001d07e24117dd46ef1494272f5674f7f11d5e7a8ee50c7bf8d87bb3895aa60607c4aabc
-  languageName: node
-  linkType: hard
-
-"keytar@npm:^7.3.0":
-  version: 7.9.0
-  resolution: "keytar@npm:7.9.0"
-  dependencies:
-    node-addon-api: "npm:^4.3.0"
-    node-gyp: "npm:latest"
-    prebuild-install: "npm:^7.0.1"
-  checksum: 904795bc304f8ad89b80f915c869a941a383312b58584212a199473d18647035cfda92a9c53e6c53bf13ea0fed23037c9597eb418a5c71ee9454f140f026fac9
   languageName: node
   linkType: hard
 
@@ -15530,7 +15525,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimist@npm:^1.1.0, minimist@npm:^1.2.0, minimist@npm:^1.2.3, minimist@npm:^1.2.6":
+"minimist@npm:^1.1.0, minimist@npm:^1.2.0, minimist@npm:^1.2.6":
   version: 1.2.8
   resolution: "minimist@npm:1.2.8"
   checksum: 908491b6cc15a6c440ba5b22780a0ba89b9810e1aea684e253e43c4e3b8d56ec1dcdd7ea96dde119c29df59c936cde16062159eae4225c691e19c70b432b6e6f
@@ -15662,13 +15657,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mkdirp-classic@npm:^0.5.2, mkdirp-classic@npm:^0.5.3":
-  version: 0.5.3
-  resolution: "mkdirp-classic@npm:0.5.3"
-  checksum: 3f4e088208270bbcc148d53b73e9a5bd9eef05ad2cbf3b3d0ff8795278d50dd1d11a8ef1875ff5aea3fa888931f95bfcb2ad5b7c1061cfefd6284d199e6776ac
-  languageName: node
-  linkType: hard
-
 "mkdirp-promise@npm:^5.0.1":
   version: 5.0.1
   resolution: "mkdirp-promise@npm:5.0.1"
@@ -15766,15 +15754,6 @@ __metadata:
   version: 2.1.3
   resolution: "ms@npm:2.1.3"
   checksum: aa92de608021b242401676e35cfa5aa42dd70cbdc082b916da7fb925c542173e36bce97ea3e804923fe92c0ad991434e4a38327e15a1b5b5f945d66df615ae6d
-  languageName: node
-  linkType: hard
-
-"msal@npm:^1.0.2":
-  version: 1.4.17
-  resolution: "msal@npm:1.4.17"
-  dependencies:
-    tslib: "npm:^1.9.3"
-  checksum: 5a79297e624884825de87ff1de70e6ce7b408f79c79de6b7be84a7769f5f11e099abd8af6aa90d6e9035a11bd6c585c46c67ea0eb5a219f52250145167635be8
   languageName: node
   linkType: hard
 
@@ -15909,13 +15888,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"napi-build-utils@npm:^1.0.1":
-  version: 1.0.2
-  resolution: "napi-build-utils@npm:1.0.2"
-  checksum: 276feb8e30189fe18718e85b6f82e4f952822baa2e7696f771cc42571a235b789dc5907a14d9ffb6838c3e4ff4c25717c2575e5ce1cf6e02e496e204c11e57f6
-  languageName: node
-  linkType: hard
-
 "napi-macros@npm:~2.0.0":
   version: 2.0.0
   resolution: "napi-macros@npm:2.0.0"
@@ -15988,15 +15960,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-abi@npm:^3.3.0":
-  version: 3.40.0
-  resolution: "node-abi@npm:3.40.0"
-  dependencies:
-    semver: "npm:^7.3.5"
-  checksum: e9f137f9e2eefb4d508514fd00f292d01cb77f695f1511e6f51f272a91c161ad15676ae9590ba53da09845b852b6c14a829e2f033c5488e03127ea502213be93
-  languageName: node
-  linkType: hard
-
 "node-abort-controller@npm:^3.1.1":
   version: 3.1.1
   resolution: "node-abort-controller@npm:3.1.1"
@@ -16013,7 +15976,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-addon-api@npm:^4.2.0, node-addon-api@npm:^4.3.0":
+"node-addon-api@npm:^4.2.0":
   version: 4.3.0
   resolution: "node-addon-api@npm:4.3.0"
   dependencies:
@@ -16342,7 +16305,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "odis-example-scripts@workspace:docs/examples"
   dependencies:
-    "@celo/base": "npm:^5.0.5"
+    "@celo/base": "npm:^6.0.0"
     "@celo/identity": "npm:^5.1.1"
     blind-threshold-bls: "https://github.com/celo-org/blind-threshold-bls-wasm#3d1013a"
     ethers: "npm:^5.7.2"
@@ -16487,13 +16450,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"open@npm:^7.0.0, open@npm:^7.4.2":
+"open@npm:^7.4.2":
   version: 7.4.2
   resolution: "open@npm:7.4.2"
   dependencies:
     is-docker: "npm:^2.0.0"
     is-wsl: "npm:^2.1.1"
   checksum: 4fc02ed3368dcd5d7247ad3566433ea2695b0713b041ebc0eeb2f0f9e5d4e29fc2068f5cdd500976b3464e77fe8b61662b1b059c73233ccc601fe8b16d6c1cd6
+  languageName: node
+  linkType: hard
+
+"open@npm:^8.0.0":
+  version: 8.4.2
+  resolution: "open@npm:8.4.2"
+  dependencies:
+    define-lazy-prop: "npm:^2.0.0"
+    is-docker: "npm:^2.1.1"
+    is-wsl: "npm:^2.2.0"
+  checksum: acd81a1d19879c818acb3af2d2e8e9d81d17b5367561e623248133deb7dd3aefaed527531df2677d3e6aaf0199f84df57b6b2262babff8bf46ea0029aac536c9
   languageName: node
   linkType: hard
 
@@ -17146,28 +17120,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prebuild-install@npm:^7.0.1":
-  version: 7.1.1
-  resolution: "prebuild-install@npm:7.1.1"
-  dependencies:
-    detect-libc: "npm:^2.0.0"
-    expand-template: "npm:^2.0.3"
-    github-from-package: "npm:0.0.0"
-    minimist: "npm:^1.2.3"
-    mkdirp-classic: "npm:^0.5.3"
-    napi-build-utils: "npm:^1.0.1"
-    node-abi: "npm:^3.3.0"
-    pump: "npm:^3.0.0"
-    rc: "npm:^1.2.7"
-    simple-get: "npm:^4.0.0"
-    tar-fs: "npm:^2.0.0"
-    tunnel-agent: "npm:^0.6.0"
-  bin:
-    prebuild-install: bin.js
-  checksum: 6c70a2f82fbda8903497c560a761b000d861a3e772322c8bed012be0f0a084b5aaca4438a3fad1bd3a24210765f4fae06ddd89ea04dc4c034dde693cc0d9d5f4
-  languageName: node
-  linkType: hard
-
 "preferred-pm@npm:^3.0.0":
   version: 3.1.2
   resolution: "preferred-pm@npm:3.1.2"
@@ -17575,15 +17527,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.7.0":
-  version: 6.11.1
-  resolution: "qs@npm:6.11.1"
-  dependencies:
-    side-channel: "npm:^1.0.4"
-  checksum: f3e00fc1f65854ddd10ace6a4209baea9f74b2cef5b203e62604be70c743801e1c5ea55631430aaa059c2740b48f2b026f7f183b496f103b08d82f2b602f4d41
-  languageName: node
-  linkType: hard
-
 "qs@npm:~6.5.2":
   version: 6.5.3
   resolution: "qs@npm:6.5.3"
@@ -17686,7 +17629,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc@npm:^1.2.7, rc@npm:^1.2.8":
+"rc@npm:^1.2.8":
   version: 1.2.8
   resolution: "rc@npm:1.2.8"
   dependencies:
@@ -18820,17 +18763,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"simple-get@npm:^4.0.0":
-  version: 4.0.1
-  resolution: "simple-get@npm:4.0.1"
-  dependencies:
-    decompress-response: "npm:^6.0.0"
-    once: "npm:^1.3.1"
-    simple-concat: "npm:^1.0.0"
-  checksum: 93f1b32319782f78f2f2234e9ce34891b7ab6b990d19d8afefaa44423f5235ce2676aae42d6743fecac6c8dfff4b808d4c24fe5265be813d04769917a9a44f36
-  languageName: node
-  linkType: hard
-
 "simple-swizzle@npm:^0.2.2":
   version: 0.2.2
   resolution: "simple-swizzle@npm:0.2.2"
@@ -19608,18 +19540,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar-fs@npm:^2.0.0":
-  version: 2.1.1
-  resolution: "tar-fs@npm:2.1.1"
-  dependencies:
-    chownr: "npm:^1.1.1"
-    mkdirp-classic: "npm:^0.5.2"
-    pump: "npm:^3.0.0"
-    tar-stream: "npm:^2.1.4"
-  checksum: 526deae025453e825f87650808969662fbb12eb0461d033e9b447de60ec951c6c4607d0afe7ce057defe9d4e45cf80399dd74bc15f9d9e0773d5e990a78ce4ac
-  languageName: node
-  linkType: hard
-
 "tar-stream@npm:^1.1.2":
   version: 1.6.2
   resolution: "tar-stream@npm:1.6.2"
@@ -19635,7 +19555,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar-stream@npm:^2.1.4, tar-stream@npm:^2.2.0":
+"tar-stream@npm:^2.2.0":
   version: 2.2.0
   resolution: "tar-stream@npm:2.2.0"
   dependencies:
@@ -20114,17 +20034,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.10.0, tslib@npm:^1.9.3":
+"tslib@npm:^1.10.0":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: 7dbf34e6f55c6492637adb81b555af5e3b4f9cc6b998fb440dac82d3b42bdc91560a35a5fb75e20e24a076c651438234da6743d139e4feabf0783f3cdfe1dddb
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^2.0.0, tslib@npm:^2.1.0, tslib@npm:^2.2.0":
-  version: 2.5.0
-  resolution: "tslib@npm:2.5.0"
-  checksum: ea556fbdf396fe15dbd45e242754e86e7c36e0dce8644404a7c8a81ae1e940744dc639569aeca1ae370a7f804d82872f3fd8564eb23be9adb7618201d0314dac
   languageName: node
   linkType: hard
 
@@ -20132,6 +20045,13 @@ __metadata:
   version: 2.6.2
   resolution: "tslib@npm:2.6.2"
   checksum: bd26c22d36736513980091a1e356378e8b662ded04204453d353a7f34a4c21ed0afc59b5f90719d4ba756e581a162ecbf93118dc9c6be5acf70aa309188166ca
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.1.0, tslib@npm:^2.2.0":
+  version: 2.5.0
+  resolution: "tslib@npm:2.5.0"
+  checksum: ea556fbdf396fe15dbd45e242754e86e7c36e0dce8644404a7c8a81ae1e940744dc639569aeca1ae370a7f804d82872f3fd8564eb23be9adb7618201d0314dac
   languageName: node
   linkType: hard
 
