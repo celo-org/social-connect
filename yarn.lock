@@ -1629,13 +1629,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/base@npm:5.0.4, @celo/base@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "@celo/base@npm:5.0.4"
-  checksum: be78fed709e281ebe709051d1a05a1a5b2d3655e9538f733495893f0398c033831869f0d6d9860592a82a5843a2044461d0290110701719ae0e2c0c49c6d9861
-  languageName: node
-  linkType: hard
-
 "@celo/base@npm:^6.0.0":
   version: 6.0.0
   resolution: "@celo/base@npm:6.0.0"
@@ -1653,11 +1646,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/celo-devchain@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@celo/celo-devchain@npm:6.0.0"
+"@celo/celo-devchain@npm:6.0.3":
+  version: 6.0.3
+  resolution: "@celo/celo-devchain@npm:6.0.3"
   dependencies:
-    "@celo/contractkit": "npm:^5.0.4"
     commander: "npm:^10.0.0"
     ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
     node-fetch: "npm:^3.3.0"
@@ -1665,24 +1657,7 @@ __metadata:
     tmp: "npm:^0.2.1"
   bin:
     celo-devchain: dist/run.js
-  checksum: 927c1d95d348a83fef6ef6f20b1cacf9da016320edcf6595e5a8053c6e094c0ed8cf0f23c704b8422400c4f2f8881c94fa59d0bfc72438fdc92b16b4886e0a12
-  languageName: node
-  linkType: hard
-
-"@celo/connect@npm:5.0.4":
-  version: 5.0.4
-  resolution: "@celo/connect@npm:5.0.4"
-  dependencies:
-    "@celo/base": "npm:^5.0.4"
-    "@celo/utils": "npm:^5.0.4"
-    "@types/debug": "npm:^4.1.5"
-    "@types/utf8": "npm:^2.1.6"
-    bignumber.js: "npm:^9.0.0"
-    debug: "npm:^4.1.1"
-    utf8: "npm:3.0.0"
-  peerDependencies:
-    web3: 1.10.0
-  checksum: 846dbec257c61787b726de11069c55fd37a0c06e513ce7e64c7c578e395bd0daa7dc5c4fbc39938278f8812142f3c0137e372476f815c62a67e6eb2bb23c1925
+  checksum: 23acd0626b13e2805c2d3e57614f3998ec18fe6b0d8bcba9bca3d59d0e8f9d70b6f115f161fcec6e11b98f2e9acef14cdf106a2657d5c94abfb5980eba0df034
   languageName: node
   linkType: hard
 
@@ -1704,28 +1679,6 @@ __metadata:
   peerDependencies:
     web3: 1.10.0
   checksum: 8682b3ddbb771a239f3fc1e9b02436305c8da8d7b80f9196ad693f882e2cf755523e74983e3b8ace176ad2cd5ce62af8c6e9b64c5f0355f6dc4dd63f8eb7720a
-  languageName: node
-  linkType: hard
-
-"@celo/contractkit@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "@celo/contractkit@npm:5.0.4"
-  dependencies:
-    "@celo/base": "npm:5.0.4"
-    "@celo/connect": "npm:5.0.4"
-    "@celo/utils": "npm:5.0.4"
-    "@celo/wallet-local": "npm:5.0.4"
-    "@types/bn.js": "npm:^5.1.0"
-    "@types/debug": "npm:^4.1.5"
-    bignumber.js: "npm:^9.0.0"
-    cross-fetch: "npm:3.0.6"
-    debug: "npm:^4.1.1"
-    fp-ts: "npm:2.1.1"
-    io-ts: "npm:2.0.1"
-    semver: "npm:^7.3.5"
-    web3: "npm:1.10.0"
-    web3-core-helpers: "npm:1.10.0"
-  checksum: f8df5dec6c9dac50058a58e1d59f7d8f83dc82152c96fd641dcb364899f93b16203b68077de7b0bf84c17ddf061aeb989f8d516389c8ff11f7e62302f405bd0d
   languageName: node
   linkType: hard
 
@@ -1776,9 +1729,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/dev-utils@npm:0.0.1-beta.1":
-  version: 0.0.1-beta.1
-  resolution: "@celo/dev-utils@npm:0.0.1-beta.1"
+"@celo/dev-utils@npm:0.0.1":
+  version: 0.0.1
+  resolution: "@celo/dev-utils@npm:0.0.1"
   dependencies:
     bignumber.js: "npm:^9.0.0"
     fs-extra: "npm:^8.1.0"
@@ -1787,7 +1740,7 @@ __metadata:
     tmp: "npm:^0.1.0"
     web3: "npm:1.10.0"
     web3-core-helpers: "npm:1.10.0"
-  checksum: 8d7dba3953050f301329ee6e62dac146a9d1282aec0d96a4edbdac2d1eb93b6174463dfd1d1b5f4b649607593ce98afabb25624aeffbcb34287e6d1a3ef37a19
+  checksum: 66915944a9cdd7d69062dd535296af65cd238056842ccf8b33051b8290f217c7cc678e24ddab55947e41a4e1884b4d63e997eb52bda9dc4d46f591c93c6ae962
   languageName: node
   linkType: hard
 
@@ -1797,7 +1750,7 @@ __metadata:
   dependencies:
     "@celo/base": "npm:^6.0.0"
     "@celo/connect": "npm:^5.1.2"
-    "@celo/dev-utils": "npm:0.0.1-beta.1"
+    "@celo/dev-utils": "npm:0.0.1"
     "@celo/identity": "npm:^5.1.1"
     "@celo/phone-number-privacy-common": "npm:^3.1.1"
     "@celo/poprf": "npm:^0.1.9"
@@ -1812,14 +1765,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/identity@npm:^5.1.1, @celo/identity@workspace:packages/identity":
+"@celo/identity@npm:^5.1.1, @celo/identity@workspace:packages/identity, old-celo-identity@npm:@celo/identity@5.1.1":
   version: 0.0.0-use.local
   resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
     "@celo/base": "npm:^6.0.0"
-    "@celo/celo-devchain": "npm:6.0.0"
+    "@celo/celo-devchain": "npm:6.0.3"
     "@celo/contractkit": "npm:^7.0.0"
-    "@celo/dev-utils": "npm:0.0.1-beta.1"
+    "@celo/dev-utils": "npm:0.0.1"
     "@celo/odis-identifiers": "npm:^1.0.0"
     "@celo/phone-number-privacy-common": "npm:^3.1.1"
     "@celo/utils": "npm:^6.0.0"
@@ -1838,7 +1791,7 @@ __metadata:
     io-ts: "npm:2.0.1"
     jest: "npm:^29.7.0"
     old-celo-base: "npm:@celo/base@1.5.2"
-    old-celo-identity: "npm:@celo/identity@5.1.0"
+    old-celo-identity: "npm:@celo/identity@5.1.1"
   languageName: unknown
   linkType: soft
 
@@ -1894,7 +1847,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/phone-number-privacy-common@npm:^3.0.3, @celo/phone-number-privacy-common@npm:^3.1.1, @celo/phone-number-privacy-common@workspace:packages/common":
+"@celo/phone-number-privacy-common@npm:^3.1.1, @celo/phone-number-privacy-common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-common@workspace:packages/common"
   dependencies:
@@ -2002,25 +1955,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/utils@npm:5.0.4, @celo/utils@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "@celo/utils@npm:5.0.4"
-  dependencies:
-    "@celo/base": "npm:5.0.4"
-    "@ethereumjs/util": "npm:8.0.5"
-    "@types/bn.js": "npm:^5.1.0"
-    "@types/elliptic": "npm:^6.4.9"
-    "@types/node": "npm:^18.7.16"
-    bignumber.js: "npm:^9.0.0"
-    elliptic: "npm:^6.5.4"
-    ethereum-cryptography: "npm:1.2.0"
-    io-ts: "npm:2.0.1"
-    web3-eth-abi: "npm:1.10.0"
-    web3-utils: "npm:1.10.0"
-  checksum: 379d6245a9a851e5f8ad55ee0fc9429ec6485272b72c74644b9ad968f9c1392c4f55d2a2552a6e245c8fb2563d9356420724c8c4a4100cfe6da64ac3b99a0670
-  languageName: node
-  linkType: hard
-
 "@celo/utils@npm:^6.0.0":
   version: 6.0.0
   resolution: "@celo/utils@npm:6.0.0"
@@ -2038,24 +1972,6 @@ __metadata:
     web3-eth-abi: "npm:1.10.0"
     web3-utils: "npm:1.10.0"
   checksum: e8828369726f958d2db7c3f5b321e07c0243d48cc16e0ebef938ae404b1e26aabb11203d971c9f578731bf58424ece5b1bcb5e7710b29653241179cd10473c8e
-  languageName: node
-  linkType: hard
-
-"@celo/wallet-base@npm:5.0.4":
-  version: 5.0.4
-  resolution: "@celo/wallet-base@npm:5.0.4"
-  dependencies:
-    "@celo/base": "npm:5.0.4"
-    "@celo/connect": "npm:5.0.4"
-    "@celo/utils": "npm:5.0.4"
-    "@ethereumjs/util": "npm:8.0.5"
-    "@types/debug": "npm:^4.1.5"
-    bignumber.js: "npm:^9.0.0"
-    debug: "npm:^4.1.1"
-    eth-lib: "npm:^0.2.8"
-    ethereum-cryptography: "npm:^2.1.2"
-    web3-eth-accounts: "npm:1.10.0"
-  checksum: 60f2552742f638fc2dd9354a7f11149d06d42fe0040228ab6c7ad5c70a7c726890c3fce4e87cbe7f3d8a2fedea058f75a7ac370f3357663314d362579f8a0482
   languageName: node
   linkType: hard
 
@@ -2117,19 +2033,6 @@ __metadata:
     eth-lib: "npm:^0.2.8"
     secp256k1: "npm:^4.0.0"
   checksum: 31db6aa602c0cede645028b43fce1eb3455ff5e6e3523ed3914dcc1a2758ccb781d0989175e3d32650d5a8400fbe60c18f325c5acc317e5ab0606a028d0580c6
-  languageName: node
-  linkType: hard
-
-"@celo/wallet-local@npm:5.0.4":
-  version: 5.0.4
-  resolution: "@celo/wallet-local@npm:5.0.4"
-  dependencies:
-    "@celo/connect": "npm:5.0.4"
-    "@celo/utils": "npm:5.0.4"
-    "@celo/wallet-base": "npm:5.0.4"
-    "@ethereumjs/util": "npm:8.0.5"
-    eth-lib: "npm:^0.2.8"
-  checksum: a6370f5e9926dbe4579022162021c45370c93cc23aeed2570326d5daab56c25cffc385654ae7b9fbe3d663a89b23e226b7092fe9891d7ee9cd212df708e29065
   languageName: node
   linkType: hard
 
@@ -16355,28 +16258,6 @@ __metadata:
   version: 1.5.2
   resolution: "@celo/base@npm:1.5.2"
   checksum: deebf7bffbac44aebf488efb9869a9cb9434db5e4461f32c44d45fe25d9eddf002ba1de3364afe555472c6ff2dcc1e5e237d8c775fda39c47587e47df13d1fb8
-  languageName: node
-  linkType: hard
-
-"old-celo-identity@npm:@celo/identity@5.1.0":
-  version: 5.1.0
-  resolution: "@celo/identity@npm:5.1.0"
-  dependencies:
-    "@celo/base": "npm:^5.0.4"
-    "@celo/contractkit": "npm:^5.0.4"
-    "@celo/odis-identifiers": "npm:^1.0.0"
-    "@celo/phone-number-privacy-common": "npm:^3.0.3"
-    "@celo/utils": "npm:^5.0.4"
-    "@types/debug": "npm:^4.1.5"
-    bignumber.js: "npm:^9.0.0"
-    blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
-    cross-fetch: "npm:3.0.6"
-    debug: "npm:^4.1.1"
-    elliptic: "npm:^6.5.4"
-    ethereum-cryptography: "npm:1.2.0"
-    fp-ts: "npm:2.1.1"
-    io-ts: "npm:2.0.1"
-  checksum: ed3c2b4f86466947272fb32d8144dbdfc83d14e73add6c7c0f663c5afa3c5a98e7f1ba70ddaf5808f4562448208d460a3d5856e5b2a31927aae147b01bf0dd54
   languageName: node
   linkType: hard
 
