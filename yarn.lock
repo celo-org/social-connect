@@ -5564,7 +5564,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bunyan@npm:1.8.10, @types/bunyan@npm:^1.8.10":
+"@types/bunyan@npm:1.8.10":
   version: 1.8.10
   resolution: "@types/bunyan@npm:1.8.10"
   dependencies:
@@ -5579,6 +5579,15 @@ __metadata:
   dependencies:
     "@types/node": "npm:*"
   checksum: 5d6e818cc324eee60ad4658fc169bad2a7ec794de383de5333327951c7be74804cf70230ac4a93b4e6ce5d86106e81e6fcc8c617454617bad6a721011b619435
+  languageName: node
+  linkType: hard
+
+"@types/bunyan@npm:^1.8.10":
+  version: 1.8.11
+  resolution: "@types/bunyan@npm:1.8.11"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 8906ec6c0573f563139681344c2a1d220c394e4aa5b88ff99b011894734f74aafc9d0b3a71758dda3b0ee30e9b6370a8aa48ac26b5585f3c8d7e0fe8db6ca844
   languageName: node
   linkType: hard
 
