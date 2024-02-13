@@ -1629,10 +1629,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/base@npm:5.0.4, @celo/base@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "@celo/base@npm:5.0.4"
-  checksum: be78fed709e281ebe709051d1a05a1a5b2d3655e9538f733495893f0398c033831869f0d6d9860592a82a5843a2044461d0290110701719ae0e2c0c49c6d9861
+"@celo/base@npm:^5.0.4":
+  version: 5.0.5
+  resolution: "@celo/base@npm:5.0.5"
+  checksum: bf8725909ac67e138b3d5d7252bfb51a2f7c5bb0dda883c94bc4d9e1075f7e9f08b26467099a2896b89c1a370ca2755856e995d1d013428b50d3ac094fd2c1a6
   languageName: node
   linkType: hard
 
@@ -1653,11 +1653,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/celo-devchain@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@celo/celo-devchain@npm:6.0.0"
+"@celo/celo-devchain@npm:6.0.3":
+  version: 6.0.3
+  resolution: "@celo/celo-devchain@npm:6.0.3"
   dependencies:
-    "@celo/contractkit": "npm:^5.0.4"
     commander: "npm:^10.0.0"
     ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
     node-fetch: "npm:^3.3.0"
@@ -1665,28 +1664,11 @@ __metadata:
     tmp: "npm:^0.2.1"
   bin:
     celo-devchain: dist/run.js
-  checksum: 927c1d95d348a83fef6ef6f20b1cacf9da016320edcf6595e5a8053c6e094c0ed8cf0f23c704b8422400c4f2f8881c94fa59d0bfc72438fdc92b16b4886e0a12
+  checksum: 23acd0626b13e2805c2d3e57614f3998ec18fe6b0d8bcba9bca3d59d0e8f9d70b6f115f161fcec6e11b98f2e9acef14cdf106a2657d5c94abfb5980eba0df034
   languageName: node
   linkType: hard
 
-"@celo/connect@npm:5.0.4":
-  version: 5.0.4
-  resolution: "@celo/connect@npm:5.0.4"
-  dependencies:
-    "@celo/base": "npm:^5.0.4"
-    "@celo/utils": "npm:^5.0.4"
-    "@types/debug": "npm:^4.1.5"
-    "@types/utf8": "npm:^2.1.6"
-    bignumber.js: "npm:^9.0.0"
-    debug: "npm:^4.1.1"
-    utf8: "npm:3.0.0"
-  peerDependencies:
-    web3: 1.10.0
-  checksum: 846dbec257c61787b726de11069c55fd37a0c06e513ce7e64c7c578e395bd0daa7dc5c4fbc39938278f8812142f3c0137e372476f815c62a67e6eb2bb23c1925
-  languageName: node
-  linkType: hard
-
-"@celo/connect@npm:^5.1.2":
+"@celo/connect@npm:^5.1.1, @celo/connect@npm:^5.1.2":
   version: 5.1.2
   resolution: "@celo/connect@npm:5.1.2"
   dependencies:
@@ -1708,13 +1690,13 @@ __metadata:
   linkType: hard
 
 "@celo/contractkit@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "@celo/contractkit@npm:5.0.4"
+  version: 5.2.1
+  resolution: "@celo/contractkit@npm:5.2.1"
   dependencies:
-    "@celo/base": "npm:5.0.4"
-    "@celo/connect": "npm:5.0.4"
-    "@celo/utils": "npm:5.0.4"
-    "@celo/wallet-local": "npm:5.0.4"
+    "@celo/base": "npm:^6.0.0"
+    "@celo/connect": "npm:^5.1.1"
+    "@celo/utils": "npm:^5.0.6"
+    "@celo/wallet-local": "npm:^5.1.1"
     "@types/bn.js": "npm:^5.1.0"
     "@types/debug": "npm:^4.1.5"
     bignumber.js: "npm:^9.0.0"
@@ -1725,7 +1707,7 @@ __metadata:
     semver: "npm:^7.3.5"
     web3: "npm:1.10.0"
     web3-core-helpers: "npm:1.10.0"
-  checksum: f8df5dec6c9dac50058a58e1d59f7d8f83dc82152c96fd641dcb364899f93b16203b68077de7b0bf84c17ddf061aeb989f8d516389c8ff11f7e62302f405bd0d
+  checksum: 3c561946f4d03d5f636669f97a349909dd8ec10dc20c6878a3e3ce608f32760314fa8ffa17f3068b541ef37174863504ef89128e7533ecbefcaf0991fb5f1b78
   languageName: node
   linkType: hard
 
@@ -1817,7 +1799,7 @@ __metadata:
   resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
     "@celo/base": "npm:^6.0.0"
-    "@celo/celo-devchain": "npm:6.0.0"
+    "@celo/celo-devchain": "npm:6.0.3"
     "@celo/contractkit": "npm:^7.0.0"
     "@celo/dev-utils": "npm:0.0.1-beta.1"
     "@celo/odis-identifiers": "npm:^1.0.0"
@@ -2002,22 +1984,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/utils@npm:5.0.4, @celo/utils@npm:^5.0.4":
-  version: 5.0.4
-  resolution: "@celo/utils@npm:5.0.4"
+"@celo/utils@npm:^5.0.4, @celo/utils@npm:^5.0.6":
+  version: 5.0.6
+  resolution: "@celo/utils@npm:5.0.6"
   dependencies:
-    "@celo/base": "npm:5.0.4"
+    "@celo/base": "npm:^6.0.0"
     "@ethereumjs/util": "npm:8.0.5"
     "@types/bn.js": "npm:^5.1.0"
     "@types/elliptic": "npm:^6.4.9"
     "@types/node": "npm:^18.7.16"
     bignumber.js: "npm:^9.0.0"
+    bn.js: "npm:4.11.9"
     elliptic: "npm:^6.5.4"
     ethereum-cryptography: "npm:1.2.0"
+    fp-ts: "npm:2.1.1"
     io-ts: "npm:2.0.1"
+    rlp: "npm:^2.2.4"
     web3-eth-abi: "npm:1.10.0"
     web3-utils: "npm:1.10.0"
-  checksum: 379d6245a9a851e5f8ad55ee0fc9429ec6485272b72c74644b9ad968f9c1392c4f55d2a2552a6e245c8fb2563d9356420724c8c4a4100cfe6da64ac3b99a0670
+  checksum: 6b3b26ac784c3ef2c5c3a67c97e86b91ea25c9970ba85cf72eca39a6935745ef5ca0a31f6ba4a79db13d14302b31a41d17319d792f8625b42dcde2427d11d509
   languageName: node
   linkType: hard
 
@@ -2038,24 +2023,6 @@ __metadata:
     web3-eth-abi: "npm:1.10.0"
     web3-utils: "npm:1.10.0"
   checksum: e8828369726f958d2db7c3f5b321e07c0243d48cc16e0ebef938ae404b1e26aabb11203d971c9f578731bf58424ece5b1bcb5e7710b29653241179cd10473c8e
-  languageName: node
-  linkType: hard
-
-"@celo/wallet-base@npm:5.0.4":
-  version: 5.0.4
-  resolution: "@celo/wallet-base@npm:5.0.4"
-  dependencies:
-    "@celo/base": "npm:5.0.4"
-    "@celo/connect": "npm:5.0.4"
-    "@celo/utils": "npm:5.0.4"
-    "@ethereumjs/util": "npm:8.0.5"
-    "@types/debug": "npm:^4.1.5"
-    bignumber.js: "npm:^9.0.0"
-    debug: "npm:^4.1.1"
-    eth-lib: "npm:^0.2.8"
-    ethereum-cryptography: "npm:^2.1.2"
-    web3-eth-accounts: "npm:1.10.0"
-  checksum: 60f2552742f638fc2dd9354a7f11149d06d42fe0040228ab6c7ad5c70a7c726890c3fce4e87cbe7f3d8a2fedea058f75a7ac370f3357663314d362579f8a0482
   languageName: node
   linkType: hard
 
@@ -2120,20 +2087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/wallet-local@npm:5.0.4":
-  version: 5.0.4
-  resolution: "@celo/wallet-local@npm:5.0.4"
-  dependencies:
-    "@celo/connect": "npm:5.0.4"
-    "@celo/utils": "npm:5.0.4"
-    "@celo/wallet-base": "npm:5.0.4"
-    "@ethereumjs/util": "npm:8.0.5"
-    eth-lib: "npm:^0.2.8"
-  checksum: a6370f5e9926dbe4579022162021c45370c93cc23aeed2570326d5daab56c25cffc385654ae7b9fbe3d663a89b23e226b7092fe9891d7ee9cd212df708e29065
-  languageName: node
-  linkType: hard
-
-"@celo/wallet-local@npm:^5.1.2":
+"@celo/wallet-local@npm:^5.1.1, @celo/wallet-local@npm:^5.1.2":
   version: 5.1.2
   resolution: "@celo/wallet-local@npm:5.1.2"
   dependencies:
@@ -7680,6 +7634,13 @@ __metadata:
   version: 4.11.6
   resolution: "bn.js@npm:4.11.6"
   checksum: 22741b015c9fff60fce32fc9988331b298eb9b6db5bfb801babb23b846eaaf894e440e0d067b2b3ae4e46aab754e90972f8f333b31bf94a686bbcb054bfa7b14
+  languageName: node
+  linkType: hard
+
+"bn.js@npm:4.11.9":
+  version: 4.11.9
+  resolution: "bn.js@npm:4.11.9"
+  checksum: c5a2342f0bc3d0bbe53361d57aa51c489589ad2d7c726c1337e9af7f37b6bc2d2d1b63cfb1972a7aacbc053367832037f699f973c81d9c5844af247650968691
   languageName: node
   linkType: hard
 
