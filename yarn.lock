@@ -1810,7 +1810,7 @@ __metadata:
     "@types/elliptic": "npm:^6.4.16"
     bignumber.js: "npm:^9.1.2"
     blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
-    cross-fetch: "npm:3.1.4"
+    cross-fetch: "npm:3.1.5"
     debug: "npm:^4.1.1"
     elliptic: "npm:^6.5.4"
     ethereum-cryptography: "npm:1.2.0"
@@ -9042,16 +9042,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cross-fetch@npm:3.1.4":
-  version: 3.1.4
-  resolution: "cross-fetch@npm:3.1.4"
-  dependencies:
-    node-fetch: "npm:2.6.1"
-  checksum: 10/adca8962668c00ba47bcb979c24184e58f0ed1d034f1cd9ca1886ac84fa6443cb22eab0c3469afb293f3ba70e9f6e27a6bdd69b4935b1da1810cd06964d828e3
-  languageName: node
-  linkType: hard
-
-"cross-fetch@npm:^3.1.4":
+"cross-fetch@npm:3.1.5, cross-fetch@npm:^3.1.4":
   version: 3.1.5
   resolution: "cross-fetch@npm:3.1.5"
   dependencies:
