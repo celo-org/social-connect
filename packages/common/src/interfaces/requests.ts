@@ -484,10 +484,10 @@ export type DomainRequestHeader<R extends DomainRequest> =
   R extends DomainRestrictedSignatureRequest
     ? DomainRestrictedSignatureRequestHeader
     : never | R extends DisableDomainRequest
-    ? DisableDomainRequestHeader
-    : never | R extends DomainQuotaStatusRequest
-    ? DomainQuotaStatusRequestHeader
-    : never
+      ? DisableDomainRequestHeader
+      : never | R extends DomainQuotaStatusRequest
+        ? DomainQuotaStatusRequestHeader
+        : never
 
 export type SignMessageRequestHeader = KeyVersionHeader & PnpAuthHeader
 
@@ -497,11 +497,11 @@ export type PhoneNumberPrivacyRequestHeader<R extends PhoneNumberPrivacyRequest>
   R extends SignMessageRequest
     ? SignMessageRequestHeader
     : never | R extends PnpQuotaRequest
-    ? PnpQuotaRequestHeader
-    : never
+      ? PnpQuotaRequestHeader
+      : never
 
 export type OdisRequestHeader<R extends OdisRequest> = R extends DomainRequest
   ? DomainRequestHeader<R>
   : never | R extends PhoneNumberPrivacyRequest
-  ? PhoneNumberPrivacyRequestHeader<R>
-  : never
+    ? PhoneNumberPrivacyRequestHeader<R>
+    : never
