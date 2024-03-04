@@ -55,7 +55,6 @@ jobs:
       - name: Create Release Pull Request or Publish to npm
         id: changesets
         uses: changesets/action@v1
-        if: false
         env:
           GITHUB_TOKEN: ${{ env.PAT }}
           NPM_TOKEN: ${{ env.NPM_TOKEN }}
