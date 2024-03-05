@@ -1322,9 +1322,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/celo-devchain@npm:7.0.0-beta.0":
-  version: 7.0.0-beta.0
-  resolution: "@celo/celo-devchain@npm:7.0.0-beta.0"
+"@celo/celo-devchain@npm:7.0.0":
+  version: 7.0.0
+  resolution: "@celo/celo-devchain@npm:7.0.0"
   dependencies:
     commander: "npm:^10.0.0"
     ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
@@ -1333,7 +1333,7 @@ __metadata:
     tmp: "npm:^0.2.1"
   bin:
     celo-devchain: dist/run.js
-  checksum: 10/491f4185e946b8b6bc632e2a7f8983bc4c76ae263e37d22f5d45be9428dc08ae2303bf22f07affad2a607506994b26996edccc9b2ea3f55e0f6b200a0bd6ae77
+  checksum: 10/91f3fd48475eb0a9ee1e0c8ad1adb9461ac884023ae87b49e5080421f66b57c9d28764bcdd21cb4c5de0af72b802037330bf8e5b1a82177d716aaf1c3f64bb8f
   languageName: node
   linkType: hard
 
@@ -1468,7 +1468,7 @@ __metadata:
   resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
     "@celo/base": "npm:^6.0.0"
-    "@celo/celo-devchain": "npm:7.0.0-beta.0"
+    "@celo/celo-devchain": "npm:7.0.0"
     "@celo/contractkit": "npm:^7.0.0"
     "@celo/dev-utils": "npm:0.0.1-beta.1"
     "@celo/odis-identifiers": "npm:^1.0.0"
