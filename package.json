@@ -12,7 +12,7 @@
     "prettify:diff": "yarn run prettier --config .prettierrc.js --list-different '**/*.+(ts|js)'",
     "reset": "yarn reset-modules && yarn reset-cache",
     "reset-cache": "yarn reset-yarn && yarn reset-rn",
-    "reset-modules": "rm -rf node_modules/ packages/*/node_modules",
+    "reset-modules": "rm -rf node_modules/",
     "reset-yarn": "yarn cache clean",
     "test": "yarn workspaces foreach --all run test",
     "test:fast": "yarn workspaces foreach -ip --since --exclude '{odis,apps/combiner}' run test",
