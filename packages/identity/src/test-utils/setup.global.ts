@@ -16,7 +16,7 @@ export default async function globalSetup() {
       path.dirname(require.resolve('@celo/celo-devchain')),
       '../chains',
     )
-    await baseSetup(path.resolve(chainDataPath), 'v10.tar.gz', {
+    await baseSetup(path.resolve(chainDataPath), 'v11.tar.gz', {
       from_targz: true,
     })
     await waitForPortOpen('localhost', 8545, 60)

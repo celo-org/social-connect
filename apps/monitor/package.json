@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@celo/base": "^6.0.0",
-    "@celo/contractkit": "^7.0.0",
+    "@celo/contractkit": "^7.1.0",
     "@celo/cryptographic-utils": "^5.0.7",
     "@celo/encrypted-backup": "^5.0.5",
     "@celo/identity": "^5.1.1",
