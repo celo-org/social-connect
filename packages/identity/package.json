@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@celo/base": "^6.0.0",
-    "@celo/contractkit": "^7.0.0",
+    "@celo/contractkit": "^7.1.0",
     "@celo/odis-identifiers": "^1.0.0",
     "@celo/phone-number-privacy-common": "^3.1.1",
     "@celo/utils": "^6.0.0",

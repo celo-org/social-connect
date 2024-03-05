@@ -19,7 +19,7 @@
   ],
   "dependencies": {
     "@celo/base": "^6.0.0",
-    "@celo/contractkit": "^7.0.0",
+    "@celo/contractkit": "^7.1.0",
     "@celo/utils": "^6.0.0",
     "@types/bunyan": "1.8.10",
     "bignumber.js": "^9.1.2",
