@@ -11,5 +11,35 @@
     "@celo/identity": "5.1.1",
     "@celo/odis-identifiers": "1.0.0"
   },
-  "changesets": []
+  "changesets": [
+    "big-lies-protect",
+    "cold-ducks-visit",
+    "eighty-glasses-sip",
+    "empty-dodos-impress",
+    "fair-bottles-wonder",
+    "fifty-buses-taste",
+    "four-zoos-tie",
+    "khaki-walls-drum",
+    "light-keys-prove",
+    "lucky-birds-end",
+    "many-goats-teach",
+    "nasty-elephants-juggle",
+    "neat-bananas-allow",
+    "nice-laws-accept",
+    "nice-peaches-talk",
+    "perfect-deers-shake",
+    "real-bottles-swim",
+    "red-ravens-search",
+    "rude-hounds-jam",
+    "smooth-moons-battle",
+    "spotty-cameras-design",
+    "spotty-starfishes-move",
+    "tall-cycles-care",
+    "ten-beers-build",
+    "tender-frogs-thank",
+    "tender-tomatoes-protect",
+    "tricky-actors-wait",
+    "yellow-spoons-change",
+    "young-houses-explode"
+  ]
 }
