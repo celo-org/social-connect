@@ -1,0 +1,15 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "@celo/phone-number-privacy-combiner": "3.3.2",
+    "@celo/phone-number-privacy-monitor": "3.0.2",
+    "@celo/phone-number-privacy-signer": "3.1.1",
+    "odis-example-scripts": "1.0.1",
+    "@celo/phone-number-privacy-common": "3.1.1",
+    "@celo/encrypted-backup": "5.0.5",
+    "@celo/identity": "5.1.1",
+    "@celo/odis-identifiers": "1.0.0"
+  },
+  "changesets": []
+}
