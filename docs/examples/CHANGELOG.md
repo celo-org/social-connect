@@ -1,5 +1,15 @@
 # odis-example-scripts
 
+## 1.0.2-beta.0
+
+### Patch Changes
+
+- 8804b67: Upgrade @celo/\*\* dependencies to latest release
+- Updated dependencies [8804b67]
+- Updated dependencies [56164f9]
+- Updated dependencies [3d18f26]
+  - @celo/identity@5.1.2-beta.0
+
 ## 1.0.1
 
 ### Patch Changes
