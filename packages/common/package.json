@@ -6,6 +6,7 @@
   "license": "Apache-2.0",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/common",
   "scripts": {
     "prepublish": "yarn build",
     "build": "yarn run --top-level tsc ",

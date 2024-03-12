@@ -4,7 +4,7 @@
   "license": "Apache-2.0",
   "version": "1.0.1-beta.0",
   "description": "ODIS Identifier Prefixes and functions to hash identifiers",
-  "repository": "https://github.com/celo-org/social-connect",
+  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
