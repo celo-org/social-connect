@@ -29,7 +29,7 @@ jobs:
       workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
       service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
       artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-combiner
-      tags: ${{ github.event.pull_request.head.sha }}
+      tags: ${{ github.sha }}
       context: .
       file: dockerfiles/Dockerfile-combiner
       trivy: true
