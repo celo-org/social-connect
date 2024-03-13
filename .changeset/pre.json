@@ -1,5 +1,5 @@
 {
-  "mode": "pre",
+  "mode": "exit",
   "tag": "beta",
   "initialVersions": {
     "@celo/phone-number-privacy-combiner": "3.3.2",
