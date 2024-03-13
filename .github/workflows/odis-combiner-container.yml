@@ -9,6 +9,7 @@ on:
       - 'yarn.lock'
     branches:
       - main
+      - 'prerelease/*'
     tags:
       - odis-combiner-.*
   pull_request:
