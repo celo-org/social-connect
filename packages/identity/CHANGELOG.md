@@ -1,5 +1,18 @@
 # @celo/identity
 
+## 5.1.2
+
+### Patch Changes
+
+- 8804b67: Upgrade @celo/\*\* dependencies to latest release
+- 56164f9: Updated devchain to support CELO CR11
+- 3d18f26: Update package dependencies to reduce CVEs
+- Updated dependencies [8804b67]
+- Updated dependencies [687607a]
+- Updated dependencies [3d18f26]
+  - @celo/phone-number-privacy-common@3.1.2
+  - @celo/odis-identifiers@1.0.1
+
 ## 5.1.2-beta.0
 
 ### Patch Changes

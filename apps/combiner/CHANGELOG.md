@@ -1,5 +1,19 @@
 # @celo/phone-number-privacy-combiner
 
+## 3.3.3
+
+### Patch Changes
+
+- 8804b67: Upgrade @celo/\*\* dependencies to latest release
+- 3d18f26: Update package dependencies to reduce CVEs
+- Updated dependencies [8804b67]
+- Updated dependencies [687607a]
+- Updated dependencies [56164f9]
+- Updated dependencies [3d18f26]
+  - @celo/encrypted-backup@5.0.6
+  - @celo/identity@5.1.2
+  - @celo/phone-number-privacy-common@3.1.2
+
 ## 3.3.3-beta.0
 
 ### Patch Changes
