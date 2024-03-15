@@ -1,11 +1,12 @@
 {
   "name": "@celo/phone-number-privacy-common",
-  "version": "3.1.1",
+  "version": "3.1.2-beta.0",
   "description": "Common library for the combiner and signer libraries",
   "author": "Celo",
   "license": "Apache-2.0",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
+  "repository": "https://github.com/celo-org/social-connect/tree/main/packages/common",
   "scripts": {
     "prepublish": "yarn build",
     "build": "yarn run --top-level tsc ",

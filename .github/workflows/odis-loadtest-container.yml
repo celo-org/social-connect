@@ -9,6 +9,7 @@ on:
       - 'yarn.lock'
     branches:
       - main
+      - 'prerelease/*'
     tags:
       - odis-loadtest-.*
   pull_request:

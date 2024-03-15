@@ -1,5 +1,13 @@
 # @celo/phone-number-privacy-common
 
+## 3.1.2-beta.0
+
+### Patch Changes
+
+- 8804b67: Upgrade @celo/\*\* dependencies to latest release
+- 687607a: Remove opentelemetry dependencies
+- 3d18f26: Update package dependencies to reduce CVEs
+
 ## 3.1.1
 
 ### Patch Changes

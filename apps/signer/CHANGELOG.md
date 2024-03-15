@@ -1,5 +1,17 @@
 # @celo/phone-number-privacy-signer
 
+## 3.1.2-beta.0
+
+### Patch Changes
+
+- 14269eb: Updated the e2e test script.
+- 8804b67: Upgrade @celo/\*\* dependencies to latest release
+- 3d18f26: Update package dependencies to reduce CVEs
+- Updated dependencies [8804b67]
+- Updated dependencies [687607a]
+- Updated dependencies [3d18f26]
+  - @celo/phone-number-privacy-common@3.1.2-beta.0
+
 ## 3.1.1
 
 ### Patch Changes
