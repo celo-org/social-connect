@@ -1,6 +1,6 @@
 {
   "name": "@celo/identity",
-  "version": "5.1.2-beta.0",
+  "version": "5.1.2",
   "description": "Utilities for interacting with Celo's identity protocol",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -26,8 +26,8 @@
   "dependencies": {
     "@celo/base": "^6.0.0",
     "@celo/contractkit": "^7.1.0",
-    "@celo/odis-identifiers": "^1.0.1-beta.0",
-    "@celo/phone-number-privacy-common": "^3.1.2-beta.0",
+    "@celo/odis-identifiers": "^1.0.1",
+    "@celo/phone-number-privacy-common": "^3.1.2",
     "@celo/utils": "^6.0.0",
     "@types/debug": "^4.1.10",
     "bignumber.js": "^9.1.2",
