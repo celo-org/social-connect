@@ -1,6 +1,6 @@
 {
   "name": "@celo/phone-number-privacy-combiner",
-  "version": "3.3.3-beta.0",
+  "version": "3.3.3",
   "private": true,
   "description": "Orchestrates and combines threshold signatures for use in ODIS",
   "author": "Celo",
@@ -26,9 +26,9 @@
   "dependencies": {
     "@celo/base": "^6.0.0",
     "@celo/contractkit": "^7.1.0",
-    "@celo/encrypted-backup": "^5.0.6-beta.0",
-    "@celo/identity": "^5.1.2-beta.0",
-    "@celo/phone-number-privacy-common": "^3.1.2-beta.0",
+    "@celo/encrypted-backup": "^5.0.6",
+    "@celo/identity": "^5.1.2",
+    "@celo/phone-number-privacy-common": "^3.1.2",
     "@celo/poprf": "^0.1.9",
     "@opentelemetry/api": "^1.6.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.4",

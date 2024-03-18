@@ -1442,15 +1442,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/encrypted-backup@npm:^5.0.6-beta.0, @celo/encrypted-backup@workspace:packages/encrypted-backup":
+"@celo/encrypted-backup@npm:^5.0.6, @celo/encrypted-backup@workspace:packages/encrypted-backup":
   version: 0.0.0-use.local
   resolution: "@celo/encrypted-backup@workspace:packages/encrypted-backup"
   dependencies:
     "@celo/base": "npm:^6.0.0"
     "@celo/connect": "npm:^5.1.2"
     "@celo/dev-utils": "npm:0.0.1-beta.1"
-    "@celo/identity": "npm:^5.1.2-beta.0"
-    "@celo/phone-number-privacy-common": "npm:^3.1.2-beta.0"
+    "@celo/identity": "npm:^5.1.2"
+    "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/poprf": "npm:^0.1.9"
     "@celo/utils": "npm:^6.0.0"
     "@celo/wallet-local": "npm:^5.1.2"
@@ -1463,7 +1463,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/identity@npm:^5.1.2-beta.0, @celo/identity@workspace:packages/identity":
+"@celo/identity@npm:^5.1.2, @celo/identity@workspace:packages/identity":
   version: 0.0.0-use.local
   resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
@@ -1471,8 +1471,8 @@ __metadata:
     "@celo/celo-devchain": "npm:7.0.0"
     "@celo/contractkit": "npm:^7.1.0"
     "@celo/dev-utils": "npm:0.0.1-beta.1"
-    "@celo/odis-identifiers": "npm:^1.0.1-beta.0"
-    "@celo/phone-number-privacy-common": "npm:^3.1.2-beta.0"
+    "@celo/odis-identifiers": "npm:^1.0.1"
+    "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/utils": "npm:^6.0.0"
     "@celo/wallet-local": "npm:^5.1.2"
     "@types/debug": "npm:^4.1.10"
@@ -1500,7 +1500,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/odis-identifiers@npm:^1.0.1-beta.0, @celo/odis-identifiers@workspace:packages/odis-identifiers":
+"@celo/odis-identifiers@npm:^1.0.1, @celo/odis-identifiers@workspace:packages/odis-identifiers":
   version: 0.0.0-use.local
   resolution: "@celo/odis-identifiers@workspace:packages/odis-identifiers"
   dependencies:
@@ -1514,9 +1514,9 @@ __metadata:
   dependencies:
     "@celo/base": "npm:^6.0.0"
     "@celo/contractkit": "npm:^7.1.0"
-    "@celo/encrypted-backup": "npm:^5.0.6-beta.0"
-    "@celo/identity": "npm:^5.1.2-beta.0"
-    "@celo/phone-number-privacy-common": "npm:^3.1.2-beta.0"
+    "@celo/encrypted-backup": "npm:^5.0.6"
+    "@celo/identity": "npm:^5.1.2"
+    "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/phone-number-privacy-signer": "workspace:^"
     "@celo/poprf": "npm:^0.1.9"
     "@celo/utils": "npm:^6.0.0"
@@ -1582,7 +1582,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/phone-number-privacy-common@npm:^3.1.2-beta.0, @celo/phone-number-privacy-common@workspace:packages/common":
+"@celo/phone-number-privacy-common@npm:^3.1.2, @celo/phone-number-privacy-common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-common@workspace:packages/common"
   dependencies:
@@ -1618,9 +1618,9 @@ __metadata:
     "@celo/base": "npm:^6.0.0"
     "@celo/contractkit": "npm:^7.1.0"
     "@celo/cryptographic-utils": "npm:^5.0.7"
-    "@celo/encrypted-backup": "npm:^5.0.6-beta.0"
-    "@celo/identity": "npm:^5.1.2-beta.0"
-    "@celo/phone-number-privacy-common": "npm:^3.1.2-beta.0"
+    "@celo/encrypted-backup": "npm:^5.0.6"
+    "@celo/identity": "npm:^5.1.2"
+    "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/utils": "npm:^6.0.0"
     "@celo/wallet-local": "npm:^5.1.2"
     firebase-admin: "npm:^11.11.0"
@@ -1639,7 +1639,7 @@ __metadata:
   dependencies:
     "@celo/base": "npm:^6.0.0"
     "@celo/contractkit": "npm:^7.1.0"
-    "@celo/phone-number-privacy-common": "npm:^3.1.2-beta.0"
+    "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/poprf": "npm:^0.1.9"
     "@celo/utils": "npm:^6.0.0"
     "@celo/wallet-hsm-azure": "npm:^5.1.2"
@@ -15781,7 +15781,7 @@ __metadata:
   resolution: "odis-example-scripts@workspace:docs/examples"
   dependencies:
     "@celo/base": "npm:^6.0.0"
-    "@celo/identity": "npm:^5.1.2-beta.0"
+    "@celo/identity": "npm:^5.1.2"
     blind-threshold-bls: "https://github.com/celo-org/blind-threshold-bls-wasm#3d1013a"
     ethers: "npm:^5.7.2"
     prettier: "npm:2.7.1"
