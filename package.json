@@ -73,7 +73,7 @@
     "protobufjs": "7.2.4",
     "@babel/traverse": "7.23.2",
     "node-fetch": "2.6.7",
-    "get-func-name": "2.0.1",
+    "get-func-name": "2.0.2",
     "minimatch": "3.0.5",
     "async": "2.6.4",
     "browserify-sign": "4.2.2"
