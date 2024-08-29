@@ -1,6 +1,12 @@
 import { ensureLeading0x, Err, Ok, parseJsonAsResult, Result, trimLeading0x } from '@celo/base'
-import { Address, publicKeyToAddress } from '@celo/utils/lib/address'
-import { ensureCompressed, ensureUncompressed, trimUncompressedPrefix } from '@celo/utils/lib/ecdh'
+import { getAccountsContract } from '@celo/phone-number-privacy-common'
+import { publicKeyToAddress } from '@celo/utils/lib/address'
+import {
+  computeSharedSecret,
+  ensureCompressed,
+  ensureUncompressed,
+  trimUncompressedPrefix,
+} from '@celo/utils/lib/ecdh'
 import { AES128Decrypt, AES128Encrypt, Encrypt, IV_LENGTH } from '@celo/utils/lib/ecies'
 import { EIP712Object, EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils'
 import { createHmac, randomBytes } from 'crypto'
@@ -9,6 +15,7 @@ import { toHex } from 'ethereum-cryptography/utils'
 import { isLeft } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import { join, sep } from 'path'
+import type { Address } from 'viem'
 import { OffchainDataWrapper, OffchainErrorTypes } from '../offchain-data-wrapper'
 import {
   InvalidDataError,
@@ -56,10 +63,10 @@ const distributeSymmetricKey = async (
   key: Buffer,
   toAddress: Address,
 ): Promise<void | SchemaErrors> => {
-  const accounts = await wrapper.kit.contracts.getAccounts()
+  const accounts = getAccountsContract(wrapper.viemClient)
   const [fromPubKey, toPubKey] = await Promise.all([
-    accounts.getDataEncryptionKey(wrapper.self),
-    accounts.getDataEncryptionKey(toAddress),
+    accounts.read.getDataEncryptionKey([wrapper.self]),
+    accounts.read.getDataEncryptionKey([toAddress]),
   ])
   if (fromPubKey === null) {
     return new UnavailableKey(wrapper.self)
@@ -68,7 +75,7 @@ const distributeSymmetricKey = async (
     return new UnavailableKey(toAddress)
   }
 
-  const wallet = wrapper.kit.getWallet()!
+  computeSharedSecret(toPubKey)
   const sharedSecret = await wallet.computeSharedSecret(publicKeyToAddress(fromPubKey), toPubKey)
 
   const computedDataPath = getCiphertextLabel(`${dataPath}.key`, sharedSecret, fromPubKey, toPubKey)
@@ -203,11 +210,11 @@ const readSymmetricKey = async (
   dataPath: string,
   senderAddress: Address,
 ): Promise<Result<Buffer, SchemaErrors>> => {
-  const accounts = await wrapper.kit.contracts.getAccounts()
+  const accounts = getAccountsContract(wrapper.viemClient)
   const wallet = wrapper.kit.getWallet()!
   const [readerPubKey, senderPubKey] = await Promise.all([
-    accounts.getDataEncryptionKey(wrapper.self),
-    accounts.getDataEncryptionKey(senderAddress),
+    accounts.read.getDataEncryptionKey([wrapper.self]),
+    accounts.read.getDataEncryptionKey([senderAddress]),
   ])
 
   if (readerPubKey === null) {
@@ -353,7 +360,10 @@ export const buildEIP712TypedData = async <DataType>(
 
 export const signBuffer = async (wrapper: OffchainDataWrapper, dataPath: string, buf: Buffer) => {
   const typedData = await buildEIP712TypedData(wrapper, dataPath, buf)
-  return wrapper.kit.getWallet()!.signTypedData(wrapper.signer, typedData)
+  return wrapper.viemClient.signTypedData({
+    account: wrapper.signer,
+    ...typedData,
+  })
 }
 
 const ioTsToSolidityTypeMapping: { [x: string]: string } = {

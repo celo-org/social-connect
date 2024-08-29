@@ -1,13 +1,13 @@
 import { hexToBuffer, retryAsyncWithBackOffAndTimeout } from '@celo/base'
-import { ContractKit } from '@celo/contractkit'
-import { AccountsWrapper } from '@celo/contractkit/lib/wrappers/Accounts'
 import { trimLeading0x } from '@celo/utils/lib/address'
 import { verifySignature } from '@celo/utils/lib/signatureUtils'
 
 import Logger from 'bunyan'
 import crypto from 'crypto'
 import { Request } from 'express'
+import { Address, Client, Hex, isAddress } from 'viem'
 import { fetchEnv, rootLogger } from '..'
+import { getAccountsContract } from '../celoViemKit'
 import {
   AuthenticationMethod,
   ErrorMessage,
@@ -16,19 +16,19 @@ import {
 } from '../interfaces'
 import { FULL_NODE_TIMEOUT_IN_MS, RETRY_COUNT, RETRY_DELAY_IN_MS } from './constants'
 
-export type DataEncryptionKeyFetcher = (address: string) => Promise<string>
+export type DataEncryptionKeyFetcher = (address: Address) => Promise<string>
 
-export function newContractKitFetcher(
-  contractKit: ContractKit,
+export function newDEKFetcher(
+  viemClient: Client,
   logger: Logger,
   fullNodeTimeoutMs: number = FULL_NODE_TIMEOUT_IN_MS,
   fullNodeRetryCount: number = RETRY_COUNT,
   fullNodeRetryDelayMs: number = RETRY_DELAY_IN_MS,
 ): DataEncryptionKeyFetcher {
-  return (address: string) =>
+  return (address: Address) =>
     getDataEncryptionKey(
       address,
-      contractKit,
+      viemClient,
       logger,
       fullNodeTimeoutMs,
       fullNodeRetryCount,
@@ -55,6 +55,11 @@ export async function authenticateUser<R extends PhoneNumberPrivacyRequest>(
   const authMethod = request.body.authenticationMethod
 
   if (!messageSignature || !signer) {
+    return false
+  }
+
+  // ensure signer is in fact an address
+  if (!isAddress(signer)) {
     return false
   }
 
@@ -140,18 +145,18 @@ export function verifyDEKSignature(
 }
 
 export async function getDataEncryptionKey(
-  address: string,
-  contractKit: ContractKit,
+  address: Address,
+  viemClient: Client,
   logger: Logger,
   fullNodeTimeoutMs: number,
   fullNodeRetryCount: number,
   fullNodeRetryDelayMs: number,
-): Promise<string> {
+): Promise<Hex> {
   try {
     const res = await retryAsyncWithBackOffAndTimeout(
       async () => {
-        const accountWrapper: AccountsWrapper = await contractKit.contracts.getAccounts()
-        return accountWrapper.getDataEncryptionKey(address)
+        const accountsContract = getAccountsContract(viemClient)
+        return accountsContract.read.getDataEncryptionKey([address])
       },
       fullNodeRetryCount,
       [],

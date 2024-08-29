@@ -6,6 +6,7 @@ import {
   privateKeyToAddress,
 } from '@celo/utils/lib/address'
 
+// why no 0x?
 export const PRIVATE_KEY = '2c63bf6d60b16c8afa13e1069dbe92fef337c23855fff8b27732b3e9c6e7efd4'
 export const ACCOUNT_ADDRESS = normalizeAddressWith0x(privateKeyToAddress(PRIVATE_KEY)) // 0x6037800e91eaa703e38bad40c01410bbdf0fea7e
 

@@ -1,4 +1,4 @@
-import { getContractKitWithAgent, rootLogger } from '@celo/phone-number-privacy-common'
+import { getWalletClientWithAgent, rootLogger } from '@celo/phone-number-privacy-common'
 import { CronJob } from 'cron'
 import { Knex } from 'knex'
 import { initDatabase } from './common/database/database'
@@ -21,7 +21,7 @@ async function start() {
   logger.info(`Starting. Dev mode: ${DEV_MODE}`)
   const db = await initDatabase(config)
   const keyProvider: KeyProvider = await initKeyProvider(config)
-  const server = startSigner(config, db, keyProvider, getContractKitWithAgent(config.blockchain))
+  const server = startSigner(config, db, keyProvider, getWalletClientWithAgent(config.blockchain))
 
   logger.info('Starting database Prunner job')
   launchRequestPrunnerJob(db)

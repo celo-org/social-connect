@@ -1,8 +1,8 @@
-import { ContractKit } from '@celo/contractkit'
 import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import BigNumber from 'bignumber.js'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
+import { Address, PublicClient } from 'viem'
 import { OdisError, wrapError } from '../../common/error'
 import { traceAsyncFunction } from '../../common/tracing-utils'
 import { getDEK, getOnChainOdisPayments } from '../../common/web3/contracts'
@@ -10,7 +10,7 @@ import { config } from '../../config'
 
 export interface PnpAccount {
   dek: string // onChain
-  address: string // onChain
+  address: Address // onChain
   pnpTotalQuota: number // onChain
 }
 
@@ -37,7 +37,7 @@ export class CachingAccountService implements AccountService {
     })
   }
 
-  getAccount(address: string): Promise<PnpAccount> {
+  getAccount(address: Address): Promise<PnpAccount> {
     return traceAsyncFunction('CachingAccountService - getAccount', async () => {
       const value = await this.cache.fetch(address)
 
@@ -56,19 +56,19 @@ export class CachingAccountService implements AccountService {
 export class ContractKitAccountService implements AccountService {
   constructor(
     private readonly logger: Logger,
-    private readonly kit: ContractKit,
+    private readonly client: PublicClient,
   ) {}
 
-  async getAccount(address: string): Promise<PnpAccount> {
+  async getAccount(address: Address): Promise<PnpAccount> {
     return traceAsyncFunction('ContractKitAccountService - getAccount', async () => {
       const dek = await wrapError(
-        getDEK(this.kit, this.logger, address),
+        getDEK(this.client, this.logger, address),
         ErrorMessage.FAILURE_TO_GET_DEK,
       )
 
       const { queryPriceInCUSD } = config.quota
       const totalPaidInWei = await wrapError(
-        getOnChainOdisPayments(this.kit, this.logger, address),
+        getOnChainOdisPayments(this.client, this.logger, address),
         ErrorMessage.FAILURE_TO_GET_TOTAL_QUOTA,
       )
       const totalQuotaBN = totalPaidInWei
@@ -94,7 +94,7 @@ export class MockAccountService implements AccountService {
     private readonly mockTotalQuota: number,
   ) {}
 
-  async getAccount(address: string): Promise<PnpAccount> {
+  async getAccount(address: Address): Promise<PnpAccount> {
     return {
       dek: this.mockDek,
       address,

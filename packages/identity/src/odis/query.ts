@@ -1,5 +1,4 @@
 import { selectiveRetryAsyncWithBackOff } from '@celo/base/lib/async'
-import { ContractKit } from '@celo/contractkit'
 import {
   AuthenticationMethod,
   CombinerEndpoint,
@@ -17,12 +16,14 @@ import fetch from 'cross-fetch'
 import debugFactory from 'debug'
 import { isLeft } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
+import { Transport, WalletClient } from 'viem'
+import { celo } from 'viem/chains'
 
 const debug = debugFactory('kit:odis:query')
 
 export interface WalletKeySigner {
   authenticationMethod: AuthenticationMethod.WALLET_KEY
-  contractKit: ContractKit
+  client: WalletClient<Transport, typeof celo>
 }
 
 export interface EncryptionKeySigner {
@@ -132,7 +133,7 @@ export async function getOdisPnpRequestAuth(
     return signWithDEK(bodyString, signer as EncryptionKeySigner)
   }
   if (signer.authenticationMethod === AuthenticationMethod.WALLET_KEY) {
-    return signer.contractKit.connection.sign(bodyString, body.account)
+    return signer.client.signMessage({ message: bodyString, account: body.account })
   }
   throw new Error('AuthenticationMethod not supported')
 }

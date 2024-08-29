@@ -1,7 +1,7 @@
-import { ContractKit } from '@celo/contractkit'
 import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
+import { Address, PublicClient } from 'viem'
 import { OdisError, wrapError } from '../../common/error'
 import { Counters } from '../../common/metrics'
 import { traceAsyncFunction } from '../../common/tracing-utils'
@@ -47,12 +47,12 @@ export class CachingAccountService implements AccountService {
 export class ContractKitAccountService implements AccountService {
   constructor(
     private readonly logger: Logger,
-    private readonly kit: ContractKit,
+    private readonly client: PublicClient,
   ) {}
 
-  async getAccount(address: string): Promise<string> {
+  async getAccount(address: Address): Promise<string> {
     return traceAsyncFunction('ContractKitAccountService - getAccount', async () => {
-      return wrapError(getDEK(this.kit, this.logger, address), ErrorMessage.FAILURE_TO_GET_DEK)
+      return wrapError(getDEK(this.client, this.logger, address), ErrorMessage.FAILURE_TO_GET_DEK)
     })
   }
 }

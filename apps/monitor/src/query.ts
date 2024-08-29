@@ -1,4 +1,3 @@
-import { newKit } from '@celo/contractkit'
 import { generateKeys, generateMnemonic, MnemonicStrength } from '@celo/cryptographic-utils'
 import {
   buildOdisDomain,
@@ -14,10 +13,16 @@ import {
   OdisContextName,
 } from '@celo/identity/lib/odis/query'
 import { genSessionID } from '@celo/phone-number-privacy-common/lib/utils/logger'
-import { normalizeAddressWith0x, privateKeyToAddress } from '@celo/utils/lib/address'
+import {
+  ensureLeading0x,
+  normalizeAddressWith0x,
+  privateKeyToAddress,
+} from '@celo/utils/lib/address'
 import { defined } from '@celo/utils/lib/sign-typed-data-utils'
-import { LocalWallet } from '@celo/wallet-local'
 import { defineString } from 'firebase-functions/params'
+import { Address, createWalletClient, Hex, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { celo } from 'viem/chains'
 import { dekAuthSigner, generateRandomPhoneNumber, PRIVATE_KEY } from './resources'
 
 let phoneNumber: string
@@ -25,7 +30,7 @@ let phoneNumber: string
 const defaultPhoneNumber = defineString('PHONE_NUMBER')
 const newPrivateKey = async () => {
   const mnemonic = await generateMnemonic(MnemonicStrength.s256_24words)
-  return (await generateKeys(mnemonic)).privateKey
+  return (await generateKeys(mnemonic)).privateKey as Hex
 }
 
 export const queryOdisForSalt = async (
@@ -37,35 +42,14 @@ export const queryOdisForSalt = async (
   privateKey?: string,
   privateKeyPercentage: number = 100,
 ) => {
-  let authSigner: AuthSigner
-  let accountAddress: string
-
   const serviceContext = getServiceContext(contextName, OdisAPI.PNP)
 
-  const contractKit = newKit(blockchainProvider, new LocalWallet())
-
-  if (useDEK) {
-    if (!privateKey || Math.random() > privateKeyPercentage * 0.01) {
-      privateKey = PRIVATE_KEY
-    }
-    contractKit.connection.addAccount(privateKey)
-    accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey))
-    contractKit.defaultAccount = accountAddress
-    authSigner = dekAuthSigner(0)
-    phoneNumber = generateRandomPhoneNumber()
-  } else {
-    if (!privateKey || Math.random() > privateKeyPercentage * 0.01) {
-      privateKey = await newPrivateKey()
-    }
-    accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey))
-    contractKit.connection.addAccount(privateKey)
-    contractKit.defaultAccount = accountAddress
-    authSigner = {
-      authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-      contractKit,
-    }
-    phoneNumber = defaultPhoneNumber.value()
-  }
+  const { accountAddress, authSigner } = await getAuthSignerAndAccount(
+    blockchainProvider,
+    useDEK,
+    privateKey,
+    privateKeyPercentage,
+  )
 
   const abortController = new AbortController()
   const timeout = setTimeout(() => {
@@ -100,7 +84,7 @@ export const queryOdisForQuota = async (
   blockchainProvider: string,
   contextName: OdisContextName,
   timeoutMs: number = 10000,
-  privateKey?: string,
+  privateKey?: Hex,
   privateKeyPercentage: number = 100,
 ) => {
   console.log(`contextName: ${contextName}`) // tslint:disable-line:no-console
@@ -108,17 +92,22 @@ export const queryOdisForQuota = async (
 
   const serviceContext = getServiceContext(contextName, OdisAPI.PNP)
 
-  const contractKit = newKit(blockchainProvider, new LocalWallet())
-
   if (!privateKey || Math.random() > privateKeyPercentage * 0.01) {
     privateKey = await newPrivateKey()
   }
+
+  const account = privateKeyToAccount(privateKey as Hex)
+
   const accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey))
-  contractKit.connection.addAccount(privateKey)
-  contractKit.defaultAccount = accountAddress
+
+  const client = createWalletClient({
+    account,
+    chain: celo,
+    transport: http(blockchainProvider),
+  })
   const authSigner: AuthSigner = {
     authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-    contractKit,
+    client,
   }
 
   const abortController = new AbortController()
@@ -165,4 +154,43 @@ export const queryOdisDomain = async (contextName: OdisContextName) => {
   const domain = buildOdisDomain(monitorDomainConfig, authorizer.address)
   // Throws if signature verification fails
   return odisHardenKey(Buffer.from('password'), domain, serviceContext, authorizer.wallet)
+}
+
+async function getAuthSignerAndAccount(
+  blockchainProvider: string,
+  useDEK: boolean,
+  privateKey: string | undefined,
+  privateKeyPercentage: number,
+) {
+  let authSigner: AuthSigner
+  let accountAddress: Address
+
+  if (useDEK) {
+    // im not sure why this is like this
+    if (!privateKey || Math.random() > privateKeyPercentage * 0.01) {
+      privateKey = PRIVATE_KEY
+    }
+    accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey)) as Address
+    authSigner = dekAuthSigner(0)
+    phoneNumber = generateRandomPhoneNumber()
+  } else {
+    // im not sure why this is like this.
+    if (!privateKey || Math.random() > privateKeyPercentage * 0.01) {
+      privateKey = await newPrivateKey()
+    }
+    accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey)) as Address
+
+    const client = createWalletClient({
+      account: privateKeyToAccount(ensureLeading0x(privateKey)),
+      chain: celo,
+      transport: http(blockchainProvider),
+    })
+
+    authSigner = {
+      authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
+      client,
+    }
+    phoneNumber = defaultPhoneNumber.value()
+  }
+  return { accountAddress, authSigner, privateKey }
 }

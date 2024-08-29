@@ -2,10 +2,11 @@ import { hexToBuffer } from '@celo/base'
 import { ContractKit } from '@celo/contractkit'
 import Logger from 'bunyan'
 import { Request } from 'express'
+import { Client } from 'viem'
 import { ErrorMessage, ErrorType } from '../../src/interfaces/errors'
 import { AuthenticationMethod } from '../../src/interfaces/requests'
 import * as auth from '../../src/utils/authentication'
-import { newContractKitFetcher } from '../../src/utils/authentication'
+import { newDEKFetcher } from '../../src/utils/authentication'
 
 describe('Authentication test suite', () => {
   const logger = Logger.createLogger({
@@ -21,7 +22,7 @@ describe('Authentication test suite', () => {
           account: '0xc1912fee45d61c87cc5ea59dae31190fffff232d',
         },
       } as Request
-      const dekFetcher = newContractKitFetcher({} as ContractKit, logger)
+      const dekFetcher = newDEKFetcher({} as Client, logger)
       const warnings: ErrorType[] = []
 
       const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
@@ -35,7 +36,7 @@ describe('Authentication test suite', () => {
         get: (name: string) => (name === 'Authorization' ? 'Test' : ''),
         body: {},
       } as Request
-      const dekFetcher = newContractKitFetcher({} as ContractKit, logger)
+      const dekFetcher = newDEKFetcher({} as Client, logger)
 
       const warnings: ErrorType[] = []
 
@@ -53,7 +54,7 @@ describe('Authentication test suite', () => {
           authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,
         },
       } as Request
-      const dekFetcher = newContractKitFetcher({} as ContractKit, logger)
+      const dekFetcher = newDEKFetcher({} as Client, logger)
 
       const warnings: ErrorType[] = []
 
@@ -82,7 +83,7 @@ describe('Authentication test suite', () => {
           },
         },
       } as ContractKit
-      const dekFetcher = newContractKitFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(mockContractKit, logger)
 
       const warnings: ErrorType[] = []
 
@@ -111,7 +112,7 @@ describe('Authentication test suite', () => {
           },
         },
       } as ContractKit
-      const dekFetcher = newContractKitFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(mockContractKit, logger)
 
       const warnings: ErrorType[] = []
 
@@ -150,7 +151,7 @@ describe('Authentication test suite', () => {
       } as ContractKit
 
       const warnings: ErrorType[] = []
-      const dekFetcher = newContractKitFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(mockContractKit, logger)
 
       const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -196,7 +197,7 @@ describe('Authentication test suite', () => {
 
         const warnings: ErrorType[] = []
 
-        const dekFetcher = newContractKitFetcher(mockContractKit, logger)
+        const dekFetcher = newDEKFetcher(mockContractKit, logger)
 
         const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -237,7 +238,7 @@ describe('Authentication test suite', () => {
 
       const warnings: ErrorType[] = []
 
-      const dekFetcher = newContractKitFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(mockContractKit, logger)
 
       const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -279,7 +280,7 @@ describe('Authentication test suite', () => {
 
       const warnings: ErrorType[] = []
 
-      const dekFetcher = newContractKitFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(mockContractKit, logger)
 
       const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -315,7 +316,7 @@ describe('Authentication test suite', () => {
           },
         },
       } as ContractKit
-      const dekFetcher = newContractKitFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(mockContractKit, logger)
 
       const warnings: ErrorType[] = []
 

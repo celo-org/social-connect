@@ -1,6 +1,5 @@
-import { ContractKit } from '@celo/contractkit'
 import {
-  getContractKitWithAgent,
+  getWalletClientWithAgent,
   loggerMiddleware,
   OdisRequest,
   rootLogger,
@@ -12,6 +11,7 @@ import https from 'https'
 import { Knex } from 'knex'
 import { IncomingMessage, ServerResponse } from 'node:http'
 import * as PromClient from 'prom-client'
+import { WalletClient } from 'viem'
 import {
   catchErrorHandler,
   connectionClosedHandler,
@@ -45,11 +45,11 @@ export function startSigner(
   config: SignerConfig,
   db: Knex,
   keyProvider: KeyProvider,
-  kit?: ContractKit,
+  client?: WalletClient,
 ): Express | https.Server<typeof IncomingMessage, typeof ServerResponse> {
   const logger = rootLogger(config.serviceName)
 
-  kit = kit ?? getContractKitWithAgent(config.blockchain)
+  client = client ?? getWalletClientWithAgent(config.blockchain)
 
   logger.info('Creating signer express server')
   const app = express()
@@ -67,7 +67,7 @@ export function startSigner(
 
   const baseAccountService = config.shouldMockAccountService
     ? new MockAccountService(config.mockDek, config.mockTotalQuota)
-    : new ContractKitAccountService(logger, kit)
+    : new ContractKitAccountService(logger, client)
 
   const accountService = new CachingAccountService(baseAccountService)
 

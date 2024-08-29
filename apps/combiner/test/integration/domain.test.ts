@@ -16,7 +16,7 @@ import {
   ErrorMessage,
   FULL_NODE_TIMEOUT_IN_MS,
   genSessionID,
-  getContractKitWithAgent,
+  getWalletClientWithAgent,
   KEY_VERSION_HEADER,
   PoprfClient,
   RETRY_COUNT,
@@ -266,7 +266,7 @@ describe('domainService', () => {
         ]),
       )
 
-      app = startCombiner(combinerConfig, getContractKitWithAgent(combinerConfig.blockchain))
+      app = startCombiner(combinerConfig, getWalletClientWithAgent(combinerConfig.blockchain))
     })
 
     beforeEach(async () => {
@@ -414,7 +414,7 @@ describe('domainService', () => {
           configWithApiDisabled.domains.enabled = false
           const appWithApiDisabled = startCombiner(
             configWithApiDisabled,
-            getContractKitWithAgent(configWithApiDisabled.blockchain),
+            getWalletClientWithAgent(configWithApiDisabled.blockchain),
           )
           const req = await disableRequest()
 
@@ -563,7 +563,7 @@ describe('domainService', () => {
           configWithApiDisabled.domains.enabled = false
           const appWithApiDisabled = startCombiner(
             configWithApiDisabled,
-            getContractKitWithAgent(configWithApiDisabled.blockchain),
+            getWalletClientWithAgent(configWithApiDisabled.blockchain),
           )
 
           const req = await quotaRequest()
@@ -893,7 +893,7 @@ describe('domainService', () => {
           configWithApiDisabled.domains.enabled = false
           const appWithApiDisabled = startCombiner(
             configWithApiDisabled,
-            getContractKitWithAgent(configWithApiDisabled.blockchain),
+            getWalletClientWithAgent(configWithApiDisabled.blockchain),
           )
 
           const [req, _] = await signatureRequest()
@@ -1216,7 +1216,7 @@ describe('domainService', () => {
       )
       app = startCombiner(
         combinerConfigLargerN,
-        getContractKitWithAgent(combinerConfigLargerN.blockchain),
+        getWalletClientWithAgent(combinerConfigLargerN.blockchain),
       )
     })
 

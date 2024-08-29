@@ -1,4 +1,3 @@
-import { newKit } from '@celo/contractkit'
 import {
   EncryptionKeySigner,
   OdisContextName,
@@ -10,6 +9,9 @@ import {
   normalizeAddressWith0x,
   privateKeyToAddress,
 } from '@celo/utils/lib/address'
+import { Address, createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { celo } from 'viem/chains'
 
 require('dotenv').config()
 
@@ -33,7 +35,7 @@ export const DEFAULT_FORNO_URL =
   process.env.ODIS_BLOCKCHAIN_PROVIDER ?? 'https://alfajores-forno.celo-testnet.org'
 
 export const PRIVATE_KEY = '2c63bf6d60b16c8afa13e1069dbe92fef337c23855fff8b27732b3e9c6e7efd4' // XXX only valid for staging and alfajores
-export const ACCOUNT_ADDRESS = normalizeAddressWith0x(privateKeyToAddress(PRIVATE_KEY)) // 0x6037800e91eaa703e38bad40c01410bbdf0fea7e
+export const ACCOUNT_ADDRESS = normalizeAddressWith0x(privateKeyToAddress(PRIVATE_KEY)) as Address // 0x6037800e91eaa703e38bad40c01410bbdf0fea7e
 
 // export const PRIVATE_KEY_NO_QUOTA =
 // '2c63bf6d60b16c8afa13e1069dbe92fef337c23855fff8b27732b3e9c6e7efd4' // XXX use this PK on mainnet
@@ -54,10 +56,11 @@ export const CONTACT_PHONE_NUMBERS = [CONTACT_PHONE_NUMBER]
 /**
  * RESOURCES AND UTILS
  */
-export const contractKit = newKit(DEFAULT_FORNO_URL)
-contractKit.addAccount(PRIVATE_KEY_NO_QUOTA)
-contractKit.addAccount(PRIVATE_KEY)
-contractKit.defaultAccount = ACCOUNT_ADDRESS
+const client = createWalletClient({
+  transport: http(DEFAULT_FORNO_URL),
+  chain: celo,
+  account: privateKeyToAccount(PRIVATE_KEY_NO_QUOTA),
+})
 
 interface DEK {
   privateKey: string
@@ -91,5 +94,5 @@ export const dekAuthSigner = (index: number): EncryptionKeySigner => {
 
 export const walletAuthSigner: WalletKeySigner = {
   authenticationMethod: AuthenticationMethod.WALLET_KEY,
-  contractKit,
+  client,
 }

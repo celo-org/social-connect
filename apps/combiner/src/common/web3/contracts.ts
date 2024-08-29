@@ -1,15 +1,19 @@
-import { ContractKit } from '@celo/contractkit'
 import { ErrorMessage, getDataEncryptionKey } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
+import { Address, PublicClient } from 'viem'
 import config from '../../config'
 import { Counters, Histograms, newMeter } from '../metrics'
 
-export async function getDEK(kit: ContractKit, logger: Logger, account: string): Promise<string> {
+export async function getDEK(
+  client: PublicClient,
+  logger: Logger,
+  account: Address,
+): Promise<string> {
   const _meter = newMeter(Histograms.fullNodeLatency, 'getDataEncryptionKey')
   return _meter(() =>
     getDataEncryptionKey(
       account,
-      kit,
+      client,
       logger,
       config.phoneNumberPrivacy.fullNodeTimeoutMs,
       config.phoneNumberPrivacy.fullNodeRetryCount,

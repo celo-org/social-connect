@@ -1,5 +1,4 @@
-import { sleep } from '@celo/base'
-import { newKit, StableToken } from '@celo/contractkit'
+import { ensureLeading0x, sleep } from '@celo/base'
 import {
   AuthenticationMethod,
   KEY_VERSION_HEADER,
@@ -13,8 +12,16 @@ import {
   TestUtils,
   WarningMessage,
 } from '@celo/phone-number-privacy-common'
+import {
+  getAccountsContract,
+  getCUSDContract,
+  getOdisPaymentsContract,
+} from '@celo/phone-number-privacy-common/src/celoViemKit'
 import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
+import { Account, Address, createWalletClient, http } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { celo } from 'viem/chains'
 import { config, getSignerVersion } from '../../src/config'
 import { getBlindedPhoneNumber, getTestParamsForContext } from './utils'
 
@@ -28,31 +35,35 @@ const {
   PHONE_NUMBER,
   PRIVATE_KEY1,
   PRIVATE_KEY2,
-  PRIVATE_KEY3,
+  // PRIVATE_KEY3,
 } = TestUtils.Values
 const { getPnpQuotaRequest, getPnpRequestAuthorization, getPnpSignRequest } = TestUtils.Utils
 
 const ODIS_SIGNER_URL = process.env.ODIS_SIGNER_SERVICE_URL
 const contextSpecificParams = getTestParamsForContext()
 
-const kit = newKit(contextSpecificParams.blockchainProviderURL)
-kit.addAccount(PRIVATE_KEY1)
-kit.addAccount(PRIVATE_KEY2)
-kit.addAccount(PRIVATE_KEY3)
+const account1 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY1))
+const account2 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY2))
+// const account3 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY3))
+const client = createWalletClient({
+  account: account1,
+  chain: celo,
+  transport: http(contextSpecificParams.blockchainProviderURL),
+})
 
 jest.setTimeout(60000)
 
 const expectedVersion = getSignerVersion()
 
 describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
-  const singleQueryCost = config.quota.queryPriceInCUSD.times(1e18).toString()
+  const singleQueryCost = BigInt(config.quota.queryPriceInCUSD.times(1e18).toString(10))
 
   beforeAll(async () => {
-    const accountsWrapper = await kit.contracts.getAccounts()
-    if ((await accountsWrapper.getDataEncryptionKey(ACCOUNT_ADDRESS2)) !== DEK_PUBLIC_KEY) {
-      await accountsWrapper
-        .setAccountDataEncryptionKey(DEK_PUBLIC_KEY)
-        .sendAndWaitForReceipt({ from: ACCOUNT_ADDRESS2 })
+    const accountsWrapper = getAccountsContract(client)
+    if ((await accountsWrapper.read.getDataEncryptionKey([ACCOUNT_ADDRESS2])) !== DEK_PUBLIC_KEY) {
+      await accountsWrapper.write.setAccountDataEncryptionKey([DEK_PUBLIC_KEY], {
+        account: account2,
+      })
     }
   })
 
@@ -106,7 +117,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
 
       const resBody: PnpQuotaResponseSuccess = await res.json()
 
-      await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, ACCOUNT_ADDRESS2)
+      await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, account2)
 
       const res2 = await queryPnpQuotaEndpoint(req, authorization)
       expect(res2.status).toBe(200)
@@ -208,7 +219,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
           blindedMessage,
           AuthenticationMethod.WALLET_KEY,
         )
-        await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, ACCOUNT_ADDRESS2)
+        await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, account2)
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(req, authorization)
         expect(res.status).toBe(200)
@@ -242,7 +253,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
           blindedMessage,
           AuthenticationMethod.WALLET_KEY,
         )
-        await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, ACCOUNT_ADDRESS2)
+        await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, account2)
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(req, authorization, keyVersion)
         expect(res.status).toBe(200)
@@ -266,7 +277,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       })
 
       it('Should respond with 200 and warning on repeated valid requests', async () => {
-        await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, ACCOUNT_ADDRESS2)
+        await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, account2)
         const blindedMessage = getBlindedPhoneNumber(PHONE_NUMBER, randomBytes(32))
         const req = getPnpSignRequest(
           ACCOUNT_ADDRESS2,
@@ -499,15 +510,17 @@ async function queryPnpSignEndpoint(
   return res
 }
 
-async function sendCUSDToOdisPayments(
-  amountInWei: string | number,
-  recipient: string,
-  sender: string,
-) {
-  const stableToken = await kit.contracts.getStableToken(StableToken.cUSD)
-  const odisPayments = await kit.contracts.getOdisPayments()
-  await stableToken
-    .approve(odisPayments.address, amountInWei)
-    .sendAndWaitForReceipt({ from: sender })
-  await odisPayments.payInCUSD(recipient, amountInWei).sendAndWaitForReceipt({ from: sender })
+async function sendCUSDToOdisPayments(amountInWei: bigint, recipient: Address, sender: Account) {
+  const stableToken = getCUSDContract(client)
+  const odisPayments = getOdisPaymentsContract(client)
+
+  await stableToken.write.approve([odisPayments.address, amountInWei], {
+    account: sender,
+    chain: client.chain,
+  })
+
+  await odisPayments.write.payInCUSD([recipient, amountInWei], {
+    account: sender,
+    chain: client.chain,
+  })
 }

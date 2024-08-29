@@ -1,7 +1,6 @@
-import { ContractKit } from '@celo/contractkit'
 import {
   CombinerEndpoint,
-  getContractKitWithAgent,
+  getWalletClientWithAgent,
   KEY_VERSION_HEADER,
   loggerMiddleware,
   OdisRequest,
@@ -10,6 +9,7 @@ import {
 import express, { RequestHandler } from 'express'
 import fs from 'fs'
 import https from 'https'
+import { WalletClient } from 'viem'
 import { Signer } from './common/combine'
 import {
   catchErrorHandler,
@@ -36,10 +36,10 @@ import { NoQuotaCache } from './utils/no-quota-cache'
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
-export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
+export function startCombiner(config: CombinerConfig, viemClient?: WalletClient) {
   const logger = rootLogger(config.serviceName)
 
-  kit = kit ?? getContractKitWithAgent(config.blockchain)
+  viemClient = viemClient ?? getWalletClientWithAgent(config.blockchain)
 
   logger.info('Creating combiner express server')
   const app = express()
@@ -71,7 +71,7 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
 
   const baseAccountService = config.phoneNumberPrivacy.shouldMockAccountService
     ? new MockAccountService(config.phoneNumberPrivacy.mockDek!)
-    : new ContractKitAccountService(logger, kit)
+    : new ContractKitAccountService(logger, viemClient)
 
   const accountService = new CachingAccountService(baseAccountService)
   const noQuotaCache = new NoQuotaCache()

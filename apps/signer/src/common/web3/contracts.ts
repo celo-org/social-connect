@@ -1,20 +1,24 @@
 import { retryAsyncWithBackOffAndTimeout } from '@celo/base'
-import { ContractKit } from '@celo/contractkit'
-import { getDataEncryptionKey } from '@celo/phone-number-privacy-common'
+import { getDataEncryptionKey, getOdisPaymentsContract } from '@celo/phone-number-privacy-common'
 import { BigNumber } from 'bignumber.js'
 import Logger from 'bunyan'
+import { Address, Hex, PublicClient } from 'viem'
 import { config } from '../../config'
 import { Counters, Histograms, newMeter } from '../metrics'
 
 export async function getOnChainOdisPayments(
-  kit: ContractKit,
+  client: PublicClient,
   logger: Logger,
-  account: string,
+  account: Address,
 ): Promise<BigNumber> {
   const _meter = newMeter(Histograms.fullNodeLatency, 'getOnChainOdisPayments')
   return _meter(() =>
     retryAsyncWithBackOffAndTimeout(
-      async () => (await kit.contracts.getOdisPayments()).totalPaidCUSD(account),
+      async () => {
+        const paid = await getOdisPaymentsContract(client).read.totalPaidCUSD([account])
+        // might replace bigNumber with big int but not yet
+        return new BigNumber(paid.toString(10))
+      },
       config.fullNodeRetryCount,
       [],
       config.fullNodeRetryDelayMs,
@@ -28,12 +32,12 @@ export async function getOnChainOdisPayments(
   )
 }
 
-export async function getDEK(kit: ContractKit, logger: Logger, account: string): Promise<string> {
+export async function getDEK(client: PublicClient, logger: Logger, account: Address): Promise<Hex> {
   const _meter = newMeter(Histograms.fullNodeLatency, 'getDataEncryptionKey')
   return _meter(() =>
     getDataEncryptionKey(
       account,
-      kit,
+      client,
       logger,
       config.fullNodeTimeoutMs,
       config.fullNodeRetryCount,

@@ -1,29 +1,45 @@
+import { federatedAttestationsABI } from '@celo/abis'
 import { OdisUtils } from '@celo/identity'
 import { AuthSigner, OdisContextName, ServiceContext } from '@celo/identity/lib/odis/query'
-import { ContractKit, newKit } from '@celo/contractkit'
-import { Account } from 'web3-core'
+import {
+  Address,
+  createWalletClient,
+  Hex,
+  http,
+  PrivateKeyAccount,
+  Transport,
+  WalletClient,
+} from 'viem'
+import { readContract } from 'viem/_types/actions/public/readContract'
+import { simulateContract } from 'viem/_types/actions/public/simulateContract'
+import { writeContract } from 'viem/_types/actions/wallet/writeContract'
+import { privateKeyToAccount } from 'viem/accounts'
+import { celoAlfajores } from 'viem/chains'
 
+const FEDERATED_ATTESTATIONS_ADDRESS = '0x70F9314aF173c246669cFb0EEe79F9Cfd9C34ee3' as const
 const ALFAJORES_RPC = 'https://alfajores-forno.celo-testnet.org'
 const ISSUER_PRIVATE_KEY = '0x199abda8320f5af0bb51429d246a4e537d1c85fbfaa30d52f9b34df381bd3a95'
 class ASv2 {
-  kit: ContractKit
-  issuer: Account
+  walletClient: WalletClient<Transport, typeof celoAlfajores, PrivateKeyAccount>
+  issuer: PrivateKeyAccount
   authSigner: AuthSigner
   serviceContext: ServiceContext
 
-  constructor(kit: ContractKit) {
-    this.kit = kit
-    this.issuer = kit.web3.eth.accounts.privateKeyToAccount(ISSUER_PRIVATE_KEY)
-    this.kit.addAccount(ISSUER_PRIVATE_KEY)
-    this.kit.defaultAccount = this.issuer.address
+  constructor() {
+    this.issuer = privateKeyToAccount(ISSUER_PRIVATE_KEY)
+
+    this.walletClient = createWalletClient({
+      transport: http(ALFAJORES_RPC),
+      account: this.issuer,
+    })
     this.serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.ALFAJORES)
     this.authSigner = {
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-      contractKit: this.kit,
+      client: this.walletClient,
     }
   }
 
-  async registerAttestation(phoneNumber: string, account: string, attestationIssuedTime: number) {
+  async registerAttestation(phoneNumber: string, account: Address, attestationIssuedTime: bigint) {
     await this.checkAndTopUpODISQuota()
 
     // get identifier from phone number using ODIS
@@ -35,12 +51,15 @@ class ASv2 {
       this.serviceContext,
     )
 
-    const federatedAttestationsContract = await this.kit.contracts.getFederatedAttestations()
+    const { request } = await simulateContract(this.walletClient, {
+      abi: federatedAttestationsABI,
+      functionName: 'registerAttestationAsIssuer',
+      args: [obfuscatedIdentifier as Hex, account, attestationIssuedTime],
+      address: FEDERATED_ATTESTATIONS_ADDRESS,
+      chain: celoAlfajores,
+    })
 
-    // upload identifier <-> address mapping to onchain registry
-    await federatedAttestationsContract
-      .registerAttestationAsIssuer(obfuscatedIdentifier, account, attestationIssuedTime)
-      .send()
+    await writeContract(this.walletClient, request)
   }
 
   async lookupAddresses(phoneNumber: string) {
@@ -53,15 +72,15 @@ class ASv2 {
       this.serviceContext,
     )
 
-    const federatedAttestationsContract = await this.kit.contracts.getFederatedAttestations()
-
     // query on-chain mappings
-    const attestations = await federatedAttestationsContract.lookupAttestations(
-      obfuscatedIdentifier,
-      [this.issuer.address],
-    )
+    const [_countsPerIssuer, accounts, _signers] = await readContract(this.walletClient, {
+      abi: federatedAttestationsABI,
+      functionName: 'lookupAttestations',
+      address: '0x',
+      args: [obfuscatedIdentifier as Hex, [this.issuer.address]],
+    })
 
-    return attestations.accounts
+    return accounts
   }
 
   private async checkAndTopUpODISQuota() {
@@ -112,11 +131,10 @@ class ASv2 {
 }
 
 ;(async () => {
-  const kit = await newKit(ALFAJORES_RPC)
-  const asv2 = new ASv2(kit)
+  const asv2 = new ASv2()
   const userAccount = '0xf14790BAdd2638cECB5e885fc7fAD1b6660AAc34'
   const userPhoneNumber = '+18009099999'
-  const timeAttestationWasVerified = Math.floor(new Date().getTime() / 1000)
+  const timeAttestationWasVerified = BigInt(Math.floor(new Date().getTime() / 1000))
   try {
     await asv2.registerAttestation(userPhoneNumber, userAccount, timeAttestationWasVerified)
     console.log('attestation registered')

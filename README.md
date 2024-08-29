@@ -50,17 +50,18 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 2. Set up your issuer (read "Authentication" section in [privacy.md](docs/docs/privacy.md#authentication)), which is the account registering attestations. When a user requests for the issuer to register an attestation, the issuer should [verify](docs/protocol.md#verification) somehow that the user owns their identifier (ex. SMS verification for phone number identifiers).
 
     ```ts
-    import { newKit } from "@celo/contractkit";
-
+    import { createClient } from "viem";
+    import { celoAlfajores } from "viem/chains"
+    import { privateKeyToAccount } from 'viem/accounts'
     // the issuer is the account that is registering the attestation
     let ISSUER_PRIVATE_KEY;
 
-    // create alfajores contractKit instance with the issuer private key
-    const kit = await newKit("https://alfajores-forno.celo-testnet.org");
-    kit.addAccount(ISSUER_PRIVATE_KEY);
-    const issuerAddress =
-        kit.web3.eth.accounts.privateKeyToAccount(ISSUER_PRIVATE_KEY).address;
-    kit.defaultAccount = issuerAddress;
+    // create alfajores viem client with the issuer private key
+    const viemClient = createClient({
+      account: privateKeyToAccount(ISSUER_PRIVATE_KEY)
+      transport: http(),
+      chain: celoAlfajores
+    });
 
     // information provided by user, issuer should confirm they do own the identifier
     const userPlaintextIdentifier = "+12345678910";
