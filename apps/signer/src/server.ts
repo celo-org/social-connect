@@ -34,7 +34,7 @@ import { pnpQuota } from './pnp/endpoints/quota/action'
 import { pnpSign } from './pnp/endpoints/sign/action'
 import {
   CachingAccountService,
-  ContractKitAccountService,
+  ClientAccountService,
   MockAccountService,
 } from './pnp/services/account-service'
 import { DefaultPnpRequestService, MockPnpRequestService } from './pnp/services/request-service'
@@ -67,7 +67,7 @@ export function startSigner(
 
   const baseAccountService = config.shouldMockAccountService
     ? new MockAccountService(config.mockDek, config.mockTotalQuota)
-    : new ContractKitAccountService(logger, client)
+    : new ClientAccountService(logger, client)
 
   const accountService = new CachingAccountService(baseAccountService)
 

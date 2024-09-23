@@ -53,14 +53,14 @@ export class CachingAccountService implements AccountService {
   }
 }
 
-export class ContractKitAccountService implements AccountService {
+export class ClientAccountService implements AccountService {
   constructor(
     private readonly logger: Logger,
     private readonly client: PublicClient,
   ) {}
 
   async getAccount(address: Address): Promise<PnpAccount> {
-    return traceAsyncFunction('ContractKitAccountService - getAccount', async () => {
+    return traceAsyncFunction('ClientAccountService - getAccount', async () => {
       const dek = await wrapError(
         getDEK(this.client, this.logger, address),
         ErrorMessage.FAILURE_TO_GET_DEK,

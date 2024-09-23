@@ -164,7 +164,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       const amountInWei = BigInt(
         signerConfig.quota.queryPriceInCUSD.times(1e18).times(numQueriesToReplenish).toString(),
       )
-
+      const client = walletAuthSigner.client
       const stableToken = getCUSDContract(client)
       const odisPayments = getOdisPaymentsContract(client)
 
@@ -443,7 +443,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           CombinerEndpoint.PNP_SIGN,
           SignMessageResponseSchema,
           {
-            Authorization: await walletAuthSigner.contractKit.connection.sign(
+            Authorization: await walletAuthSigner.client.signMessage(
               JSON.stringify(req),
               ACCOUNT_ADDRESS_NO_QUOTA,
             ),

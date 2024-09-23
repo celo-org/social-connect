@@ -92,7 +92,8 @@ export function createMockWeb3(txCount: number, blockNumber: number) {
   }
 }
 
-export async function registerWalletAddress(
+// Seems unused.
+export async function _registerWalletAddress(
   accountAddress: Address,
   walletAddress: Address,
   walletAddressPk: Hex,
