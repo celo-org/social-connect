@@ -78,7 +78,7 @@ sequenceDiagram
     wallet1 -->> user1:
     wallet1 -->> ODIS: get obfuscated identifier of phone number
     ODIS -->> wallet1:
-    wallet1 -->> SocialConnect: publish attestation with obfuscated idnetifier
+    wallet1 -->> SocialConnect: publish attestation with obfuscated identifier
     end
 
     rect rgb(230,240,290, .3)
