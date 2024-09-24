@@ -2,7 +2,7 @@ import { hexToBuffer } from '@celo/base'
 import { ContractKit } from '@celo/contractkit'
 import Logger from 'bunyan'
 import { Request } from 'express'
-import { Client } from 'viem'
+import { Client, createTestClient } from 'viem'
 import { ErrorMessage, ErrorType } from '../../src/interfaces/errors'
 import { AuthenticationMethod } from '../../src/interfaces/requests'
 import * as auth from '../../src/utils/authentication'
@@ -72,18 +72,21 @@ describe('Authentication test suite', () => {
           authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,
         },
       } as Request
-      const mockContractKit = {
-        contracts: {
-          getAccounts: async () => {
-            return Promise.resolve({
-              getDataEncryptionKey: async (_: string) => {
-                return ''
-              },
-            })
-          },
-        },
-      } as ContractKit
-      const dekFetcher = newDEKFetcher(mockContractKit, logger)
+      // const mockContractKit = {
+      //   contracts: {
+      //     getAccounts: async () => {
+      //       return Promise.resolve({
+      //         getDataEncryptionKey: async (_: string) => {
+      //           return ''
+      //         },
+      //       })
+      //     },
+      //   },
+      // } as ContractKit
+
+      const client = createTestClient({})
+
+      const dekFetcher = newDEKFetcher(client, logger)
 
       const warnings: ErrorType[] = []
 

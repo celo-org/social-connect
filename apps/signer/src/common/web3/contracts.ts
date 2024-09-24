@@ -2,12 +2,12 @@ import { retryAsyncWithBackOffAndTimeout } from '@celo/base'
 import { getDataEncryptionKey, getOdisPaymentsContract } from '@celo/phone-number-privacy-common'
 import { BigNumber } from 'bignumber.js'
 import Logger from 'bunyan'
-import { Address, Hex, PublicClient } from 'viem'
+import { Address, Client, Hex } from 'viem'
 import { config } from '../../config'
 import { Counters, Histograms, newMeter } from '../metrics'
 
 export async function getOnChainOdisPayments(
-  client: PublicClient,
+  client: Client,
   logger: Logger,
   account: Address,
 ): Promise<BigNumber> {
@@ -32,7 +32,7 @@ export async function getOnChainOdisPayments(
   )
 }
 
-export async function getDEK(client: PublicClient, logger: Logger, account: Address): Promise<Hex> {
+export async function getDEK(client: Client, logger: Logger, account: Address): Promise<Hex> {
   const _meter = newMeter(Histograms.fullNodeLatency, 'getDataEncryptionKey')
   return _meter(() =>
     getDataEncryptionKey(

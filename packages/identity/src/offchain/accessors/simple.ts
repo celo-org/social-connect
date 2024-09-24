@@ -1,7 +1,6 @@
 import { Address, trimLeading0x } from '@celo/base'
 import { Err, makeAsyncThrowable, Result } from '@celo/base/lib/result'
 import * as t from 'io-ts'
-import { signTypedData } from 'viem/_types/actions/wallet/signTypedData'
 import { OffchainDataWrapper } from '../../offchain-data-wrapper'
 import {
   buildEIP712TypedData,
@@ -30,7 +29,8 @@ export class PublicSimpleAccessor<DataType> implements PublicAccessor<DataType> 
 
   private async sign(data: DataType) {
     const typedData = await buildEIP712TypedData(this.wrapper, this.dataPath, data, this.type)
-    return signTypedData(undefined, typedData)
+    const wallet = this.wrapper.kit.getWallet()!
+    return wallet.signTypedData(this.wrapper.signer, typedData)
   }
 
   async write(data: DataType) {

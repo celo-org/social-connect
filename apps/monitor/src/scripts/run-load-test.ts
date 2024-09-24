@@ -1,5 +1,6 @@
 import { OdisContextName } from '@celo/identity/lib/odis/query'
 import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
+import { Hex } from 'viem'
 import yargs from 'yargs'
 import { concurrentRPSLoadTest } from '../test'
 
@@ -91,7 +92,7 @@ yargs
         args.bypassQuota,
         args.useDEK,
         args.movingAvgRequests,
-        args.privateKey,
+        args.privateKey as Hex,
         args.privateKeyPercentage,
       )
     },

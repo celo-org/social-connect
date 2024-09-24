@@ -2,7 +2,7 @@ import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import BigNumber from 'bignumber.js'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
-import { Address, PublicClient } from 'viem'
+import { Address, WalletClient } from 'viem'
 import { OdisError, wrapError } from '../../common/error'
 import { traceAsyncFunction } from '../../common/tracing-utils'
 import { getDEK, getOnChainOdisPayments } from '../../common/web3/contracts'
@@ -56,7 +56,7 @@ export class CachingAccountService implements AccountService {
 export class ClientAccountService implements AccountService {
   constructor(
     private readonly logger: Logger,
-    private readonly client: PublicClient,
+    private readonly client: WalletClient,
   ) {}
 
   async getAccount(address: Address): Promise<PnpAccount> {

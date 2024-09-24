@@ -1,5 +1,6 @@
-import { ensureLeading0x } from '@celo/base/lib/address'
+import { Address, ensureLeading0x } from '@celo/base/lib/address'
 import { Err, Ok, Result, RootError, makeAsyncThrowable } from '@celo/base/lib/result'
+import { ContractKit } from '@celo/contractkit'
 import { ClaimTypes } from '@celo/contractkit/lib/identity/claims/types'
 import { IdentityMetadataWrapper } from '@celo/contractkit/lib/identity/metadata'
 import { publicKeyToAddress } from '@celo/utils/lib/address'
@@ -12,12 +13,9 @@ import {
 import fetch from 'cross-fetch'
 import debugFactory from 'debug'
 import * as t from 'io-ts'
-import { WalletClient, type Address } from 'viem'
 import { AuthorizedSignerAccessor } from './offchain/accessors/authorized-signer'
 import { StorageWriter } from './offchain/storage-writers'
 import { buildEIP712TypedData, resolvePath } from './offchain/utils'
-
-import { getAccountsContract } from '@celo/phone-number-privacy-common'
 
 const debug = debugFactory('offchaindata')
 
@@ -60,7 +58,7 @@ export type OffchainErrors =
   | NoStorageProvider
 
 export interface OffchainDataWrapper {
-  viemClient: WalletClient
+  kit: ContractKit
   signer: Address
   self: Address
   writeDataTo(data: Buffer, signature: Buffer, dataPath: string): Promise<OffchainErrors | void>
@@ -74,12 +72,12 @@ export interface OffchainDataWrapper {
 
 export class BasicDataWrapper implements OffchainDataWrapper {
   storageWriter: StorageWriter | undefined
-  signer: Address
+  signer: string
 
   constructor(
-    readonly self: Address,
-    readonly viemClient: WalletClient,
-    signer?: Address,
+    readonly self: string,
+    readonly kit: ContractKit,
+    signer?: string,
   ) {
     this.signer = signer || self
   }
@@ -90,29 +88,10 @@ export class BasicDataWrapper implements OffchainDataWrapper {
     checkOffchainSigners: boolean,
     type?: t.Type<DataType>,
   ): Promise<Result<Buffer, OffchainErrors>> {
-    const accounts = getAccountsContract(this.viemClient)
-
-    const metadataURL = await accounts.read.getMetadataURL([account])
+    const accounts = await this.kit.contracts.getAccounts()
+    const metadataURL = await accounts.getMetadataURL(account)
     debug({ account, metadataURL })
-
-    const accountsWrapper = {
-      isAccount: async (address: string) => accounts.read.isAccount([address as Address]),
-      getValidatorSigner: async (address: string) =>
-        accounts.read.getValidatorSigner([address as Address]),
-      getVoteSigner: async (address: string) =>
-        accounts.read.getValidatorSigner([address as Address]),
-      getAttestationSigner: async (address: string) =>
-        accounts.read.getValidatorSigner([address as Address]),
-    }
-
-    const minimalKit = {
-      contracts: {
-        getAccounts: async () => accountsWrapper,
-      },
-    }
-
-    // @ts-expect-error it might not look it but the above are the only methods called on the kit. yes this is very dangerous
-    const metadata = await IdentityMetadataWrapper.fetchFromURL(minimalKit, metadataURL)
+    const metadata = await IdentityMetadataWrapper.fetchFromURL(accounts, metadataURL)
     // TODO: Filter StorageRoots with the datapath glob
     const storageRoots = metadata
       .filterClaims(ClaimTypes.STORAGE)
@@ -201,13 +180,13 @@ class StorageRoot {
       return Ok(body)
     }
 
-    const accountsContract = getAccountsContract(this.wrapper.viemClient)
-    if (await accountsContract.read.isAccount([this.account])) {
+    const accounts = await this.wrapper.kit.contracts.getAccounts()
+    if (await accounts.isAccount(this.account)) {
       const keys = await Promise.all([
-        accountsContract.read.getVoteSigner([this.account]),
-        accountsContract.read.getValidatorSigner([this.account]),
-        accountsContract.read.getAttestationSigner([this.account]),
-        accountsContract.read.getDataEncryptionKey([this.account]),
+        accounts.getVoteSigner(this.account),
+        accounts.getValidatorSigner(this.account),
+        accounts.getAttestationSigner(this.account),
+        accounts.getDataEncryptionKey(this.account),
       ])
 
       const dekAddress = keys[3] ? publicKeyToAddress(ensureUncompressed(keys[3])) : '0x0'

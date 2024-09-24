@@ -1,5 +1,5 @@
-import { Result, StrongAddress } from '@celo/base'
-import { newKitFromWeb3 } from '@celo/contractkit'
+import { Result } from '@celo/base'
+import { ContractKit, newKitFromWeb3 } from '@celo/contractkit'
 import { createStorageClaim } from '@celo/contractkit/lib/identity/claims/claim'
 import { IdentityMetadataWrapper } from '@celo/contractkit/lib/identity/metadata'
 import { AccountsWrapper } from '@celo/contractkit/lib/wrappers/Accounts'
@@ -7,6 +7,7 @@ import { ACCOUNT_PRIVATE_KEYS } from '@celo/dev-utils/lib/ganache-setup'
 import { testWithGanache } from '@celo/dev-utils/lib/ganache-test'
 import {
   ensureLeading0x,
+  privateKeyToAddress,
   privateKeyToPublicKey,
   publicKeyToAddress,
   toChecksumAddress,
@@ -15,9 +16,6 @@ import { ensureCompressed } from '@celo/utils/lib/ecdh'
 import { NativeSigner, serializeSignature } from '@celo/utils/lib/signatureUtils'
 import { LocalWallet } from '@celo/wallet-local'
 import { randomBytes } from 'crypto'
-import { Address, createWalletClient, Hex, http, WalletClient } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { celoAlfajores } from 'viem/chains'
 import fetchMock from './__mocks__/cross-fetch'
 import { BasicDataWrapper, OffchainDataWrapper, OffchainErrorTypes } from './offchain-data-wrapper'
 import { AuthorizedSignerAccessor } from './offchain/accessors/authorized-signer'
@@ -35,7 +33,7 @@ interface RegisteredAccount {
   address: string
   storageRoot: string
   localStorageRoot: string
-  client: WalletClient
+  kit: ContractKit
 }
 
 testWithGanache('Offchain Data', (web3) => {
@@ -62,7 +60,7 @@ testWithGanache('Offchain Data', (web3) => {
     compressedDEK = false,
   ): Promise<RegisteredAccount> {
     const publicKey = privateKeyToPublicKey(privateKey)
-    const address = publicKeyToAddress(publicKey) as StrongAddress
+    const address = publicKeyToAddress(publicKey)
     const metadataURL = `http://example.com/${address}/metadata`
     const storageRoot = `http://example.com/${address}/root`
     const localStorageRoot = `/tmp/offchain/${address}`
@@ -88,24 +86,11 @@ testWithGanache('Offchain Data', (web3) => {
     await accounts.setMetadataURL(metadataURL).sendAndWaitForReceipt({ from: address })
 
     kit.connection.addAccount(privateKey)
-    const account = privateKeyToAccount(privateKey as Hex)
-    const walletClient = createWalletClient({
-      account,
-      chain: celoAlfajores,
-      transport: http(),
-    })
-    const wrapper = new BasicDataWrapper(account.address, walletClient)
+
+    const wrapper = new BasicDataWrapper(address, kit)
     wrapper.storageWriter = new MockStorageWriter(localStorageRoot, storageRoot, fetchMock)
 
-    return {
-      wrapper,
-      privateKey,
-      publicKey,
-      address,
-      storageRoot,
-      localStorageRoot,
-      client: walletClient,
-    }
+    return { wrapper, privateKey, publicKey, address, storageRoot, localStorageRoot, kit }
   }
 
   beforeEach(async () => {
@@ -117,10 +102,10 @@ testWithGanache('Offchain Data', (web3) => {
 
   afterEach(() => {
     fetchMock.reset()
-    // writer.kit.getWallet()!.removeAccount(writer.address)
-    // reader.kit.getWallet()!.removeAccount(reader.address)
-    // reader2.kit.getWallet()!.removeAccount(reader2.address)
-    // signer.kit.getWallet()!.removeAccount(signer.address)
+    writer.kit.getWallet()!.removeAccount(writer.address)
+    reader.kit.getWallet()!.removeAccount(reader.address)
+    reader2.kit.getWallet()!.removeAccount(reader2.address)
+    signer.kit.getWallet()!.removeAccount(signer.address)
   })
 
   const assertValidNameResponse = (resp: Result<{ name: string }, SchemaErrors>) => {
@@ -171,6 +156,10 @@ testWithGanache('Offchain Data', (web3) => {
       const writerPrivateKey = ACCOUNT_PRIVATE_KEYS[5]
       const writerDEK = randomBytes(32).toString('hex')
       const compressedWriter = await setupAccount(writerPrivateKey, writerDEK, true)
+      const DEKAddress = privateKeyToAddress(writerDEK)
+      compressedWriter.wrapper.kit.connection.addAccount(writerDEK)
+      compressedWriter.wrapper.signer = DEKAddress
+
       const nameAccessor = new PublicNameAccessor(compressedWriter.wrapper)
       await nameAccessor.write(testPayload)
 
@@ -187,7 +176,7 @@ testWithGanache('Offchain Data', (web3) => {
       404,
     )
 
-    const wrapper = new BasicDataWrapper(signer.address as Address, kit)
+    const wrapper = new BasicDataWrapper(signer.address, kit)
     wrapper.storageWriter = new MockStorageWriter(
       writer.localStorageRoot,
       writer.storageRoot,

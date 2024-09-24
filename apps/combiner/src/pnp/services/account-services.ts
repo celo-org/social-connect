@@ -1,7 +1,7 @@
 import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
-import { Address, PublicClient } from 'viem'
+import { Address, Client } from 'viem'
 import { OdisError, wrapError } from '../../common/error'
 import { Counters } from '../../common/metrics'
 import { traceAsyncFunction } from '../../common/tracing-utils'
@@ -47,7 +47,7 @@ export class CachingAccountService implements AccountService {
 export class ContractKitAccountService implements AccountService {
   constructor(
     private readonly logger: Logger,
-    private readonly client: PublicClient,
+    private readonly client: Client,
   ) {}
 
   async getAccount(address: Address): Promise<string> {

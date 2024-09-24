@@ -21,7 +21,6 @@
   "dependencies": {
     "@celo/abis": "^11.0.0",
     "@celo/base": "^6.0.0",
-    "@celo/contractkit": "^7.1.0",
     "@celo/utils": "^6.0.0",
     "@types/bunyan": "1.8.10",
     "bignumber.js": "^9.1.2",
@@ -35,7 +34,7 @@
     "io-ts": "2.0.1",
     "is-base64": "^1.1.0",
     "node-fetch": "^2.6.9",
-    "viem": "^2.19.3"
+    "viem": "2.21.14"
   },
   "devDependencies": {
     "@celo/poprf": "^0.1.9",

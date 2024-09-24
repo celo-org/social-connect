@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "@celo/base": "^6.0.0",
-    "@celo/contractkit": "^7.1.0",
     "@celo/encrypted-backup": "^5.0.6",
     "@celo/identity": "^5.1.2",
     "@celo/phone-number-privacy-common": "^3.1.2",
@@ -56,7 +55,7 @@
     "pg": "^8.2.1",
     "prom-client": "12.0.0",
     "uuid": "^7.0.3",
-    "viem": "^2.19.3"
+    "viem": "2.21.14"
   },
   "devDependencies": {
     "@celo/phone-number-privacy-signer": "workspace:^",

@@ -1,4 +1,5 @@
 import { CombinerEndpoint } from '@celo/phone-number-privacy-common'
+import fetchMock from '../__mocks__/cross-fetch'
 import { WasmBlsBlindingClient } from './bls-blinding-client'
 import {
   getBlindedIdentifier,
@@ -9,7 +10,6 @@ import {
   IdentifierPrefix,
 } from './identifier'
 import { AuthenticationMethod, EncryptionKeySigner, ErrorMessages, ServiceContext } from './query'
-import fetchMock from '../__mocks__/cross-fetch'
 
 jest.mock('./bls-blinding-client', () => {
   class WasmBlsBlindingClient {
