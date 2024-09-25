@@ -1,7 +1,6 @@
 import { privateKeyToAddress } from '@celo/utils/lib/address'
-import { serializeSignature, Signature, signMessage } from '@celo/utils/lib/signatureUtils'
+import { serializeSignature, signMessage } from '@celo/utils/lib/signatureUtils'
 import BigNumber from 'bignumber.js'
-import { Address, Hex } from 'viem'
 import {
   AuthenticationMethod,
   PhoneNumberPrivacyRequest,
@@ -90,26 +89,6 @@ export function createMockWeb3(txCount: number, blockNumber: number) {
       getBlockNumber: jest.fn(() => blockNumber),
     },
   }
-}
-
-// Seems unused.
-export async function _registerWalletAddress(
-  accountAddress: Address,
-  walletAddress: Address,
-  walletAddressPk: Hex,
-  contractKit: any,
-) {
-  const accounts = await contractKit.contracts.getAccounts()
-  // this is not a contract method but rather a local function must port
-  // there is a method on the contract generateProofOfKeyPossession i wonder if it will work
-  const pop = await accounts.generateProofOfKeyPossessionLocally(
-    accountAddress,
-    walletAddress,
-    walletAddressPk,
-  )
-  await accounts
-    .setWalletAddress(walletAddress, pop as Signature)
-    .sendAndWaitForReceipt({ from: accountAddress } as any)
 }
 
 export function getPnpQuotaRequest(

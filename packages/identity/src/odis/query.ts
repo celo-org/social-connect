@@ -16,18 +16,18 @@ import fetch from 'cross-fetch'
 import debugFactory from 'debug'
 import { isLeft } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
-import { isAddress, WalletClient } from 'viem'
+import { Address, Hex, isAddress, SignableMessage } from 'viem'
 
 const debug = debugFactory('kit:odis:query')
 
 export interface WalletKeySigner {
   authenticationMethod: AuthenticationMethod.WALLET_KEY
-  client: WalletClient
+  sign191: ({ message, account }: { message: SignableMessage; account: Address }) => Promise<Hex>
 }
 
 export interface EncryptionKeySigner {
   authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY
-  rawKey: string
+  rawKey: Hex
 }
 
 // Support signing with the DEK or with the
@@ -135,7 +135,7 @@ export async function getOdisPnpRequestAuth(
     if (!isAddress(body.account)) {
       throw new Error('body.account is not a valid Address')
     }
-    return signer.client.signMessage({ message: bodyString, account: body.account })
+    return signer.sign191({ message: bodyString, account: body.account })
   }
   throw new Error('AuthenticationMethod not supported')
 }

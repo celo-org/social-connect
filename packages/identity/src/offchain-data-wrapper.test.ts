@@ -37,6 +37,7 @@ interface RegisteredAccount {
 }
 
 testWithGanache('Offchain Data', (web3) => {
+  // @ts-expect-error slightly different web3 defs
   const kit = newKitFromWeb3(web3, new LocalWallet())
 
   const writerPrivate = ACCOUNT_PRIVATE_KEYS[0]

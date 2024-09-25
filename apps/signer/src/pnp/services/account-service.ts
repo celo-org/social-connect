@@ -3,9 +3,9 @@ import BigNumber from 'bignumber.js'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
 import { Address, WalletClient } from 'viem'
+import { getDEK, getOnChainOdisPayments } from '../../common/contracts'
 import { OdisError, wrapError } from '../../common/error'
 import { traceAsyncFunction } from '../../common/tracing-utils'
-import { getDEK, getOnChainOdisPayments } from '../../common/web3/contracts'
 import { config } from '../../config'
 
 export interface PnpAccount {

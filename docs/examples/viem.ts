@@ -45,7 +45,9 @@ class ASv2 {
     this.serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.ALFAJORES)
     this.authSigner = {
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-      client: this.walletClient,
+      sign191: (args) => {
+        return this.walletClient.signMessage(args)
+      },
     }
   }
 

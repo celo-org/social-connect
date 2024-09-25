@@ -107,7 +107,7 @@ export const queryOdisForQuota = async (
   })
   const authSigner: AuthSigner = {
     authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-    client,
+    sign191: ({ message, account }) => client.signMessage({ message, account }),
   }
 
   const abortController = new AbortController()
@@ -188,7 +188,7 @@ async function getAuthSignerAndAccount(
 
     authSigner = {
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-      client,
+      sign191: client.signMessage,
     }
     phoneNumber = defaultPhoneNumber.value()
   }

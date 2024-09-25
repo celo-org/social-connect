@@ -207,12 +207,12 @@ if (remainingQuota < 1) {
 
 There are two authentication methods for your `AuthSigner` when interacting with ODIS:
 
-1. **`WalletKeySigner`**:  uses a wallet key by passing in a contractkit instance with the account unlocked:
+1. **`WalletKeySigner`**:  just needs to be capable of signing a eip191 message. Viem and Ethers both have a signMessage function that can be used  
 
     ```typescript
     const authSigner: AuthSigner = {
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-      contractKit,
+      sign191: ,
     };
     ```
 

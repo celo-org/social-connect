@@ -5,13 +5,13 @@ import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
 import {
   CombinerEndpoint,
   getAccountsContract,
+  getCUSDContract,
   getOdisPaymentsContract,
   PnpQuotaRequest,
   PnpQuotaResponseSchema,
   SignMessageRequest,
   SignMessageResponseSchema,
 } from '@celo/phone-number-privacy-common'
-import { getCUSDContract } from '@celo/phone-number-privacy-common/src/celoViemKit'
 import { config as signerConfig } from '@celo/phone-number-privacy-signer/src/config'
 import { normalizeAddressWith0x } from '@celo/utils/lib/address'
 import threshold_bls from 'blind-threshold-bls'
@@ -24,6 +24,7 @@ import {
   ACCOUNT_ADDRESS,
   ACCOUNT_ADDRESS_NO_QUOTA,
   BLINDED_PHONE_NUMBER,
+  client,
   dekAuthSigner,
   deks,
   getTestContextName,
@@ -47,7 +48,7 @@ const expectedVersion = getCombinerVersion()
 
 describe(`Running against service deployed at ${combinerUrl} w/ blockchain provider ${fullNodeUrl}`, () => {
   beforeAll(async () => {
-    const accountsContract = getAccountsContract(walletAuthSigner.client)
+    const accountsContract = getAccountsContract(client)
     const dekPublicKey = normalizeAddressWith0x(deks[0].publicKey) as Hex
     if ((await accountsContract.read.getDataEncryptionKey([ACCOUNT_ADDRESS])) !== dekPublicKey) {
       await accountsContract.write.setAccountDataEncryptionKey([dekPublicKey], {
@@ -136,7 +137,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           CombinerEndpoint.PNP_QUOTA,
           PnpQuotaResponseSchema,
           {
-            Authorization: await walletAuthSigner.client.signMessage({
+            Authorization: await walletAuthSigner.sign191({
               message: JSON.stringify(req),
               account: privateKeyToAccount(PRIVATE_KEY_NO_QUOTA),
             }),
@@ -164,7 +165,6 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       const amountInWei = BigInt(
         signerConfig.quota.queryPriceInCUSD.times(1e18).times(numQueriesToReplenish).toString(),
       )
-      const client = walletAuthSigner.client
       const stableToken = getCUSDContract(client)
       const odisPayments = getOdisPaymentsContract(client)
 
@@ -172,11 +172,11 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
 
       await stableToken.write.approve([odisPayments.address, amountInWei], {
         account: sender,
-        chain: walletAuthSigner.client.chain,
+        chain: client.chain,
       })
       await odisPayments.write.payInCUSD([ACCOUNT_ADDRESS, amountInWei], {
         account: sender,
-        chain: walletAuthSigner.client.chain,
+        chain: client.chain,
       })
       // wait for cache to expire and then query to refresh
       await sleep(5 * 1000)
@@ -443,10 +443,10 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           CombinerEndpoint.PNP_SIGN,
           SignMessageResponseSchema,
           {
-            Authorization: await walletAuthSigner.client.signMessage(
-              JSON.stringify(req),
-              ACCOUNT_ADDRESS_NO_QUOTA,
-            ),
+            Authorization: await client.signMessage({
+              message: JSON.stringify(req),
+              account: ACCOUNT_ADDRESS_NO_QUOTA,
+            }),
           },
         ),
       ).rejects.toThrow(ErrorMessages.ODIS_AUTH_ERROR)

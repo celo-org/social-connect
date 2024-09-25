@@ -39,7 +39,7 @@ We've made a mini-series to explain you:
 
 ## 🧑‍💻 Quickstart
 
-The following steps use the Celo [ContractKit](https://docs.celo.org/developer/contractkit) to quickly set you up to play around with the protocol. If you would like to use a different library instead, please refer to the [example scripts](examples/).
+The following steps use the  [Viem](https://viem.sh) to quickly set you up to play around with the protocol. If you would like to use a different library instead, please refer to the [example scripts](examples/).
 
 1. Add the [`@celo/identity`](https://www.npmjs.com/package/@celo/identity) package into your project.
 
@@ -80,7 +80,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
     // authSigner provides information needed to authenticate with ODIS
     const authSigner: AuthSigner = {
         authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-        contractKit: kit,
+        sign191: ({message, account}) => viemClient.signMessage({message, account}),
     };
     // serviceContext provides the ODIS endpoint and public key
     const serviceContext = OdisUtils.Query.getServiceContext(
@@ -153,7 +153,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 
 |                                             Type                                              |
 | :-------------------------------------------------------------------------------------------: |
-|                            [ContractKit](docs/examples/contractKit.ts)                             |
+|                            [Viem](docs/examples/viem.ts)                             |
 |                              [EthersJS (v5)](docs/examples/ethers.ts)                              |
 |                                  [web3.js](docs/examples/web3.ts)                                  |
 |         [NextJS based web app (Phone Number)](https://github.com/celo-org/emisianto)          |
@@ -162,7 +162,7 @@ The following steps use the Celo [ContractKit](https://docs.celo.org/developer/c
 |      [NextJS based web app (Twitter)](https://github.com/celo-org/SocialConnect-Twitter)      |
 | [Server side NextJS (Twitter)](https://github.com/celo-org/SocialConnect-Twitter-Server-Side) |
 
-<!-- -   [@celo/contractkit](https://docs.celo.org/developer/contractkit) (see [`examples/contractKit.ts`](examples/contractKit.ts)),
+<!-- -   [viem](https://viem.sh) (see [`examples/viem.ts`](examples/viem.ts)),
 -   [ethers.js](https://ethers.org/) (see [`examples/ethers.ts`](examples/ethers.ts)), and
 -   [web3.js](https://web3js.readthedocs.io/en/v1.8.1/) (see [`examples/web3.ts`](examples/web3.ts)). -->
 

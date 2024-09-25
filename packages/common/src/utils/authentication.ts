@@ -7,7 +7,7 @@ import crypto from 'crypto'
 import { Request } from 'express'
 import { Address, Client, Hex, isAddress } from 'viem'
 import { fetchEnv, rootLogger } from '..'
-import { getAccountsContract } from '../celoViemKit'
+import { getAccountsContract } from '../contracts'
 import {
   AuthenticationMethod,
   ErrorMessage,

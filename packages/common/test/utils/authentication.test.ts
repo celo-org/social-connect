@@ -1,8 +1,8 @@
 import { hexToBuffer } from '@celo/base'
-import { ContractKit } from '@celo/contractkit'
 import Logger from 'bunyan'
 import { Request } from 'express'
-import { Client, createTestClient } from 'viem'
+import { Client, createClient, http } from 'viem'
+import { celoAlfajores } from 'viem/chains'
 import { ErrorMessage, ErrorType } from '../../src/interfaces/errors'
 import { AuthenticationMethod } from '../../src/interfaces/requests'
 import * as auth from '../../src/utils/authentication'
@@ -13,6 +13,8 @@ describe('Authentication test suite', () => {
     name: 'logger',
     level: 'warn',
   })
+
+  const client = createClient({ transport: http(), chain: celoAlfajores })
 
   describe('authenticateUser utility', () => {
     it("Should fail authentication with missing 'Authorization' header", async () => {
@@ -84,8 +86,6 @@ describe('Authentication test suite', () => {
       //   },
       // } as ContractKit
 
-      const client = createTestClient({})
-
       const dekFetcher = newDEKFetcher(client, logger)
 
       const warnings: ErrorType[] = []
@@ -104,18 +104,18 @@ describe('Authentication test suite', () => {
           authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,
         },
       } as Request
-      const mockContractKit = {
-        contracts: {
-          getAccounts: async () => {
-            return Promise.resolve({
-              getDataEncryptionKey: async (_: string) => {
-                return 'notAValidKeyEncryption'
-              },
-            })
-          },
-        },
-      } as ContractKit
-      const dekFetcher = newDEKFetcher(mockContractKit, logger)
+      // const mockContractKit = {
+      //   contracts: {
+      //     getAccounts: async () => {
+      //       return Promise.resolve({
+      //         getDataEncryptionKey: async (_: string) => {
+      //           return 'notAValidKeyEncryption'
+      //         },
+      //       })
+      //     },
+      //   },
+      // } as ContractKit
+      const dekFetcher = newDEKFetcher(client, logger)
 
       const warnings: ErrorType[] = []
 
@@ -136,25 +136,25 @@ describe('Authentication test suite', () => {
         get: (name: string) => (name === 'Authorization' ? sig : ''),
         body,
       } as Request
-      const mockContractKit = {
-        contracts: {
-          getAccounts: async () => {
-            return Promise.resolve({
-              getDataEncryptionKey: async (_: string) => {
-                // NOTE: elliptic is disabled elsewhere in this library to prevent
-                // accidental signing of truncated messages.
-                const EC = require('elliptic').ec
-                const ec = new EC('secp256k1')
-                const key = ec.keyFromPrivate(hexToBuffer(rawKey))
-                return key.getPublic(true, 'hex')
-              },
-            })
-          },
-        },
-      } as ContractKit
+      // const mockContractKit = {
+      //   contracts: {
+      //     getAccounts: async () => {
+      //       return Promise.resolve({
+      //         getDataEncryptionKey: async (_: string) => {
+      //           // NOTE: elliptic is disabled elsewhere in this library to prevent
+      //           // accidental signing of truncated messages.
+      //           const EC = require('elliptic').ec
+      //           const ec = new EC('secp256k1')
+      //           const key = ec.keyFromPrivate(hexToBuffer(rawKey))
+      //           return key.getPublic(true, 'hex')
+      //         },
+      //       })
+      //     },
+      //   },
+      // } as ContractKit
 
       const warnings: ErrorType[] = []
-      const dekFetcher = newDEKFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(client, logger)
 
       const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -181,26 +181,26 @@ describe('Authentication test suite', () => {
           get: (name: string) => (name === 'Authorization' ? sig : ''),
           body,
         } as Request
-        const mockContractKit = {
-          contracts: {
-            getAccounts: async () => {
-              return Promise.resolve({
-                getDataEncryptionKey: async (_: string) => {
-                  // NOTE: elliptic is disabled elsewhere in this library to prevent
-                  // accidental signing of truncated messages.
-                  const EC = require('elliptic').ec
-                  const ec = new EC('secp256k1')
-                  const key = ec.keyFromPrivate(hexToBuffer(rawKey))
-                  return key.getPublic(true, 'hex')
-                },
-              })
-            },
-          },
-        } as ContractKit
+        // const mockContractKit = {
+        //   contracts: {
+        //     getAccounts: async () => {
+        //       return Promise.resolve({
+        //         getDataEncryptionKey: async (_: string) => {
+        //           // NOTE: elliptic is disabled elsewhere in this library to prevent
+        //           // accidental signing of truncated messages.
+        //           const EC = require('elliptic').ec
+        //           const ec = new EC('secp256k1')
+        //           const key = ec.keyFromPrivate(hexToBuffer(rawKey))
+        //           return key.getPublic(true, 'hex')
+        //         },
+        //       })
+        //     },
+        //   },
+        // } as ContractKit
 
         const warnings: ErrorType[] = []
 
-        const dekFetcher = newDEKFetcher(mockContractKit, logger)
+        const dekFetcher = newDEKFetcher(client, logger)
 
         const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -221,27 +221,27 @@ describe('Authentication test suite', () => {
         body,
       } as Request
 
-      const mockContractKit = {
-        contracts: {
-          getAccounts: async () => {
-            return Promise.resolve({
-              getDataEncryptionKey: async (_: string) => {
-                // NOTE: elliptic is disabled elsewhere in this library to prevent
-                // accidental signing of truncated messages.
-                const EC = require('elliptic').ec
-                const ec = new EC('secp256k1')
-                // Send back a manipulated key.
-                const key = ec.keyFromPrivate(hexToBuffer('a' + rawKey.slice(1)))
-                return key.getPublic(true, 'hex')
-              },
-            })
-          },
-        },
-      } as ContractKit
+      // const mockContractKit = {
+      //   contracts: {
+      //     getAccounts: async () => {
+      //       return Promise.resolve({
+      //         getDataEncryptionKey: async (_: string) => {
+      //           // NOTE: elliptic is disabled elsewhere in this library to prevent
+      //           // accidental signing of truncated messages.
+      //           const EC = require('elliptic').ec
+      //           const ec = new EC('secp256k1')
+      //           // Send back a manipulated key.
+      //           const key = ec.keyFromPrivate(hexToBuffer('a' + rawKey.slice(1)))
+      //           return key.getPublic(true, 'hex')
+      //         },
+      //       })
+      //     },
+      //   },
+      // } as ContractKit
 
       const warnings: ErrorType[] = []
 
-      const dekFetcher = newDEKFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(client, logger)
 
       const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -263,27 +263,27 @@ describe('Authentication test suite', () => {
         body,
       } as Request
 
-      const mockContractKit = {
-        contracts: {
-          getAccounts: async () => {
-            return Promise.resolve({
-              getDataEncryptionKey: async (_: string) => {
-                // NOTE: elliptic is disabled elsewhere in this library to prevent
-                // accidental signing of truncated messages.
-                const EC = require('elliptic').ec
-                const ec = new EC('secp256k1')
-                // Send back a manipulated key.
-                const key = ec.keyFromPrivate(hexToBuffer(rawKey))
-                return key.getPublic(true, 'hex')
-              },
-            })
-          },
-        },
-      } as ContractKit
+      // const mockContractKit = {
+      //   contracts: {
+      //     getAccounts: async () => {
+      //       return Promise.resolve({
+      //         getDataEncryptionKey: async (_: string) => {
+      //           // NOTE: elliptic is disabled elsewhere in this library to prevent
+      //           // accidental signing of truncated messages.
+      //           const EC = require('elliptic').ec
+      //           const ec = new EC('secp256k1')
+      //           // Send back a manipulated key.
+      //           const key = ec.keyFromPrivate(hexToBuffer(rawKey))
+      //           return key.getPublic(true, 'hex')
+      //         },
+      //       })
+      //     },
+      //   },
+      // } as ContractKit
 
       const warnings: ErrorType[] = []
 
-      const dekFetcher = newDEKFetcher(mockContractKit, logger)
+      const dekFetcher = newDEKFetcher(client, logger)
 
       const success = await auth.authenticateUser(sampleRequest, logger, dekFetcher, warnings)
 
@@ -308,18 +308,18 @@ describe('Authentication test suite', () => {
         get: (name: string) => (name === 'Authorization' ? sig : ''),
         body,
       } as Request
-      const mockContractKit = {
-        contracts: {
-          getAccounts: async () => {
-            return Promise.resolve({
-              getDataEncryptionKey: async (_: string) => {
-                return key.getPublic(true, 'hex')
-              },
-            })
-          },
-        },
-      } as ContractKit
-      const dekFetcher = newDEKFetcher(mockContractKit, logger)
+      // const mockContractKit = {
+      //   contracts: {
+      //     getAccounts: async () => {
+      //       return Promise.resolve({
+      //         getDataEncryptionKey: async (_: string) => {
+      //           return key.getPublic(true, 'hex')
+      //         },
+      //       })
+      //     },
+      //   },
+      // } as ContractKit
+      const dekFetcher = newDEKFetcher(client, logger)
 
       const warnings: ErrorType[] = []
 

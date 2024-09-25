@@ -1,4 +1,4 @@
-export { getAccountsContract, getOdisPaymentsContract } from './celoViemKit'
+export { getAccountsContract, getCUSDContract, getOdisPaymentsContract } from './contracts'
 export * from './domains'
 export * from './interfaces'
 export { ErrorMessage, WarningMessage } from './interfaces/errors'

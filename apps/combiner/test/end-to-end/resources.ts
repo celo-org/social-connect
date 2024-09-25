@@ -56,7 +56,7 @@ export const CONTACT_PHONE_NUMBERS = [CONTACT_PHONE_NUMBER]
 /**
  * RESOURCES AND UTILS
  */
-const client = createWalletClient({
+export const client = createWalletClient({
   transport: http(DEFAULT_FORNO_URL),
   chain: celo,
   account: privateKeyToAccount(PRIVATE_KEY_NO_QUOTA),
@@ -94,5 +94,5 @@ export const dekAuthSigner = (index: number): EncryptionKeySigner => {
 
 export const walletAuthSigner: WalletKeySigner = {
   authenticationMethod: AuthenticationMethod.WALLET_KEY,
-  client,
+  sign191: (args) => client.signMessage(args),
 }

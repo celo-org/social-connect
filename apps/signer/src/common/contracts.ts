@@ -3,8 +3,8 @@ import { getDataEncryptionKey, getOdisPaymentsContract } from '@celo/phone-numbe
 import { BigNumber } from 'bignumber.js'
 import Logger from 'bunyan'
 import { Address, Client, Hex } from 'viem'
-import { config } from '../../config'
-import { Counters, Histograms, newMeter } from '../metrics'
+import { config } from '../config'
+import { Counters, Histograms, newMeter } from './metrics'
 
 export async function getOnChainOdisPayments(
   client: Client,
@@ -16,7 +16,6 @@ export async function getOnChainOdisPayments(
     retryAsyncWithBackOffAndTimeout(
       async () => {
         const paid = await getOdisPaymentsContract(client).read.totalPaidCUSD([account])
-        // might replace bigNumber with big int but not yet
         return new BigNumber(paid.toString(10))
       },
       config.fullNodeRetryCount,
