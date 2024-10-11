@@ -23,19 +23,15 @@ export function createMockAttestation(getVerifiedStatus: jest.Mock<AttestationsS
   }
 }
 
-export function createMockToken(balanceOf: jest.Mock<BigNumber, []>) {
-  return {
-    balanceOf,
-  }
-}
-
 export function createMockAccounts(
   getWalletAddress: jest.Mock<string, []>,
   getDataEncryptionKey: jest.Mock<string, []>,
 ) {
   return {
-    getWalletAddress,
-    getDataEncryptionKey,
+    read: {
+      getWalletAddress,
+      getDataEncryptionKey,
+    },
   }
 }
 
@@ -43,35 +39,7 @@ export function createMockAccounts(
 // and more easily set return values
 export function createMockOdisPayments(totalPaidCUSDFunc: jest.Mock<BigNumber, []>) {
   return {
-    totalPaidCUSD: totalPaidCUSDFunc,
-  }
-}
-
-export function createMockContractKit(
-  c: { [contractName in ContractRetrieval]?: any },
-  mockWeb3?: any,
-) {
-  const contracts: any = {}
-  for (const t of Object.keys(c)) {
-    contracts[t] = jest.fn(() => c[t as ContractRetrieval])
-  }
-
-  return {
-    contracts,
-    registry: {
-      addressFor: async () => 1000,
-    },
-    connection: mockWeb3 ?? createMockConnection(mockWeb3),
-  }
-}
-
-export function createMockConnection(mockWeb3: any) {
-  return {
-    web3: mockWeb3,
-    getTransactionCount: jest.fn(() => mockWeb3.eth.getTransactionCount()),
-    getBlockNumber: jest.fn(() => {
-      return mockWeb3.eth.getBlockNumber()
-    }),
+    read: { totalPaidCUSD: totalPaidCUSDFunc },
   }
 }
 
@@ -80,15 +48,6 @@ export enum ContractRetrieval {
   getGoldToken = 'getGoldToken',
   getAccounts = 'getAccounts',
   getOdisPayments = 'getOdisPayments',
-}
-
-export function createMockWeb3(txCount: number, blockNumber: number) {
-  return {
-    eth: {
-      getTransactionCount: jest.fn(() => txCount),
-      getBlockNumber: jest.fn(() => blockNumber),
-    },
-  }
 }
 
 export function getPnpQuotaRequest(

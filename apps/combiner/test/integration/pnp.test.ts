@@ -42,13 +42,7 @@ import config, { getCombinerVersion } from '../../src/config'
 import { startCombiner } from '../../src/server'
 import { getBlindedPhoneNumber, serverClose } from '../utils'
 
-const {
-  ContractRetrieval,
-  createMockContractKit,
-  createMockAccounts,
-  createMockOdisPayments,
-  getPnpRequestAuthorization,
-} = TestUtils.Utils
+const { createMockAccounts, createMockOdisPayments, getPnpRequestAuthorization } = TestUtils.Utils
 const {
   PRIVATE_KEY1,
   ACCOUNT_ADDRESS1,
@@ -153,20 +147,14 @@ const mockOdisPaymentsTotalPaidCUSD = jest.fn<BigNumber, []>()
 const mockGetWalletAddress = jest.fn<string, []>()
 const mockGetDataEncryptionKey = jest.fn<string, []>()
 
-const mockContractKit = createMockContractKit({
-  [ContractRetrieval.getAccounts]: createMockAccounts(
-    mockGetWalletAddress,
-    mockGetDataEncryptionKey,
-  ),
-  [ContractRetrieval.getOdisPayments]: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
-})
+const mockContracts = {
+  ['getAccountsContract']: createMockAccounts(mockGetWalletAddress, mockGetDataEncryptionKey),
+  ['getOdisPaymentsContract']: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
+}
 
-// TODO replace this mock with mock of viemCeloKit stuff
-// Mock newKit as opposed to the CK constructor
-// Returns an object of type ContractKit that can be passed into the signers + combiner
-jest.mock('@celo/contractkit', () => ({
-  ...jest.requireActual('@celo/contractkit'),
-  newKit: jest.fn().mockImplementation(() => mockContractKit),
+jest.mock('@celo/phone-number-privacy-common', () => ({
+  ...jest.requireActual('@celo/phone-number-privacy-common'),
+  ...mockContracts,
 }))
 
 describe('pnpService', () => {

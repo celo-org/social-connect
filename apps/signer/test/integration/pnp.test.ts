@@ -31,8 +31,6 @@ import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '
 import { startSigner } from '../../src/server'
 
 const {
-  ContractRetrieval,
-  createMockContractKit,
   createMockAccounts,
   createMockOdisPayments,
   getPnpQuotaRequest,
@@ -50,16 +48,14 @@ const mockOdisPaymentsTotalPaidCUSD = jest.fn<BigNumber, []>()
 const mockGetWalletAddress = jest.fn<string, []>()
 const mockGetDataEncryptionKey = jest.fn<string, []>()
 
-const mockContractKit = createMockContractKit({
-  [ContractRetrieval.getAccounts]: createMockAccounts(
-    mockGetWalletAddress,
-    mockGetDataEncryptionKey,
-  ),
-  [ContractRetrieval.getOdisPayments]: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
-})
-jest.mock('@celo/contractkit', () => ({
-  ...jest.requireActual('@celo/contractkit'),
-  newKit: jest.fn().mockImplementation(() => mockContractKit),
+const mockContracts = {
+  getAccountsContract: createMockAccounts(mockGetWalletAddress, mockGetDataEncryptionKey),
+  ['getOdisPaymentsContract']: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
+}
+
+jest.mock('@celo/phone-number-privacy-common', () => ({
+  ...jest.requireActual('@celo/phone-number-privacy-common'),
+  ...mockContracts,
 }))
 
 // Indexes correspond to keyVersion - 1

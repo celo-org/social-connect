@@ -29,8 +29,8 @@ import { pnpQuota } from './pnp/endpoints/quota/action'
 import { pnpSign } from './pnp/endpoints/sign/action'
 import {
   CachingAccountService,
-  ContractKitAccountService,
   MockAccountService,
+  ViemAccountService,
 } from './pnp/services/account-services'
 import { NoQuotaCache } from './utils/no-quota-cache'
 
@@ -71,7 +71,7 @@ export function startCombiner(config: CombinerConfig, viemClient?: WalletClient)
 
   const baseAccountService = config.phoneNumberPrivacy.shouldMockAccountService
     ? new MockAccountService(config.phoneNumberPrivacy.mockDek!)
-    : new ContractKitAccountService(logger, viemClient)
+    : new ViemAccountService(logger, viemClient)
 
   const accountService = new CachingAccountService(baseAccountService)
   const noQuotaCache = new NoQuotaCache()

@@ -25,9 +25,12 @@ export interface WalletKeySigner {
   sign191: ({ message, account }: { message: SignableMessage; account: Address }) => Promise<Hex>
 }
 
+/*
+ * @property rawKey is NOT 0x prefixed
+ */
 export interface EncryptionKeySigner {
   authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY
-  rawKey: Hex
+  rawKey: string
 }
 
 // Support signing with the DEK or with the

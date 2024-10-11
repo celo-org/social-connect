@@ -11,7 +11,7 @@ export interface AccountService {
   getAccount(address: string): Promise<string>
 }
 
-export interface ContractKitAccountServiceOptions {
+export interface ViemAccountServiceOptions {
   fullNodeTimeoutMs: number
   fullNodeRetryCount: number
   fullNodeRetryDelayMs: number
@@ -44,14 +44,14 @@ export class CachingAccountService implements AccountService {
 }
 
 // tslint:disable-next-line:max-classes-per-file
-export class ContractKitAccountService implements AccountService {
+export class ViemAccountService implements AccountService {
   constructor(
     private readonly logger: Logger,
     private readonly client: Client,
   ) {}
 
   async getAccount(address: Address): Promise<string> {
-    return traceAsyncFunction('ContractKitAccountService - getAccount', async () => {
+    return traceAsyncFunction('ViemAccountService - getAccount', async () => {
       return wrapError(getDEK(this.client, this.logger, address), ErrorMessage.FAILURE_TO_GET_DEK)
     })
   }
