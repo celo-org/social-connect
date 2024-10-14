@@ -3,6 +3,7 @@ import Logger from 'bunyan'
 import { Request } from 'express'
 import { Client, createClient, http } from 'viem'
 import { celoAlfajores } from 'viem/chains'
+import { createMockAccounts } from '../../lib/test/utils'
 import { ErrorMessage, ErrorType } from '../../src/interfaces/errors'
 import { AuthenticationMethod } from '../../src/interfaces/requests'
 import * as auth from '../../src/utils/authentication'
@@ -162,6 +163,20 @@ describe('Authentication test suite', () => {
       expect(warnings).toEqual([])
     })
 
+    const mockGetWalletAddress = jest.fn<string, []>()
+    const mockGetDataEncryptionKey = jest.fn(async (args: [string]) => {
+      //  NOTE: elliptic is disabled elsewhere in this library to prevent
+      // accidental signing of truncated messages.
+      const EC = require('elliptic').ec
+      const ec = new EC('secp256k1')
+      const key = ec.keyFromPrivate(hexToBuffer(args[0]))
+      return key.getPublic(true, 'hex')
+    })
+
+    const mockContracts = {
+      ['getAccountsContract']: createMockAccounts(mockGetWalletAddress, mockGetDataEncryptionKey),
+    }
+
     it('Should fail authentication when the message is manipulated', async () => {
       const rawKey = '41e8e8593108eeedcbded883b8af34d2f028710355c57f4c10a056b72486aa04'
       const body = {
@@ -169,6 +184,11 @@ describe('Authentication test suite', () => {
         authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,
       }
       const message = JSON.stringify(body)
+
+      jest.mock('@celo/phone-number-privacy-common', () => ({
+        ...jest.requireActual('@celo/phone-number-privacy-common'),
+        ...mockContracts,
+      }))
 
       // Modify every fourth character and check that the signature becomes invalid.
       for (let i = 0; i < message.length; i += 4) {
@@ -181,22 +201,6 @@ describe('Authentication test suite', () => {
           get: (name: string) => (name === 'Authorization' ? sig : ''),
           body,
         } as Request
-        // const mockContractKit = {
-        //   contracts: {
-        //     getAccounts: async () => {
-        //       return Promise.resolve({
-        //         getDataEncryptionKey: async (_: string) => {
-        //           // NOTE: elliptic is disabled elsewhere in this library to prevent
-        //           // accidental signing of truncated messages.
-        //           const EC = require('elliptic').ec
-        //           const ec = new EC('secp256k1')
-        //           const key = ec.keyFromPrivate(hexToBuffer(rawKey))
-        //           return key.getPublic(true, 'hex')
-        //         },
-        //       })
-        //     },
-        //   },
-        // } as ContractKit
 
         const warnings: ErrorType[] = []
 
