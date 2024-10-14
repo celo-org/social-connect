@@ -2,7 +2,7 @@ import { OdisContextName } from '@celo/identity/lib/odis/query'
 import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
 import { Hex } from 'viem'
 import yargs from 'yargs'
-import { concurrentRPSLoadTest } from '../test'
+import { concurrentRPSLoadTest, type TestChainInfo } from '../test'
 
 const logger = rootLogger('odis-monitor')
 
@@ -63,14 +63,17 @@ yargs
       const rps = args.rps!
       const contextName = args.contextName! as OdisContextName
 
-      let blockchainProvider: string
+      let blockchainProvider: TestChainInfo
       switch (contextName) {
         case 'alfajoresstaging':
         case 'alfajores':
-          blockchainProvider = 'https://alfajores-forno.celo-testnet.org'
+          blockchainProvider = {
+            rpcURL: 'https://alfajores-forno.celo-testnet.org',
+            chainID: 44787,
+          }
           break
         case 'mainnet':
-          blockchainProvider = 'https://forno.celo.org'
+          blockchainProvider = { rpcURL: 'https://forno.celo.org', chainID: 42220 }
           break
         default:
           logger.error('Invalid contextName')
@@ -85,7 +88,7 @@ yargs
       }
       concurrentRPSLoadTest(
         args.rps,
-        blockchainProvider!,
+        blockchainProvider,
         contextName,
         CombinerEndpointPNP.PNP_SIGN,
         args.duration,

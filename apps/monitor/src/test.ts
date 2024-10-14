@@ -11,8 +11,13 @@ import { queryOdisDomain, queryOdisForQuota, queryOdisForSalt } from './query'
 
 const logger = rootLogger('odis-monitor')
 
+export type TestChainInfo = {
+  rpcURL: string
+  chainID: 44787 | 42220
+}
+
 export async function testPNPSignQuery(
-  blockchainProvider: string,
+  blockchainProvider: TestChainInfo,
   contextName: OdisContextName,
   timeoutMs?: number,
   bypassQuota?: boolean,
@@ -46,7 +51,7 @@ export async function testPNPSignQuery(
 }
 
 export async function testPNPQuotaQuery(
-  blockchainProvider: string,
+  blockchainProvider: TestChainInfo,
   contextName: OdisContextName,
   timeoutMs?: number,
   privateKey?: Hex,
@@ -89,7 +94,7 @@ export async function testDomainSignQuery(contextName: OdisContextName) {
 
 export async function concurrentRPSLoadTest(
   rps: number,
-  blockchainProvider: string,
+  blockchainProvider: TestChainInfo,
   contextName: OdisContextName,
   endpoint:
     | CombinerEndpointPNP.PNP_QUOTA
