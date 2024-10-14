@@ -2,10 +2,10 @@ import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
 import { Address, Client } from 'viem'
+import { getDEK } from '../../common/contracts'
 import { OdisError, wrapError } from '../../common/error'
 import { Counters } from '../../common/metrics'
 import { traceAsyncFunction } from '../../common/tracing-utils'
-import { getDEK } from '../../common/web3/contracts'
 
 export interface AccountService {
   getAccount(address: string): Promise<string>

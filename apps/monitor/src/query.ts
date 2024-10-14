@@ -20,9 +20,9 @@ import {
 } from '@celo/utils/lib/address'
 import { defined } from '@celo/utils/lib/sign-typed-data-utils'
 import { defineString } from 'firebase-functions/params'
-import { Address, createWalletClient, Hex, http } from 'viem'
+import { Account, Address, createWalletClient, extractChain, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo } from 'viem/chains'
+import { celo, celoAlfajores } from 'viem/chains'
 import { dekAuthSigner, generateRandomPhoneNumber, PRIVATE_KEY } from './resources'
 
 let phoneNumber: string
@@ -30,11 +30,16 @@ let phoneNumber: string
 const defaultPhoneNumber = defineString('PHONE_NUMBER')
 const newPrivateKey = async () => {
   const mnemonic = await generateMnemonic(MnemonicStrength.s256_24words)
-  return (await generateKeys(mnemonic)).privateKey as Hex
+  return (await generateKeys(mnemonic)).privateKey
+}
+
+type ChainInfo = {
+  rpcURL: string
+  chainID: 44787 | 42220
 }
 
 export const queryOdisForSalt = async (
-  blockchainProvider: string,
+  blockchainProvider: ChainInfo,
   contextName: OdisContextName,
   timeoutMs: number = 10000,
   bypassQuota: boolean = false,
@@ -81,10 +86,10 @@ export const queryOdisForSalt = async (
 }
 
 export const queryOdisForQuota = async (
-  blockchainProvider: string,
+  blockchainProvider: ChainInfo,
   contextName: OdisContextName,
   timeoutMs: number = 10000,
-  privateKey?: Hex,
+  privateKey?: string,
   privateKeyPercentage: number = 100,
 ) => {
   console.log(`contextName: ${contextName}`) // tslint:disable-line:no-console
@@ -96,15 +101,11 @@ export const queryOdisForQuota = async (
     privateKey = await newPrivateKey()
   }
 
-  const account = privateKeyToAccount(privateKey as Hex)
+  const account = privateKeyToAccount(ensureLeading0x(privateKey))
 
   const accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey))
 
-  const client = createWalletClient({
-    account,
-    chain: celo,
-    transport: http(blockchainProvider),
-  })
+  const client = makeClient(blockchainProvider, account)
   const authSigner: AuthSigner = {
     authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
     sign191: ({ message, account }) => client.signMessage({ message, account }),
@@ -157,7 +158,7 @@ export const queryOdisDomain = async (contextName: OdisContextName) => {
 }
 
 async function getAuthSignerAndAccount(
-  blockchainProvider: string,
+  blockchainProvider: ChainInfo,
   useDEK: boolean,
   privateKey: string | undefined,
   privateKeyPercentage: number,
@@ -179,12 +180,9 @@ async function getAuthSignerAndAccount(
       privateKey = await newPrivateKey()
     }
     accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey)) as Address
+    const account = privateKeyToAccount(ensureLeading0x(privateKey))
 
-    const client = createWalletClient({
-      account: privateKeyToAccount(ensureLeading0x(privateKey)),
-      chain: celo,
-      transport: http(blockchainProvider),
-    })
+    const client = makeClient(blockchainProvider, account)
 
     authSigner = {
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
@@ -193,4 +191,12 @@ async function getAuthSignerAndAccount(
     phoneNumber = defaultPhoneNumber.value()
   }
   return { accountAddress, authSigner, privateKey }
+}
+
+function makeClient(chainInfo: ChainInfo, account: Account) {
+  return createWalletClient({
+    account: account,
+    chain: extractChain({ chains: [celoAlfajores, celo], id: chainInfo.chainID }),
+    transport: http(chainInfo.rpcURL),
+  })
 }
