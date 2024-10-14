@@ -88,7 +88,8 @@ const signerConfig: SignerConfig = {
     },
   },
   blockchain: {
-    provider: 'https://alfajores-forno.celo-testnet.org',
+    rpcURL: 'https://alfajores-forno.celo-testnet.org',
+    chainID: 44787,
     apiKey: undefined,
   },
   db: {
