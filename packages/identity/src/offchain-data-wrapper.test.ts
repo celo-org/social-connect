@@ -16,12 +16,12 @@ import { ensureCompressed } from '@celo/utils/lib/ecdh'
 import { NativeSigner, serializeSignature } from '@celo/utils/lib/signatureUtils'
 import { LocalWallet } from '@celo/wallet-local'
 import { randomBytes } from 'crypto'
+import fetchMock from './__mocks__/cross-fetch'
 import { BasicDataWrapper, OffchainDataWrapper, OffchainErrorTypes } from './offchain-data-wrapper'
 import { AuthorizedSignerAccessor } from './offchain/accessors/authorized-signer'
 import { SchemaErrors, SchemaErrorTypes } from './offchain/accessors/errors'
 import { PrivateNameAccessor, PublicNameAccessor } from './offchain/accessors/name'
 import { MockStorageWriter } from './offchain/storage-writers'
-import fetchMock from './__mocks__/cross-fetch'
 
 const testname = 'test'
 const testPayload = { name: testname }
@@ -37,6 +37,7 @@ interface RegisteredAccount {
 }
 
 testWithGanache('Offchain Data', (web3) => {
+  // @ts-expect-error slightly different web3 defs
   const kit = newKitFromWeb3(web3, new LocalWallet())
 
   const writerPrivate = ACCOUNT_PRIVATE_KEYS[0]

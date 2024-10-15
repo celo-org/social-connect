@@ -1,4 +1,3 @@
-import { newKit } from '@celo/contractkit'
 import {
   AuthenticationMethod,
   ErrorMessage,
@@ -17,6 +16,8 @@ import { BLINDED_PHONE_NUMBER } from '@celo/phone-number-privacy-common/lib/test
 import BigNumber from 'bignumber.js'
 import { Knex } from 'knex'
 import request from 'supertest'
+import { createWalletClient, http } from 'viem'
+import { celoAlfajores } from 'viem/chains'
 import { initDatabase } from '../../src/common/database/database'
 import { countAndThrowDBError } from '../../src/common/database/utils'
 import {
@@ -30,8 +31,6 @@ import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '
 import { startSigner } from '../../src/server'
 
 const {
-  ContractRetrieval,
-  createMockContractKit,
   createMockAccounts,
   createMockOdisPayments,
   getPnpQuotaRequest,
@@ -49,16 +48,14 @@ const mockOdisPaymentsTotalPaidCUSD = jest.fn<BigNumber, []>()
 const mockGetWalletAddress = jest.fn<string, []>()
 const mockGetDataEncryptionKey = jest.fn<string, []>()
 
-const mockContractKit = createMockContractKit({
-  [ContractRetrieval.getAccounts]: createMockAccounts(
-    mockGetWalletAddress,
-    mockGetDataEncryptionKey,
-  ),
-  [ContractRetrieval.getOdisPayments]: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
-})
-jest.mock('@celo/contractkit', () => ({
-  ...jest.requireActual('@celo/contractkit'),
-  newKit: jest.fn().mockImplementation(() => mockContractKit),
+const mockContracts = {
+  getAccountsContract: createMockAccounts(mockGetWalletAddress, mockGetDataEncryptionKey),
+  ['getOdisPaymentsContract']: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
+}
+
+jest.mock('@celo/phone-number-privacy-common', () => ({
+  ...jest.requireActual('@celo/phone-number-privacy-common'),
+  ...mockContracts,
 }))
 
 // Indexes correspond to keyVersion - 1
@@ -92,7 +89,11 @@ describe('pnp', () => {
   beforeEach(async () => {
     // Create a new in-memory database for each test.
     db = await initDatabase(_config)
-    app = startSigner(_config, db, keyProvider, newKit('dummyKit'))
+    const client = createWalletClient({
+      chain: celoAlfajores,
+      transport: http(),
+    })
+    app = startSigner(_config, db, keyProvider, client)
     mockOdisPaymentsTotalPaidCUSD.mockReset()
     mockGetDataEncryptionKey.mockReset().mockReturnValue(DEK_PUBLIC_KEY)
     mockGetWalletAddress.mockReset().mockReturnValue(mockAccount)
@@ -320,7 +321,10 @@ describe('pnp', () => {
           configWithApiDisabled,
           db,
           keyProvider,
-          newKit('dummyKit'),
+          createWalletClient({
+            chain: celoAlfajores,
+            transport: http(),
+          }),
         )
 
         const req = getPnpQuotaRequest(ACCOUNT_ADDRESS1)
@@ -398,7 +402,10 @@ describe('pnp', () => {
             configWithShortTimeout,
             db,
             keyProvider,
-            newKit('dummyKit'),
+            createWalletClient({
+              chain: celoAlfajores,
+              transport: http(),
+            }),
           )
           const req = getPnpQuotaRequest(ACCOUNT_ADDRESS1)
           const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
@@ -804,7 +811,10 @@ describe('pnp', () => {
           configWithApiDisabled,
           db,
           keyProvider,
-          newKit('dummyKit'),
+          createWalletClient({
+            chain: celoAlfajores,
+            transport: http(),
+          }),
         )
 
         const req = getPnpSignRequest(
@@ -892,7 +902,10 @@ describe('pnp', () => {
             configWithShortTimeout,
             db,
             keyProvider,
-            newKit('dummyKit'),
+            createWalletClient({
+              chain: celoAlfajores,
+              transport: http(),
+            }),
           )
 
           const req = getPnpSignRequest(
@@ -934,7 +947,10 @@ describe('pnp', () => {
             configWithFailOpenDisabled,
             db,
             keyProvider,
-            newKit('dummyKit'),
+            createWalletClient({
+              chain: celoAlfajores,
+              transport: http(),
+            }),
           )
 
           const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
