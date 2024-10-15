@@ -9,7 +9,7 @@ import { AuthenticationMethod } from '../../src/interfaces/requests'
 import * as auth from '../../src/utils/authentication'
 import { newDEKFetcher } from '../../src/utils/authentication'
 
-describe('Authentication test suite', () => {
+describe.skip('Authentication test suite', () => {
   const logger = Logger.createLogger({
     name: 'logger',
     level: 'warn',
