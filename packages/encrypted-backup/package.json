@@ -25,19 +25,19 @@
     "prepublish": "yarn build"
   },
   "dependencies": {
-    "@celo/base": "^6.0.0",
+    "@celo/base": "^7.0.0",
     "@celo/identity": "^5.1.2",
     "@celo/phone-number-privacy-common": "^3.1.2",
     "@celo/poprf": "^0.1.9",
-    "@celo/utils": "^6.0.0",
-    "@celo/wallet-local": "^5.1.2",
+    "@celo/utils": "^8.0.0",
+    "@celo/wallet-local": "^6.0.4",
     "@types/debug": "^4.1.10",
     "debug": "^4.1.1",
     "fp-ts": "2.1.1",
     "io-ts": "2.0.1"
   },
   "devDependencies": {
-    "@celo/dev-utils": "0.0.1-beta.1",
+    "@celo/dev-utils": "0.0.1",
     "fetch-mock": "9.11.0",
     "jest": "^29.7.0"
   },

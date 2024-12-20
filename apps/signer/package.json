@@ -38,11 +38,11 @@
     "ssl:keygen": "./scripts/create-ssl-cert.sh"
   },
   "dependencies": {
-    "@celo/base": "^6.0.0",
+    "@celo/base": "^7.0.0",
     "@celo/phone-number-privacy-common": "^3.1.2",
     "@celo/poprf": "^0.1.9",
-    "@celo/utils": "^6.0.0",
-    "@celo/wallet-hsm-azure": "^5.1.2",
+    "@celo/utils": "^8.0.0",
+    "@celo/wallet-hsm-azure": "^6.0.4",
     "@google-cloud/secret-manager": "3.0.0",
     "@opentelemetry/api": "^1.6.0",
     "@opentelemetry/auto-instrumentations-node": "^0.39.4",

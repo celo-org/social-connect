@@ -24,7 +24,7 @@
     "test:e2e:mainnet": "CONTEXT_NAME=mainnet yarn test:e2e"
   },
   "dependencies": {
-    "@celo/base": "^6.0.0",
+    "@celo/base": "^7.0.0",
     "@celo/encrypted-backup": "^5.0.6",
     "@celo/identity": "^5.1.2",
     "@celo/phone-number-privacy-common": "^3.1.2",
@@ -59,7 +59,7 @@
   },
   "devDependencies": {
     "@celo/phone-number-privacy-signer": "workspace:^",
-    "@celo/utils": "^6.0.0",
+    "@celo/utils": "^8.0.0",
     "jest": "^29.7.0",
     "knex": "^2.1.0",
     "typescript": "^5.2.2"

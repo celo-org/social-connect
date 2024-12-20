@@ -1,10 +1,10 @@
 import { Result } from '@celo/base'
 import { ContractKit, newKitFromWeb3 } from '@celo/contractkit'
-import { createStorageClaim } from '@celo/contractkit/lib/identity/claims/claim'
-import { IdentityMetadataWrapper } from '@celo/contractkit/lib/identity/metadata'
 import { AccountsWrapper } from '@celo/contractkit/lib/wrappers/Accounts'
 import { ACCOUNT_PRIVATE_KEYS } from '@celo/dev-utils/lib/ganache-setup'
 import { testWithGanache } from '@celo/dev-utils/lib/ganache-test'
+import { IdentityMetadataWrapper } from '@celo/metadata-claims'
+import { createStorageClaim } from '@celo/metadata-claims/lib/claim'
 import {
   ensureLeading0x,
   privateKeyToAddress,
@@ -37,7 +37,7 @@ interface RegisteredAccount {
 }
 
 testWithGanache('Offchain Data', (web3) => {
-  // @ts-expect-error slightly different web3 defs
+  // @ts-ignore
   const kit = newKitFromWeb3(web3, new LocalWallet())
 
   const writerPrivate = ACCOUNT_PRIVATE_KEYS[0]
