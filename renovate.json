@@ -8,17 +8,17 @@
       "groupName": "devDependencies (non-major)"
     },
     {
-      "matchPackagePatterns": ["@celo"],
-      "groupName": "celo"
+      "groupName": "celo",
+      "matchPackageNames": ["/@celo/"]
     },
     {
-      "matchPackagePatterns": ["@opentelemetry"],
-      "groupName": "opentelemetry"
+      "groupName": "opentelemetry",
+      "matchPackageNames": ["/@opentelemetry/"]
     },
     {
-      "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
-      "enabled": false
+      "enabled": false,
+      "matchPackageNames": ["/eslint/"]
     }
   ],
   "prConcurrentLimit": 8,
