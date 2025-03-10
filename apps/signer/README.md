@@ -52,7 +52,7 @@ This could be a node with RPC set up. Preferably this would be an node dedicated
 
 - `BLOCKCHAIN_PROVIDER` - The blockchain node provider for chain state access. `
 - `BLOCKCHAIN_API_KEY` - Optional API key to be added to the authentication header. `
-- `CHAIN_ID` should be 44220 or celo or 44787 on alfajores
+- `CHAIN_ID` should be 44220 for Celo Mainnet or 44787 for Celo Alfajores
 
 ### Security
 
