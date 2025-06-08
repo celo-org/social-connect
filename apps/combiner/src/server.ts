@@ -38,28 +38,24 @@ require('events').EventEmitter.defaultMaxListeners = 15
 
 export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
   const logger = rootLogger(config.serviceName)
-
   kit = kit ?? getContractKitWithAgent(config.blockchain)
 
   logger.info('Creating combiner express server')
   const app = express()
 
-  // TODO get logger to show accurate serviceName
-  // (https://github.com/celo-org/celo-monorepo/issues/9809)
   app.use(express.json({ limit: '0.2mb' }) as RequestHandler, loggerMiddleware(config.serviceName))
 
-  // Enable cross origin resource sharing from any domain so ODIS can be interacted with from web apps
-  //
-  // Security note: Allowing unrestricted cross-origin requests is acceptable here because any authenticated actions
-  // must include a signature in the request body. In particular, ODIS _does not_ use cookies to transmit authentication
-  // data. If ODIS is altered to use cookies for authentication data, this CORS policy should be reconsidered.
-  app.use((_, res, next) => {
+  // Enable cross origin resource sharing from any domain
+  app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     res.header(
       'Access-Control-Allow-Headers',
       `Origin, X-Requested-With, Content-Type, Accept, Authorization, ${KEY_VERSION_HEADER}`,
     )
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200)
+    }
     next()
   })
 
@@ -76,8 +72,15 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
   const accountService = new CachingAccountService(baseAccountService)
   const noQuotaCache = new NoQuotaCache()
 
-  const pnpSigners: Signer[] = JSON.parse(config.phoneNumberPrivacy.odisServices.signers)
-  const domainSigners: Signer[] = JSON.parse(config.domains.odisServices.signers)
+  let pnpSigners: Signer[] = []
+  let domainSigners: Signer[] = []
+  try {
+    pnpSigners = JSON.parse(config.phoneNumberPrivacy.odisServices.signers)
+    domainSigners = JSON.parse(config.domains.odisServices.signers)
+  } catch (error) {
+    logger.error('Failed to parse ODIS signer configs', error)
+    throw new Error('Invalid signer configuration')
+  }
 
   const { domains, phoneNumberPrivacy } = config
 
@@ -113,8 +116,11 @@ export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
 
   const sslOptions = getSslOptions(config)
   if (sslOptions) {
+    logger.info('Starting HTTPS server...')
     return https.createServer(sslOptions, app)
   }
+
+  logger.info('Starting HTTP server...')
   return app
 }
 
