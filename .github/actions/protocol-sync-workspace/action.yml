@@ -11,7 +11,7 @@ runs:
       uses: ./.github/actions/sync-workspace
       with:
         package-json-checksum: ${{ inputs.package-json-checksum }}
-    - uses: actions/cache/restore@v3
+    - uses: actions/cache/restore@v4
       id: cache_protocol
       with:
         path: packages/protocol/.tmp/released_chain
