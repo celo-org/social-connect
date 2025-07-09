@@ -70,7 +70,7 @@
     "bignumber.js": "9.0.0",
     "crypto-js": "4.2.0",
     "flat": "5.0.1",
-    "protobufjs": "7.2.4",
+    "protobufjs": "7.2.5",
     "@babel/traverse": "7.23.2",
     "node-fetch": "2.6.7",
     "get-func-name": "2.0.1",
