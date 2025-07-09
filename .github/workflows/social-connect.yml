@@ -144,7 +144,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -198,7 +198,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
@@ -214,7 +214,7 @@ jobs:
           yarn --cwd=packages/identity test
 
       - name: Upload Jest Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Jest Test Results
           path: test-results/jest
@@ -237,7 +237,7 @@ jobs:
         with:
           path: .git
           key: git-${{ github.ref }}
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Sync workspace
         uses: ./.github/actions/sync-workspace
         with:
