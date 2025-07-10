@@ -1,4 +1,3 @@
-import { newKit } from '@celo/contractkit'
 import {
   AuthenticationMethod,
   CombinerEndpoint,
@@ -37,17 +36,13 @@ import { Server } from 'http'
 import { Server as HttpsServer } from 'https'
 import { Knex } from 'knex'
 import request from 'supertest'
+import { createWalletClient, http } from 'viem'
+import { celoAlfajores } from 'viem/chains'
 import config, { getCombinerVersion } from '../../src/config'
 import { startCombiner } from '../../src/server'
 import { getBlindedPhoneNumber, serverClose } from '../utils'
 
-const {
-  ContractRetrieval,
-  createMockContractKit,
-  createMockAccounts,
-  createMockOdisPayments,
-  getPnpRequestAuthorization,
-} = TestUtils.Utils
+const { createMockAccounts, createMockOdisPayments, getPnpRequestAuthorization } = TestUtils.Utils
 const {
   PRIVATE_KEY1,
   ACCOUNT_ADDRESS1,
@@ -93,7 +88,8 @@ const signerConfig: SignerConfig = {
     },
   },
   blockchain: {
-    provider: 'https://alfajores-forno.celo-testnet.org',
+    rpcURL: 'https://alfajores-forno.celo-testnet.org',
+    chainID: 44787,
     apiKey: undefined,
   },
   db: {
@@ -152,19 +148,14 @@ const mockOdisPaymentsTotalPaidCUSD = jest.fn<BigNumber, []>()
 const mockGetWalletAddress = jest.fn<string, []>()
 const mockGetDataEncryptionKey = jest.fn<string, []>()
 
-const mockContractKit = createMockContractKit({
-  [ContractRetrieval.getAccounts]: createMockAccounts(
-    mockGetWalletAddress,
-    mockGetDataEncryptionKey,
-  ),
-  [ContractRetrieval.getOdisPayments]: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
-})
+const mockContracts = {
+  ['getAccountsContract']: createMockAccounts(mockGetWalletAddress, mockGetDataEncryptionKey),
+  ['getOdisPaymentsContract']: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
+}
 
-// Mock newKit as opposed to the CK constructor
-// Returns an object of type ContractKit that can be passed into the signers + combiner
-jest.mock('@celo/contractkit', () => ({
-  ...jest.requireActual('@celo/contractkit'),
-  newKit: jest.fn().mockImplementation(() => mockContractKit),
+jest.mock('@celo/phone-number-privacy-common', () => ({
+  ...jest.requireActual('@celo/phone-number-privacy-common'),
+  ...mockContracts,
 }))
 
 describe('pnpService', () => {
@@ -192,7 +183,10 @@ describe('pnpService', () => {
   const message = Buffer.from('test message', 'utf8')
 
   // In current setup, the same mocked kit is used for the combiner and signers
-  const mockKit = newKit('dummyKit')
+  const mockClient = createWalletClient({
+    chain: celoAlfajores,
+    transport: http(),
+  })
 
   const sendPnpSignRequest = async (
     req: SignMessageRequest,
@@ -284,7 +278,7 @@ describe('pnpService', () => {
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-3`, PNP_THRESHOLD_DEV_PK_SHARE_3_V3],
         ]),
       )
-      app = startCombiner(combinerConfig, mockKit)
+      app = startCombiner(combinerConfig, mockClient)
     })
 
     beforeEach(async () => {
@@ -314,9 +308,9 @@ describe('pnpService', () => {
 
     describe('when signers are operating correctly', () => {
       beforeEach(async () => {
-        signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
-        signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockKit).listen(3002)
-        signer3 = startSigner(signerConfig, signerDB3, keyProvider3, mockKit).listen(3003)
+        signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockClient).listen(3001)
+        signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockClient).listen(3002)
+        signer3 = startSigner(signerConfig, signerDB3, keyProvider3, mockClient).listen(3003)
       })
 
       describe(`${CombinerEndpoint.PNP_QUOTA}`, () => {
@@ -580,7 +574,7 @@ describe('pnpService', () => {
             JSON.stringify(combinerConfig),
           )
           configWithApiDisabled.phoneNumberPrivacy.enabled = false
-          const appWithApiDisabled = startCombiner(configWithApiDisabled, mockKit)
+          const appWithApiDisabled = startCombiner(configWithApiDisabled, mockClient)
           const req = {
             account: ACCOUNT_ADDRESS1,
           }
@@ -871,7 +865,7 @@ describe('pnpService', () => {
             JSON.stringify(combinerConfig),
           )
           configWithApiDisabled.phoneNumberPrivacy.enabled = false
-          const appWithApiDisabled = startCombiner(configWithApiDisabled, mockKit)
+          const appWithApiDisabled = startCombiner(configWithApiDisabled, mockClient)
 
           const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
           const res = await sendPnpSignRequest(req, authorization, appWithApiDisabled)
@@ -898,7 +892,7 @@ describe('pnpService', () => {
             )
             const appWithFailOpenDisabled = startCombiner(
               combinerConfigWithFailOpenDisabled,
-              mockKit,
+              mockClient,
             )
             const res = await sendPnpSignRequest(req, authorization, appWithFailOpenDisabled)
 
@@ -927,9 +921,9 @@ describe('pnpService', () => {
           const badKeyProvider1 = new MockKeyProvider(
             new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare1]]),
           )
-          signer1 = startSigner(signerConfig, signerDB1, badKeyProvider1, mockKit).listen(3001)
-          signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockKit).listen(3002)
-          signer3 = startSigner(signerConfig, signerDB3, keyProvider3, mockKit).listen(3003)
+          signer1 = startSigner(signerConfig, signerDB1, badKeyProvider1, mockClient).listen(3001)
+          signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockClient).listen(3002)
+          signer3 = startSigner(signerConfig, signerDB3, keyProvider3, mockClient).listen(3003)
         })
 
         describe(`${CombinerEndpoint.PNP_SIGN}`, () => {
@@ -972,9 +966,9 @@ describe('pnpService', () => {
             new Map([[`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, badBlsShare2]]),
           )
 
-          signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
-          signer2 = startSigner(signerConfig, signerDB2, badKeyProvider1, mockKit).listen(3002)
-          signer3 = startSigner(signerConfig, signerDB3, badKeyProvider2, mockKit).listen(3003)
+          signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockClient).listen(3001)
+          signer2 = startSigner(signerConfig, signerDB2, badKeyProvider1, mockClient).listen(3002)
+          signer3 = startSigner(signerConfig, signerDB3, badKeyProvider2, mockClient).listen(3003)
         })
 
         describe(`${CombinerEndpoint.PNP_SIGN}`, () => {
@@ -997,11 +991,11 @@ describe('pnpService', () => {
         beforeEach(async () => {
           const configWithApiDisabled: SignerConfig = JSON.parse(JSON.stringify(signerConfig))
           configWithApiDisabled.api.phoneNumberPrivacy.enabled = false
-          signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
-          signer2 = startSigner(configWithApiDisabled, signerDB2, keyProvider2, mockKit).listen(
+          signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockClient).listen(3001)
+          signer2 = startSigner(configWithApiDisabled, signerDB2, keyProvider2, mockClient).listen(
             3002,
           )
-          signer3 = startSigner(configWithApiDisabled, signerDB3, keyProvider3, mockKit).listen(
+          signer3 = startSigner(configWithApiDisabled, signerDB3, keyProvider3, mockClient).listen(
             3003,
           )
         })
@@ -1042,9 +1036,9 @@ describe('pnpService', () => {
         beforeEach(async () => {
           const configWithApiDisabled: SignerConfig = JSON.parse(JSON.stringify(signerConfig))
           configWithApiDisabled.api.phoneNumberPrivacy.enabled = false
-          signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
-          signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockKit).listen(3002)
-          signer3 = startSigner(configWithApiDisabled, signerDB3, keyProvider3, mockKit).listen(
+          signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockClient).listen(3001)
+          signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockClient).listen(3002)
+          signer3 = startSigner(configWithApiDisabled, signerDB3, keyProvider3, mockClient).listen(
             3003,
           )
         })
@@ -1094,13 +1088,13 @@ describe('pnpService', () => {
           const configWithShortTimeout: SignerConfig = JSON.parse(JSON.stringify(signerConfig))
           configWithShortTimeout.timeout = testTimeoutMS
           // Test this with all signers timing out to decrease possibility of race conditions
-          signer1 = startSigner(configWithShortTimeout, signerDB1, keyProvider1, mockKit).listen(
+          signer1 = startSigner(configWithShortTimeout, signerDB1, keyProvider1, mockClient).listen(
             3001,
           )
-          signer2 = startSigner(configWithShortTimeout, signerDB2, keyProvider2, mockKit).listen(
+          signer2 = startSigner(configWithShortTimeout, signerDB2, keyProvider2, mockClient).listen(
             3002,
           )
-          signer3 = startSigner(configWithShortTimeout, signerDB3, keyProvider3, mockKit).listen(
+          signer3 = startSigner(configWithShortTimeout, signerDB3, keyProvider3, mockClient).listen(
             3003,
           )
         })
@@ -1223,7 +1217,7 @@ describe('pnpService', () => {
           ],
         ]),
       )
-      app = startCombiner(combinerConfigLargerN, mockKit)
+      app = startCombiner(combinerConfigLargerN, mockClient)
     })
 
     let req: SignMessageRequest
@@ -1235,11 +1229,11 @@ describe('pnpService', () => {
       signerDB4 = await initSignerDatabase(signerConfig, signerMigrationsPath)
       signerDB5 = await initSignerDatabase(signerConfig, signerMigrationsPath)
 
-      signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockKit).listen(3001)
-      signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockKit).listen(3002)
-      signer3 = startSigner(signerConfig, signerDB3, keyProvider3, mockKit).listen(3003)
-      signer4 = startSigner(signerConfig, signerDB4, keyProvider4, mockKit).listen(3004)
-      signer5 = startSigner(signerConfig, signerDB5, keyProvider5, mockKit).listen(3005)
+      signer1 = startSigner(signerConfig, signerDB1, keyProvider1, mockClient).listen(3001)
+      signer2 = startSigner(signerConfig, signerDB2, keyProvider2, mockClient).listen(3002)
+      signer3 = startSigner(signerConfig, signerDB3, keyProvider3, mockClient).listen(3003)
+      signer4 = startSigner(signerConfig, signerDB4, keyProvider4, mockClient).listen(3004)
+      signer5 = startSigner(signerConfig, signerDB5, keyProvider5, mockClient).listen(3005)
 
       userSeed = new Uint8Array(32)
       for (let i = 0; i < userSeed.length - 1; i++) {
