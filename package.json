@@ -36,10 +36,10 @@
   ],
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
-    "@tsconfig/node18": "^18.2.2",
+    "@tsconfig/node23": "^23.0.0",
     "@tsconfig/recommended": "^1.0.3",
     "@types/jest": "^29.5.7",
-    "@types/node": "18.7.16",
+    "@types/node": "24.0.13",
     "@types/prompt": "1.1.7",
     "@types/semver": "7.5.4",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
@@ -60,7 +60,7 @@
     "ts-jest": "^29.0.0",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^3.8.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.8.3"
   },
   "resolutions": {
     "bip39": "https://github.com/bitcoinjs/bip39#d8ea080a18b40f301d4e2219a2991cd2417e83c2",

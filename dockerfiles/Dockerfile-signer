@@ -12,7 +12,7 @@ COPY packages/identity packages/identity
 COPY packages/odis-identifiers packages/odis-identifiers
 
 ##### Main stage
-FROM node:18-alpine3.19
+FROM node:23-alpine3.19
 LABEL org.opencontainers.image.authors="devops@clabs.co"
 
 # Upgrade OS packages
