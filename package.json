@@ -36,7 +36,7 @@
   ],
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
-    "@tsconfig/node23": "^23.0.0",
+    "@tsconfig/node22": "^22.0.0",
     "@tsconfig/recommended": "^1.0.3",
     "@types/jest": "^29.5.7",
     "@types/node": "24.0.13",
