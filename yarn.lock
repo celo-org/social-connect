@@ -1534,7 +1534,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": "npm:^1.17.1"
     "@types/bunyan": "npm:^1.8.10"
     "@types/express": "npm:^4.17.20"
-    "@types/node": "npm:18.15.13"
+    "@types/node": "npm:22.16.0"
     "@types/supertest": "npm:^2.0.15"
     "@types/uuid": "npm:^7.0.3"
     blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
@@ -1658,7 +1658,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": "npm:^1.17.1"
     "@types/bunyan": "npm:^1.8.10"
     "@types/express": "npm:^4.17.20"
-    "@types/node": "npm:18.15.13"
+    "@types/node": "npm:22.16.0"
     "@types/supertest": "npm:^2.0.15"
     aws-sdk: "npm:^2.1484.0"
     bignumber.js: "npm:^9.1.2"
@@ -5920,17 +5920,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:18.15.13":
-  version: 18.15.13
-  resolution: "@types/node@npm:18.15.13"
-  checksum: 10/b9bbe923573797ef7c5fd2641a6793489e25d9369c32aeadcaa5c7c175c85b42eb12d6fe173f6781ab6f42eaa1ebd9576a419eeaa2a1ec810094adb8adaa9a54
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:18.7.16":
-  version: 18.7.16
-  resolution: "@types/node@npm:18.7.16"
-  checksum: 10/630d1865df80c8f88f2e9769b13f06cebd6a8d2739cbee6ac411108ef56dc19e619709be6808decc51f4d6439961494ca36753bb8ff8769c35759a6e7d0f8fe7
+"@types/node@npm:22.16.0":
+  version: 22.16.0
+  resolution: "@types/node@npm:22.16.0"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10/26ebbbd24749caa4a692664290c53cdca63ec717ca250cd2babf3d3da796e9d3d0b6b9814d160693261b5e881796bf0f3c1887fef355b19e9a78fe27cd5e2ce2
   languageName: node
   linkType: hard
 
@@ -15801,7 +15796,7 @@ __metadata:
     "@tsconfig/node18": "npm:^18.2.2"
     "@tsconfig/recommended": "npm:^1.0.3"
     "@types/jest": "npm:^29.5.7"
-    "@types/node": "npm:18.7.16"
+    "@types/node": "npm:22.16.0"
     "@types/prompt": "npm:1.1.7"
     "@types/semver": "npm:7.5.4"
     "@typescript-eslint/eslint-plugin": "npm:^6.9.1"
@@ -19777,6 +19772,13 @@ __metadata:
   version: 5.26.5
   resolution: "undici-types@npm:5.26.5"
   checksum: 10/0097779d94bc0fd26f0418b3a05472410408877279141ded2bd449167be1aed7ea5b76f756562cb3586a07f251b90799bab22d9019ceba49c037c76445f7cddd
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~6.21.0":
+  version: 6.21.0
+  resolution: "undici-types@npm:6.21.0"
+  checksum: 10/ec8f41aa4359d50f9b59fa61fe3efce3477cc681908c8f84354d8567bb3701fafdddf36ef6bff307024d3feb42c837cf6f670314ba37fc8145e219560e473d14
   languageName: node
   linkType: hard
 

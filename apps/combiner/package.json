@@ -44,7 +44,7 @@
     "@opentelemetry/semantic-conventions": "^1.17.1",
     "@types/bunyan": "^1.8.10",
     "@types/express": "^4.17.20",
-    "@types/node": "18.15.13",
+    "@types/node": "22.16.0",
     "@types/supertest": "^2.0.15",
     "@types/uuid": "^7.0.3",
     "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
@@ -65,6 +65,6 @@
     "typescript": "^5.2.2"
   },
   "engines": {
-    "node": "18"
+    "node": "22"
   }
 }
