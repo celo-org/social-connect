@@ -115,7 +115,7 @@ jobs:
           restore-keys: |
             code-${{ github.sha }}
       - name: "enable corepack"
-        run : sudo corepack enable yarn
+        run : corepack enable yarn
       - name: Install yarn dependencies
       # skip check due to YN0078: │ Invalid resolution @celo/odis-identifiers@npm:^1.0.0 → npm:1.0.0
         run: git config --global url."https://".insteadOf ssh:// && yarn install --no-check-resolutions
