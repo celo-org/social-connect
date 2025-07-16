@@ -5289,13 +5289,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/node18@npm:^18.2.2":
-  version: 18.2.2
-  resolution: "@tsconfig/node18@npm:18.2.2"
-  checksum: 10/1c4b04b570e33de14bf518492e077079db2dcfba738c8d40c6ff916d94c9410246f4cb56f0802d9771423862140bf714c35d4a5f6cec2446d851cf61d3f8f9df
-  languageName: node
-  linkType: hard
-
 "@tsconfig/recommended@npm:^1.0.3":
   version: 1.0.3
   resolution: "@tsconfig/recommended@npm:1.0.3"
@@ -15793,7 +15786,6 @@ __metadata:
   resolution: "odis@workspace:."
   dependencies:
     "@changesets/cli": "npm:^2.26.2"
-    "@tsconfig/node18": "npm:^18.2.2"
     "@tsconfig/recommended": "npm:^1.0.3"
     "@types/jest": "npm:^29.5.7"
     "@types/node": "npm:22.16.0"
