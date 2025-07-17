@@ -41,7 +41,8 @@ jobs:
     # runs-on: ubuntu-latest
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
     steps:
       - name: Restore .git cache
@@ -68,6 +69,8 @@ jobs:
         run: |
           set -euo pipefail
           set -v
+          # Fix git ownership issue in container
+          git config --global --add safe.directory /__w/social-connect/social-connect
           # To get the "main" branch mapping
           git checkout main
           git checkout ${GITHUB_SHA}
@@ -112,7 +115,7 @@ jobs:
           restore-keys: |
             code-${{ github.sha }}
       - name: "enable corepack"
-        run : sudo corepack enable yarn
+        run : corepack enable yarn
       - name: Install yarn dependencies
       # skip check due to YN0078: │ Invalid resolution @celo/odis-identifiers@npm:^1.0.0 → npm:1.0.0
         run: git config --global url."https://".insteadOf ssh:// && yarn install --no-check-resolutions
@@ -133,7 +136,8 @@ jobs:
     name: Lint code
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
     needs: install-dependencies
     steps:
@@ -190,7 +194,8 @@ jobs:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     needs: install-dependencies
     steps:
       - uses: actions/cache/restore@v4
@@ -222,7 +227,8 @@ jobs:
     name: Combiner test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
     needs: install-dependencies
     if: |
@@ -250,7 +256,8 @@ jobs:
     needs: install-dependencies
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
