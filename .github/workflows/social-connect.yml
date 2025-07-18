@@ -64,6 +64,8 @@ jobs:
           separator: ','
           # Checking if changed in the last 100 commits in PRs
           fetch_depth: '100'
+          # For push events, compare against the previous commit
+          base_sha: ${{ github.event.before }}
       - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
       - name: Verify setup for incremental testing
         run: |
