@@ -42,7 +42,6 @@ jobs:
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
-      options: --user root
     timeout-minutes: 30
     steps:
       - name: Restore .git cache
@@ -137,7 +136,6 @@ jobs:
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
-      options: --user root
     timeout-minutes: 30
     needs: install-dependencies
     steps:
@@ -195,7 +193,6 @@ jobs:
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
-      options: --user root
     needs: install-dependencies
     steps:
       - uses: actions/cache/restore@v4
@@ -228,7 +225,6 @@ jobs:
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
-      options: --user root
     timeout-minutes: 30
     needs: install-dependencies
     if: |
@@ -257,7 +253,6 @@ jobs:
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
-      options: --user root
     timeout-minutes: 30
     if: |
       github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
