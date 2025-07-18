@@ -1,5 +1,6 @@
+import { Address } from '@celo/base'
 import { Err, Ok, Result } from '@celo/base/lib/result'
-import { ReadOnlyWallet } from '@celo/connect'
+import type { EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils'
 import * as crypto from 'crypto'
 import { ComputationalHardeningConfig, ComputationalHardeningFunction } from './config'
 import { DecryptionError, EncryptionError, PbkdfError, ScryptError } from './errors'
@@ -7,8 +8,11 @@ import { DecryptionError, EncryptionError, PbkdfError, ScryptError } from './err
 // NOTE: This module is intended for use within the @celo/encrypted-backup package and so is not
 // exported in the index.ts file.
 
-/** Pared down ReadOnlyWallet type that supports the required functions of EIP-712 signing. */
-export type EIP712Wallet = Pick<ReadOnlyWallet, 'getAccounts' | 'hasAccount' | 'signTypedData'>
+/** Pared down ReadOnlyWallet type that supports the required functions of EIP-712 signing. */ export interface EIP712Wallet {
+  getAccounts: () => Address[]
+  hasAccount: (address?: Address) => boolean
+  signTypedData: (address: Address, typedData: EIP712TypedData) => Promise<string>
+}
 
 /** Info strings to separate distinct usages of the key derivation function */
 export enum KDFInfo {

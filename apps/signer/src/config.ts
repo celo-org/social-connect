@@ -125,7 +125,8 @@ export const config: SignerConfig = {
     },
   },
   blockchain: {
-    provider: env.BLOCKCHAIN_PROVIDER,
+    rpcURL: env.BLOCKCHAIN_PROVIDER,
+    chainID: env.CHAIN_ID,
     apiKey: env.BLOCKCHAIN_API_KEY,
   },
   db: {
