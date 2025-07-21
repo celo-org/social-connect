@@ -55,17 +55,14 @@ jobs:
             git-
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
       - name: Detect files changed in PR, and expose as output
         id: changed-files
         uses: tj-actions/changed-files@v46
         with:
           # Using comma as separator to be able to easily match full paths (using ,<path>)
           separator: ','
-          # Checking if changed in the last 100 commits in PRs
-          fetch_depth: '100'
-          # For push events, compare against the previous commit
-          base_sha: ${{ github.event.before }}
+          since_last_remote_commit: true
       - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
       - name: Verify setup for incremental testing
         run: |
