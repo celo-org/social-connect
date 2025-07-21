@@ -71,12 +71,12 @@ jobs:
           # Fix git ownership issue in container
           git config --global --add safe.directory /__w/social-connect/social-connect
           # To get the "main" branch mapping
+          git fetch --all --tags
           git checkout main
           git checkout ${GITHUB_SHA}
           # Verify that following commands work, they are later called in the incremental testing script
           # Their output does not matter here, the fact that they finish successfully does.
           git rev-parse --abbrev-ref HEAD
-          git fetch --all --tags
       - name: Calculate node cache keys
         id: node-checksums
         run: |
