@@ -8,5 +8,7 @@ apps/**/dist
 packages/**/dist
 packages/**/lib
 docs/examples/**/lib
+**.yml
+**.yaml
 
 
