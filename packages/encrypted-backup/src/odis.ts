@@ -2,8 +2,8 @@ import { Address } from '@celo/base/lib/address'
 import { Err, Ok, Result } from '@celo/base/lib/result'
 import {
   ErrorMessages,
-  sendOdisDomainRequest,
   ServiceContext as OdisServiceContext,
+  sendOdisDomainRequest,
 } from '@celo/identity/lib/odis/query'
 import {
   checkSequentialDelayRateLimit,

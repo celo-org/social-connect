@@ -1,17 +1,17 @@
-import { ContractKit } from '@celo/contractkit'
 import { ErrorMessage } from '@celo/phone-number-privacy-common'
 import Logger from 'bunyan'
 import { LRUCache } from 'lru-cache'
+import { Address, Client } from 'viem'
+import { getDEK } from '../../common/contracts'
 import { OdisError, wrapError } from '../../common/error'
 import { Counters } from '../../common/metrics'
 import { traceAsyncFunction } from '../../common/tracing-utils'
-import { getDEK } from '../../common/web3/contracts'
 
 export interface AccountService {
   getAccount(address: string): Promise<string>
 }
 
-export interface ContractKitAccountServiceOptions {
+export interface ViemAccountServiceOptions {
   fullNodeTimeoutMs: number
   fullNodeRetryCount: number
   fullNodeRetryDelayMs: number
@@ -44,15 +44,15 @@ export class CachingAccountService implements AccountService {
 }
 
 // tslint:disable-next-line:max-classes-per-file
-export class ContractKitAccountService implements AccountService {
+export class ViemAccountService implements AccountService {
   constructor(
     private readonly logger: Logger,
-    private readonly kit: ContractKit,
+    private readonly client: Client,
   ) {}
 
-  async getAccount(address: string): Promise<string> {
-    return traceAsyncFunction('ContractKitAccountService - getAccount', async () => {
-      return wrapError(getDEK(this.kit, this.logger, address), ErrorMessage.FAILURE_TO_GET_DEK)
+  async getAccount(address: Address): Promise<string> {
+    return traceAsyncFunction('ViemAccountService - getAccount', async () => {
+      return wrapError(getDEK(this.client, this.logger, address), ErrorMessage.FAILURE_TO_GET_DEK)
     })
   }
 }
