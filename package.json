@@ -72,10 +72,8 @@
     "protobufjs": "7.2.5",
     "@babel/traverse": "7.23.2",
     "node-fetch": "2.6.7",
-    "get-func-name": "2.0.1",
     "minimatch": "3.0.5",
-    "async": "2.6.4",
-    "browserify-sign": "4.2.2"
+    "async": "2.6.4"
   },
   "packageManager": "yarn@4.9.2"
 }
