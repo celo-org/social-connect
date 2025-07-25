@@ -69,7 +69,10 @@ const distributeSymmetricKey = async (
   }
 
   const wallet = wrapper.kit.getWallet()!
-  const sharedSecret = await wallet.computeSharedSecret(publicKeyToAddress(fromPubKey), toPubKey)
+  const sharedSecret = await wallet.computeSharedSecret(
+    publicKeyToAddress(fromPubKey),
+    ensureUncompressed(toPubKey),
+  )
 
   const computedDataPath = getCiphertextLabel(`${dataPath}.key`, sharedSecret, fromPubKey, toPubKey)
   const encryptedData = Encrypt(
@@ -222,7 +225,10 @@ const readSymmetricKey = async (
     return Err(new UnavailableKey(readerPublicKeyAddress))
   }
 
-  const sharedSecret = await wallet.computeSharedSecret(readerPublicKeyAddress, senderPubKey)
+  const sharedSecret = await wallet.computeSharedSecret(
+    readerPublicKeyAddress,
+    ensureUncompressed(senderPubKey),
+  )
   const computedDataPath = getCiphertextLabel(
     `${dataPath}.key`,
     sharedSecret,

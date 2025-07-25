@@ -164,12 +164,14 @@ describe.skip('Authentication test suite', () => {
     })
 
     const mockGetWalletAddress = jest.fn<string, []>()
-    const mockGetDataEncryptionKey = jest.fn(async (args: [string]) => {
+    const mockGetDataEncryptionKey = jest.fn<string, []>().mockImplementation(() => {
       //  NOTE: elliptic is disabled elsewhere in this library to prevent
       // accidental signing of truncated messages.
       const EC = require('elliptic').ec
       const ec = new EC('secp256k1')
-      const key = ec.keyFromPrivate(hexToBuffer(args[0]))
+      const key = ec.keyFromPrivate(
+        hexToBuffer('41e8e8593108eeedcbded883b8af34d2f028710355c57f4c10a056b72486aa04'),
+      )
       return key.getPublic(true, 'hex')
     })
 
