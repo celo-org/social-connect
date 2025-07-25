@@ -7,5 +7,9 @@ module.exports = {
       lines: 80,
     },
   },
-  tsConfig: '<rootDir>/tsconfig.test.json',
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
+      tsconfig: '<rootDir>/tsconfig.test.json',
+    }],
+  },
 }
