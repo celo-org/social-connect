@@ -10,19 +10,6 @@ import {
 import { signWithRawKey } from '../utils/authentication'
 import { genSessionID } from '../utils/logger'
 
-export interface AttestationsStatus {
-  isVerified: boolean
-  numAttestationsRemaining: number
-  total: number
-  completed: number
-}
-
-export function createMockAttestation(getVerifiedStatus: jest.Mock<AttestationsStatus, []>) {
-  return {
-    getVerifiedStatus,
-  }
-}
-
 export function createMockAccounts(
   getWalletAddress: jest.Mock<string, []>,
   getDataEncryptionKey: jest.Mock<string, []>,
