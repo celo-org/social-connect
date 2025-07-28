@@ -36,19 +36,17 @@ import { Server } from 'http'
 import { Server as HttpsServer } from 'https'
 import { Knex } from 'knex'
 import request from 'supertest'
-import { createWalletClient, http } from 'viem'
+import { createWalletClient, http, publicActions } from 'viem'
 import { celoAlfajores } from 'viem/chains'
 import config, { getCombinerVersion } from '../../src/config'
 import { startCombiner } from '../../src/server'
 import { getBlindedPhoneNumber, serverClose } from '../utils'
 
-const { createMockAccounts, createMockOdisPayments, getPnpRequestAuthorization } = TestUtils.Utils
+const { getPnpRequestAuthorization } = TestUtils.Utils
 const {
   PRIVATE_KEY1,
   ACCOUNT_ADDRESS1,
-  mockAccount,
   DEK_PRIVATE_KEY,
-  DEK_PUBLIC_KEY,
   PNP_THRESHOLD_DEV_PK_SHARE_1_V1,
   PNP_THRESHOLD_DEV_PK_SHARE_1_V2,
   PNP_THRESHOLD_DEV_PK_SHARE_1_V3,
@@ -63,6 +61,9 @@ const {
 } = TestUtils.Values
 
 jest.setTimeout(20000)
+
+const mockAccount = '0x0000000000000000000000000000000000007E57'
+const DEK_PUBLIC_KEY = '0x026063780c81991c032fb4fa7485c6607b7542e048ef85d08516fe5c4482360e4b'
 
 // create deep copy of config
 const combinerConfig: typeof config = JSON.parse(JSON.stringify(config))
@@ -134,7 +135,6 @@ const signerConfig: SignerConfig = {
   fullNodeTimeoutMs: FULL_NODE_TIMEOUT_IN_MS,
   fullNodeRetryCount: RETRY_COUNT,
   fullNodeRetryDelayMs: RETRY_DELAY_IN_MS,
-  // TODO (alec) make SignerConfig better
   shouldMockAccountService: false,
   mockDek: '',
   mockTotalQuota: 0,
@@ -144,19 +144,8 @@ const signerConfig: SignerConfig = {
   requestPrunningJobCronPattern: '0 0 0 * * *',
 }
 
-const mockOdisPaymentsTotalPaidCUSD = jest.fn<BigNumber, []>()
-const mockGetWalletAddress = jest.fn<string, []>()
-const mockGetDataEncryptionKey = jest.fn<string, []>()
-
-const mockContracts = {
-  ['getAccountsContract']: createMockAccounts(mockGetWalletAddress, mockGetDataEncryptionKey),
-  ['getOdisPaymentsContract']: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
-}
-
-jest.mock('@celo/phone-number-privacy-common', () => ({
-  ...jest.requireActual('@celo/phone-number-privacy-common'),
-  ...mockContracts,
-}))
+// Mock function for OdisPayments contract calls
+const mockOdisPaymentsTotalPaidCUSD = jest.fn()
 
 describe('pnpService', () => {
   let keyProvider1: KeyProvider
@@ -182,11 +171,39 @@ describe('pnpService', () => {
 
   const message = Buffer.from('test message', 'utf8')
 
-  // In current setup, the same mocked kit is used for the combiner and signers
+  // Create a mock wallet client that can return mock contract data
   const mockClient = createWalletClient({
     chain: celoAlfajores,
     transport: http(),
   })
+    .extend(publicActions)
+    .extend(() => ({
+      // Override contract reads with mock data
+      readContract: async ({ address, functionName, args }: any) => {
+        // Mock the Accounts contract calls
+        if (address === '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9') {
+          if (functionName === 'getDataEncryptionKey') {
+            const [accountAddress] = args || []
+            if (accountAddress === ACCOUNT_ADDRESS1) {
+              return DEK_PUBLIC_KEY
+            }
+            return '0x'
+          }
+          if (functionName === 'getWalletAddress') {
+            return mockAccount
+          }
+        }
+
+        // Mock the OdisPayments contract calls
+        if (address === '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49') {
+          if (functionName === 'totalPaidCUSD') {
+            return mockOdisPaymentsTotalPaidCUSD()
+          }
+        }
+
+        throw new Error(`Unmocked contract call: ${functionName} on ${address}`)
+      },
+    }))
 
   const sendPnpSignRequest = async (
     req: SignMessageRequest,
@@ -257,6 +274,8 @@ describe('pnpService', () => {
       expectedUnblindedSigs[config.phoneNumberPrivacy.keys.currentVersion - 1]
 
     beforeAll(async () => {
+      mockOdisPaymentsTotalPaidCUSD.mockReturnValue(new BigNumber(1e18))
+
       keyProvider1 = new MockKeyProvider(
         new Map([
           [`${DefaultKeyName.PHONE_NUMBER_PRIVACY}-1`, PNP_THRESHOLD_DEV_PK_SHARE_1_V1],
@@ -292,9 +311,6 @@ describe('pnpService', () => {
       }
 
       blindedMsgResult = threshold_bls.blind(message, userSeed)
-
-      mockGetDataEncryptionKey.mockReset().mockReturnValue(DEK_PUBLIC_KEY)
-      mockGetWalletAddress.mockReset().mockReturnValue(mockAccount)
     })
 
     afterEach(async () => {
@@ -880,9 +896,23 @@ describe('pnpService', () => {
 
         describe('functionality in case of errors', () => {
           it('Should return 401 on failure to fetch DEK', async () => {
-            mockGetDataEncryptionKey.mockImplementation(() => {
-              throw new Error()
+            // Create a client that throws an error when getDataEncryptionKey is called
+            const errorClient = createWalletClient({
+              chain: celoAlfajores,
+              transport: http(),
             })
+              .extend(publicActions)
+              .extend(() => ({
+                readContract: async ({ address, functionName }: any) => {
+                  if (
+                    address === '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9' &&
+                    functionName === 'getDataEncryptionKey'
+                  ) {
+                    throw new Error('Mock DEK fetch error')
+                  }
+                  return mockClient.readContract({ address, functionName } as any)
+                },
+              }))
 
             req.authenticationMethod = AuthenticationMethod.ENCRYPTION_KEY
             const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
@@ -892,7 +922,7 @@ describe('pnpService', () => {
             )
             const appWithFailOpenDisabled = startCombiner(
               combinerConfigWithFailOpenDisabled,
-              mockClient,
+              errorClient,
             )
             const res = await sendPnpSignRequest(req, authorization, appWithFailOpenDisabled)
 
@@ -1217,6 +1247,9 @@ describe('pnpService', () => {
           ],
         ]),
       )
+
+      mockOdisPaymentsTotalPaidCUSD.mockReturnValue(new BigNumber(1e18))
+
       app = startCombiner(combinerConfigLargerN, mockClient)
     })
 
