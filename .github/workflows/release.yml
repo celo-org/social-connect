@@ -38,10 +38,10 @@ jobs:
         with:
           token: ${{ env.PAT }}
 
-      - name: Setup Node.js 18.x
+      - name: Setup Node.js 22.x
         uses: actions/setup-node@v4
         with:
-          node-version: 18.x
+          node-version: 22.x
 
       - name: 'Setup yarn'
         shell: bash

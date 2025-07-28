@@ -1,7 +1,7 @@
 name: social-connect CI/CD
 run-name: social-connect CI/CD for ${{ github.head_ref || github.ref_name }}
 
-# Dockefile for the self-hosted runner:
+# Dockerfile for the self-hosted runner:
 # https://github.com/celo-org/infrastructure/blob/master/terraform/root-modules/gcp/integration-tests-gke/files/github-arc/Dockerfile-monorepo
 
 on:
@@ -25,25 +25,23 @@ defaults:
 
 env:
   # Increment these to force cache rebuilding
-  NODE_MODULE_CACHE_VERSION: 3
+  NODE_MODULE_CACHE_VERSION: 4
   NODE_OPTIONS: '--max-old-space-size=4096'
   TERM: dumb
-  GRADLE_OPTS: '-Dorg.gradle.daemon=false -Dorg.gradle.parallel=false -Dorg.gradle.configureondemand=true -Dorg.gradle.jvmargs="-Xmx4096m -XX:+HeapDumpOnOutOfMemoryError"'
 
 jobs:
   install-dependencies:
     name: Install + Build
     outputs:
       package-json-checksum: ${{ steps.node-checksums.outputs.PACKAGE_JSON_CHECKSUM }}
-      # Propagate more outputs if you need https://github.com/tj-actions/changed-files#outputs
-      # Adding a initial comma so ',<path>' matches also for the first file
-      all_modified_files: ',${{ steps.changed-files.outputs.all_modified_files }}'
-    # runs-on: ubuntu-latest
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
     steps:
+      - name: Fix permissions for the workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
       - name: Restore .git cache
         uses: actions/cache@v4
         id: cache_git
@@ -53,28 +51,6 @@ jobs:
           restore-keys: |
             git-
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Detect files changed in PR, and expose as output
-        id: changed-files
-        uses: tj-actions/changed-files@v46
-        with:
-          # Using comma as separator to be able to easily match full paths (using ,<path>)
-          separator: ','
-          # Checking if changed in the last 100 commits in PRs
-          fetch_depth: '100'
-      - run: echo ",${{ steps.changed-files.outputs.all_modified_files }}"
-      - name: Verify setup for incremental testing
-        run: |
-          set -euo pipefail
-          set -v
-          # To get the "main" branch mapping
-          git checkout main
-          git checkout ${GITHUB_SHA}
-          # Verify that following commands work, they are later called in the incremental testing script
-          # Their output does not matter here, the fact that they finish successfully does.
-          git rev-parse --abbrev-ref HEAD
-          git fetch --all --tags
       - name: Calculate node cache keys
         id: node-checksums
         run: |
@@ -112,7 +88,7 @@ jobs:
           restore-keys: |
             code-${{ github.sha }}
       - name: "enable corepack"
-        run : sudo corepack enable yarn
+        run : corepack enable yarn
       - name: Install yarn dependencies
       # skip check due to YN0078: │ Invalid resolution @celo/odis-identifiers@npm:^1.0.0 → npm:1.0.0
         run: git config --global url."https://".insteadOf ssh:// && yarn install --no-check-resolutions
@@ -133,10 +109,13 @@ jobs:
     name: Lint code
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
     needs: install-dependencies
     steps:
+      - name: Fix permissions for the workspace
+        run: git config --global --add safe.directory $GITHUB_WORKSPACE
       # Restore .git cache as we need to checkout the local composite action to run it:
       # https://github.com/orgs/community/discussions/11771
       - uses: actions/cache/restore@v4
@@ -190,7 +169,8 @@ jobs:
     name: General (identity + encrypted-backup) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     needs: install-dependencies
     steps:
       - uses: actions/cache/restore@v4
@@ -222,15 +202,10 @@ jobs:
     name: Combiner test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
     needs: install-dependencies
-    if: |
-      github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'apps/combiner') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
-      false
     steps:
       - uses: actions/cache/restore@v4
         id: cache_git
@@ -250,15 +225,9 @@ jobs:
     needs: install-dependencies
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node18
+      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
+      options: --user root
     timeout-minutes: 30
-    if: |
-      github.base_ref == 'main' || contains(github.base_ref, 'staging') || contains(github.base_ref, 'production') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'packages') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, 'apps/signer') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, ',package.json') ||
-      contains(needs.install-dependencies.outputs.all_modified_files, ',yarn.lock') ||
-      false
     steps:
       - uses: actions/cache/restore@v4
         id: cache_git
