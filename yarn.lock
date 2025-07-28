@@ -984,7 +984,7 @@ __metadata:
     "@types/node-fetch": "npm:^2.5.7"
     bignumber.js: "npm:^9.1.2"
     bunyan: "npm:1.8.15"
-    bunyan-debug-stream: "npm:2.0.0"
+    bunyan-debug-stream: "npm:2.0.1"
     bunyan-gke-stackdriver: "npm:0.1.2"
     dotenv: "npm:^8.2.0"
     elliptic: "npm:^6.5.4"
@@ -6567,6 +6567,18 @@ __metadata:
   peerDependencies:
     bunyan: "*"
   checksum: 10/d0207cdb1272591962c5255d12f1f0f3483e6adbce6e104fcbe3bc7ca6acd999b3c2c5e70c2d229f8edb1e1ca73ba1a2a43bc74e1a16b1b788f12a11b980cdb0
+  languageName: node
+  linkType: hard
+
+"bunyan-debug-stream@npm:2.0.1":
+  version: 2.0.1
+  resolution: "bunyan-debug-stream@npm:2.0.1"
+  dependencies:
+    colors: "npm:1.4.0"
+    exception-formatter: "npm:^1.0.4"
+  peerDependencies:
+    bunyan: "*"
+  checksum: 10/c42f5e9cd037e4cfe52d97ed916a9b5e7c268938de8bce0ee6ab7a36d4bc9f73d9b588eaff7449c268d34163c6cb7d58f293afe85998ad33f2960a479a0aeb1f
   languageName: node
   linkType: hard
 
