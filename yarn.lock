@@ -854,21 +854,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/dev-utils@npm:0.0.1":
-  version: 0.0.1
-  resolution: "@celo/dev-utils@npm:0.0.1"
-  dependencies:
-    bignumber.js: "npm:^9.0.0"
-    fs-extra: "npm:^8.1.0"
-    ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
-    targz: "npm:^1.0.1"
-    tmp: "npm:^0.1.0"
-    web3: "npm:1.10.0"
-    web3-core-helpers: "npm:1.10.0"
-  checksum: 10/66915944a9cdd7d69062dd535296af65cd238056842ccf8b33051b8290f217c7cc678e24ddab55947e41a4e1884b4d63e997eb52bda9dc4d46f591c93c6ae962
-  languageName: node
-  linkType: hard
-
 "@celo/dev-utils@npm:0.0.1-beta.1":
   version: 0.0.1-beta.1
   resolution: "@celo/dev-utils@npm:0.0.1-beta.1"
@@ -889,7 +874,7 @@ __metadata:
   resolution: "@celo/encrypted-backup@workspace:packages/encrypted-backup"
   dependencies:
     "@celo/base": "npm:^7.0.0"
-    "@celo/dev-utils": "npm:0.0.1"
+    "@celo/dev-utils": "npm:0.0.1-beta.1"
     "@celo/identity": "npm:^5.1.2"
     "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/poprf": "npm:^0.1.9"
