@@ -22,7 +22,7 @@
     "@celo/abis": "^11.0.0",
     "@celo/base": "^7.0.0",
     "@celo/utils": "^8.0.0",
-    "@types/bunyan": "1.8.10",
+    "@types/bunyan": "1.8.11",
     "bignumber.js": "^9.1.2",
     "bunyan": "1.8.15",
     "bunyan-debug-stream": "2.0.0",
