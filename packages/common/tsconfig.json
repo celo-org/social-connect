@@ -5,6 +5,6 @@
     "rootDir": "src",
     "outDir": "lib",
   },
-  "include": ["src", "bunyan-debug.d.ts"],
+  "include": ["src"],
   "compileOnSave": true
 }

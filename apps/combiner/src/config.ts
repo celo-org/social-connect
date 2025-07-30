@@ -7,6 +7,7 @@ import {
   TestUtils,
   toBool,
 } from '@celo/phone-number-privacy-common'
+import { celoAlfajores } from 'viem/chains'
 
 export function getCombinerVersion(): string {
   return process.env.npm_package_version ?? require('../package.json').version ?? '0.0.0'
@@ -80,7 +81,8 @@ if (DEV_MODE) {
       port: 8081,
     },
     blockchain: {
-      provider: FORNO_ALFAJORES,
+      rpcURL: FORNO_ALFAJORES,
+      chainID: celoAlfajores.id,
     },
     phoneNumberPrivacy: {
       serviceName: defaultServiceName,
@@ -166,7 +168,8 @@ if (DEV_MODE) {
       sslCertPath: env.SERVER_SSL_CERT_PATH,
     },
     blockchain: {
-      provider: env.BLOCKCHAIN_PROVIDER,
+      rpcURL: env.BLOCKCHAIN_PROVIDER,
+      chainID: env.CHAIN_ID,
       apiKey: env.BLOCKCHAIN_API_KEY,
     },
     phoneNumberPrivacy: {
