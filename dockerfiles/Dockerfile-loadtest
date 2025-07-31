@@ -42,7 +42,7 @@ RUN yarn workspaces focus @celo/phone-number-privacy-monitor --production
 RUN rm -r .git
 
 # Setup and run the signer application.
-ENV NODE_ENV production
+ENV NODE_ENV=production
 WORKDIR /celo-phone-number-privacy/apps/monitor
 EXPOSE 8080
 RUN yarn
