@@ -17,7 +17,7 @@ FROM node:22-alpine
 LABEL org.opencontainers.image.authors="devops@clabs.co"
 
 # Install dependencies and upgrade OS packages
-RUN apk add --no-cache python3 git bash && \
+RUN apk add --no-cache python3 git bash make && \
     apk upgrade --no-cache
 
 WORKDIR /celo-phone-number-privacy/
