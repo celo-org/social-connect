@@ -49,7 +49,7 @@ RUN yarn workspaces focus @celo/phone-number-privacy-combiner --production
 RUN rm -r .git
 
 # Setup and run the combiner application.
-ENV NODE_ENV production
+ENV NODE_ENV=production
 WORKDIR /celo-phone-number-privacy/apps/combiner
 EXPOSE 8080
 RUN yarn
