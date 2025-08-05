@@ -24,7 +24,7 @@ export enum SupportedDatabase {
   Postgres = 'postgres', // PostgresSQL
   MySql = 'mysql', // MySQL
   MsSql = 'mssql', // Microsoft SQL Server
-  Sqlite = 'sqlite3', // SQLite (for testing)
+  Sqlite = 'better-sqlite3', // SQLite (for testing)
 }
 
 export enum SupportedKeystore {
