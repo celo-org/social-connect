@@ -13,6 +13,8 @@
     "clean": "yarn run --top-level tsc --build  --clean",
     "build": "yarn run --top-level tsc --build",
     "lint": "yarn run --top-level eslint .",
+    "format": "yarn run --top-level prettier --write '**/*.+(ts|js)'",
+    "format:check": "yarn run --top-level prettier --check '**/*.+(ts|js)'",
     "test": "yarn jest --runInBand --testPathIgnorePatterns test/end-to-end",
     "test:debughandles": "jest --watch --runInBand --detectOpenHandles --testPathIgnorePatterns test/end-to-end",
     "test:debug": "node --inspect ../../../node_modules/.bin/jest --runInBand",
