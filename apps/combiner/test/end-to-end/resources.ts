@@ -11,7 +11,7 @@ import {
 } from '@celo/utils/lib/address'
 import { Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo } from 'viem/chains'
+import { celo, celoAlfajores } from 'viem/chains'
 
 require('dotenv').config()
 
@@ -56,10 +56,24 @@ export const CONTACT_PHONE_NUMBERS = [CONTACT_PHONE_NUMBER]
 /**
  * RESOURCES AND UTILS
  */
+const getViemChain = () => {
+  const contextName = getTestContextName()
+  switch (contextName) {
+    case OdisContextName.MAINNET:
+      return celo
+    case OdisContextName.ALFAJORES:
+      return celoAlfajores
+    case OdisContextName.STAGING:
+      return celoAlfajores
+    default:
+      break
+  }
+}
+
 export const client = createWalletClient({
   transport: http(DEFAULT_FORNO_URL),
-  chain: celo,
-  account: privateKeyToAccount(PRIVATE_KEY_NO_QUOTA),
+  chain: getViemChain(),
+  account: privateKeyToAccount(ensureLeading0x(PRIVATE_KEY)),
 })
 
 interface DEK {
@@ -94,5 +108,10 @@ export const dekAuthSigner = (index: number): EncryptionKeySigner => {
 
 export const walletAuthSigner: WalletKeySigner = {
   authenticationMethod: AuthenticationMethod.WALLET_KEY,
-  sign191: (args) => client.signMessage(args),
+  sign191: (args) => {
+    // Use the appropriate private key based on the account address
+    const privateKey =
+      args.account === ACCOUNT_ADDRESS_NO_QUOTA ? PRIVATE_KEY_NO_QUOTA : PRIVATE_KEY
+    return privateKeyToAccount(ensureLeading0x(privateKey)).signMessage(args)
+  },
 }
