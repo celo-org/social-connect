@@ -34,7 +34,7 @@ jobs:
           static-secrets: '{"/static-secrets/NPM/npm-publish-token":"NPM_TOKEN"}'
 
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           token: ${{ env.PAT }}
 
