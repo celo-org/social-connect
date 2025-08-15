@@ -1057,7 +1057,7 @@ __metadata:
     knex: "npm:^2.1.0"
     lru-cache: "npm:^10.0.1"
     mssql: "npm:^6.3.1"
-    mysql2: "npm:^2.1.0"
+    mysql2: "npm:^3.0.0"
     pg: "npm:^8.2.1"
     prom-client: "npm:12.0.0"
     promise.allsettled: "npm:^1.0.2"
@@ -5953,6 +5953,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"aws-ssl-profiles@npm:^1.1.1":
+  version: 1.1.2
+  resolution: "aws-ssl-profiles@npm:1.1.2"
+  checksum: 10/af9e5c5e6e343e0f299106acaf03106a7458be69772d004f3e4cf0e3649bb41131b594126fcbc997ad89d73752d9e1d72886c72fcc8649ac5d590459d6b75827
+  languageName: node
+  linkType: hard
+
 "aws4@npm:^1.8.0":
   version: 1.12.0
   resolution: "aws4@npm:1.12.0"
@@ -7829,7 +7836,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"denque@npm:^2.0.1":
+"denque@npm:^2.1.0":
   version: 2.1.0
   resolution: "denque@npm:2.1.0"
   checksum: 10/8ea05321576624b90acfc1ee9208b8d1d04b425cf7573b9b4fa40a2c3ed4d4b0af5190567858f532f677ed2003d4d2b73c8130b34e3c7b8d5e88cdcfbfaa1fe7
@@ -12871,6 +12878,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"long@npm:^5.2.1":
+  version: 5.3.2
+  resolution: "long@npm:5.3.2"
+  checksum: 10/b6b55ddae56fcce2864d37119d6b02fe28f6dd6d9e44fd22705f86a9254b9321bd69e9ffe35263b4846d54aba197c64882adcb8c543f2383c1e41284b321ea64
+  languageName: node
+  linkType: hard
+
 "lowercase-keys@npm:^2.0.0":
   version: 2.0.0
   resolution: "lowercase-keys@npm:2.0.0"
@@ -12934,6 +12948,13 @@ __metadata:
     lodash.clonedeep: "npm:^4.5.0"
     lru-cache: "npm:~4.0.0"
   checksum: 10/a13361a11c64bc5af1a7cadba4c24b2afbe11396533e222ed092723a6928e27e14f56c1402535667d4e801d8ee49a9c0fd73a20bd6806f5f92d2f4ba102026ec
+  languageName: node
+  linkType: hard
+
+"lru.min@npm:^1.0.0":
+  version: 1.1.2
+  resolution: "lru.min@npm:1.1.2"
+  checksum: 10/74e56b21048a496dda6a5bd2b6104d919b3bae7ddfd4e50b2724a0b48516394f0b95dd350b8a8818572bfeac9944c9a69c405dac8825f6ddf082775fe0592c6b
   languageName: node
   linkType: hard
 
@@ -13604,23 +13625,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mysql2@npm:^2.1.0":
-  version: 2.3.3
-  resolution: "mysql2@npm:2.3.3"
+"mysql2@npm:^3.0.0":
+  version: 3.14.3
+  resolution: "mysql2@npm:3.14.3"
   dependencies:
-    denque: "npm:^2.0.1"
+    aws-ssl-profiles: "npm:^1.1.1"
+    denque: "npm:^2.1.0"
     generate-function: "npm:^2.3.1"
     iconv-lite: "npm:^0.6.3"
-    long: "npm:^4.0.0"
-    lru-cache: "npm:^6.0.0"
-    named-placeholders: "npm:^1.1.2"
+    long: "npm:^5.2.1"
+    lru.min: "npm:^1.0.0"
+    named-placeholders: "npm:^1.1.3"
     seq-queue: "npm:^0.0.5"
     sqlstring: "npm:^2.3.2"
-  checksum: 10/af101e46c3f342d80f85dce6053f771c9ca7fd2cdfef993226eee11edefbb01a4740f1e9674014dcd8c948c53711553c5a523d3105364f40a120318e87dc8049
+  checksum: 10/855b433f5e327cb8b3117b9cc6ce6f0dc99a7fea0622910c858c38bfa9031246fb964b1f41d269ce07516adf8d8a3a72b70d2bd779486b2355640ea76e1b41ba
   languageName: node
   linkType: hard
 
-"named-placeholders@npm:^1.1.2":
+"named-placeholders@npm:^1.1.3":
   version: 1.1.3
   resolution: "named-placeholders@npm:1.1.3"
   dependencies:
