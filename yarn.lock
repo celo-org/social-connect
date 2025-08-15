@@ -4354,12 +4354,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bn.js@npm:4.11.6":
-  version: 4.11.6
-  resolution: "@types/bn.js@npm:4.11.6"
+"@types/bn.js@npm:*, @types/bn.js@npm:^5.1.0, @types/bn.js@npm:^5.1.1":
+  version: 5.2.0
+  resolution: "@types/bn.js@npm:5.2.0"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/9ff3e7a1539a953c381c0d30ea2049162e3cab894cda91ee10f3a84d603f9afa2b2bc2a38fe9b427de94b6e2b7b77aefd217c1c7b07a10ae8d7499f9d6697a41
+  checksum: 10/06c93841f74e4a5e5b81b74427d56303b223c9af36389b4cd3c562bda93f43c425c7e241aee1b0b881dde57238dc2e07f21d30d412b206a7dae4435af4c054e8
   languageName: node
   linkType: hard
 
@@ -6130,10 +6130,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:9.0.0":
-  version: 9.0.0
-  resolution: "bignumber.js@npm:9.0.0"
-  checksum: 10/7406d0d11dfdd2183e19be745f0d5913e3773ded5fbca2a310221e719f15fd8ec6b8d7991031a6081a6276a8e12e27d58ead60f73dcbb9d697ebe9e2dd0ad7e0
+"bignumber.js@npm:^9.0.0, bignumber.js@npm:^9.1.2":
+  version: 9.3.1
+  resolution: "bignumber.js@npm:9.3.1"
+  checksum: 10/1be0372bf0d6d29d0a49b9e6a9cefbd54dad9918232ad21fcd4ec39030260773abf0c76af960c6b3b98d3115a3a71e61c6a111812d1395040a039cfa178e0245
   languageName: node
   linkType: hard
 
