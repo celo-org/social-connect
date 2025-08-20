@@ -4529,12 +4529,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/bn.js@npm:4.11.6":
-  version: 4.11.6
-  resolution: "@types/bn.js@npm:4.11.6"
+"@types/bn.js@npm:*, @types/bn.js@npm:^5.1.0, @types/bn.js@npm:^5.1.1":
+  version: 5.2.0
+  resolution: "@types/bn.js@npm:5.2.0"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/9ff3e7a1539a953c381c0d30ea2049162e3cab894cda91ee10f3a84d603f9afa2b2bc2a38fe9b427de94b6e2b7b77aefd217c1c7b07a10ae8d7499f9d6697a41
+  checksum: 10/06c93841f74e4a5e5b81b74427d56303b223c9af36389b4cd3c562bda93f43c425c7e241aee1b0b881dde57238dc2e07f21d30d412b206a7dae4435af4c054e8
   languageName: node
   linkType: hard
 
@@ -6324,10 +6324,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bignumber.js@npm:9.0.0":
-  version: 9.0.0
-  resolution: "bignumber.js@npm:9.0.0"
-  checksum: 10/7406d0d11dfdd2183e19be745f0d5913e3773ded5fbca2a310221e719f15fd8ec6b8d7991031a6081a6276a8e12e27d58ead60f73dcbb9d697ebe9e2dd0ad7e0
+"bignumber.js@npm:^9.0.0, bignumber.js@npm:^9.1.2":
+  version: 9.3.1
+  resolution: "bignumber.js@npm:9.3.1"
+  checksum: 10/1be0372bf0d6d29d0a49b9e6a9cefbd54dad9918232ad21fcd4ec39030260773abf0c76af960c6b3b98d3115a3a71e61c6a111812d1395040a039cfa178e0245
   languageName: node
   linkType: hard
 
@@ -13569,12 +13569,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:3.0.5":
-  version: 3.0.5
-  resolution: "minimatch@npm:3.0.5"
+"minimatch@npm:3.1.2":
+  version: 3.1.2
+  resolution: "minimatch@npm:3.1.2"
   dependencies:
     brace-expansion: "npm:^1.1.7"
-  checksum: 10/8f9707491183a07a9542b8cf45aacb3745ba9fe6c611173fb225d7bf191e55416779aee31e17673a516a178af02d8d3d71ddd36ae3d5cc2495f627977ad1a012
+  checksum: 10/e0b25b04cd4ec6732830344e5739b13f8690f8a012d73445a4a19fbc623f5dd481ef7a5827fde25954cd6026fede7574cc54dc4643c99d6c6b653d6203f94634
   languageName: node
   linkType: hard
 
@@ -14069,9 +14069,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:2.6.7":
-  version: 2.6.7
-  resolution: "node-fetch@npm:2.6.7"
+"node-fetch@npm:2.7.0":
+  version: 2.7.0
+  resolution: "node-fetch@npm:2.7.0"
   dependencies:
     whatwg-url: "npm:^5.0.0"
   peerDependencies:
@@ -14079,7 +14079,7 @@ __metadata:
   peerDependenciesMeta:
     encoding:
       optional: true
-  checksum: 10/4bc9245383db92c35601a798c9a992fdf38d99920ceac11e0e6512ef3014d188b3807ccb060bc6c4bdb57a145030c73f5b5fd6730f665979f9264bc43ca3afea
+  checksum: 10/b24f8a3dc937f388192e59bcf9d0857d7b6940a2496f328381641cb616efccc9866e89ec43f2ec956bbd6c3d3ee05524ce77fe7b29ccd34692b3a16f237d6676
   languageName: node
   linkType: hard
 
@@ -15362,9 +15362,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"protobufjs@npm:7.2.5":
-  version: 7.2.5
-  resolution: "protobufjs@npm:7.2.5"
+"protobufjs@npm:7.5.3":
+  version: 7.5.3
+  resolution: "protobufjs@npm:7.5.3"
   dependencies:
     "@protobufjs/aspromise": "npm:^1.1.2"
     "@protobufjs/base64": "npm:^1.1.2"
@@ -15378,7 +15378,7 @@ __metadata:
     "@protobufjs/utf8": "npm:^1.1.0"
     "@types/node": "npm:>=13.7.0"
     long: "npm:^5.0.0"
-  checksum: 10/6c5aa62b61dff843f585f3acd9cb7a82d566de2dbf167a300b39afee91b04298c4b4aec61354b7c00308b40596f5f3f4b07d6246cfb4ee0abeaea25101033315
+  checksum: 10/3e412d2e2f799875dcdac1b43508f465a499dd3ffd9d24073669702589ef016529905617a12a967b1a8cfbe803a638b494cc3ed8db035605c7570d1a7fc094c9
   languageName: node
   linkType: hard
 
