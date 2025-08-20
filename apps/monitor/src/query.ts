@@ -35,7 +35,7 @@ const newPrivateKey = async () => {
 
 type ChainInfo = {
   rpcURL: string
-  chainID: 44787 | 42220
+  chainID: number
 }
 
 export const queryOdisForSalt = async (
