@@ -13,7 +13,7 @@ const logger = rootLogger('odis-monitor')
 
 export type TestChainInfo = {
   rpcURL: string
-  chainID: 44787 | 42220
+  chainID: number
 }
 
 export async function testPNPSignQuery(

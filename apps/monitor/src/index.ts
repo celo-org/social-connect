@@ -10,7 +10,7 @@ export const odisMonitorScheduleFunctionPNPGen2 = functions.onSchedule(
   'every 5 minutes',
   async () =>
     testPNPSignQuery(
-      { rpcURL: blockchainProvider.value(), chainID: chainID.value() as 44787 },
+      { rpcURL: blockchainProvider.value(), chainID: chainID.value() },
       contextName.value() as any,
     ),
 )

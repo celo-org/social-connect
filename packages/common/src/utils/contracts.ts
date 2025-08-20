@@ -25,7 +25,6 @@ export function getWalletClientWithAgent(config: BlockchainConfig): WalletClient
   options.fetchOptions = {}
   options.fetchOptions.keepalive = true
 
-  // TODO
   // no agent on viem?
   // options.fetchOptions = {
   //   http: new http.Agent({ keepAlive: true }),
