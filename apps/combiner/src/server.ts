@@ -36,7 +36,10 @@ import { NoQuotaCache } from './utils/no-quota-cache'
 
 require('events').EventEmitter.defaultMaxListeners = 15
 
-export function startCombiner(config: CombinerConfig, kit?: ContractKit) {
+export function startCombiner(
+  config: CombinerConfig,
+  kit?: ContractKit,
+): express.Express | https.Server {
   const logger = rootLogger(config.serviceName)
 
   kit = kit ?? getContractKitWithAgent(config.blockchain)
