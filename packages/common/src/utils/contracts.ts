@@ -8,7 +8,7 @@ import { celo, celoAlfajores } from 'viem/chains'
 
 export interface BlockchainConfig {
   rpcURL: string
-  chainID: typeof celo.id | typeof celoAlfajores.id
+  chainID: number
   apiKey?: string
 }
 
