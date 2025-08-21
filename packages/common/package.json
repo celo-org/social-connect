@@ -29,7 +29,7 @@
     "bunyan-gke-stackdriver": "0.1.2",
     "dotenv": "^8.2.0",
     "elliptic": "^6.5.4",
-    "express": "^4.17.6",
+    "express": "^5.0.0",
     "fp-ts": "2.1.1",
     "io-ts": "2.0.1",
     "is-base64": "^1.1.0",
@@ -39,7 +39,7 @@
     "@celo/poprf": "^0.1.9",
     "@celo/wallet-local": "^5.1.2",
     "@types/elliptic": "^6.4.16",
-    "@types/express": "^4.17.20",
+    "@types/express": "^5.0.0",
     "@types/is-base64": "^1.1.2",
     "@types/node-fetch": "^2.5.7",
     "jest": "^29.7.0"
