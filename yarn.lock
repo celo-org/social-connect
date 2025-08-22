@@ -691,10 +691,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/abis@npm:11.0.0, @celo/abis@npm:^11.0.0":
+"@celo/abis@npm:11.0.0":
   version: 11.0.0
   resolution: "@celo/abis@npm:11.0.0"
   checksum: 10/f54204d2fad17e01201b03efbea02837c9b360130d201f229cca6f048031ca20aeea964599ac8ba8c3a367f8dba861f79ace4d47376cbd5379f9987fec4a10c8
+  languageName: node
+  linkType: hard
+
+"@celo/abis@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "@celo/abis@npm:13.0.0"
+  checksum: 10/1b5c939824802c52eed93d369ca810958cc1b46ba41a092814fa1a5edbc25391921aa9154ac0a4a7d887a37953ad6966babc51fa2c64244ef82e8749dcbd3657
   languageName: node
   linkType: hard
 
@@ -1002,7 +1009,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-common@workspace:packages/common"
   dependencies:
-    "@celo/abis": "npm:^11.0.0"
+    "@celo/abis": "npm:^13.0.0"
     "@celo/base": "npm:^7.0.0"
     "@celo/poprf": "npm:^0.1.9"
     "@celo/utils": "npm:^8.0.0"
@@ -14350,7 +14357,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "odis-example-scripts@workspace:docs/examples"
   dependencies:
-    "@celo/abis": "npm:^11.0.0"
+    "@celo/abis": "npm:^13.0.0"
     "@celo/base": "npm:^7.0.0"
     "@celo/identity": "npm:^5.1.2"
     blind-threshold-bls: "https://github.com/celo-org/blind-threshold-bls-wasm#3d1013a"
