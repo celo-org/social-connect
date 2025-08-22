@@ -19,9 +19,9 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@celo/base": "^6.0.0",
-    "@celo/contractkit": "^7.1.0",
-    "@celo/utils": "^6.0.0",
+    "@celo/abis": "^13.0.0",
+    "@celo/base": "^7.0.0",
+    "@celo/utils": "^8.0.0",
     "@types/bunyan": "1.8.11",
     "bignumber.js": "^9.1.2",
     "bunyan": "1.8.15",
@@ -33,11 +33,12 @@
     "fp-ts": "2.1.1",
     "io-ts": "2.0.1",
     "is-base64": "^1.1.0",
-    "node-fetch": "^2.6.9"
+    "node-fetch": "^2.6.9",
+    "viem": "2.21.14"
   },
   "devDependencies": {
     "@celo/poprf": "^0.1.9",
-    "@celo/wallet-local": "^5.1.2",
+    "@celo/wallet-local": "^6.0.4",
     "@types/elliptic": "^6.4.16",
     "@types/express": "^4.17.20",
     "@types/is-base64": "^1.1.2",
