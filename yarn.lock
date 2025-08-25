@@ -1009,12 +1009,14 @@ __metadata:
     "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/utils": "npm:^6.0.0"
     "@celo/wallet-local": "npm:^5.1.2"
+    "@types/node": "npm:22.16.5"
     firebase-admin: "npm:^11.11.0"
     firebase-functions: "npm:^4.5.0"
     firebase-functions-test: "npm:^3.1.0"
     firebase-tools: "npm:13.6.0"
     jest: "npm:^29.7.0"
     ts-node: "npm:^10.9.1"
+    typescript: "npm:^5.2.2"
     yargs: "npm:^14.0.0"
   languageName: unknown
   linkType: soft
