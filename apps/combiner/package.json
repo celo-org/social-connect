@@ -35,7 +35,7 @@
     "@opentelemetry/exporter-jaeger": "^1.17.1",
     "@opentelemetry/instrumentation": "^0.44.0",
     "@opentelemetry/propagator-ot-trace": "^0.27.0",
-    "@opentelemetry/resources": "1.17.1",
+    "@opentelemetry/resources": "^1.17.1",
     "@opentelemetry/sdk-metrics": "^1.17.1",
     "@opentelemetry/sdk-node": "^0.44.0",
     "@opentelemetry/sdk-trace-base": "^1.17.1",
