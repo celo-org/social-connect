@@ -1,4 +1,4 @@
-import { ensureLeading0x, sleep } from '@celo/base'
+import { sleep } from '@celo/base'
 import { OdisUtils } from '@celo/identity'
 import { ErrorMessages, getServiceContext, OdisAPI } from '@celo/identity/lib/odis/query'
 import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
@@ -18,7 +18,6 @@ import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
 import fetch from 'node-fetch'
 import { Hex } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
 import { getCombinerVersion } from '../../src'
 import {
   ACCOUNT_ADDRESS,
@@ -29,7 +28,6 @@ import {
   deks,
   getTestContextName,
   PHONE_NUMBER,
-  PRIVATE_KEY,
   walletAuthSigner,
 } from './resources'
 
@@ -51,7 +49,8 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
     const dekPublicKey = normalizeAddressWith0x(deks[0].publicKey) as Hex
     if ((await accountsContract.read.getDataEncryptionKey([ACCOUNT_ADDRESS])) !== dekPublicKey) {
       await accountsContract.write.setAccountDataEncryptionKey([dekPublicKey], {
-        account: ACCOUNT_ADDRESS,
+        account: client.account,
+        chain: client.chain,
       })
     }
   })
@@ -176,17 +175,15 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         const stableToken = getCUSDContract(client)
         const odisPayments = getOdisPaymentsContract(client)
 
-        const sender = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY))
-
         try {
           await stableToken.write.approve([odisPayments.address, amountInWei], {
-            account: sender,
+            account: client.account,
             chain: client.chain,
             gas: BigInt(100000),
             gasPrice: BigInt(50000000000), // 50 gwei
           })
           await odisPayments.write.payInCUSD([ACCOUNT_ADDRESS, amountInWei], {
-            account: sender,
+            account: client.account,
             chain: client.chain,
             gas: BigInt(150000),
             gasPrice: BigInt(50000000000), // 50 gwei
