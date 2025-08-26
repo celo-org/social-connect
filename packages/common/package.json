@@ -19,7 +19,7 @@
     "lib/**/*"
   ],
   "dependencies": {
-    "@celo/abis": "^11.0.0",
+    "@celo/abis": "^13.0.0",
     "@celo/base": "^7.0.0",
     "@celo/utils": "^8.0.0",
     "@types/bunyan": "1.8.11",
