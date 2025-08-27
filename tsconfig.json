@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/node22",
   "compilerOptions": {
+    "isolatedModules": true
   },
   "exclude": [
     "packages/**/tests/**",
