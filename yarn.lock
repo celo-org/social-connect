@@ -978,6 +978,7 @@ __metadata:
     "@celo/utils": "npm:^6.0.0"
     "@celo/wallet-local": "npm:^5.1.2"
     "@types/bunyan": "npm:1.8.11"
+    "@types/dotenv": "npm:^6.0.0"
     "@types/elliptic": "npm:^6.4.16"
     "@types/express": "npm:^4.17.20"
     "@types/is-base64": "npm:^1.1.2"
@@ -4313,10 +4314,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tsconfig/recommended@npm:^1.0.3":
-  version: 1.0.10
-  resolution: "@tsconfig/recommended@npm:1.0.10"
-  checksum: 10/f79184fc035b6440cb416af816a86287d94b608f97129b66cd5de48cc89c0678101a5732f6f06319d85efa71ff75c24e646164052418b37e917791f28a041af2
+"@tsconfig/node22@npm:^22.0.0":
+  version: 22.0.2
+  resolution: "@tsconfig/node22@npm:22.0.2"
+  checksum: 10/b9fb6543856cbac8b9b79c234bbefa3415f083e0a46e6f0fbe418fe21c5d086440222e1383258d75ebac951cbe17564a6d146fafc59c889d6302decd1a7880dd
   languageName: node
   linkType: hard
 
@@ -4503,6 +4504,15 @@ __metadata:
   dependencies:
     "@types/ms": "npm:*"
   checksum: 10/47876a852de8240bfdaf7481357af2b88cb660d30c72e73789abf00c499d6bc7cd5e52f41c915d1b9cd8ec9fef5b05688d7b7aef17f7f272c2d04679508d1053
+  languageName: node
+  linkType: hard
+
+"@types/dotenv@npm:^6.0.0":
+  version: 6.1.1
+  resolution: "@types/dotenv@npm:6.1.1"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 10/9a4445b4b6c74900ca5f461e528fa426ea2b34b22b611f8ef5f597eabf12bbdeab848e7963a795b750ecb6133728e674d7548219ccdaeb68a5fde02b73bbf120
   languageName: node
   linkType: hard
 
@@ -13974,7 +13984,7 @@ __metadata:
   resolution: "odis@workspace:."
   dependencies:
     "@changesets/cli": "npm:^2.26.2"
-    "@tsconfig/recommended": "npm:^1.0.3"
+    "@tsconfig/node22": "npm:^22.0.0"
     "@types/jest": "npm:^29.5.7"
     "@types/node": "npm:22.16.5"
     "@types/prompt": "npm:1.1.9"
