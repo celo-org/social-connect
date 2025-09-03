@@ -196,7 +196,10 @@ async function getAuthSignerAndAccount(
 function makeClient(chainInfo: ChainInfo, account: Account) {
   return createWalletClient({
     account: account,
-    chain: extractChain({ chains: [celoAlfajores, celo], id: chainInfo.chainID as 44787 | 42220 }),
+    chain: extractChain({
+      chains: [celoAlfajores, celo],
+      id: chainInfo.chainID as typeof celoAlfajores.id | typeof celo.id,
+    }),
     transport: http(chainInfo.rpcURL),
   })
 }
