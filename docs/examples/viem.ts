@@ -73,7 +73,6 @@ class ASv2 {
       [obfuscatedIdentifier as Hex, account, attestationIssuedTime],
       { chain: this.walletClient.chain, account: this.issuer },
     )
-
   }
 
   async lookupAddresses(phoneNumber: string) {
