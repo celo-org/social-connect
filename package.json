@@ -56,7 +56,7 @@
     "semver": "7.7.2",
     "ts-jest": "^29.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.9.2"
   },
   "resolutions": {
     "bip39": "https://github.com/bitcoinjs/bip39#d8ea080a18b40f301d4e2219a2991cd2417e83c2",
