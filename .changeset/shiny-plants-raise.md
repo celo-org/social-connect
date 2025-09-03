@@ -2,65 +2,63 @@
 "@celo/phone-number-privacy-common": major
 ---
 
-Replace @celo/contractkit with viem
-
+Replaced all usage of @celo/contractkit with viem across the package.
 
 ### BREAKING CHANGES
-Config changes 
 
-`BlockchainConfig` gains a new required `chainID` property
+- Config changes:
 
-`provider` which is an overloaded term is renamed to `rpcURL`
+  - `BlockchainConfig` now requires a new property: `chainID`
+  - `provider` renamed to `rpcURL`
+    ```diff
+    config: BlockchainConfig = {
+      - provider: FORNO_URL
+      + rpcURL: FORNO_URL
+      + chainID: 42220
+    }
+    ```
 
-```diff
-config: BlockchainConfig = {
-  - provider: FORNO_URL
-  + rpcURL: FORNOURL
-  + chainID: 42220
-}
-```
+- Initialization changes:
 
-`getContractKit` => `getWalletClient`
+  - `getContractKit` → `getWalletClient`
+  - `getContractKitWithAgent` → `getWalletClientWithAgent`
 
+- Authentication and DEK fetching:
 
-functions replaced in utils/authentication
+  - `newContractKitFetcher` → `newDEKFetcher`
+    ```diff
+    - newContractKitFetcher(contractKit: ContractKit, ...)
+    + newDEKFetcher(viemClient: Client, ...)
+    ```
+  - `getDataEncryptionKey` signature changed:
+    ```diff
+    export async function getDataEncryptionKey(
+      - address: string,
+      - contractKit: ContractKit,
+      + address: Address,
+      + viemClient: Client,
+      logger: Logger,
+      fullNodeTimeoutMs: number,
+      fullNodeRetryCount: number,
+      fullNodeRetryDelayMs: number,
+      - ): Promise<string>
+      + ): Promise<Hex>
+    ```
 
-`newContractKitFetcher` => `newDEKFetcher`
+- Functions removed from test/utils:
+  - `createMockToken`
+  - `createMockContractKit`
+  - `createMockConnection`
+  - `createMockWeb3`
+  - `replenishQuota`
 
-```diff
--  newContractKitFetcher(contractKit: ContractKit, ...)
-+  newDEKFetcher(viemClient: Client, ...)
-```
+- All addresses now typed as `Address` from viem.
 
-functions with with changed signatures
+### NEW EXPORTS
 
-`getDataEncryptionKey`
+- `getAccountsContract`, `getOdisPaymentsContract`, `getCUSDContract`:
+  - These helpers replace contractKit wrappers and use viem + @celo/abis.
 
-```diff
-export async function getDataEncryptionKey(
--  address: string,
--  contractKit: ContractKit,
-+  address: Address,
-+  viemClient: Client,
-  logger: Logger,
-  fullNodeTimeoutMs: number,
-  fullNodeRetryCount: number,
-  fullNodeRetryDelayMs: number,
-- ): Promise<string>
-+ ): Promise<Hex>
-```
+---
 
-functions removed from test/utils
-
-- `createMockToken`
-- `createMockContractKit`
-- `createMockConnection`
-- `createMockWeb3`
-- `replenishQuota`
-
-
-### NEW FUNCTIONS
-
-`import {getAccountsContract, getOdisPaymentsContract, getCUSDContract } from @celo/phone-number-privacy-common`
-
-To replace contractKit wrappers for Accounts, OdisPayments, and StableToken, contracts. 
+You must update all initialization and contract access to the new Viem-based APIs and types.
