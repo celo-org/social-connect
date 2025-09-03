@@ -1,6 +1,7 @@
 import { OdisContextName } from '@celo/identity/lib/odis/query'
 import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
 import { Hex } from 'viem'
+import { celo, celoAlfajores } from 'viem/chains'
 import yargs from 'yargs'
 import { concurrentRPSLoadTest, type TestChainInfo } from '../test'
 
@@ -69,11 +70,11 @@ yargs
         case 'alfajores':
           blockchainProvider = {
             rpcURL: 'https://alfajores-forno.celo-testnet.org',
-            chainID: 44787,
+            chainID: celoAlfajores.id,
           }
           break
         case 'mainnet':
-          blockchainProvider = { rpcURL: 'https://forno.celo.org', chainID: 42220 }
+          blockchainProvider = { rpcURL: 'https://forno.celo.org', chainID: celo.id }
           break
         default:
           logger.error('Invalid contextName')
