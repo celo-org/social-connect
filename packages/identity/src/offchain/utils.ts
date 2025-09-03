@@ -32,8 +32,16 @@ function getCiphertextLabel(
   const senderPublicKeyBuffer = Buffer.from(ensureCompressed(senderPublicKey), 'hex')
   const receiverPublicKeyBuffer = Buffer.from(ensureCompressed(receiverPublicKey), 'hex')
 
-  const label = createHmac('sha256', sharedSecret)
-    .update(Buffer.concat([senderPublicKeyBuffer, receiverPublicKeyBuffer, Buffer.from(path)]))
+  const label = createHmac('sha256', Uint8Array.from(sharedSecret))
+    .update(
+      Uint8Array.from(
+        Buffer.concat([
+          Uint8Array.from(senderPublicKeyBuffer),
+          Uint8Array.from(receiverPublicKeyBuffer),
+          Uint8Array.from(Buffer.from(path)),
+        ]),
+      ),
+    )
     .digest('hex')
   return join(sep, 'ciphertexts', label)
 }
@@ -323,7 +331,7 @@ export const buildEIP712TypedData = async <DataType>(
       ],
     }
     message = {
-      hash: ensureLeading0x(toHex(keccak256(data))),
+      hash: ensureLeading0x(toHex(keccak256(Uint8Array.from(data)))),
     }
   } else {
     const Claim = buildEIP712Schema(type!)

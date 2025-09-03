@@ -201,7 +201,7 @@ export class CircuitBreakerClient {
           key: this.environment.publicKey,
           oaepHash: 'sha256',
         },
-        plaintext,
+        Uint8Array.from(plaintext),
       )
     } catch (error) {
       return Err(new EncryptionError(error as Error))

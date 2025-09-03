@@ -295,5 +295,8 @@ export const getIdentifierHash = (
  * @param sigBuf Unblinded signature returned by ODIS
  */
 export function getPepperFromThresholdSignature(sigBuf: Buffer) {
-  return createHash('sha256').update(sigBuf).digest('base64').slice(0, PEPPER_CHAR_LENGTH)
+  return createHash('sha256')
+    .update(Uint8Array.from(sigBuf))
+    .digest('base64')
+    .slice(0, PEPPER_CHAR_LENGTH)
 }
