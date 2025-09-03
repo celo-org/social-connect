@@ -34,6 +34,9 @@
     "apps/*",
     "docs/examples"
   ],
+  "dependencies": {
+    "viem": "2.37.2"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
     "@tsconfig/node22": "^22.0.0",
@@ -63,7 +66,10 @@
     "@babel/traverse": "7.23.2",
     "node-fetch": "2.7.0",
     "minimatch": "3.1.2",
-    "async": "2.6.4"
+    "async": "2.6.4",
+    "re2": "^1.22.1",
+    "nan": "^2.23.0",
+    "viem": "2.37.2"
   },
   "packageManager": "yarn@4.9.4"
 }

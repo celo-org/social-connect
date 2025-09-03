@@ -32,7 +32,6 @@
     "@celo/wallet-local": "^6.0.4",
     "firebase-admin": "^11.11.0",
     "firebase-functions": "^4.5.0",
-    "viem": "2.21.14",
     "yargs": "^14.0.0"
   },
   "devDependencies": {

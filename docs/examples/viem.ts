@@ -14,7 +14,7 @@ import {
   Transport,
   WalletClient,
 } from 'viem'
-import { readContract } from 'viem/_types/actions/public/readContract'
+import { readContract } from 'viem/actions'
 import { privateKeyToAccount } from 'viem/accounts'
 import { celoAlfajores } from 'viem/chains'
 import {
