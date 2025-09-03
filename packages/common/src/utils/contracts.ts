@@ -25,12 +25,6 @@ export function getWalletClientWithAgent(config: BlockchainConfig): WalletClient
   options.fetchOptions = {}
   options.fetchOptions.keepalive = true
 
-  // no agent on viem?
-  // options.fetchOptions = {
-  //   http: new http.Agent({ keepAlive: true }),
-  //   https: new https.Agent({ keepAlive: true }),
-  // }
-
   return createWalletClient({
     chain: config.chainID === celo.id ? celo : celoAlfajores,
     transport: viemHttpTransport(config.rpcURL, configureOptions(config, options)),
