@@ -74,14 +74,6 @@ class ASv2 {
       { chain: this.walletClient.chain, account: this.issuer },
     )
 
-    // const { request } = await simulateContract(this.walletClient, {
-    //   abi: federatedAttestationsABI,
-    //   functionName: 'registerAttestationAsIssuer',
-    //   address: FEDERATED_ATTESTATIONS_ADDRESS,
-    //   chain: celoAlfajores,
-    // })
-
-    // await this.walletClient.writeContract(request)
   }
 
   async lookupAddresses(phoneNumber: string) {
