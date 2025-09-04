@@ -1,5 +1,12 @@
 # odis-example-scripts
 
+## 1.0.3
+
+### Patch Changes
+
+- Updated dependencies [cc5df33]
+  - @celo/identity@6.0.0
+
 ## 1.0.2
 
 ### Patch Changes

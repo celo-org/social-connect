@@ -1,5 +1,33 @@
 # @celo/phone-number-privacy-monitor
 
+## 4.0.0
+
+### Major Changes
+
+- cc5df33: Replace @celo/contractkit with viem
+
+  ### Breaking Changes
+
+  `queryOdisForQuota` and `queryOdisForSalt` for first param instead of a string url now take an object with rpcURL and chainID.
+
+  ```diff
+  - queryOdisForQuota("https://forno.celo.org",...rest)
+  + queryOdisForQuota({rpcURL: "https://forno.celo.org", chainID: 42220},...rest)
+
+
+  - queryOdisForSalt("https://forno.celo.org",...rest)
+  + queryOdisForSalt({rpcURL: "https://forno.celo.org", chainID: 42220},...rest)
+  ```
+
+### Patch Changes
+
+- Updated dependencies [cc5df33]
+- Updated dependencies [6dada95]
+- Updated dependencies [cc5df33]
+  - @celo/identity@6.0.0
+  - @celo/encrypted-backup@5.0.7
+  - @celo/phone-number-privacy-common@4.0.0
+
 ## 3.1.0
 
 ### Minor Changes
