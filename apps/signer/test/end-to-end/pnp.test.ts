@@ -31,7 +31,6 @@ const {
   DEK_PUBLIC_KEY,
   PHONE_NUMBER,
   PRIVATE_KEY1,
-  // PRIVATE_KEY3,
 } = TestUtils.Values
 
 // Use the same funded account as combiner for staging/alfajores
@@ -57,7 +56,6 @@ const getViemChain = () => {
 
 const account1 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY1))
 const account2 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY2))
-// const account3 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY3))
 const client = createWalletClient({
   account: account1,
   chain: getViemChain(),
