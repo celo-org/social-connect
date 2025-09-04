@@ -31,6 +31,7 @@ import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '
 import { startSigner } from '../../src/server'
 
 const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
+const ODIS_PAYMENTS_PROXY_ADDRESS = '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49'
 
 const { getPnpQuotaRequest, getPnpRequestAuthorization, getPnpSignRequest } = TestUtils.Utils
 const { PRIVATE_KEY1, ACCOUNT_ADDRESS1, mockAccount, DEK_PRIVATE_KEY, DEK_PUBLIC_KEY } =
@@ -99,7 +100,7 @@ describe('pnp', () => {
           }
 
           // Mock the OdisPayments contract calls
-          if (address === '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49') {
+          if (address === ODIS_PAYMENTS_PROXY_ADDRESS) {
             if (functionName === 'totalPaidCUSD') {
               return mockOdisPaymentsTotalPaidCUSD()
             }
@@ -969,7 +970,7 @@ describe('pnp', () => {
                 }
 
                 // Mock the OdisPayments contract calls to throw error
-                if (address === '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49') {
+                if (address === ODIS_PAYMENTS_PROXY_ADDRESS) {
                   if (functionName === 'totalPaidCUSD') {
                     throw new Error('dummy error')
                   }

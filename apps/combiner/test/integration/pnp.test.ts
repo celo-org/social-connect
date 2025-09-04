@@ -65,6 +65,7 @@ jest.setTimeout(20000)
 const mockAccount = '0x0000000000000000000000000000000000007E57'
 const DEK_PUBLIC_KEY = '0x026063780c81991c032fb4fa7485c6607b7542e048ef85d08516fe5c4482360e4b'
 const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
+const ODIS_PAYMENTS_PROXY_ADDRESS = '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49'
 
 // create deep copy of config
 const combinerConfig: typeof config = JSON.parse(JSON.stringify(config))
@@ -196,7 +197,7 @@ describe('pnpService', () => {
         }
 
         // Mock the OdisPayments contract calls
-        if (address === '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49') {
+        if (address === ODIS_PAYMENTS_PROXY_ADDRESS) {
           if (functionName === 'totalPaidCUSD') {
             return mockOdisPaymentsTotalPaidCUSD()
           }
