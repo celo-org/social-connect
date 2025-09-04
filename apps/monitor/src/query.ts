@@ -33,7 +33,7 @@ const newPrivateKey = async () => {
   return (await generateKeys(mnemonic)).privateKey
 }
 
-type ChainInfo = {
+export type ChainInfo = {
   rpcURL: string
   chainID: number
 }

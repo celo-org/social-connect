@@ -7,17 +7,12 @@ import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
 import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
 import { performance } from 'perf_hooks'
 import { Hex } from 'viem'
-import { queryOdisDomain, queryOdisForQuota, queryOdisForSalt } from './query'
+import { ChainInfo, queryOdisDomain, queryOdisForQuota, queryOdisForSalt } from './query'
 
 const logger = rootLogger('odis-monitor')
 
-export type TestChainInfo = {
-  rpcURL: string
-  chainID: number
-}
-
 export async function testPNPSignQuery(
-  blockchainProvider: TestChainInfo,
+  blockchainProvider: ChainInfo,
   contextName: OdisContextName,
   timeoutMs?: number,
   bypassQuota?: boolean,
@@ -51,7 +46,7 @@ export async function testPNPSignQuery(
 }
 
 export async function testPNPQuotaQuery(
-  blockchainProvider: TestChainInfo,
+  blockchainProvider: ChainInfo,
   contextName: OdisContextName,
   timeoutMs?: number,
   privateKey?: Hex,
@@ -94,7 +89,7 @@ export async function testDomainSignQuery(contextName: OdisContextName) {
 
 export async function concurrentRPSLoadTest(
   rps: number,
-  blockchainProvider: TestChainInfo,
+  blockchainProvider: ChainInfo,
   contextName: OdisContextName,
   endpoint:
     | CombinerEndpointPNP.PNP_QUOTA

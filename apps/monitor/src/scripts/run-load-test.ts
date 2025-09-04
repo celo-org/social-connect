@@ -3,7 +3,8 @@ import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-comm
 import { Hex } from 'viem'
 import { celo, celoAlfajores } from 'viem/chains'
 import yargs from 'yargs'
-import { concurrentRPSLoadTest, type TestChainInfo } from '../test'
+import { ChainInfo } from '../query'
+import { concurrentRPSLoadTest } from '../test'
 
 const logger = rootLogger('odis-monitor')
 
@@ -64,7 +65,7 @@ yargs
       const rps = args.rps!
       const contextName = args.contextName! as OdisContextName
 
-      let blockchainProvider: TestChainInfo
+      let blockchainProvider: ChainInfo
       switch (contextName) {
         case 'alfajoresstaging':
         case 'alfajores':
