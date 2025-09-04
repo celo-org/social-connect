@@ -30,6 +30,8 @@ import { KeyProvider } from '../../src/common/key-management/key-provider-base'
 import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '../../src/config'
 import { startSigner } from '../../src/server'
 
+const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
+
 const { getPnpQuotaRequest, getPnpRequestAuthorization, getPnpSignRequest } = TestUtils.Utils
 const { PRIVATE_KEY1, ACCOUNT_ADDRESS1, mockAccount, DEK_PRIVATE_KEY, DEK_PUBLIC_KEY } =
   TestUtils.Values
@@ -83,7 +85,7 @@ describe('pnp', () => {
         // Override contract reads with mock data
         readContract: async ({ address, functionName, args }: any): Promise<any> => {
           // Mock the Accounts contract calls
-          if (address === '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9') {
+          if (address === ACCOUNTS_PROXY_ADDRESS) {
             if (functionName === 'getDataEncryptionKey') {
               const [accountAddress] = args || []
               if (accountAddress === ACCOUNT_ADDRESS1) {
@@ -953,7 +955,7 @@ describe('pnp', () => {
             .extend(() => ({
               readContract: async ({ address, functionName, args }: any): Promise<any> => {
                 // Mock the Accounts contract calls
-                if (address === '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9') {
+                if (address === ACCOUNTS_PROXY_ADDRESS) {
                   if (functionName === 'getDataEncryptionKey') {
                     const [accountAddress] = args || []
                     if (accountAddress === ACCOUNT_ADDRESS1) {

@@ -64,6 +64,7 @@ jest.setTimeout(20000)
 
 const mockAccount = '0x0000000000000000000000000000000000007E57'
 const DEK_PUBLIC_KEY = '0x026063780c81991c032fb4fa7485c6607b7542e048ef85d08516fe5c4482360e4b'
+const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
 
 // create deep copy of config
 const combinerConfig: typeof config = JSON.parse(JSON.stringify(config))
@@ -181,7 +182,7 @@ describe('pnpService', () => {
       // Override contract reads with mock data
       readContract: async ({ address, functionName, args }: any) => {
         // Mock the Accounts contract calls
-        if (address === '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9') {
+        if (address === ACCOUNTS_PROXY_ADDRESS) {
           if (functionName === 'getDataEncryptionKey') {
             const [accountAddress] = args || []
             if (accountAddress === ACCOUNT_ADDRESS1) {
@@ -905,7 +906,7 @@ describe('pnpService', () => {
               .extend(() => ({
                 readContract: async ({ address, functionName }: any) => {
                   if (
-                    address === '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9' &&
+                    address === ACCOUNTS_PROXY_ADDRESS &&
                     functionName === 'getDataEncryptionKey'
                   ) {
                     throw new Error('Mock DEK fetch error')
