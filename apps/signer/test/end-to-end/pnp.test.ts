@@ -19,7 +19,7 @@ import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
 import { Account, Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores } from 'viem/chains'
+import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
 import { config, getSignerVersion } from '../../src/config'
 import { getBlindedPhoneNumber, getTestParamsForContext } from './utils'
 
@@ -49,6 +49,8 @@ const getViemChain = () => {
       return celoAlfajores
     case 'staging':
       return celoAlfajores
+    case 'sepolia':
+      return celoSepolia
     default:
       return celoAlfajores // default to alfajores for testing
   }

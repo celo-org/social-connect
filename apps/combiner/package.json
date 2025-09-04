@@ -23,6 +23,7 @@
     "test:e2e": "E2E_TESTING=true jest --runInBand test/end-to-end --verbose",
     "test:e2e:staging": "CONTEXT_NAME=staging yarn test:e2e",
     "test:e2e:alfajores": "CONTEXT_NAME=alfajores yarn test:e2e",
+    "test:e2e:sepolia": "CONTEXT_NAME=sepolia yarn test:e2e",
     "test:e2e:mainnet": "CONTEXT_NAME=mainnet yarn test:e2e"
   },
   "dependencies": {

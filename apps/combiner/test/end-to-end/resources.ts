@@ -11,7 +11,7 @@ import {
 } from '@celo/utils/lib/address'
 import { Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores } from 'viem/chains'
+import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
 
 require('dotenv').config()
 
@@ -23,6 +23,8 @@ export const getTestContextName = (): OdisContextName => {
       return OdisContextName.STAGING
     case 'mainnet':
       return OdisContextName.MAINNET
+    case 'sepolia':
+      return OdisContextName.SEPOLIA
     default:
       throw new Error('CONTEXT_NAME env var is undefined or invalid')
   }
@@ -65,6 +67,8 @@ const getViemChain = () => {
       return celoAlfajores
     case OdisContextName.STAGING:
       return celoAlfajores
+    case OdisContextName.SEPOLIA:
+      return celoSepolia
     default:
       break
   }
