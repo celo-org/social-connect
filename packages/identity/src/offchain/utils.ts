@@ -32,8 +32,16 @@ function getCiphertextLabel(
   const senderPublicKeyBuffer = Buffer.from(ensureCompressed(senderPublicKey), 'hex')
   const receiverPublicKeyBuffer = Buffer.from(ensureCompressed(receiverPublicKey), 'hex')
 
-  const label = createHmac('sha256', sharedSecret)
-    .update(Buffer.concat([senderPublicKeyBuffer, receiverPublicKeyBuffer, Buffer.from(path)]))
+  const label = createHmac('sha256', Uint8Array.from(sharedSecret))
+    .update(
+      Uint8Array.from(
+        Buffer.concat([
+          Uint8Array.from(senderPublicKeyBuffer),
+          Uint8Array.from(receiverPublicKeyBuffer),
+          Uint8Array.from(Buffer.from(path)),
+        ]),
+      ),
+    )
     .digest('hex')
   return join(sep, 'ciphertexts', label)
 }
@@ -69,7 +77,10 @@ const distributeSymmetricKey = async (
   }
 
   const wallet = wrapper.kit.getWallet()!
-  const sharedSecret = await wallet.computeSharedSecret(publicKeyToAddress(fromPubKey), toPubKey)
+  const sharedSecret = await wallet.computeSharedSecret(
+    publicKeyToAddress(fromPubKey),
+    ensureUncompressed(toPubKey),
+  )
 
   const computedDataPath = getCiphertextLabel(`${dataPath}.key`, sharedSecret, fromPubKey, toPubKey)
   const encryptedData = Encrypt(
@@ -222,7 +233,10 @@ const readSymmetricKey = async (
     return Err(new UnavailableKey(readerPublicKeyAddress))
   }
 
-  const sharedSecret = await wallet.computeSharedSecret(readerPublicKeyAddress, senderPubKey)
+  const sharedSecret = await wallet.computeSharedSecret(
+    readerPublicKeyAddress,
+    ensureUncompressed(senderPubKey),
+  )
   const computedDataPath = getCiphertextLabel(
     `${dataPath}.key`,
     sharedSecret,
@@ -317,7 +331,7 @@ export const buildEIP712TypedData = async <DataType>(
       ],
     }
     message = {
-      hash: ensureLeading0x(toHex(keccak256(data))),
+      hash: ensureLeading0x(toHex(keccak256(Uint8Array.from(data)))),
     }
   } else {
     const Claim = buildEIP712Schema(type!)

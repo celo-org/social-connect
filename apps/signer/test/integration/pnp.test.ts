@@ -1,4 +1,3 @@
-import { newKit } from '@celo/contractkit'
 import {
   AuthenticationMethod,
   ErrorMessage,
@@ -17,6 +16,8 @@ import { BLINDED_PHONE_NUMBER } from '@celo/phone-number-privacy-common/lib/test
 import BigNumber from 'bignumber.js'
 import { Knex } from 'knex'
 import request from 'supertest'
+import { createWalletClient, http, publicActions } from 'viem'
+import { celoAlfajores } from 'viem/chains'
 import { initDatabase } from '../../src/common/database/database'
 import { countAndThrowDBError } from '../../src/common/database/utils'
 import {
@@ -29,15 +30,10 @@ import { KeyProvider } from '../../src/common/key-management/key-provider-base'
 import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '../../src/config'
 import { startSigner } from '../../src/server'
 
-const {
-  ContractRetrieval,
-  createMockContractKit,
-  createMockAccounts,
-  createMockOdisPayments,
-  getPnpQuotaRequest,
-  getPnpRequestAuthorization,
-  getPnpSignRequest,
-} = TestUtils.Utils
+const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
+const ODIS_PAYMENTS_PROXY_ADDRESS = '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49'
+
+const { getPnpQuotaRequest, getPnpRequestAuthorization, getPnpSignRequest } = TestUtils.Utils
 const { PRIVATE_KEY1, ACCOUNT_ADDRESS1, mockAccount, DEK_PRIVATE_KEY, DEK_PUBLIC_KEY } =
   TestUtils.Values
 
@@ -45,21 +41,8 @@ jest.setTimeout(20000)
 
 const zeroBalance = new BigNumber(0)
 
+// Mock function for OdisPayments contract calls
 const mockOdisPaymentsTotalPaidCUSD = jest.fn<BigNumber, []>()
-const mockGetWalletAddress = jest.fn<string, []>()
-const mockGetDataEncryptionKey = jest.fn<string, []>()
-
-const mockContractKit = createMockContractKit({
-  [ContractRetrieval.getAccounts]: createMockAccounts(
-    mockGetWalletAddress,
-    mockGetDataEncryptionKey,
-  ),
-  [ContractRetrieval.getOdisPayments]: createMockOdisPayments(mockOdisPaymentsTotalPaidCUSD),
-})
-jest.mock('@celo/contractkit', () => ({
-  ...jest.requireActual('@celo/contractkit'),
-  newKit: jest.fn().mockImplementation(() => mockContractKit),
-}))
 
 // Indexes correspond to keyVersion - 1
 const expectedSignatures: string[] = [
@@ -92,10 +75,43 @@ describe('pnp', () => {
   beforeEach(async () => {
     // Create a new in-memory database for each test.
     db = await initDatabase(_config)
-    app = startSigner(_config, db, keyProvider, newKit('dummyKit'))
+
+    // Create a mock wallet client that can return mock contract data
+    const mockClient = createWalletClient({
+      chain: celoAlfajores,
+      transport: http(),
+    })
+      .extend(publicActions)
+      .extend(() => ({
+        // Override contract reads with mock data
+        readContract: async ({ address, functionName, args }: any): Promise<any> => {
+          // Mock the Accounts contract calls
+          if (address === ACCOUNTS_PROXY_ADDRESS) {
+            if (functionName === 'getDataEncryptionKey') {
+              const [accountAddress] = args || []
+              if (accountAddress === ACCOUNT_ADDRESS1) {
+                return DEK_PUBLIC_KEY
+              }
+              return '0x'
+            }
+            if (functionName === 'getWalletAddress') {
+              return mockAccount
+            }
+          }
+
+          // Mock the OdisPayments contract calls
+          if (address === ODIS_PAYMENTS_PROXY_ADDRESS) {
+            if (functionName === 'totalPaidCUSD') {
+              return mockOdisPaymentsTotalPaidCUSD()
+            }
+          }
+
+          throw new Error(`Unmocked contract call: ${functionName} on ${address}`)
+        },
+      }))
+
+    app = startSigner(_config, db, keyProvider, mockClient)
     mockOdisPaymentsTotalPaidCUSD.mockReset()
-    mockGetDataEncryptionKey.mockReset().mockReturnValue(DEK_PUBLIC_KEY)
-    mockGetWalletAddress.mockReset().mockReturnValue(mockAccount)
   })
 
   afterEach(async () => {
@@ -320,7 +336,10 @@ describe('pnp', () => {
           configWithApiDisabled,
           db,
           keyProvider,
-          newKit('dummyKit'),
+          createWalletClient({
+            chain: celoAlfajores,
+            transport: http(),
+          }),
         )
 
         const req = getPnpQuotaRequest(ACCOUNT_ADDRESS1)
@@ -398,7 +417,10 @@ describe('pnp', () => {
             configWithShortTimeout,
             db,
             keyProvider,
-            newKit('dummyKit'),
+            createWalletClient({
+              chain: celoAlfajores,
+              transport: http(),
+            }),
           )
           const req = getPnpQuotaRequest(ACCOUNT_ADDRESS1)
           const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
@@ -804,7 +826,10 @@ describe('pnp', () => {
           configWithApiDisabled,
           db,
           keyProvider,
-          newKit('dummyKit'),
+          createWalletClient({
+            chain: celoAlfajores,
+            transport: http(),
+          }),
         )
 
         const req = getPnpSignRequest(
@@ -892,7 +917,10 @@ describe('pnp', () => {
             configWithShortTimeout,
             db,
             keyProvider,
-            newKit('dummyKit'),
+            createWalletClient({
+              chain: celoAlfajores,
+              transport: http(),
+            }),
           )
 
           const req = getPnpSignRequest(
@@ -919,9 +947,38 @@ describe('pnp', () => {
         })
 
         it('Should return 500 on blockchain totalQuota query failure', async () => {
-          mockOdisPaymentsTotalPaidCUSD.mockImplementation(() => {
-            throw new Error('dummy error')
+          // Create a mock client that throws an error for totalPaidCUSD calls
+          const failingMockClient = createWalletClient({
+            chain: celoAlfajores,
+            transport: http(),
           })
+            .extend(publicActions)
+            .extend(() => ({
+              readContract: async ({ address, functionName, args }: any): Promise<any> => {
+                // Mock the Accounts contract calls
+                if (address === ACCOUNTS_PROXY_ADDRESS) {
+                  if (functionName === 'getDataEncryptionKey') {
+                    const [accountAddress] = args || []
+                    if (accountAddress === ACCOUNT_ADDRESS1) {
+                      return DEK_PUBLIC_KEY
+                    }
+                    return '0x'
+                  }
+                  if (functionName === 'getWalletAddress') {
+                    return mockAccount
+                  }
+                }
+
+                // Mock the OdisPayments contract calls to throw error
+                if (address === ODIS_PAYMENTS_PROXY_ADDRESS) {
+                  if (functionName === 'totalPaidCUSD') {
+                    throw new Error('dummy error')
+                  }
+                }
+
+                throw new Error(`Unmocked contract call: ${functionName} on ${address}`)
+              },
+            }))
 
           const req = getPnpSignRequest(
             ACCOUNT_ADDRESS1,
@@ -934,7 +991,7 @@ describe('pnp', () => {
             configWithFailOpenDisabled,
             db,
             keyProvider,
-            newKit('dummyKit'),
+            failingMockClient,
           )
 
           const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)

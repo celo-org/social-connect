@@ -1,3 +1,6 @@
+import { OdisUtils } from '@celo/identity'
+import { AuthenticationMethod, AuthSigner, OdisContextName } from '@celo/identity/lib/odis/query'
+import { ethers, Wallet } from 'ethers'
 import {
   ACCOUNTS_CONTRACT,
   ACCOUNTS_PROXY_ADDRESS,
@@ -8,9 +11,6 @@ import {
   ODIS_PAYMENTS_PROXY_ADDRESS,
   STABLE_TOKEN_CONTRACT,
 } from './constants'
-import { OdisUtils } from '@celo/identity'
-import { AuthenticationMethod, AuthSigner, OdisContextName } from '@celo/identity/lib/odis/query'
-import { ethers, Wallet } from 'ethers'
 
 const USER_ACCOUNT = '0xf14790BAdd2638cECB5e885fc7fAD1b6660AAc34'
 const USER_PHONE_NUMBER = '+18009099991'

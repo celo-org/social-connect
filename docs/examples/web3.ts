@@ -1,3 +1,6 @@
+import { OdisUtils } from '@celo/identity'
+import { AuthSigner, OdisContextName } from '@celo/identity/lib/odis/query'
+import Web3 from 'web3'
 import {
   ACCOUNTS_CONTRACT,
   ACCOUNTS_PROXY_ADDRESS,
@@ -8,9 +11,6 @@ import {
   ODIS_PAYMENTS_PROXY_ADDRESS,
   STABLE_TOKEN_CONTRACT,
 } from './constants'
-import Web3 from 'web3'
-import { OdisUtils } from '@celo/identity'
-import { AuthSigner, OdisContextName } from '@celo/identity/lib/odis/query'
 
 const ISSUER_PRIVATE_KEY = '0x726e53db4f0a79dfd63f58b19874896fce3748fcb80874665e0c147369c04a37'
 const DEK_PUBLIC_KEY = '0x026063780c81991c032fb4fa7485c6607b7542e048ef85d08516fe5c4482360e4b'

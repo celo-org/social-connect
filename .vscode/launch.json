@@ -32,22 +32,6 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "port": 9229
-    },
-    {
-      "name": "Debug ContractKit Tests",
-      "type": "node",
-      "request": "launch",
-      "runtimeArgs": [
-        "--inspect-brk",
-        "${workspaceRoot}/node_modules/.bin/jest",
-        "--rootDir",
-        "${workspaceFolder}/packages/contractkit",
-        "--runInBand",
-        "${workspaceFolder}/packages/contractkit/src/**/*.test.ts",
-      ],
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "port": 9229
     }
   ]
 }

@@ -1,8 +1,7 @@
 import { Address, ensureLeading0x } from '@celo/base/lib/address'
 import { Err, Ok, Result, RootError, makeAsyncThrowable } from '@celo/base/lib/result'
-import { ContractKit } from '@celo/contractkit'
-import { ClaimTypes } from '@celo/contractkit/lib/identity/claims/types'
-import { IdentityMetadataWrapper } from '@celo/contractkit/lib/identity/metadata'
+import type { ContractKit } from '@celo/contractkit'
+import { ClaimTypes, IdentityMetadataWrapper } from '@celo/metadata-claims'
 import { publicKeyToAddress } from '@celo/utils/lib/address'
 import { ensureUncompressed } from '@celo/utils/lib/ecdh'
 import {

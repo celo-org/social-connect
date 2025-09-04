@@ -1,5 +1,4 @@
 import { selectiveRetryAsyncWithBackOff } from '@celo/base/lib/async'
-import { ContractKit } from '@celo/contractkit'
 import {
   AuthenticationMethod,
   CombinerEndpoint,
@@ -17,14 +16,18 @@ import fetch from 'cross-fetch'
 import debugFactory from 'debug'
 import { isLeft } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
+import { Address, Hex, isAddress, SignableMessage } from 'viem'
 
 const debug = debugFactory('kit:odis:query')
 
 export interface WalletKeySigner {
   authenticationMethod: AuthenticationMethod.WALLET_KEY
-  contractKit: ContractKit
+  sign191: ({ message, account }: { message: SignableMessage; account: Address }) => Promise<Hex>
 }
 
+/*
+ * @property rawKey is NOT 0x prefixed
+ */
 export interface EncryptionKeySigner {
   authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY
   rawKey: string
@@ -132,7 +135,10 @@ export async function getOdisPnpRequestAuth(
     return signWithDEK(bodyString, signer as EncryptionKeySigner)
   }
   if (signer.authenticationMethod === AuthenticationMethod.WALLET_KEY) {
-    return signer.contractKit.connection.sign(bodyString, body.account)
+    if (!isAddress(body.account)) {
+      throw new Error('body.account is not a valid Address')
+    }
+    return signer.sign191({ message: bodyString, account: body.account })
   }
   throw new Error('AuthenticationMethod not supported')
 }

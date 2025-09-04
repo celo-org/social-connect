@@ -9,7 +9,8 @@
     "lint": "yarn run --top-level eslint ."
   },
   "dependencies": {
-    "@celo/base": "^6.0.0",
+    "@celo/abis": "^13.0.0",
+    "@celo/base": "^7.0.0",
     "@celo/identity": "^5.1.2",
     "blind-threshold-bls": "https://github.com/celo-org/blind-threshold-bls-wasm#3d1013a",
     "ethers": "^5.7.2",

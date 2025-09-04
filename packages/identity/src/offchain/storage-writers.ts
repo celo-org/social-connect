@@ -17,7 +17,10 @@ export class LocalStorageWriter extends StorageWriter {
   protected async writeToFs(data: string | Buffer, dataPath: string): Promise<void> {
     const directory = parse(dataPath).dir
     await promises.mkdir(join(this.root, directory), { recursive: true })
-    await promises.writeFile(join(this.root, dataPath), data)
+    await promises.writeFile(
+      join(this.root, dataPath),
+      typeof data === 'string' ? data : Uint8Array.from(data),
+    )
   }
 }
 

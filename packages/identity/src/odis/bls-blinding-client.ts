@@ -25,7 +25,7 @@ export class WasmBlsBlindingClient implements BlsBlindingClient {
   private rawMessage: Buffer | undefined
 
   constructor(odisPubKey: string) {
-    this.odisPubKey = Buffer.from(odisPubKey, 'base64')
+    this.odisPubKey = Uint8Array.from(Buffer.from(odisPubKey, 'base64'))
     // Dynamically load the Wasm library
     // Checkout out documentation for alternative runtime environments:
     // https://github.com/celo-org/identity/tree/ASv2/asv2#runtime-environments
@@ -46,7 +46,10 @@ export class WasmBlsBlindingClient implements BlsBlindingClient {
       )
     }
     this.rawMessage = Buffer.from(base64PhoneNumber, 'base64')
-    this.blindedValue = await this.thresholdBls.blind(this.rawMessage, userSeed)
+    this.blindedValue = await this.thresholdBls.blind(
+      Uint8Array.from(this.rawMessage),
+      Uint8Array.from(userSeed),
+    )
     const blindedMessage = this.blindedValue.message
     return Buffer.from(blindedMessage).toString('base64')
   }
@@ -58,11 +61,15 @@ export class WasmBlsBlindingClient implements BlsBlindingClient {
 
     const blindedSignature = Buffer.from(base64BlindSig, 'base64')
     const unblindMessage = await this.thresholdBls.unblind(
-      blindedSignature,
+      Uint8Array.from(blindedSignature),
       this.blindedValue.blindingFactor,
     )
     // this throws on error
-    await this.thresholdBls.verify(this.odisPubKey, this.rawMessage, unblindMessage)
+    await this.thresholdBls.verify(
+      this.odisPubKey,
+      Uint8Array.from(this.rawMessage),
+      unblindMessage,
+    )
     return Buffer.from(unblindMessage).toString('base64')
   }
 
