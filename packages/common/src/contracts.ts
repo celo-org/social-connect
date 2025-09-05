@@ -1,7 +1,7 @@
 import { accountsABI, odisPaymentsABI, stableTokenABI } from '@celo/abis'
 import { Address, Client, getContract, GetContractReturnType } from 'viem'
 
-import { celo, celoAlfajores } from 'viem/chains'
+import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
 const CONTRACTS: Record<number, Record<'accounts' | 'odisPayments' | 'cusd', Address>> = {
   [celo.id]: {
     accounts: '0x7d21685C17607338b313a7174bAb6620baD0aaB7',
@@ -12,6 +12,11 @@ const CONTRACTS: Record<number, Record<'accounts' | 'odisPayments' | 'cusd', Add
     accounts: '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9',
     odisPayments: '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49',
     cusd: '0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1',
+  },
+  [celoSepolia.id]: {
+    accounts: '0x44957232699ca060B607E77083bDACD350d6b6d1',
+    odisPayments: '0x96AfaE75F12A759c1dFB364ce93548c3Bd242D58',
+    cusd: '0xEF4d55D6dE8e8d73232827Cd1e9b2F2dBb45bC80',
   },
 }
 
