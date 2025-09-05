@@ -57,7 +57,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       method: 'GET',
     })
     expect(response.status).toBe(200)
-    const body = await response.json()
+    const body = (await response.json()) as any
     // This checks against local package.json version, change if necessary
     expect(body.version).toBe(expectedVersion)
   })
@@ -67,7 +67,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const req = await disableRequest(wallet, ACCOUNT_ADDRESS1, `${disableSalt}-${Date.now()}`)
       const res = await queryDomainEndpoint(req, SignerEndpoint.DISABLE_DOMAIN)
       expect(res.status).toBe(200)
-      const resBody: DisableDomainResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DisableDomainResponseSuccess
       expect(resBody).toEqual<DisableDomainResponseSuccess>({
         success: true,
         version: resBody.version,
@@ -84,7 +84,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const req = await disableRequest(wallet, ACCOUNT_ADDRESS1, disableSalt)
       const res = await queryDomainEndpoint(req, SignerEndpoint.DISABLE_DOMAIN)
       expect(res.status).toBe(200)
-      const resBody: DisableDomainResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DisableDomainResponseSuccess
       expect(resBody).toEqual<DisableDomainResponseSuccess>({
         success: true,
         version: resBody.version,
@@ -103,7 +103,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       delete badRequest.domain.version
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DISABLE_DOMAIN)
       expect(res.status).toBe(400)
-      const resBody: DisableDomainResponseFailure = await res.json()
+      const resBody = (await res.json()) as DisableDomainResponseFailure
       expect(resBody).toEqual<DisableDomainResponseFailure>({
         success: false,
         version: resBody.version,
@@ -117,7 +117,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain.name = 'UnknownDomain'
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DISABLE_DOMAIN)
       expect(res.status).toBe(400)
-      const resBody: DisableDomainResponseFailure = await res.json()
+      const resBody = (await res.json()) as DisableDomainResponseFailure
       expect(resBody).toEqual<DisableDomainResponseFailure>({
         success: false,
         version: resBody.version,
@@ -131,7 +131,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain = 'Freddy'
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DISABLE_DOMAIN)
       expect(res.status).toBe(400)
-      const resBody: DisableDomainResponseFailure = await res.json()
+      const resBody = (await res.json()) as DisableDomainResponseFailure
       expect(resBody).toEqual<DisableDomainResponseFailure>({
         success: false,
         version: resBody.version,
@@ -144,7 +144,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain.salt = defined('badSalt')
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DISABLE_DOMAIN)
       expect(res.status).toBe(401)
-      const resBody: DisableDomainResponseFailure = await res.json()
+      const resBody = (await res.json()) as DisableDomainResponseFailure
       expect(resBody).toEqual<DisableDomainResponseFailure>({
         success: false,
         version: resBody.version,
@@ -159,7 +159,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const req = await quotaRequest(wallet, ACCOUNT_ADDRESS1, quotaSalt)
       const res = await queryDomainEndpoint(req, SignerEndpoint.DOMAIN_QUOTA_STATUS)
       expect(res.status).toBe(200)
-      const resBody: DomainQuotaStatusResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DomainQuotaStatusResponseSuccess
       expect(resBody).toEqual<DomainQuotaStatusResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -171,7 +171,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const req = await quotaRequest(wallet, ACCOUNT_ADDRESS1, disableSalt)
       const res = await queryDomainEndpoint(req, SignerEndpoint.DOMAIN_QUOTA_STATUS)
       expect(res.status).toBe(200)
-      const resBody: DomainQuotaStatusResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DomainQuotaStatusResponseSuccess
       expect(resBody).toEqual<DomainQuotaStatusResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -185,7 +185,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       delete badRequest.domain.version
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_QUOTA_STATUS)
       expect(res.status).toBe(400)
-      const resBody: DomainQuotaStatusResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainQuotaStatusResponseFailure
       expect(resBody).toEqual<DomainQuotaStatusResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -199,7 +199,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain.name = 'UnknownDomain'
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_QUOTA_STATUS)
       expect(res.status).toBe(400)
-      const resBody: DomainQuotaStatusResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainQuotaStatusResponseFailure
       expect(resBody).toEqual<DomainQuotaStatusResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -213,7 +213,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain = 'Freddy'
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_QUOTA_STATUS)
       expect(res.status).toBe(400)
-      const resBody: DomainQuotaStatusResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainQuotaStatusResponseFailure
       expect(resBody).toEqual<DomainQuotaStatusResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -226,7 +226,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain.salt = defined('badSalt')
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_QUOTA_STATUS)
       expect(res.status).toBe(401)
-      const resBody: DomainQuotaStatusResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainQuotaStatusResponseFailure
       expect(resBody).toEqual<DomainQuotaStatusResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -245,7 +245,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
     it('[Signer configuration test] Should respond with 200 on valid request for new domain', async () => {
       const res = await queryDomainEndpoint(req, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(200)
-      const resBody: DomainRestrictedSignatureResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseSuccess
       expect(resBody).toEqual<DomainRestrictedSignatureResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -268,7 +268,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       // Replay exactly the same first request
       const res = await queryDomainEndpoint(req, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(401)
-      const resBody: DomainRestrictedSignatureResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -302,7 +302,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         body: JSON.stringify(req),
       })
       expect(res.status).toBe(200)
-      const resBody: DomainRestrictedSignatureResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseSuccess
       expect(resBody).toEqual<DomainRestrictedSignatureResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -327,7 +327,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       )
       const res = await queryDomainEndpoint(newReq, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(200)
-      const resBody: DomainRestrictedSignatureResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseSuccess
       expect(resBody).toEqual<DomainRestrictedSignatureResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -354,7 +354,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         contextSpecificParams.domainsKeyVersion,
       )
       expect(res.status).toBe(200)
-      const resBody: DomainRestrictedSignatureResponseSuccess = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseSuccess
       expect(resBody).toEqual<DomainRestrictedSignatureResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -380,7 +380,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       delete badRequest.domain.version
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(400)
-      const resBody: DomainRestrictedSignatureResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -398,7 +398,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain.name = 'UnknownDomain'
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(400)
-      const resBody: DomainRestrictedSignatureResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -416,7 +416,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain = 'Freddy'
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(400)
-      const resBody: DomainRestrictedSignatureResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -432,7 +432,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       )
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_SIGN, 'a')
       expect(res.status).toBe(400)
-      const resBody: DomainRestrictedSignatureResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -449,7 +449,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       badRequest.domain.salt = defined('badSalt')
       const res = await queryDomainEndpoint(badRequest, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(401)
-      const resBody: DomainRestrictedSignatureResponseFailure = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -465,7 +465,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const [signReq, _] = await signatureRequest(wallet, ACCOUNT_ADDRESS1, salt, noQuotaDomain)
       const res = await queryDomainEndpoint(signReq, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(429)
-      const resBody = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -491,7 +491,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       )
       const res = await queryDomainEndpoint(signReq, SignerEndpoint.DOMAIN_SIGN)
       expect(res.status).toBe(429)
-      const resBody = await res.json()
+      const resBody = (await res.json()) as DomainRestrictedSignatureResponseFailure
       expect(resBody).toEqual<DomainRestrictedSignatureResponseFailure>({
         success: false,
         version: expectedVersion,

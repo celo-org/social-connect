@@ -4,6 +4,7 @@ import {
   WalletKeySigner,
 } from '@celo/identity/lib/odis/query'
 import { AuthenticationMethod } from '@celo/phone-number-privacy-common'
+import { DEK_PUBLIC_KEY, DEK_PRIVATE_KEY } from '@celo/phone-number-privacy-common/lib/test/values'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,
@@ -88,8 +89,8 @@ interface DEK {
 
 export const deks: DEK[] = [
   {
-    privateKey: 'bf8a2b73baf8402f8fe906ad3f42b560bf14b39f7df7797ece9e293d6f162188',
-    publicKey: '034846bc781cacdafc66f3a77aa9fc3c56a9dadcd683c72be3c446fee8da041070',
+    privateKey: DEK_PRIVATE_KEY.slice(2), // Remove 0x prefix
+    publicKey: DEK_PUBLIC_KEY.slice(2), // Remove 0x prefix
     address: '0x7b33dF2607b85e3211738a49A6Ad6E8Ed4d13F6E',
   },
   {
