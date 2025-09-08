@@ -59,7 +59,6 @@
     "typescript": "^5.9.2"
   },
   "resolutions": {
-    "bip39": "https://github.com/bitcoinjs/bip39#d8ea080a18b40f301d4e2219a2991cd2417e83c2",
     "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
     "ganache": "npm:@celo/ganache@7.8.0-unofficial.0",
     "protobufjs": "7.5.4",
