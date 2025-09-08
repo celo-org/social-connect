@@ -169,7 +169,7 @@ if (DEV_MODE) {
     },
     blockchain: {
       rpcURL: env.BLOCKCHAIN_PROVIDER,
-      chainID: env.CHAIN_ID,
+      chainID: env.CHAIN_ID ? Number(env.CHAIN_ID) : celoAlfajores.id,
       apiKey: env.BLOCKCHAIN_API_KEY,
     },
     phoneNumberPrivacy: {

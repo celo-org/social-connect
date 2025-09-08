@@ -8,6 +8,7 @@ import {
   toBool,
 } from '@celo/phone-number-privacy-common'
 import BigNumber from 'bignumber.js'
+import { celoAlfajores } from 'viem/chains'
 
 require('dotenv').config()
 
@@ -126,7 +127,7 @@ export const config: SignerConfig = {
   },
   blockchain: {
     rpcURL: env.BLOCKCHAIN_PROVIDER,
-    chainID: env.CHAIN_ID,
+    chainID: env.CHAIN_ID ? Number(env.CHAIN_ID) : celoAlfajores.id,
     apiKey: env.BLOCKCHAIN_API_KEY,
   },
   db: {
