@@ -176,17 +176,27 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         const odisPayments = getOdisPaymentsContract(client)
 
         try {
-          await stableToken.write.approve([odisPayments.address, amountInWei], {
-            account: client.account,
-            chain: client.chain,
-            gas: BigInt(100000),
-            gasPrice: BigInt(50000000000), // 50 gwei
-          })
+          // Check current allowance
+          const currentAllowance = await stableToken.read.allowance([
+            client.account.address,
+            odisPayments.address,
+          ])
+
+          // Only approve if current allowance is insufficient
+          if (currentAllowance < amountInWei) {
+            await stableToken.write.approve([odisPayments.address, amountInWei], {
+              account: client.account,
+              chain: client.chain,
+              gas: BigInt(100000),
+              gasPrice: BigInt(100000000000), // 100 gwei - increased to avoid replacement transaction underpriced
+            })
+          }
+
           await odisPayments.write.payInCUSD([ACCOUNT_ADDRESS, amountInWei], {
             account: client.account,
             chain: client.chain,
             gas: BigInt(150000),
-            gasPrice: BigInt(50000000000), // 50 gwei
+            gasPrice: BigInt(100000000000), // 100 gwei - increased to avoid replacement transaction underpriced
           })
           // wait for cache to expire and then query to refresh
           await sleep(5 * 1000)
@@ -485,7 +495,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
           PHONE_NUMBER,
           IdentifierPrefix.PHONE_NUMBER,
           ACCOUNT_ADDRESS_NO_QUOTA,
-          dekAuthSigner(0),
+          walletAuthSigner, // Use wallet auth since this account doesn't have the correct DEK registered
           SERVICE_CONTEXT,
         ),
       ).rejects.toThrow(ErrorMessages.ODIS_QUOTA_ERROR)

@@ -4,7 +4,7 @@ import {
   WalletKeySigner,
 } from '@celo/identity/lib/odis/query'
 import { AuthenticationMethod } from '@celo/phone-number-privacy-common'
-import { DEK_PUBLIC_KEY, DEK_PRIVATE_KEY } from '@celo/phone-number-privacy-common/lib/test/values'
+import { DEK_PRIVATE_KEY, DEK_PUBLIC_KEY } from '@celo/phone-number-privacy-common/lib/test/values'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,
@@ -67,7 +67,7 @@ const getViemChain = () => {
     case OdisContextName.ALFAJORES:
       return celoAlfajores
     case OdisContextName.STAGING:
-      return celoAlfajores
+      return celoSepolia
     case OdisContextName.SEPOLIA:
       return celoSepolia
     default:

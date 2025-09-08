@@ -48,7 +48,7 @@ const getViemChain = () => {
     case 'alfajores':
       return celoAlfajores
     case 'staging':
-      return celoAlfajores
+      return celoSepolia
     case 'sepolia':
       return celoSepolia
     default:

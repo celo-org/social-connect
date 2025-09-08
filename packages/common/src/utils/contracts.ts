@@ -4,7 +4,7 @@ import {
   type HttpTransportConfig,
   type WalletClient,
 } from 'viem'
-import { celo, celoAlfajores } from 'viem/chains'
+import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
 
 export interface BlockchainConfig {
   rpcURL: string
@@ -12,9 +12,23 @@ export interface BlockchainConfig {
   apiKey?: string
 }
 
+function getChainFromId(chainID: number) {
+  switch (chainID) {
+    case celo.id:
+      return celo
+    case celoAlfajores.id:
+      return celoAlfajores
+    case celoSepolia.id:
+      return celoSepolia
+    default:
+      // Default to Alfajores for backward compatibility
+      return celoAlfajores
+  }
+}
+
 export function getWalletClient(config: BlockchainConfig): WalletClient {
   return createWalletClient({
-    chain: config.chainID === celo.id ? celo : celoAlfajores,
+    chain: getChainFromId(config.chainID),
     transport: viemHttpTransport(config.rpcURL, configureOptions(config, {})),
   })
 }
@@ -26,7 +40,7 @@ export function getWalletClientWithAgent(config: BlockchainConfig): WalletClient
   options.fetchOptions.keepalive = true
 
   return createWalletClient({
-    chain: config.chainID === celo.id ? celo : celoAlfajores,
+    chain: getChainFromId(config.chainID),
     transport: viemHttpTransport(config.rpcURL, configureOptions(config, options)),
   })
 }
