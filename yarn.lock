@@ -1141,7 +1141,7 @@ __metadata:
     "@celo/poprf": "npm:^0.1.9"
     "@celo/utils": "npm:^8.0.0"
     "@celo/wallet-hsm-azure": "npm:^6.0.4"
-    "@google-cloud/secret-manager": "npm:3.0.0"
+    "@google-cloud/secret-manager": "npm:3.12.0"
     "@opentelemetry/api": "npm:^1.6.0"
     "@opentelemetry/auto-instrumentations-node": "npm:^0.39.4"
     "@opentelemetry/exporter-jaeger": "npm:^1.17.1"
@@ -2369,12 +2369,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@google-cloud/secret-manager@npm:3.0.0":
-  version: 3.0.0
-  resolution: "@google-cloud/secret-manager@npm:3.0.0"
+"@google-cloud/secret-manager@npm:3.12.0":
+  version: 3.12.0
+  resolution: "@google-cloud/secret-manager@npm:3.12.0"
   dependencies:
-    google-gax: "npm:^2.0.1"
-  checksum: 10/96f1e56061d0c6b445afc839763b24282f6f8d256d623779a040ce980979d7a849ee1b233b6c9f0cd91a077e1bd1cfd5f56b8081bcf62e634c14a730fd8f6f01
+    google-gax: "npm:^2.30.0"
+  checksum: 10/0f2ce7d370ff9ed8d7d5a5f4ce4c10596cac3706073077dfecbd3e2d1f84331d4d59760038679da60607a1994f3faa185bdf510589eb5be95166b81c755c7e61
   languageName: node
   linkType: hard
 
@@ -10575,7 +10575,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"google-gax@npm:^2.0.1":
+"google-gax@npm:^2.30.0":
   version: 2.30.5
   resolution: "google-gax@npm:2.30.5"
   dependencies:
