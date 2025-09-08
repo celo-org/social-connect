@@ -24,8 +24,8 @@ export const getTestContextName = (): OdisContextName => {
       return OdisContextName.STAGING
     case 'mainnet':
       return OdisContextName.MAINNET
-    case 'sepolia':
-      return OdisContextName.SEPOLIA
+    case 'celo-sepolia':
+      return OdisContextName.CELO_SEPOLIA
     default:
       throw new Error('CONTEXT_NAME env var is undefined or invalid')
   }
@@ -68,7 +68,7 @@ const getViemChain = () => {
       return celoAlfajores
     case OdisContextName.STAGING:
       return celoSepolia
-    case OdisContextName.SEPOLIA:
+    case OdisContextName.CELO_SEPOLIA:
       return celoSepolia
     default:
       break

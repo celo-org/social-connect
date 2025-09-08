@@ -72,13 +72,13 @@ export const ODIS_ALFAJORES_CONTEXT_DOMAINS: ServiceContext = {
     '+ZrxyPvLChWUX/DyPw6TuGwQH0glDJEbSrSxUARyP5PuqYyP/U4WZTV1e0bAUioBZ6QCJMiLpDwTaFvy8VnmM5RBbLQUMrMg5p4+CBCqj6HhsMfcyUj8V0LyuNdStlCB',
 }
 
-export const ODIS_SEPOLIA_CONTEXT_PNP: ServiceContext = {
+export const ODIS_CELO_SEPOLIA_CONTEXT_PNP: ServiceContext = {
   odisUrl: 'https://odis-combiner.celo-sepolia.celo-testnet.org',
   odisPubKey:
     'kPoRxWdEdZ/Nd3uQnp3FJFs54zuiS+ksqvOm9x8vY6KHPG8jrfqysvIRU0wtqYsBKA7SoAsICMBv8C/Fb2ZpDOqhSqvr/sZbZoHmQfvbqrzbtDIPvUIrHgRS0ydJCMsA',
 }
 
-export const ODIS_SEPOLIA_CONTEXT_DOMAINS: ServiceContext = {
+export const ODIS_CELO_SEPOLIA_CONTEXT_DOMAINS: ServiceContext = {
   odisUrl: 'https://odis-combiner.celo-sepolia.celo-testnet.org',
   odisPubKey:
     '+ZrxyPvLChWUX/DyPw6TuGwQH0glDJEbSrSxUARyP5PuqYyP/U4WZTV1e0bAUioBZ6QCJMiLpDwTaFvy8VnmM5RBbLQUMrMg5p4+CBCqj6HhsMfcyUj8V0LyuNdStlCB',
@@ -105,7 +105,7 @@ export enum OdisContextName {
   STAGING = 'alfajoresstaging',
   ALFAJORES = 'alfajores',
   MAINNET = 'mainnet',
-  SEPOLIA = 'sepolia',
+  CELO_SEPOLIA = 'celo-sepolia',
 }
 
 export function getServiceContext(
@@ -118,10 +118,10 @@ export function getServiceContext(
         [OdisAPI.PNP]: ODIS_ALFAJORES_CONTEXT_PNP,
         [OdisAPI.DOMAIN]: ODIS_ALFAJORES_CONTEXT_DOMAINS,
       }[api]
-    case OdisContextName.SEPOLIA:
+    case OdisContextName.CELO_SEPOLIA:
       return {
-        [OdisAPI.PNP]: ODIS_SEPOLIA_CONTEXT_PNP,
-        [OdisAPI.DOMAIN]: ODIS_SEPOLIA_CONTEXT_DOMAINS,
+        [OdisAPI.PNP]: ODIS_CELO_SEPOLIA_CONTEXT_PNP,
+        [OdisAPI.DOMAIN]: ODIS_CELO_SEPOLIA_CONTEXT_DOMAINS,
       }[api]
     case OdisContextName.STAGING:
       return {

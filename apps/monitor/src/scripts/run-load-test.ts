@@ -67,7 +67,7 @@ yargs
 
       let blockchainProvider: ChainInfo
       switch (contextName) {
-        case 'sepolia':
+        case 'celo-sepolia':
           blockchainProvider = {
             rpcURL: 'https://forno.celo-sepolia.celo-testnet.org',
             chainID: celoSepolia.id,

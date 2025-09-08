@@ -38,13 +38,13 @@ export function getTestParamsForContext(): E2ETestParams {
         domainsPubKey: process.env.ALFAJORES_DOMAINS_PUBKEY!,
         domainsKeyVersion: process.env.ODIS_DOMAINS_TEST_KEY_VERSION!,
       }
-    case 'sepolia':
+    case 'celo-sepolia':
       return {
-        blockchainProviderURL: process.env.SEPOLIA_ODIS_BLOCKCHAIN_PROVIDER!,
-        pnpPolynomial: process.env.SEPOLIA_PHONE_NUMBER_PRIVACY_POLYNOMIAL!,
+        blockchainProviderURL: process.env.CELO_SEPOLIA_ODIS_BLOCKCHAIN_PROVIDER!,
+        pnpPolynomial: process.env.CELO_SEPOLIA_PHONE_NUMBER_PRIVACY_POLYNOMIAL!,
         pnpKeyVersion: process.env.ODIS_PNP_TEST_KEY_VERSION!,
-        domainsPolynomial: process.env.SEPOLIA_DOMAINS_POLYNOMIAL!,
-        domainsPubKey: process.env.SEPOLIA_DOMAINS_PUBKEY!,
+        domainsPolynomial: process.env.CELO_SEPOLIA_DOMAINS_POLYNOMIAL!,
+        domainsPubKey: process.env.CELO_SEPOLIA_DOMAINS_PUBKEY!,
         domainsKeyVersion: process.env.ODIS_DOMAINS_TEST_KEY_VERSION!,
       }
     case 'mainnet':
