@@ -9755,20 +9755,19 @@ __metadata:
   linkType: hard
 
 "firebase-functions@npm:^4.5.0":
-  version: 4.7.0
-  resolution: "firebase-functions@npm:4.7.0"
+  version: 4.9.0
+  resolution: "firebase-functions@npm:4.9.0"
   dependencies:
     "@types/cors": "npm:^2.8.5"
     "@types/express": "npm:4.17.3"
     cors: "npm:^2.8.5"
     express: "npm:^4.17.1"
-    node-fetch: "npm:^2.6.7"
     protobufjs: "npm:^7.2.2"
   peerDependencies:
     firebase-admin: ^10.0.0 || ^11.0.0 || ^12.0.0
   bin:
     firebase-functions: lib/bin/firebase-functions.js
-  checksum: 10/8ac9d095a4687671c61decae4eff2cad21f9e7879a261cb24e772429325c2e9cf74e2926a091173432058b0563eda5886eecc102e8b09a4cca1b3c5e6e6503e9
+  checksum: 10/7b23295bb40053ea4e80018bf7bcfc55afc41d13c2db236c2e263b4ac1fef30f6ed379424945e38190a1b8a97e30392fad0f983cd4a0d11ad2c5e68dc4130a09
   languageName: node
   linkType: hard
 
