@@ -3044,7 +3044,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/hashes@npm:1.8.0, @noble/hashes@npm:^1.8.0, @noble/hashes@npm:~1.8.0":
+"@noble/hashes@npm:1.8.0, @noble/hashes@npm:^1.2.0, @noble/hashes@npm:^1.8.0, @noble/hashes@npm:~1.8.0":
   version: 1.8.0
   resolution: "@noble/hashes@npm:1.8.0"
   checksum: 10/474b7f56bc6fb2d5b3a42132561e221b0ea4f91e590f4655312ca13667840896b34195e2b53b7f097ec080a1fdd3b58d902c2a8d0fbdf51d2e238b53808a177e
@@ -5238,13 +5238,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:11.11.6":
-  version: 11.11.6
-  resolution: "@types/node@npm:11.11.6"
-  checksum: 10/3b0be5fe7104dc24d34271cb043149dab55317356bc20d7f3871dc9cb60954dc77ffc6b0531b00c3de32a748c207db769b925f17dbe03565f8a4a5001acbf367
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:22.16.5":
   version: 22.16.5
   resolution: "@types/node@npm:22.16.5"
@@ -6537,15 +6530,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bip39@https://github.com/bitcoinjs/bip39#d8ea080a18b40f301d4e2219a2991cd2417e83c2":
-  version: 3.0.3
-  resolution: "bip39@https://github.com/bitcoinjs/bip39.git#commit=d8ea080a18b40f301d4e2219a2991cd2417e83c2"
+"bip39@https://github.com/bitcoinjs/bip39#a7ecbfe2e60d0214ce17163d610cad9f7b23140c":
+  version: 3.1.0
+  resolution: "bip39@https://github.com/bitcoinjs/bip39.git#commit=a7ecbfe2e60d0214ce17163d610cad9f7b23140c"
   dependencies:
-    "@types/node": "npm:11.11.6"
-    create-hash: "npm:^1.1.0"
-    pbkdf2: "npm:^3.0.9"
-    randombytes: "npm:^2.0.1"
-  checksum: 10/50351401aeed4297e7570c5c8556e1de6c5e956928326569c98fbaf7331f94790726defedca748982a8cc4af209f78bf7f950d91e2245036b7d50faebefd20fe
+    "@noble/hashes": "npm:^1.2.0"
+  checksum: 10/406c0b5bdab0d43df2ff8916c5b57bb7f65cd36a115cbd7620a75b972638f8511840bfc27bfc68946027086fd33ed3050d8cd304e85fd527503b23d857a8486e
   languageName: node
   linkType: hard
 
@@ -15106,7 +15096,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pbkdf2@npm:^3.0.17, pbkdf2@npm:^3.0.9":
+"pbkdf2@npm:^3.0.17":
   version: 3.1.2
   resolution: "pbkdf2@npm:3.1.2"
   dependencies:
