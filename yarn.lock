@@ -14159,7 +14159,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nan@npm:^2.23.0":
+"nan@npm:^2.14.0, nan@npm:^2.22.2":
   version: 2.23.0
   resolution: "nan@npm:2.23.0"
   dependencies:
@@ -14616,7 +14616,7 @@ __metadata:
     ts-jest: "npm:^29.0.0"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.9.2"
-    viem: "npm:2.37.3"
+    viem: "npm:^2.37.3"
   languageName: unknown
   linkType: soft
 
@@ -15874,7 +15874,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"re2@npm:^1.22.1":
+"re2@npm:^1.17.7":
   version: 1.22.1
   resolution: "re2@npm:1.22.1"
   dependencies:
@@ -18593,9 +18593,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:2.37.3":
-  version: 2.37.3
-  resolution: "viem@npm:2.37.3"
+"viem@npm:^2.37.3":
+  version: 2.37.5
+  resolution: "viem@npm:2.37.5"
   dependencies:
     "@noble/curves": "npm:1.9.1"
     "@noble/hashes": "npm:1.8.0"
@@ -18610,7 +18610,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/5b1fc8008b173f9917c89caad745fc9dde292a50fde2fcaecd5d17368891363a138ff43c5ddf8fc96a5d91ca2582461945a835d7d02126d5b5de3df82b93b791
+  checksum: 10/00990664ea40c54269ed19245306f378a9511c313ec21a79a75e9775128b42bd6e2e4ec7bc449bbaff5e20548308a797268e91c6f68381bac6c5ca1cfb16b2db
   languageName: node
   linkType: hard
 
