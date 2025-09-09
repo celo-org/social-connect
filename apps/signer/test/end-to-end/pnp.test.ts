@@ -19,7 +19,7 @@ import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
 import { Account, Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores } from 'viem/chains'
+import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
 import { config, getSignerVersion } from '../../src/config'
 import { getBlindedPhoneNumber, getTestParamsForContext } from './utils'
 
@@ -48,7 +48,9 @@ const getViemChain = () => {
     case 'alfajores':
       return celoAlfajores
     case 'staging':
-      return celoAlfajores
+      return celoSepolia
+    case 'celo-sepolia':
+      return celoSepolia
     default:
       return celoAlfajores // default to alfajores for testing
   }
@@ -97,7 +99,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       method: 'GET',
     })
     expect(response.status).toBe(200)
-    const body = await response.json()
+    const body = (await response.json()) as any
     // This checks against local package.json version, change if necessary
     expect(body.version).toBe(expectedVersion)
   })
@@ -108,7 +110,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
       const res = await queryPnpQuotaEndpoint(req, authorization)
       expect(res.status).toBe(200)
-      const resBody: PnpQuotaResponseSuccess = await res.json()
+      const resBody = (await res.json()) as PnpQuotaResponseSuccess
       expect(resBody).toEqual<PnpQuotaResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -123,7 +125,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const authorization = getPnpRequestAuthorization(req, DEK_PRIVATE_KEY)
       const res = await queryPnpQuotaEndpoint(req, authorization)
       expect(res.status).toBe(200)
-      const resBody: PnpQuotaResponseSuccess = await res.json()
+      const resBody = (await res.json()) as PnpQuotaResponseSuccess
       expect(resBody).toEqual<PnpQuotaResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -141,7 +143,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const res = await queryPnpQuotaEndpoint(req, authorization)
       expect(res.status).toBe(200)
 
-      const resBody: PnpQuotaResponseSuccess = await res.json()
+      const resBody = (await res.json()) as PnpQuotaResponseSuccess
       let paymentSucceeded = false
       try {
         // Make a payment to increase quota
@@ -157,7 +159,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
 
       const res2 = await queryPnpQuotaEndpoint(req, authorization)
       expect(res2.status).toBe(200)
-      const res2Body: PnpQuotaResponseSuccess = await res2.json()
+      const res2Body = (await res2.json()) as PnpQuotaResponseSuccess
       expect(res2Body).toEqual<PnpQuotaResponseSuccess>({
         success: true,
         version: expectedVersion,
@@ -170,7 +172,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
 
       const res3 = await queryPnpQuotaEndpoint(req, authorization)
       expect(res3.status).toBe(200)
-      const res3Body: PnpQuotaResponseSuccess = await res3.json()
+      const res3Body = (await res3.json()) as PnpQuotaResponseSuccess
 
       expect(res3Body).toEqual<PnpQuotaResponseSuccess>({
         success: true,
@@ -188,7 +190,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
       const res = await queryPnpQuotaEndpoint(badRequest, authorization)
       expect(res.status).toBe(400)
-      const resBody: PnpQuotaResponseFailure = await res.json()
+      const resBody = (await res.json()) as PnpQuotaResponseFailure
       expect(resBody).toEqual<PnpQuotaResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -201,7 +203,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
       const res = await queryPnpQuotaEndpoint(badRequest, authorization)
       expect(res.status).toBe(401)
-      const resBody: PnpQuotaResponseFailure = await res.json()
+      const resBody = (await res.json()) as PnpQuotaResponseFailure
       expect(resBody).toEqual<PnpQuotaResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -214,7 +216,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY2)
       const res = await queryPnpQuotaEndpoint(badRequest, authorization)
       expect(res.status).toBe(401)
-      const resBody: PnpQuotaResponseFailure = await res.json()
+      const resBody = (await res.json()) as PnpQuotaResponseFailure
       expect(resBody).toEqual<PnpQuotaResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -227,7 +229,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
       const res = await queryPnpQuotaEndpoint(badRequest, authorization)
       expect(res.status).toBe(401)
-      const resBody: PnpQuotaResponseFailure = await res.json()
+      const resBody = (await res.json()) as PnpQuotaResponseFailure
       expect(resBody).toEqual<PnpQuotaResponseFailure>({
         success: false,
         version: expectedVersion,
@@ -245,7 +247,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
         const res = await queryPnpQuotaEndpoint(req, authorization)
         expect(res.status).toBe(200)
-        const resBody: PnpQuotaResponseSuccess = await res.json()
+        const resBody = (await res.json()) as PnpQuotaResponseSuccess
         startingPerformedQueryCount = resBody.performedQueryCount
       })
 
@@ -259,7 +261,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(req, authorization)
         expect(res.status).toBe(200)
-        const resBody: SignMessageResponseSuccess = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseSuccess
         expect(resBody).toEqual<SignMessageResponseSuccess>({
           success: true,
           version: expectedVersion,
@@ -292,7 +294,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(req, authorization, keyVersion)
         expect(res.status).toBe(200)
-        const resBody: SignMessageResponseSuccess = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseSuccess
         expect(resBody).toEqual<SignMessageResponseSuccess>({
           success: true,
           version: expectedVersion,
@@ -321,7 +323,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(req, authorization)
         expect(res.status).toBe(200)
-        const resBody: SignMessageResponseSuccess = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseSuccess
         expect(resBody).toEqual<SignMessageResponseSuccess>({
           success: true,
           version: expectedVersion,
@@ -343,7 +345,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
 
         const res2 = await queryPnpSignEndpoint(req, authorization)
         expect(res2.status).toBe(200)
-        const res2Body: SignMessageResponseSuccess = await res2.json()
+        const res2Body = (await res2.json()) as SignMessageResponseSuccess
         expect(res2Body).toEqual<SignMessageResponseSuccess>({
           success: true,
           version: expectedVersion,
@@ -369,7 +371,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
         expect(res.status).toBe(400)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           success: false,
           version: expectedVersion,
@@ -386,7 +388,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization, 'asd')
         expect(res.status).toBe(400)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           success: false,
           version: expectedVersion,
@@ -403,7 +405,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
         expect(res.status).toBe(400)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           success: false,
           version: expectedVersion,
@@ -420,7 +422,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
         expect(res.status).toBe(400)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           success: false,
           version: expectedVersion,
@@ -437,7 +439,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
         expect(res.status).toBe(401)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           // TODO test if toStrictEqual works after fixing sendFailure<any>
           success: false,
@@ -455,7 +457,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY2)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
         expect(res.status).toBe(401)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           success: false,
           version: expectedVersion,
@@ -472,7 +474,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(badRequest, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(badRequest, authorization)
         expect(res.status).toBe(401)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           success: false,
           version: expectedVersion,
@@ -485,7 +487,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const quotaAuthorization = getPnpRequestAuthorization(quotaReq, PRIVATE_KEY1)
         const quotaRes = await queryPnpQuotaEndpoint(quotaReq, quotaAuthorization)
         expect(quotaRes.status).toBe(200)
-        const quotaResBody: PnpQuotaResponseSuccess = await quotaRes.json()
+        const quotaResBody = (await quotaRes.json()) as PnpQuotaResponseSuccess
         // Sanity check
         expect(quotaResBody.performedQueryCount).toEqual(quotaResBody.totalQuota)
 
@@ -493,7 +495,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
         const res = await queryPnpSignEndpoint(req, authorization)
         expect(res.status).toBe(403)
-        const resBody: SignMessageResponseFailure = await res.json()
+        const resBody = (await res.json()) as SignMessageResponseFailure
         expect(resBody).toEqual<SignMessageResponseFailure>({
           success: false,
           version: expectedVersion,
