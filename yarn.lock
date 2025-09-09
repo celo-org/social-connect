@@ -14616,7 +14616,7 @@ __metadata:
     ts-jest: "npm:^29.0.0"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.9.2"
-    viem: "npm:2.37.2"
+    viem: "npm:2.37.3"
   languageName: unknown
   linkType: soft
 
@@ -18593,9 +18593,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"viem@npm:2.37.2":
-  version: 2.37.2
-  resolution: "viem@npm:2.37.2"
+"viem@npm:2.37.3":
+  version: 2.37.3
+  resolution: "viem@npm:2.37.3"
   dependencies:
     "@noble/curves": "npm:1.9.1"
     "@noble/hashes": "npm:1.8.0"
@@ -18610,7 +18610,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: 10/917ff16318ff9f2d5ac04f10667cc5388d8a226fda7f9bb426882e3586ea29c711bad339df8dc30f15e3b007b2fbaa0406becb8fbc1fbf4d59f4d46f3f6b4781
+  checksum: 10/5b1fc8008b173f9917c89caad745fc9dde292a50fde2fcaecd5d17368891363a138ff43c5ddf8fc96a5d91ca2582461945a835d7d02126d5b5de3df82b93b791
   languageName: node
   linkType: hard
 
