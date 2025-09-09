@@ -35,7 +35,7 @@
     "docs/examples"
   ],
   "dependencies": {
-    "viem": "2.37.2"
+    "viem": "^2.37.3"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.2",
@@ -64,10 +64,7 @@
     "protobufjs": "7.5.4",
     "node-fetch": "2.7.0",
     "minimatch": "3.1.2",
-    "async": "2.6.4",
-    "re2": "^1.22.1",
-    "nan": "^2.23.0",
-    "viem": "2.37.2"
+    "async": "2.6.4"
   },
   "packageManager": "yarn@4.9.4"
 }
