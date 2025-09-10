@@ -64,7 +64,7 @@ export class AWSKeyProvider extends KeyProviderBase {
     try {
       const secret = JSON.parse(secretString) as SecretStringResult
       return secret[key]
-    } catch (e) {
+    } catch {
       throw new Error('Expecting JSON, secret string is not valid JSON')
     }
   }
