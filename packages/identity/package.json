@@ -35,9 +35,9 @@
     "cross-fetch": "3.2.0",
     "debug": "^4.1.1",
     "elliptic": "^6.5.4",
-    "ethereum-cryptography": "1.2.0",
     "fp-ts": "2.1.1",
-    "io-ts": "2.0.1"
+    "io-ts": "2.0.1",
+    "ox": "^0.2.2"
   },
   "peerDependencies": {
     "@celo/contractkit": "^9.0.0"

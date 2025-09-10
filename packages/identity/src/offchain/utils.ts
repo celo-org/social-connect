@@ -4,8 +4,7 @@ import { ensureCompressed, ensureUncompressed, trimUncompressedPrefix } from '@c
 import { AES128Decrypt, AES128Encrypt, Encrypt, IV_LENGTH } from '@celo/utils/lib/ecies'
 import { EIP712Object, EIP712TypedData } from '@celo/utils/lib/sign-typed-data-utils'
 import { createHmac, randomBytes } from 'crypto'
-import { keccak256 } from 'ethereum-cryptography/keccak'
-import { toHex } from 'ethereum-cryptography/utils'
+import { Hex, Hash } from 'ox'
 import { isLeft } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import { join, sep } from 'path'
@@ -331,7 +330,7 @@ export const buildEIP712TypedData = async <DataType>(
       ],
     }
     message = {
-      hash: ensureLeading0x(toHex(keccak256(Uint8Array.from(data)))),
+      hash: ensureLeading0x(Hex.fromBytes(Hash.keccak256(Uint8Array.from(data)))),
     }
   } else {
     const Claim = buildEIP712Schema(type!)
