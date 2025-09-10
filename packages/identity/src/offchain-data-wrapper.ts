@@ -199,7 +199,7 @@ class StorageRoot {
         let guessedSigner: string
         try {
           guessedSigner = recoverEIP712TypedDataSignerRsv(typedData, signature)
-        } catch (error) {
+        } catch {
           guessedSigner = recoverEIP712TypedDataSignerVrs(typedData, signature)
         }
         const authorizedSignerAccessor = new AuthorizedSignerAccessor(this.wrapper)
