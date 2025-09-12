@@ -1,5 +1,76 @@
 # @celo/phone-number-privacy-combiner
 
+## 4.0.0-beta.0
+
+### Major Changes
+
+- cc5df33: Replace @celo/contractkit with viem
+
+  ### Breaking Changes
+
+  `startCombiner` now takes an optional WalletClient instance from viem instead of a ContractKit instance
+
+  config passed to `startCombiner` has a sub config `blockchain` which has the following changes.
+
+  ```diff
+  {
+    ...restOfConfig,
+    blockchain: {
+      - provider: "https://forno.celo.org"
+      + rpcURL: "https://forno.celo.org"
+      + chainID: 42220
+    }
+  }
+
+  ```
+
+  ***
+
+  `lib/common/web3` => `lib/common`
+
+  `getDEK` moved from
+
+  it now takes a WalletClient as its first param instead of a ContractKit.
+
+  third param is now typed to require address starts with 0x
+
+  ```diff
+  - export async function getDEK(kit: ContractKit, logger: Logger, account: string): Promise<string>
+  + export async function getDEK(client: Client, logger: Logger, account: Address): Promise<string>
+  ```
+
+  ***
+
+  lib/pnp/services/account-services`
+
+  `ContractKitAccountServiceOptions` => `ViemAccountServiceOptions`
+
+  `ContractKitAccountService` => `ViemAccountService`
+
+  addressed passed to `getAccount` now MUST start with `0x` in type
+
+### Minor Changes
+
+- 49922d5: Add Celo Sepolia testnet support and fix E2E tests
+
+  - Add Celo Sepolia testnet support across ODIS components including combiner, signer, monitor, and identity packages
+  - Add Celo Sepolia contract addresses and RPC endpoints
+  - Add test commands for running E2E tests against Celo Sepolia
+  - Upgrade TypeScript to 5.4.5 in signer package to support @tsconfig/node22
+  - Fix type assertion issues in E2E tests by using proper `as Type` syntax
+  - Standardize DEK test values in common package to prevent conflicts between combiner and signer E2E tests
+  - Both test suites now reference the same DEK values to avoid overriding each other on shared blockchain
+
+### Patch Changes
+
+- Updated dependencies [49922d5]
+- Updated dependencies [cc5df33]
+- Updated dependencies [6dada95]
+- Updated dependencies [cc5df33]
+  - @celo/identity@6.0.0-beta.0
+  - @celo/phone-number-privacy-common@4.0.0-beta.0
+  - @celo/encrypted-backup@5.0.7-beta.0
+
 ## 3.3.3
 
 ### Patch Changes
