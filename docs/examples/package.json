@@ -1,6 +1,6 @@
 {
   "name": "odis-example-scripts",
-  "version": "1.0.2",
+  "version": "1.0.3-beta.0",
   "main": "index.js",
   "private": true,
   "license": "MIT",
@@ -11,7 +11,7 @@
   "dependencies": {
     "@celo/abis": "^13.0.0",
     "@celo/base": "^7.0.0",
-    "@celo/identity": "^5.1.2",
+    "@celo/identity": "^6.0.0-beta.0",
     "blind-threshold-bls": "https://github.com/celo-org/blind-threshold-bls-wasm#3d1013a",
     "ethers": "^5.7.2",
     "web3": "^1.8.0",
