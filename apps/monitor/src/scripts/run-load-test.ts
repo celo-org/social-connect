@@ -8,7 +8,7 @@ import { concurrentRPSLoadTest } from '../test'
 
 const logger = rootLogger('odis-monitor')
 
-yargs
+void yargs
   .scriptName('ODIS-load-test')
   .recommendCommands()
   .demandCommand(1)

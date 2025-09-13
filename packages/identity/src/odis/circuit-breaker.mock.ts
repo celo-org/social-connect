@@ -91,7 +91,7 @@ export class MockCircuitBreaker {
         { key: MOCK_CIRCUIT_BREAKER_PRIVATE_KEY, oaepHash: 'sha256' },
         Uint8Array.from(Buffer.from(ciphertext, 'base64')),
       )
-    } catch (error) {
+    } catch {
       return {
         status: 500,
         body: { error: 'Error while decrypting ciphertext' },

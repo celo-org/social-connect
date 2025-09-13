@@ -170,7 +170,7 @@ class ASv2 {
   try {
     await asv2.registerAttestation(userPhoneNumber, userAccount, timeAttestationWasVerified)
     console.log('attestation registered')
-  } catch (err) {
+  } catch {
     // mostly likely reason registering would fail is if this issuer has already
     // registered a mapping between this number and account
   }
