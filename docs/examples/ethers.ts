@@ -5,6 +5,7 @@ import {
   ACCOUNTS_CONTRACT,
   ACCOUNTS_PROXY_ADDRESS,
   ALFAJORES_CUSD_ADDRESS,
+  CELO_SEPOLIA_RPC,
   FA_CONTRACT,
   FA_PROXY_ADDRESS,
   ODIS_PAYMENTS_CONTRACT,
@@ -19,14 +20,12 @@ const ISSUER_PRIVATE_KEY = '0x726e53db4f0a79dfd63f58b19874896fce3748fcb80874665e
 const DEK_PUBLIC_KEY = '0x026063780c81991c032fb4fa7485c6607b7542e048ef85d08516fe5c4482360e4b'
 const DEK_PRIVATE_KEY = '0xc2bbdabb440141efed205497a41d5fb6114e0435fd541e368dc628a8e086bfee'
 
-const ALFAJORES_RPC = 'https://alfajores-forno.celo-testnet.org'
-
 const NOW_TIMESTAMP = Math.floor(new Date().getTime() / 1000)
 
 class ASv2 {
-  provider = new ethers.providers.JsonRpcProvider(ALFAJORES_RPC)
+  provider = new ethers.providers.JsonRpcProvider(CELO_SEPOLIA_RPC)
   issuer = new Wallet(ISSUER_PRIVATE_KEY, this.provider)
-  serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.ALFAJORES)
+  serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.CELO_SEPOLIA)
 
   authSigner: AuthSigner = {
     authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,

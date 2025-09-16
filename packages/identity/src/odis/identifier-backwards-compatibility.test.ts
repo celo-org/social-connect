@@ -13,7 +13,7 @@ const mockE164Number = '+14155550000'
 const mockAccount = '0x755dB5fF7B82e9a96e0dDDD143293dc2ADeC0050'
 // const mockPrivateKey = '0x2cacaf965ae80da49d5b1fc4b4c9b08ffc35971a584aedcc1cb8322b9d5fd9c9'
 
-// this DEK has been registered to the above account on alfajores
+// this DEK has been registered to the above account on Celo Sepolia
 const dekPrivateKey = '0xc2bbdabb440141efed205497a41d5fb6114e0435fd541e368dc628a8e086bfee'
 
 const authSigner: AuthSigner = {
@@ -21,9 +21,9 @@ const authSigner: AuthSigner = {
   rawKey: dekPrivateKey,
 }
 const oldServiceContext = OdisUtilsOld.Query.getServiceContext(
-  OdisUtilsOld.Query.OdisContextName.ALFAJORES,
+  OdisUtilsOld.Query.OdisContextName.CELO_SEPOLIA,
 )
-const currentServiceContext = getServiceContext(OdisContextName.ALFAJORES)
+const currentServiceContext = getServiceContext(OdisContextName.CELO_SEPOLIA)
 oldServiceContext.odisUrl = currentServiceContext.odisUrl
 
 const expectedObfuscatedIdentifier =
@@ -37,7 +37,7 @@ const expectedPepper = 'Pi4Z1NQnfsdvJ'
  * future. If major upgrades were to break identifier continuity, this could lead to downstream
  * problems with SocialConnect users.
  *
- * This test is flakey because it sends requests to the actual ODIS instance deployed on Alfajores.
+ * This test is flakey because it sends requests to the actual ODIS instance deployed on Celo Sepolia.
  * It’s basically an end-to-end test.
  */
 describe('backwards compatibility of phone number identifiers', () => {

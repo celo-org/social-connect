@@ -5,6 +5,7 @@ import {
   ACCOUNTS_CONTRACT,
   ACCOUNTS_PROXY_ADDRESS,
   ALFAJORES_CUSD_ADDRESS,
+  CELO_SEPOLIA_RPC,
   FA_CONTRACT,
   FA_PROXY_ADDRESS,
   ODIS_PAYMENTS_CONTRACT,
@@ -16,16 +17,14 @@ const ISSUER_PRIVATE_KEY = '0x726e53db4f0a79dfd63f58b19874896fce3748fcb80874665e
 const DEK_PUBLIC_KEY = '0x026063780c81991c032fb4fa7485c6607b7542e048ef85d08516fe5c4482360e4b'
 const DEK_PRIVATE_KEY = '0xc2bbdabb440141efed205497a41d5fb6114e0435fd541e368dc628a8e086bfee'
 
-const ALFAJORES_RPC = 'https://alfajores-forno.celo-testnet.org'
-
 class ASv2 {
-  web3 = new Web3(ALFAJORES_RPC)
+  web3 = new Web3(CELO_SEPOLIA_RPC)
   issuer = this.web3.eth.accounts.privateKeyToAccount(ISSUER_PRIVATE_KEY)
   authSigner: AuthSigner = {
     authenticationMethod: OdisUtils.Query.AuthenticationMethod.ENCRYPTION_KEY,
     rawKey: DEK_PRIVATE_KEY,
   }
-  serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.ALFAJORES)
+  serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.CELO_SEPOLIA)
 
   /** Contracts **/
   accountsContract = new this.web3.eth.Contract(ACCOUNTS_CONTRACT.abi, ACCOUNTS_PROXY_ADDRESS)

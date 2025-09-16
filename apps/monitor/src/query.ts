@@ -22,7 +22,7 @@ import { defined } from '@celo/utils/lib/sign-typed-data-utils'
 import { defineString } from 'firebase-functions/params'
 import { Account, Address, createWalletClient, extractChain, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores } from 'viem/chains'
+import { celo, celoSepolia } from 'viem/chains'
 import { dekAuthSigner, generateRandomPhoneNumber, PRIVATE_KEY } from './resources'
 
 let phoneNumber: string
@@ -197,8 +197,8 @@ function makeClient(chainInfo: ChainInfo, account: Account) {
   return createWalletClient({
     account: account,
     chain: extractChain({
-      chains: [celoAlfajores, celo],
-      id: chainInfo.chainID as typeof celoAlfajores.id | typeof celo.id,
+      chains: [celoSepolia, celo],
+      id: chainInfo.chainID as typeof celoSepolia.id | typeof celo.id,
     }),
     transport: http(chainInfo.rpcURL),
   })
