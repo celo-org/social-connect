@@ -94,7 +94,7 @@ export interface IdentifierHashDetails {
  * @param identifierPrefix Standardized prefix used to prevent collisions between identifiers
  * @param account The address making the request to ODIS, from which quota will be charged
  * @param signer Object containing the private key used to authenticate the ODIS request
- * @param context Specifies which ODIS combiner url should be queried (i.e. mainnet or alfajores)
+ * @param context Specifies which ODIS combiner url should be queried (i.e. mainnet or celo sepolia)
  * @param blindingFactor Optional Private seed used to blind identifers before they are sent to ODIS
  * @param clientVersion Optional Specifies the client software version
  * @param blsBlindingClient Optional Performs blinding and unblinding, defaults to WasmBlsBlindingClient
@@ -194,7 +194,7 @@ export async function getBlindedIdentifier(
  *
  * @param account The address making the request to ODIS, from which quota will be charged
  * @param signer Object containing the private key used to authenticate the ODIS request
- * @param context Specifies which ODIS combiner url should be queried (i.e. mainnet or alfajores)
+ * @param context Specifies which ODIS combiner url should be queried (i.e. mainnet or celo sepolia)
  * @param base64BlindedMessage The blinded prefixed identifier to be sent to ODIS
  * @param clientVersion Optional Specifies the client software version
  * @param sessionID Optional Used to track user sessions across the client and ODIS

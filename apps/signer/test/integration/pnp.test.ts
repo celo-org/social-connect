@@ -17,7 +17,7 @@ import BigNumber from 'bignumber.js'
 import { Knex } from 'knex'
 import request from 'supertest'
 import { createWalletClient, http, publicActions } from 'viem'
-import { celoAlfajores } from 'viem/chains'
+import { celoSepolia } from 'viem/chains'
 import { initDatabase } from '../../src/common/database/database'
 import { countAndThrowDBError } from '../../src/common/database/utils'
 import {
@@ -78,7 +78,7 @@ describe('pnp', () => {
 
     // Create a mock wallet client that can return mock contract data
     const mockClient = createWalletClient({
-      chain: celoAlfajores,
+      chain: celoSepolia,
       transport: http(),
     })
       .extend(publicActions)
@@ -337,7 +337,7 @@ describe('pnp', () => {
           db,
           keyProvider,
           createWalletClient({
-            chain: celoAlfajores,
+            chain: celoSepolia,
             transport: http(),
           }),
         )
@@ -418,7 +418,7 @@ describe('pnp', () => {
             db,
             keyProvider,
             createWalletClient({
-              chain: celoAlfajores,
+              chain: celoSepolia,
               transport: http(),
             }),
           )
@@ -827,7 +827,7 @@ describe('pnp', () => {
           db,
           keyProvider,
           createWalletClient({
-            chain: celoAlfajores,
+            chain: celoSepolia,
             transport: http(),
           }),
         )
@@ -918,7 +918,7 @@ describe('pnp', () => {
             db,
             keyProvider,
             createWalletClient({
-              chain: celoAlfajores,
+              chain: celoSepolia,
               transport: http(),
             }),
           )
@@ -949,7 +949,7 @@ describe('pnp', () => {
         it('Should return 500 on blockchain totalQuota query failure', async () => {
           // Create a mock client that throws an error for totalPaidCUSD calls
           const failingMockClient = createWalletClient({
-            chain: celoAlfajores,
+            chain: celoSepolia,
             transport: http(),
           })
             .extend(publicActions)

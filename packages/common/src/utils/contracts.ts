@@ -4,7 +4,7 @@ import {
   type HttpTransportConfig,
   type WalletClient,
 } from 'viem'
-import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
+import { celo, celoSepolia } from 'viem/chains'
 
 export interface BlockchainConfig {
   rpcURL: string
@@ -16,13 +16,11 @@ function getChainFromId(chainID: number) {
   switch (chainID) {
     case celo.id:
       return celo
-    case celoAlfajores.id:
-      return celoAlfajores
     case celoSepolia.id:
       return celoSepolia
     default:
-      // Default to Alfajores for backward compatibility
-      return celoAlfajores
+      // Default to Celo Sepolia for backward compatibility
+      return celoSepolia
   }
 }
 

@@ -14,9 +14,9 @@ import {
   ComputationalHardeningConfig,
   EnvironmentIdentifier,
   HardeningConfig,
-  PASSWORD_HARDENING_ALFAJORES_CONFIG,
+  PASSWORD_HARDENING_CELO_SEPOLIA_CONFIG,
   PASSWORD_HARDENING_MAINNET_CONFIG,
-  PIN_HARDENING_ALFAJORES_CONFIG,
+  PIN_HARDENING_CELO_SEPOLIA_CONFIG,
   PIN_HARDENING_MAINNET_CONFIG,
 } from './config'
 import { BackupError, InvalidBackupError, UsageError } from './errors'
@@ -155,8 +155,8 @@ export async function createPinEncryptedBackup({
 }: CreatePinEncryptedBackupArgs): Promise<Result<Backup, BackupError>> {
   // Select the hardening configuration based on the environment selector.
   let hardening: HardeningConfig | undefined
-  if (environment === EnvironmentIdentifier.ALFAJORES) {
-    hardening = PIN_HARDENING_ALFAJORES_CONFIG
+  if (environment === EnvironmentIdentifier.CELO_SEPOLIA) {
+    hardening = PIN_HARDENING_CELO_SEPOLIA_CONFIG
   } else if (environment === EnvironmentIdentifier.MAINNET || environment === undefined) {
     hardening = PIN_HARDENING_MAINNET_CONFIG
   }
@@ -207,8 +207,8 @@ export async function createPasswordEncryptedBackup({
 }: CreatePasswordEncryptedBackupArgs): Promise<Result<Backup, BackupError>> {
   // Select the hardening configuration based on the environment selector.
   let hardening: HardeningConfig | undefined
-  if (environment === EnvironmentIdentifier.ALFAJORES) {
-    hardening = PASSWORD_HARDENING_ALFAJORES_CONFIG
+  if (environment === EnvironmentIdentifier.CELO_SEPOLIA) {
+    hardening = PASSWORD_HARDENING_CELO_SEPOLIA_CONFIG
   } else if (environment === EnvironmentIdentifier.MAINNET || environment === undefined) {
     hardening = PASSWORD_HARDENING_MAINNET_CONFIG
   }
