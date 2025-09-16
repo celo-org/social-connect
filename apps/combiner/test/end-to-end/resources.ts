@@ -12,14 +12,13 @@ import {
 } from '@celo/utils/lib/address'
 import { Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
+import { celo, celoSepolia } from 'viem/chains'
+import { FORNO_CELO_SEPOLIA } from '../../src'
 
 require('dotenv').config()
 
 export const getTestContextName = (): OdisContextName => {
   switch (process.env.CONTEXT_NAME) {
-    case 'alfajores':
-      return OdisContextName.ALFAJORES
     case 'staging':
       return OdisContextName.STAGING
     case 'mainnet':
@@ -34,10 +33,9 @@ export const getTestContextName = (): OdisContextName => {
 /**
  * CONSTS
  */
-export const DEFAULT_FORNO_URL =
-  process.env.ODIS_BLOCKCHAIN_PROVIDER ?? 'https://alfajores-forno.celo-testnet.org'
+export const DEFAULT_FORNO_URL = process.env.ODIS_BLOCKCHAIN_PROVIDER ?? FORNO_CELO_SEPOLIA
 
-export const PRIVATE_KEY = '2c63bf6d60b16c8afa13e1069dbe92fef337c23855fff8b27732b3e9c6e7efd4' // XXX only valid for staging and alfajores
+export const PRIVATE_KEY = '2c63bf6d60b16c8afa13e1069dbe92fef337c23855fff8b27732b3e9c6e7efd4' // INFO: only valid for staging and celo sepolia
 export const ACCOUNT_ADDRESS = normalizeAddressWith0x(privateKeyToAddress(PRIVATE_KEY)) as Address // 0x6037800e91eaa703e38bad40c01410bbdf0fea7e
 
 // export const PRIVATE_KEY_NO_QUOTA =
@@ -64,11 +62,9 @@ const getViemChain = () => {
   switch (contextName) {
     case OdisContextName.MAINNET:
       return celo
-    case OdisContextName.ALFAJORES:
-      return celoAlfajores
-    case OdisContextName.STAGING:
-      return celoSepolia
     case OdisContextName.CELO_SEPOLIA:
+      return celoSepolia
+    case OdisContextName.STAGING:
       return celoSepolia
     default:
       break

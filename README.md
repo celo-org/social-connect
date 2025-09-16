@@ -22,10 +22,10 @@ SocialConnect uses a federated model, meaning that anyone has the power to be an
 
 Here are some active issuers verifying and registering attestations:
 
-| Issuer Name | Address                                                                                                         |
-| ----------- | --------------------------------------------------------------------------------------------------------------- |
-| Kaala       | `0x6549aF2688e07907C1b821cA44d6d65872737f05` (mainnet)                                                          |
-| Libera      | `0x388612590F8cC6577F19c9b61811475Aa432CB44` (mainnet) `0xe3475047EF9F9231CD6fAe02B3cBc5148E8eB2c8` (alfajores) |
+| Issuer Name | Address                                                |
+| ----------- | -------------------------------------------------------|
+| Kaala       | `0x6549aF2688e07907C1b821cA44d6d65872737f05` (mainnet) |
+| Libera      | `0x388612590F8cC6577F19c9b61811475Aa432CB44` (mainnet) |
 
 Off-chain identifiers, originally in plaintext, are obfuscated before they are used in on-chain attestations to ensure user privacy and security. This is done with the help of the [Oblivious Decentralized Identifier Service (**ODIS**)](https://docs.celo.org/protocol/identity/odis). The details of the obfuscation process and how to interact with ODIS are described in the [docs about privacy](docs/privacy.md).
 
@@ -51,16 +51,16 @@ The following steps use the  [Viem](https://viem.sh) to quickly set you up to pl
 
     ```ts
     import { createClient } from "viem";
-    import { celoAlfajores } from "viem/chains"
+    import { celoSepolia } from "viem/chains"
     import { privateKeyToAccount } from 'viem/accounts'
     // the issuer is the account that is registering the attestation
     let ISSUER_PRIVATE_KEY;
 
-    // create alfajores viem client with the issuer private key
+    // create celo sepolia viem client with the issuer private key
     const viemClient = createClient({
       account: privateKeyToAccount(ISSUER_PRIVATE_KEY)
       transport: http(),
-      chain: celoAlfajores
+      chain: celoSepolia
     });
 
     // information provided by user, issuer should confirm they do own the identifier
@@ -84,7 +84,7 @@ The following steps use the  [Viem](https://viem.sh) to quickly set you up to pl
     };
     // serviceContext provides the ODIS endpoint and public key
     const serviceContext = OdisUtils.Query.getServiceContext(
-        OdisContextName.ALFAJORES
+        OdisContextName.CELO_SEPOLIA
     );
 
     // check existing quota on issuer account

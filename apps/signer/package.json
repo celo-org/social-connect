@@ -25,7 +25,7 @@
     "test:e2e:staging:0": "CONTEXT_NAME=staging ODIS_SIGNER_SERVICE_URL=https://odis-signer0-staging.integration-tests.celo-networks-dev.org yarn test:e2e",
     "test:e2e:staging:1": "CONTEXT_NAME=staging ODIS_SIGNER_SERVICE_URL=https://odis-signer1-staging.integration-tests.celo-networks-dev.org yarn test:e2e",
     "test:e2e:staging:2": "CONTEXT_NAME=staging ODIS_SIGNER_SERVICE_URL=https://odis-signer2-staging.integration-tests.celo-networks-dev.org yarn test:e2e",
-"test:e2e:celo-sepolia:0": "CONTEXT_NAME=celo-sepolia ODIS_SIGNER_SERVICE_URL=https://odis-signer0-celo-sepolia.celo-sepolia.celo-testnet.org yarn test:e2e",
+    "test:e2e:celo-sepolia:0": "CONTEXT_NAME=celo-sepolia ODIS_SIGNER_SERVICE_URL=https://odis-signer0-celo-sepolia.celo-sepolia.celo-testnet.org yarn test:e2e",
     "test:e2e:celo-sepolia:1": "CONTEXT_NAME=celo-sepolia ODIS_SIGNER_SERVICE_URL=https://odis-signer1-celo-sepolia.celo-sepolia.celo-testnet.org yarn test:e2e",
     "test:e2e:celo-sepolia:2": "CONTEXT_NAME=celo-sepolia ODIS_SIGNER_SERVICE_URL=https://odis-signer2-celo-sepolia.celo-sepolia.celo-testnet.org yarn test:e2e",
     "test:e2e:mainnet:0": "CONTEXT_NAME=mainnet ODIS_SIGNER_SERVICE_URL=https://odis-signer0-mainnet.rc1-europe-west1.celo-testnet.org yarn test:e2e",

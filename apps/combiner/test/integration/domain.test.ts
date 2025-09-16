@@ -45,8 +45,8 @@ import { Server } from 'http'
 import { Server as HttpsServer } from 'https'
 import { Knex } from 'knex'
 import request from 'supertest'
-import { celoAlfajores } from 'viem/chains'
-import config from '../../src/config'
+import { celoSepolia } from 'viem/chains'
+import config, { FORNO_CELO_SEPOLIA } from '../../src/config'
 import { startCombiner } from '../../src/server'
 import { serverClose } from '../utils'
 
@@ -86,8 +86,8 @@ const signerConfig: SignerConfig = {
     },
   },
   blockchain: {
-    rpcURL: 'https://alfajores-forno.celo-testnet.org',
-    chainID: celoAlfajores.id,
+    rpcURL: FORNO_CELO_SEPOLIA,
+    chainID: celoSepolia.id,
     apiKey: undefined,
   },
   db: {
