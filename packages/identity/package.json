@@ -48,10 +48,10 @@
     }
   },
   "devDependencies": {
-    "@celo/celo-devchain": "7.0.0",
-    "@celo/contractkit": "^9.0.0",
-    "@celo/dev-utils": "0.0.1-beta.1",
-    "@celo/wallet-local": "^6.0.4",
+    "@celo/celo-devchain": "^8.0.0",
+    "@celo/contractkit": "^10.0.0",
+    "@celo/dev-utils": "^0.1.2",
+    "@celo/wallet-local": "^8.0.0",
     "@types/elliptic": "^6.4.16",
     "fetch-mock": "9.11.0",
     "ganache": "npm:@celo/ganache@7.8.0-unofficial.0",
