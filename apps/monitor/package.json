@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@celo/base": "^7.0.0",
-    "@celo/cryptographic-utils": "^5.0.7",
+    "@celo/cryptographic-utils": "^6.0.0",
     "@celo/encrypted-backup": "^5.0.6",
     "@celo/identity": "^5.1.2",
     "@celo/phone-number-privacy-common": "^3.1.2",
