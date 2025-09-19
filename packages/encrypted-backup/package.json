@@ -34,7 +34,7 @@
     "@types/debug": "^4.1.10",
     "debug": "^4.1.1",
     "fp-ts": "2.1.1",
-    "io-ts": "2.0.1"
+    "io-ts": "2.2.22"
   },
   "devDependencies": {
     "@celo/dev-utils": "0.0.1-beta.1",
