@@ -1062,7 +1062,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": "npm:^1.17.1"
     "@types/bunyan": "npm:^1.8.10"
     "@types/express": "npm:^4.17.20"
-    "@types/node": "npm:22.16.5"
+    "@types/node": "npm:22.18.3"
     "@types/supertest": "npm:^2.0.15"
     "@types/uuid": "npm:^7.0.3"
     blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
@@ -5273,6 +5273,15 @@ __metadata:
   dependencies:
     undici-types: "npm:~6.21.0"
   checksum: 10/ba45b5c9113cbc5edb12960fcfe7e80db2c998af5c1931264240695b27d756570d92462150b95781bd67a03aa82111cc970ab0f4504eb99213edff8bf425354e
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:22.18.3":
+  version: 22.18.3
+  resolution: "@types/node@npm:22.18.3"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10/6acec9f6efbd1afe7bb4168ccbec60933a6c5562e8d2cd3912e4ec4c291fbafd3c75c939d478f20156dc808b6533685b59e202a2b952964b3fac2be5d3ed4f11
   languageName: node
   linkType: hard
 
