@@ -155,7 +155,7 @@ export async function concurrentRPSLoadTest(
             privateKey,
             privateKeyPercentage,
           ))
-    } catch (_) {
+    } catch {
       logger.error('load test request failed')
     }
   }

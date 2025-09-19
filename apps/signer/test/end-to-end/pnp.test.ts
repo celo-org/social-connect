@@ -74,7 +74,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
     let currentDek: string
     try {
       currentDek = await accountsWrapper.read.getDataEncryptionKey([ACCOUNT_ADDRESS2])
-    } catch (error) {
+    } catch {
       // If getDataEncryptionKey returns "0x" (no data), viem throws an error
       // We treat this as no DEK being set
       currentDek = '0x'
