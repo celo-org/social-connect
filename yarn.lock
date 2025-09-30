@@ -1121,7 +1121,7 @@ __metadata:
     "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/utils": "npm:^8.0.0"
     "@celo/wallet-local": "npm:^6.0.4"
-    "@types/node": "npm:22.18.3"
+    "@types/node": "npm:22.18.6"
     firebase-admin: "npm:^13.5.0"
     firebase-functions: "npm:^6.4.0"
     firebase-functions-test: "npm:^3.4.1"
@@ -1158,7 +1158,7 @@ __metadata:
     "@opentelemetry/semantic-conventions": "npm:^1.17.1"
     "@types/bunyan": "npm:^1.8.10"
     "@types/express": "npm:^4.17.20"
-    "@types/node": "npm:22.18.3"
+    "@types/node": "npm:22.18.6"
     "@types/supertest": "npm:^2.0.15"
     aws-sdk: "npm:^2.1484.0"
     bignumber.js: "npm:^9.1.2"
@@ -5595,6 +5595,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:22.18.6, @types/node@npm:^22.18.3":
+  version: 22.18.6
+  resolution: "@types/node@npm:22.18.6"
+  dependencies:
+    undici-types: "npm:~6.21.0"
+  checksum: 10/d816882476fa4f2d2db238139e9d65299414ac54bf81aa85dae850589b480cfe0c1722dc845295d446e2babd6ddfe64b79a8c56d771bf5345ddb1c48950f029e
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^12.12.17, @types/node@npm:^12.12.6, @types/node@npm:^12.7.1":
   version: 12.20.55
   resolution: "@types/node@npm:12.20.55"
@@ -5608,15 +5617,6 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10/3a5c5841f294bc35b5b416a32764b5c0c2f22f4cef48cb7d2e3b4e068a52d5857e50da8e6e0685e743127c70344301c833849a3904ce3bd3f67448da5e85487a
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:^22.18.3":
-  version: 22.18.6
-  resolution: "@types/node@npm:22.18.6"
-  dependencies:
-    undici-types: "npm:~6.21.0"
-  checksum: 10/d816882476fa4f2d2db238139e9d65299414ac54bf81aa85dae850589b480cfe0c1722dc845295d446e2babd6ddfe64b79a8c56d771bf5345ddb1c48950f029e
   languageName: node
   linkType: hard
 
@@ -18264,8 +18264,8 @@ __metadata:
   linkType: hard
 
 "ts-jest@npm:^29.0.0":
-  version: 29.4.3
-  resolution: "ts-jest@npm:29.4.3"
+  version: 29.4.4
+  resolution: "ts-jest@npm:29.4.4"
   dependencies:
     bs-logger: "npm:^0.2.6"
     fast-json-stable-stringify: "npm:^2.1.0"
@@ -18299,7 +18299,7 @@ __metadata:
       optional: true
   bin:
     ts-jest: cli.js
-  checksum: 10/818bf5ffca88f5a61651a7da1f98442218183b93d0804479ef9c4609d5b54c001a9dcb1d964d70779fb974e75a7a22a5914d7af00a5f52d009d3e24bf8c2c10c
+  checksum: 10/759913fdb9795416abe918ba41c2ab3865f796f909d22bbf219a6a6c5e7daecad06ad85ecc905ea1af89fde2eb048c3b981493dfad6e3a21f7d5c602e630d34d
   languageName: node
   linkType: hard
 
