@@ -968,7 +968,7 @@ __metadata:
     debug: "npm:^4.1.1"
     fetch-mock: "npm:9.11.0"
     fp-ts: "npm:2.1.1"
-    io-ts: "npm:2.0.1"
+    io-ts: "npm:2.2.22"
     jest: "npm:^29.7.0"
   languageName: unknown
   linkType: soft
@@ -997,7 +997,7 @@ __metadata:
     fetch-mock: "npm:9.11.0"
     fp-ts: "npm:2.1.1"
     ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
-    io-ts: "npm:2.0.1"
+    io-ts: "npm:2.2.22"
     jest: "npm:^29.7.0"
     old-celo-base: "npm:@celo/base@1.5.2"
     old-celo-identity: "npm:@celo/identity@5.1.0"
@@ -1103,7 +1103,7 @@ __metadata:
     elliptic: "npm:^6.5.4"
     express: "npm:^4.17.6"
     fp-ts: "npm:2.1.1"
-    io-ts: "npm:2.0.1"
+    io-ts: "npm:2.2.22"
     is-base64: "npm:^1.1.0"
     jest: "npm:^29.7.0"
     node-fetch: "npm:^2.6.9"
@@ -11722,6 +11722,15 @@ __metadata:
   peerDependencies:
     fp-ts: ^2.0.0
   checksum: 10/40d4e76cfafdd2ddfd7d842748ed174cae8f1db5b6e3937b2ccaaff89ea9a9fb04f303a4fbb30d2f551fac754189b2b11ab9e28e4a192a1069ca65021f410e65
+  languageName: node
+  linkType: hard
+
+"io-ts@npm:2.2.22":
+  version: 2.2.22
+  resolution: "io-ts@npm:2.2.22"
+  peerDependencies:
+    fp-ts: ^2.5.0
+  checksum: 10/c5eb8ca848f6e9586b5430773c62c8577902a6ca621349339e4d238c9ac4aba8df8de3e4d4317ff6593dcf38eb804445e0a5ba87afd7a2b8d29344ea9b6dc151
   languageName: node
   linkType: hard
 
