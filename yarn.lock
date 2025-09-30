@@ -1090,7 +1090,7 @@ __metadata:
     "@celo/utils": "npm:^8.0.0"
     "@celo/wallet-local": "npm:^6.0.4"
     "@types/bunyan": "npm:1.8.11"
-    "@types/dotenv": "npm:^6.0.0"
+    "@types/dotenv": "npm:^8.0.0"
     "@types/elliptic": "npm:^6.4.16"
     "@types/express": "npm:^4.17.20"
     "@types/is-base64": "npm:^1.1.2"
@@ -4985,12 +4985,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/dotenv@npm:^6.0.0":
-  version: 6.1.1
-  resolution: "@types/dotenv@npm:6.1.1"
+"@types/dotenv@npm:^8.0.0":
+  version: 8.2.3
+  resolution: "@types/dotenv@npm:8.2.3"
   dependencies:
-    "@types/node": "npm:*"
-  checksum: 10/9a4445b4b6c74900ca5f461e528fa426ea2b34b22b611f8ef5f597eabf12bbdeab848e7963a795b750ecb6133728e674d7548219ccdaeb68a5fde02b73bbf120
+    dotenv: "npm:*"
+  checksum: 10/3075371abbcaf231593c57297338c9b731a45b3dd519ab96c1708a2f7fa345fcf885daf1ba3e39d84942873706fb1aa656b560cde9ccb62ce598ceb563502470
   languageName: node
   linkType: hard
 
@@ -8447,6 +8447,13 @@ __metadata:
   dependencies:
     is-obj: "npm:^2.0.0"
   checksum: 10/33b2561617bd5c73cf9305368ba4638871c5dbf9c8100c8335acd2e2d590a81ec0e75c11cfaea5cc3cf8c2f668cad4beddb52c11856d0c9e666348eee1baf57a
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:*":
+  version: 17.2.3
+  resolution: "dotenv@npm:17.2.3"
+  checksum: 10/f8b78626ebfff6e44420f634773375c9651808b3e1a33df6d4cc19120968eea53e100f59f04ec35f2a20b2beb334b6aba4f24040b2f8ad61773f158ac042a636
   languageName: node
   linkType: hard
 
