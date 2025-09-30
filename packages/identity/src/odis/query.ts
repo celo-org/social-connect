@@ -37,7 +37,8 @@ export interface EncryptionKeySigner {
 export type AuthSigner = WalletKeySigner | EncryptionKeySigner
 
 // Re-export types and aliases to maintain backwards compatibility.
-export { AuthenticationMethod, PhoneNumberPrivacyRequest, signWithRawKey }
+export { AuthenticationMethod, signWithRawKey }
+export type { PhoneNumberPrivacyRequest }
 
 export enum ErrorMessages {
   ODIS_QUOTA_ERROR = 'odisQuotaError',
