@@ -3,7 +3,8 @@
   "compilerOptions": {
     "declaration": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "isolatedModules": true
   },
   "include": ["src/**/*", "types/**/*"]
 }

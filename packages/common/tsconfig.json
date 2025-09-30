@@ -4,6 +4,7 @@
     "declaration": true,
     "rootDir": "src",
     "outDir": "lib",
+    "isolatedModules": true
   },
   "include": ["src"],
   "compileOnSave": true
