@@ -967,7 +967,7 @@ __metadata:
     "@types/debug": "npm:^4.1.10"
     debug: "npm:^4.1.1"
     fetch-mock: "npm:9.11.0"
-    fp-ts: "npm:2.1.1"
+    fp-ts: "npm:2.16.11"
     io-ts: "npm:2.0.1"
     jest: "npm:^29.7.0"
   languageName: unknown
@@ -995,7 +995,7 @@ __metadata:
     elliptic: "npm:^6.5.4"
     ethereum-cryptography: "npm:1.2.0"
     fetch-mock: "npm:9.11.0"
-    fp-ts: "npm:2.1.1"
+    fp-ts: "npm:2.16.11"
     ganache: "npm:@celo/ganache@7.8.0-unofficial.0"
     io-ts: "npm:2.0.1"
     jest: "npm:^29.7.0"
@@ -1102,7 +1102,7 @@ __metadata:
     dotenv: "npm:^8.2.0"
     elliptic: "npm:^6.5.4"
     express: "npm:^4.17.6"
-    fp-ts: "npm:2.1.1"
+    fp-ts: "npm:2.16.11"
     io-ts: "npm:2.0.1"
     is-base64: "npm:^1.1.0"
     jest: "npm:^29.7.0"
@@ -10172,6 +10172,13 @@ __metadata:
   version: 2.1.1
   resolution: "fp-ts@npm:2.1.1"
   checksum: 10/57ca78ccf3b46ed589f196a6f41365598357c7c2b4ddc8a8d1709b8f11b0841105c7238594bc563d9efb37497b8cf7b96a197a76000b0446b78dcbc921b16826
+  languageName: node
+  linkType: hard
+
+"fp-ts@npm:2.16.11":
+  version: 2.16.11
+  resolution: "fp-ts@npm:2.16.11"
+  checksum: 10/4c034326728c43a28b3a0f3a88c1218bca13c69ee3c420ab7a52636aa0d68cb68990308e72d93b3e5cc952e998019f7e3ba16389bb1ecc0174574536c29d3ab3
   languageName: node
   linkType: hard
 
