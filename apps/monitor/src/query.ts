@@ -12,7 +12,7 @@ import {
   OdisAPI,
   OdisContextName,
 } from '@celo/identity/lib/odis/query'
-import { genSessionID } from '@celo/phone-number-privacy-common/lib/utils/logger'
+import { genSessionID, rootLogger } from '@celo/phone-number-privacy-common/lib/utils/logger'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,
@@ -20,11 +20,11 @@ import {
 } from '@celo/utils/lib/address'
 import { defined } from '@celo/utils/lib/sign-typed-data-utils'
 import { defineString } from 'firebase-functions/params'
-import { Account, Address, createWalletClient, extractChain, http } from 'viem'
+import { Address } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores } from 'viem/chains'
 import { dekAuthSigner, generateRandomPhoneNumber, PRIVATE_KEY } from './resources'
 
+const getLogger = () => rootLogger('odis-monitor')
 let phoneNumber: string
 
 const defaultPhoneNumber = defineString('PHONE_NUMBER')
@@ -48,6 +48,19 @@ export const queryOdisForSalt = async (
   privateKeyPercentage: number = 100,
 ) => {
   const serviceContext = getServiceContext(contextName, OdisAPI.PNP)
+  getLogger().debug(
+    {
+      contextName,
+      blockchainProvider,
+      serviceContext: {
+        odisUrl: serviceContext.odisUrl,
+        odisPubKey: serviceContext.odisPubKey,
+      },
+      useDEK,
+      bypassQuota,
+    },
+    'Querying ODIS for salt',
+  )
 
   const { accountAddress, authSigner } = await getAuthSignerAndAccount(
     blockchainProvider,
@@ -59,7 +72,7 @@ export const queryOdisForSalt = async (
   const abortController = new AbortController()
   const timeout = setTimeout(() => {
     abortController.abort()
-    console.log(`ODIS salt request timed out after ${timeoutMs} ms`) // tslint:disable-line:no-console
+    getLogger().warn(`ODIS salt request timed out after ${timeoutMs} ms`)
   }, timeoutMs)
   try {
     const testSessionId = Math.floor(Math.random() * 100000).toString()
@@ -92,10 +105,18 @@ export const queryOdisForQuota = async (
   privateKey?: string,
   privateKeyPercentage: number = 100,
 ) => {
-  console.log(`contextName: ${contextName}`) // tslint:disable-line:no-console
-  console.log(`blockchain provider: ${blockchainProvider}`) // tslint:disable-line:no-console
-
   const serviceContext = getServiceContext(contextName, OdisAPI.PNP)
+  getLogger().debug(
+    {
+      contextName,
+      blockchainProvider,
+      serviceContext: {
+        odisUrl: serviceContext.odisUrl,
+        odisPubKey: serviceContext.odisPubKey,
+      },
+    },
+    'Querying ODIS for quota',
+  )
 
   if (!privateKey || Math.random() > privateKeyPercentage * 0.01) {
     privateKey = await newPrivateKey()
@@ -105,10 +126,9 @@ export const queryOdisForQuota = async (
 
   const accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey))
 
-  const client = makeClient(blockchainProvider, account)
   const authSigner: AuthSigner = {
     authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-    sign191: ({ message, account }) => client.signMessage({ message, account }),
+    sign191: async ({ message }) => account.signMessage({ message }),
   }
 
   const abortController = new AbortController()
@@ -136,7 +156,7 @@ export const queryOdisForQuota = async (
 }
 
 export const queryOdisDomain = async (contextName: OdisContextName) => {
-  console.log(`contextName: ${contextName}`)
+  getLogger().debug({ contextName }, 'Querying ODIS domain')
 
   const serviceContext = getServiceContext(contextName, OdisAPI.DOMAIN)
   const monitorDomainConfig: OdisHardeningConfig = {
@@ -182,24 +202,11 @@ async function getAuthSignerAndAccount(
     accountAddress = normalizeAddressWith0x(privateKeyToAddress(privateKey)) as Address
     const account = privateKeyToAccount(ensureLeading0x(privateKey))
 
-    const client = makeClient(blockchainProvider, account)
-
     authSigner = {
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
-      sign191: client.signMessage,
+      sign191: async ({ message }) => account.signMessage({ message }),
     }
-    phoneNumber = defaultPhoneNumber.value()
+    phoneNumber = defaultPhoneNumber.value() || generateRandomPhoneNumber()
   }
   return { accountAddress, authSigner, privateKey }
-}
-
-function makeClient(chainInfo: ChainInfo, account: Account) {
-  return createWalletClient({
-    account: account,
-    chain: extractChain({
-      chains: [celoAlfajores, celo],
-      id: chainInfo.chainID as typeof celoAlfajores.id | typeof celo.id,
-    }),
-    transport: http(chainInfo.rpcURL),
-  })
 }
