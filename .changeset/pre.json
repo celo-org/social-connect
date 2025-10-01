@@ -11,5 +11,30 @@
     "@celo/identity": "5.1.2",
     "@celo/odis-identifiers": "1.0.1"
   },
-  "changesets": []
+  "changesets": [
+    "add-sepolia-support-fix-e2e",
+    "big-worms-applaud",
+    "brave-carpets-hug",
+    "deep-eagles-love",
+    "dull-tomatoes-hide",
+    "fair-knives-end",
+    "famous-pets-ask",
+    "five-cups-smile",
+    "giant-monkeys-admire",
+    "great-turtles-roll",
+    "green-mice-rescue",
+    "heavy-snakes-check",
+    "hot-buckets-begin",
+    "lovely-hands-begin",
+    "many-monkeys-sleep",
+    "nasty-forks-tell",
+    "neat-tables-fly",
+    "nice-eggs-change",
+    "odd-trainers-design",
+    "shiny-plants-raise",
+    "spotty-garlics-cross",
+    "stupid-suns-tickle",
+    "swift-ghosts-chew",
+    "swift-knives-brush"
+  ]
 }
