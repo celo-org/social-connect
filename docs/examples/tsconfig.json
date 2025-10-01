@@ -2,6 +2,7 @@
   "extends": "@tsconfig/node22",
 
   "compilerOptions": {
+    "composite": true,
     "declaration": true,
     "rootDir": ".",
     "outDir": "lib"

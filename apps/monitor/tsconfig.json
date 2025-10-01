@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/node22",
   "compilerOptions": {
+    "composite": true,
     "esModuleInterop": true,
     "declaration": true,
     "rootDir": "src",
