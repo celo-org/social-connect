@@ -1,8 +1,4 @@
-import {
-  CircuitBreakerServiceContext,
-  VALORA_ALFAJORES_CIRCUIT_BREAKER_ENVIRONMENT,
-  VALORA_MAINNET_CIRCUIT_BREAKER_ENVIRONMENT,
-} from '@celo/identity/lib/odis/circuit-breaker'
+import { CircuitBreakerServiceContext } from '@celo/identity/lib/odis/circuit-breaker'
 import {
   ODIS_CELO_SEPOLIA_CONTEXT_DOMAINS,
   ODIS_MAINNET_CONTEXT_DOMAINS,
@@ -286,9 +282,7 @@ export const PIN_HARDENING_MAINNET_CONFIG: HardeningConfig = {
     rateLimit: PIN_HARDENING_RATE_LIMIT,
     environment: ODIS_MAINNET_CONTEXT_DOMAINS,
   },
-  circuitBreaker: {
-    environment: VALORA_MAINNET_CIRCUIT_BREAKER_ENVIRONMENT,
-  },
+  circuitBreaker: undefined,
 }
 
 export const PIN_HARDENING_CELO_SEPOLIA_CONFIG: HardeningConfig = {
@@ -296,9 +290,7 @@ export const PIN_HARDENING_CELO_SEPOLIA_CONFIG: HardeningConfig = {
     rateLimit: PIN_HARDENING_RATE_LIMIT,
     environment: ODIS_CELO_SEPOLIA_CONTEXT_DOMAINS,
   },
-  circuitBreaker: {
-    environment: VALORA_ALFAJORES_CIRCUIT_BREAKER_ENVIRONMENT,
-  },
+  circuitBreaker: undefined,
 }
 
 export const PASSWORD_HARDENING_MAINNET_CONFIG: HardeningConfig = {
