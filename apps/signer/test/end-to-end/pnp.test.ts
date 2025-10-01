@@ -33,7 +33,7 @@ const {
   PRIVATE_KEY1,
 } = TestUtils.Values
 
-// Use the same funded account as combiner for staging/alfajores
+// Use the same funded account as combiner for staging/celo-sepolia
 const PRIVATE_KEY2 = '2c63bf6d60b16c8afa13e1069dbe92fef337c23855fff8b27732b3e9c6e7efd4'
 const ACCOUNT_ADDRESS2 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY2)).address // 0x6037800e91eaa703e38bad40c01410bbdf0fea7e
 const { getPnpQuotaRequest, getPnpRequestAuthorization, getPnpSignRequest } = TestUtils.Utils
