@@ -2,9 +2,10 @@
   "extends": "@tsconfig/node22",
   "compilerOptions": {
     "declaration": true,
-    "removeComments":true,
+    "removeComments": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "isolatedModules": true
   },
   "include": ["src", "index.d.ts"],
   "compileOnSave": true
