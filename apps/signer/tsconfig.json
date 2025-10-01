@@ -1,10 +1,12 @@
 {
   "extends": "@tsconfig/node22",
   "compilerOptions": {
+    "composite": true,
     "esModuleInterop": true,
     "declaration": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "isolatedModules": true
   },
   "include": ["src", "index.d.ts"],
   "compileOnSave": true

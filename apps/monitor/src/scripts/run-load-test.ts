@@ -6,9 +6,15 @@ import yargs from 'yargs'
 import { ChainInfo } from '../query'
 import { concurrentRPSLoadTest } from '../test'
 
+// Check for verbose flag early to set LOG_LEVEL and LOG_FORMAT before logger initialization
+if (process.argv.includes('--verbose')) {
+  process.env.LOG_LEVEL = 'debug'
+  process.env.LOG_FORMAT = 'json'
+}
+
 const logger = rootLogger('odis-monitor')
 
-yargs
+void yargs
   .scriptName('ODIS-load-test')
   .recommendCommands()
   .demandCommand(1)
@@ -55,6 +61,11 @@ yargs
           type: 'number',
           description: 'percentage of time to use privateKey, if specified',
           default: 100,
+        })
+        .option('verbose', {
+          type: 'boolean',
+          description: 'Enable verbose logging (sets LOG_LEVEL=debug, LOG_FORMAT=json)',
+          default: false,
         }),
     (args) => {
       if (args.rps == null || args.contextName == null) {
@@ -62,6 +73,7 @@ yargs
         yargs.showHelp()
         process.exit(1)
       }
+
       const rps = args.rps!
       const contextName = args.contextName! as OdisContextName
 

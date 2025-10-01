@@ -1,9 +1,11 @@
 {
   "extends": "@tsconfig/node22",
   "compilerOptions": {
+    "composite": true,
     "declaration": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "isolatedModules": true
   },
   "include": ["src/**/*"],
   "exclude": ["**/*.test.ts"]

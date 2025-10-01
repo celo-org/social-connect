@@ -7,16 +7,20 @@
   "license": "Apache-2.0",
   "main": "dist/index.js",
   "scripts": {
-    "deploy": "yarn build && firebase deploy --only functions:odisMonitorScheduleFunctionPNPGen2,functions:odisMonitorScheduleFunctionDomainsGen2",
+    "login": "yarn firebase logout && yarn firebase login",
+    "deploy": "yarn build && yarn firebase deploy --only functions:odisMonitorScheduleFunctionPNPGen2,functions:odisMonitorScheduleFunctionDomainsGen2",
     "deploy:staging": "yarn deploy --project celo-phone-number-privacy-stg",
     "deploy:alfajores": "yarn deploy --project celo-phone-number-privacy",
+    "deploy:celo-sepolia": "yarn deploy --project phone-number-privacy-sepolia",
     "deploy:mainnet": "yarn deploy --project celo-pgpnp-mainnet",
-    "config:get:staging": "firebase functions:config:get --project celo-phone-number-privacy-stg",
-    "config:get:alfajores": "firebase functions:config:get --project celo-phone-number-privacy",
-    "config:get:mainnet": "firebase functions:config:get --project celo-pgpnp-mainnet",
-    "config:set:staging": "firebase functions:config:set --project celo-phone-number-privacy-stg",
-    "config:set:alfajores": "firebase functions:config:set --project celo-phone-number-privacy",
-    "config:set:mainnet": "firebase functions:config:set --project celo-pgpnp-mainnet",
+    "config:get:staging": "yarn firebase functions:config:get --project celo-phone-number-privacy-stg",
+    "config:get:alfajores": "yarn firebase functions:config:get --project celo-phone-number-privacy",
+    "config:get:celo-sepolia": "yarn firebase functions:config:get --project phone-number-privacy-sepolia",
+    "config:get:mainnet": "yarn firebase functions:config:get --project celo-pgpnp-mainnet",
+    "config:set:staging": "yarn firebase functions:config:set --project celo-phone-number-privacy-stg",
+    "config:set:alfajores": "yarn firebase functions:config:set --project celo-phone-number-privacy",
+    "config:set:celo-sepolia": "yarn firebase functions:config:set --project phone-number-privacy-sepolia",
+    "config:set:mainnet": "yarn firebase functions:config:set --project celo-pgpnp-mainnet",
     "clean": "yarn run --top-level tsc --build --clean",
     "build": "yarn run --top-level tsc  ",
     "lint": "yarn run --top-level eslint .",
@@ -24,25 +28,26 @@
   },
   "dependencies": {
     "@celo/base": "^7.0.0",
-    "@celo/cryptographic-utils": "^5.0.7",
+    "@celo/cryptographic-utils": "^6.0.0",
     "@celo/encrypted-backup": "^5.0.6",
     "@celo/identity": "^5.1.2",
     "@celo/phone-number-privacy-common": "^3.1.2",
     "@celo/utils": "^8.0.0",
     "@celo/wallet-local": "^6.0.4",
-    "firebase-admin": "^11.11.0",
-    "firebase-functions": "^4.5.0",
+    "firebase-admin": "^13.5.0",
+    "firebase-functions": "^6.4.0",
+    "viem": "^2.21.54",
     "yargs": "^14.0.0"
   },
   "devDependencies": {
-    "@types/node": "22.16.5",
-    "firebase-functions-test": "^3.1.0",
-    "firebase-tools": "13.6.0",
+    "@types/node": "22.18.6",
+    "firebase-functions-test": "^3.4.1",
+    "firebase-tools": "^14.15.2",
     "jest": "^29.7.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.3.3"
   },
   "engines": {
-    "node": "22"
+    "node": "20"
   }
 }

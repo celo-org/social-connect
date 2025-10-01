@@ -9,7 +9,7 @@ import { performance } from 'perf_hooks'
 import { Hex } from 'viem'
 import { ChainInfo, queryOdisDomain, queryOdisForQuota, queryOdisForSalt } from './query'
 
-const logger = rootLogger('odis-monitor')
+const getLogger = () => rootLogger('odis-monitor')
 
 export async function testPNPSignQuery(
   blockchainProvider: ChainInfo,
@@ -20,6 +20,10 @@ export async function testPNPSignQuery(
   privateKey?: string,
   privateKeyPercentage: number = 100,
 ) {
+  getLogger().debug(
+    { blockchainProvider, contextName, bypassQuota, useDEK },
+    'Starting PNP sign query test',
+  )
   try {
     const odisResponse: IdentifierHashDetails = await queryOdisForSalt(
       blockchainProvider,
@@ -30,16 +34,16 @@ export async function testPNPSignQuery(
       privateKey,
       privateKeyPercentage,
     )
-    logger.debug({ odisResponse }, 'ODIS salt request successful. System is healthy.')
+    getLogger().debug({ odisResponse }, 'ODIS salt request successful. System is healthy.')
   } catch (err) {
     if ((err as Error).message === ErrorMessages.ODIS_QUOTA_ERROR) {
-      logger.warn(
+      getLogger().warn(
         { error: err },
         'ODIS salt request out of quota. This is expected. System is healthy.',
       )
     } else {
-      logger.error('ODIS salt request failed.')
-      logger.error({ err })
+      getLogger().error('ODIS salt request failed.')
+      getLogger().error({ err })
       throw err
     }
   }
@@ -52,7 +56,7 @@ export async function testPNPQuotaQuery(
   privateKey?: Hex,
   privateKeyPercentage: number = 100,
 ) {
-  logger.info(`Performing test PNP query for ${CombinerEndpointPNP.PNP_QUOTA}`)
+  getLogger().info(`Performing test PNP query for ${CombinerEndpointPNP.PNP_QUOTA}`)
   try {
     const odisResponse: PnpClientQuotaStatus = await queryOdisForQuota(
       blockchainProvider,
@@ -61,27 +65,27 @@ export async function testPNPQuotaQuery(
       privateKey,
       privateKeyPercentage,
     )
-    logger.info({ odisResponse }, 'ODIS quota request successful. System is healthy.')
+    getLogger().info({ odisResponse }, 'ODIS quota request successful. System is healthy.')
   } catch (err) {
-    logger.error('ODIS quota request failed.')
-    logger.error({ err })
+    getLogger().error('ODIS quota request failed.')
+    getLogger().error({ err })
     throw err
   }
 }
 
 export async function testDomainSignQuery(contextName: OdisContextName) {
-  logger.info('Performing test domains query')
+  getLogger().info('Performing test domains query')
   let odisResponse: Result<Buffer, BackupError>
   try {
     odisResponse = await queryOdisDomain(contextName)
-    logger.info({ odisResponse }, 'ODIS response')
+    getLogger().info({ odisResponse }, 'ODIS response')
   } catch (err) {
-    logger.error('ODIS key hardening request failed.')
-    logger.error({ err })
+    getLogger().error('ODIS key hardening request failed.')
+    getLogger().error({ err })
     throw err
   }
   if (odisResponse.ok) {
-    logger.info('System is healthy')
+    getLogger().info('System is healthy')
   } else {
     throw new Error('Received not ok response')
   }
@@ -128,9 +132,9 @@ export async function concurrentRPSLoadTest(
       }
 
       if (reqLatency > 600) {
-        logger.warn(stats, 'SLOW Request')
+        getLogger().warn(stats, 'SLOW Request')
       } else {
-        logger.info(stats, 'request finished')
+        getLogger().info(stats, 'request finished')
       }
       index++
     }
@@ -155,8 +159,8 @@ export async function concurrentRPSLoadTest(
             privateKey,
             privateKeyPercentage,
           ))
-    } catch (_) {
-      logger.error('load test request failed')
+    } catch {
+      getLogger().error('load test request failed')
     }
   }
 
@@ -185,7 +189,7 @@ async function doRPSTest(
       if (inFlightRequests.length > 0) {
         const req = inFlightRequests.shift()
         await req?.catch((_err) => {
-          logger.error('load test request failed')
+          getLogger().error('load test request failed')
         })
       } else {
         await sleep(1000)
