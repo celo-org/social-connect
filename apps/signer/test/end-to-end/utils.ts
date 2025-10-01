@@ -29,15 +29,6 @@ export function getTestParamsForContext(): E2ETestParams {
         domainsPubKey: process.env.STAGING_DOMAINS_PUBKEY!,
         domainsKeyVersion: process.env.ODIS_DOMAINS_TEST_KEY_VERSION!,
       }
-    case 'alfajores':
-      return {
-        blockchainProviderURL: process.env.ALFAJORES_ODIS_BLOCKCHAIN_PROVIDER!,
-        pnpPolynomial: process.env.ALFAJORES_PHONE_NUMBER_PRIVACY_POLYNOMIAL!,
-        pnpKeyVersion: process.env.ODIS_PNP_TEST_KEY_VERSION!,
-        domainsPolynomial: process.env.ALFAJORES_DOMAINS_POLYNOMIAL!,
-        domainsPubKey: process.env.ALFAJORES_DOMAINS_PUBKEY!,
-        domainsKeyVersion: process.env.ODIS_DOMAINS_TEST_KEY_VERSION!,
-      }
     case 'celo-sepolia':
       return {
         blockchainProviderURL: process.env.CELO_SEPOLIA_ODIS_BLOCKCHAIN_PROVIDER!,
