@@ -19,7 +19,7 @@ import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
 import { Account, Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
+import { celo, celoSepolia } from 'viem/chains'
 import { config, getSignerVersion } from '../../src/config'
 import { getBlindedPhoneNumber, getTestParamsForContext } from './utils'
 
@@ -33,7 +33,7 @@ const {
   PRIVATE_KEY1,
 } = TestUtils.Values
 
-// Use the same funded account as combiner for staging/alfajores
+// Use the same funded account as combiner for staging/celo-sepolia
 const PRIVATE_KEY2 = '2c63bf6d60b16c8afa13e1069dbe92fef337c23855fff8b27732b3e9c6e7efd4'
 const ACCOUNT_ADDRESS2 = privateKeyToAccount(ensureLeading0x(PRIVATE_KEY2)).address // 0x6037800e91eaa703e38bad40c01410bbdf0fea7e
 const { getPnpQuotaRequest, getPnpRequestAuthorization, getPnpSignRequest } = TestUtils.Utils
@@ -45,14 +45,12 @@ const getViemChain = () => {
   switch (process.env.CONTEXT_NAME) {
     case 'mainnet':
       return celo
-    case 'alfajores':
-      return celoAlfajores
-    case 'staging':
-      return celoSepolia
     case 'celo-sepolia':
       return celoSepolia
+    case 'staging':
+      return celoSepolia
     default:
-      return celoAlfajores // default to alfajores for testing
+      return celoSepolia // default to celo sepolia for testing
   }
 }
 
