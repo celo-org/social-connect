@@ -24,7 +24,10 @@ export async function getOnChainOdisPayments(
       undefined,
       config.fullNodeTimeoutMs,
     ).catch((err: any) => {
-      logger.error({ err, account }, 'failed to get on-chain odis balance for account')
+      logger.error(
+        { err, account },
+        `Error retrieving on-chain ODIS balance for account: ${account}. Please check network connectivity.`,
+      )
       Counters.blockchainErrors.inc()
       throw err
     }),
@@ -42,7 +45,10 @@ export async function getDEK(client: Client, logger: Logger, account: Address): 
       config.fullNodeRetryCount,
       config.fullNodeRetryDelayMs,
     ).catch((err) => {
-      logger.error({ err, account }, 'failed to get on-chain DEK for account')
+      logger.error(
+        { err, account },
+        `Failed to retrieve Data Encryption Key (DEK) for account: ${account}. There may be an issue with blockchain access.`,
+      )
       Counters.blockchainErrors.inc()
       throw err
     }),
