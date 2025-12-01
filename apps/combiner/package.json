@@ -52,7 +52,7 @@
     "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
     "bunyan": "1.8.15",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^5.0.0",
     "lru-cache": "^10.0.1",
     "node-fetch": "^2.6.9",
     "pg": "^8.2.1",
