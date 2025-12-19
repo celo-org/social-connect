@@ -18,7 +18,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { readContract } from 'viem/actions'
 import { celoSepolia } from 'viem/chains'
 import {
-  ALFAJORES_CUSD_ADDRESS,
+  CELO_SEPOLIA_CUSD_ADDRESS,
   CELO_SEPOLIA_RPC,
   FA_PROXY_ADDRESS as FEDERATED_ATTESTATIONS_ADDRESS,
   ODIS_PAYMENTS_PROXY_ADDRESS,
@@ -63,7 +63,7 @@ class ASv2 {
       OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     const federatedAttestations = getContract({
@@ -74,7 +74,7 @@ class ASv2 {
 
     await federatedAttestations.write.registerAttestationAsIssuer(
       [obfuscatedIdentifier as Hex, account, attestationIssuedTime],
-      { chain: this.walletClient.chain, account: this.issuer },
+      { chain: this.walletClient.chain, account: this.issuer }
     )
   }
 
@@ -85,7 +85,7 @@ class ASv2 {
       OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     // query on-chain mappings
@@ -104,14 +104,14 @@ class ASv2 {
     const { remainingQuota } = await OdisUtils.Quota.getPnpQuotaStatus(
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     console.log('remaining ODIS quota', remainingQuota)
     if (remainingQuota < 1) {
       const stableTokenContract = getContract({
         abi: stableTokenABI,
-        address: ALFAJORES_CUSD_ADDRESS,
+        address: CELO_SEPOLIA_CUSD_ADDRESS,
         client: { public: this.publicClient, wallet: this.walletClient },
       })
       const odisPaymentsContract = getContract({
@@ -133,7 +133,7 @@ class ASv2 {
       if (currentAllowance <= ONE_CENT_CUSD_WEI) {
         const approvalTxHash = await stableTokenContract.write.increaseAllowance(
           [odisPaymentsContract.address, ONE_CENT_CUSD_WEI],
-          { account: this.issuer, chain: celoSepolia },
+          { account: this.issuer, chain: celoSepolia }
         )
 
         const approvalTxReceipt = await this.publicClient.waitForTransactionReceipt({
@@ -150,7 +150,7 @@ class ASv2 {
       if (enoughAllowance) {
         const odisPaymentHash = await odisPaymentsContract.write.payInCUSD(
           [this.issuer.address, ONE_CENT_CUSD_WEI],
-          { account: this.issuer, chain: celoSepolia },
+          { account: this.issuer, chain: celoSepolia }
         )
 
         const odisPaymentReceipt = await this.publicClient.waitForTransactionReceipt({

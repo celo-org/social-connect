@@ -4,7 +4,7 @@ import { ethers, Wallet } from 'ethers'
 import {
   ACCOUNTS_CONTRACT,
   ACCOUNTS_PROXY_ADDRESS,
-  ALFAJORES_CUSD_ADDRESS,
+  CELO_SEPOLIA_CUSD_ADDRESS,
   CELO_SEPOLIA_RPC,
   FA_CONTRACT,
   FA_PROXY_ADDRESS,
@@ -37,17 +37,17 @@ class ASv2 {
   federatedAttestationsContract = new ethers.Contract(
     FA_PROXY_ADDRESS,
     FA_CONTRACT.abi,
-    this.issuer,
+    this.issuer
   )
   odisPaymentsContract = new ethers.Contract(
     ODIS_PAYMENTS_PROXY_ADDRESS,
     ODIS_PAYMENTS_CONTRACT.abi,
-    this.issuer,
+    this.issuer
   )
   stableTokenContract = new ethers.Contract(
-    ALFAJORES_CUSD_ADDRESS,
+    CELO_SEPOLIA_CUSD_ADDRESS,
     STABLE_TOKEN_CONTRACT.abi,
-    this.issuer,
+    this.issuer
   )
 
   constructor() {
@@ -64,7 +64,7 @@ class ASv2 {
         OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
         this.issuer.address,
         this.authSigner,
-        this.serviceContext,
+        this.serviceContext
       )
     ).obfuscatedIdentifier
 
@@ -72,7 +72,7 @@ class ASv2 {
     await this.federatedAttestationsContract.registerAttestationAsIssuer(
       obfuscatedIdentifier,
       account,
-      NOW_TIMESTAMP,
+      NOW_TIMESTAMP
     )
   }
 
@@ -84,14 +84,14 @@ class ASv2 {
         OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
         this.issuer.address,
         this.authSigner,
-        this.serviceContext,
+        this.serviceContext
       )
     ).obfuscatedIdentifier
 
     // query onchain mappings
     const attestations = await this.federatedAttestationsContract.lookupAttestations(
       obfuscatedIdentifier,
-      [this.issuer.address],
+      [this.issuer.address]
     )
 
     return attestations.accounts
@@ -102,7 +102,7 @@ class ASv2 {
     const { remainingQuota } = await OdisUtils.Quota.getPnpQuotaStatus(
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     console.log('remaining ODIS quota', remainingQuota)
@@ -110,7 +110,7 @@ class ASv2 {
       // give odis payment contract permission to use cUSD
       const currentAllowance = await this.stableTokenContract.allowance(
         this.issuer.address,
-        this.odisPaymentsContract.address,
+        this.odisPaymentsContract.address
       )
       console.log('current allowance:', currentAllowance.toString())
       let enoughAllowance: boolean = false
