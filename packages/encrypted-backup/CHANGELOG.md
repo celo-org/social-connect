@@ -1,5 +1,16 @@
 # @celo/encrypted-backup
 
+## 5.0.7
+
+### Patch Changes
+
+- 6dada95: Remove @celo/connect as a depdendency
+- Updated dependencies [49922d5]
+- Updated dependencies [cc5df33]
+- Updated dependencies [cc5df33]
+  - @celo/identity@6.0.0
+  - @celo/phone-number-privacy-common@4.0.0
+
 ## 5.0.6
 
 ### Patch Changes
