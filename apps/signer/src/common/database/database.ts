@@ -47,7 +47,7 @@ export async function initDatabase(config: SignerConfig, migrationsPath?: string
     }
   } else if (type === SupportedDatabase.Sqlite) {
     logger.info('Using SQLite')
-    client = 'sqlite3'
+    client = 'better-sqlite3'
     connection = ':memory:'
   } else {
     throw new Error(`Unsupported database type: ${type}`)
