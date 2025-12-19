@@ -28,7 +28,7 @@
     "@celo/metadata-claims": "^1.0.0",
     "@celo/odis-identifiers": "^1.0.1",
     "@celo/phone-number-privacy-common": "^3.1.2",
-    "@celo/utils": "^6.0.0",
+    "@celo/utils": "^8.0.0",
     "@types/debug": "^4.1.10",
     "bignumber.js": "^9.1.2",
     "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
@@ -48,15 +48,15 @@
     }
   },
   "devDependencies": {
-    "@celo/celo-devchain": "7.0.0",
-    "@celo/contractkit": "^9.0.0",
+    "@celo/celo-devchain": "8.0.0",
+    "@celo/contractkit": "^10.0.0",
     "@celo/dev-utils": "0.0.1-beta.1",
-    "@celo/wallet-local": "^6.0.4",
+    "@celo/wallet-local": "^8.0.0",
     "@types/elliptic": "^6.4.16",
     "fetch-mock": "9.11.0",
     "ganache": "npm:@celo/ganache@7.8.0-unofficial.0",
     "jest": "^29.7.0",
-    "old-celo-base": "npm:@celo/base@1.5.2",
+    "old-celo-base": "npm:@celo/base@7.0.3",
     "old-celo-identity": "npm:@celo/identity@5.1.0"
   },
   "engines": {
