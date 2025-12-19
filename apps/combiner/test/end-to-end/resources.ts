@@ -12,14 +12,12 @@ import {
 } from '@celo/utils/lib/address'
 import { Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
+import { celo, celoSepolia } from 'viem/chains'
 
 require('dotenv').config()
 
 export const getTestContextName = (): OdisContextName => {
   switch (process.env.CONTEXT_NAME) {
-    case 'alfajores':
-      return OdisContextName.ALFAJORES
     case 'staging':
       return OdisContextName.STAGING
     case 'mainnet':
@@ -64,8 +62,6 @@ const getViemChain = () => {
   switch (contextName) {
     case OdisContextName.MAINNET:
       return celo
-    case OdisContextName.ALFAJORES:
-      return celoAlfajores
     case OdisContextName.STAGING:
       return celoSepolia
     case OdisContextName.CELO_SEPOLIA:
