@@ -2,7 +2,7 @@ import { hexToBuffer } from '@celo/base'
 import Logger from 'bunyan'
 import { Request } from 'express'
 import { Client, createClient, http } from 'viem'
-import { celoAlfajores } from 'viem/chains'
+import { celoSepolia } from 'viem/chains'
 import { getAccountsContract } from '../../src/contracts'
 import { ErrorMessage, ErrorType } from '../../src/interfaces/errors'
 import { AuthenticationMethod } from '../../src/interfaces/requests'
@@ -28,7 +28,7 @@ describe('Authentication test suite', () => {
     level: 'warn',
   })
 
-  const client = createClient({ transport: http(), chain: celoAlfajores })
+  const client = createClient({ transport: http(), chain: celoSepolia })
 
   // Helper function to create mock accounts contract
   const createMockAccountsContract = (dekReturnValue: string | Promise<string> | Error) => ({

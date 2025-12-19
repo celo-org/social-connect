@@ -14,20 +14,20 @@ import {
   Transport,
   WalletClient,
 } from 'viem'
-import { readContract } from 'viem/actions'
 import { privateKeyToAccount } from 'viem/accounts'
-import { celoAlfajores } from 'viem/chains'
+import { readContract } from 'viem/actions'
+import { celoSepolia } from 'viem/chains'
 import {
-  ALFAJORES_CUSD_ADDRESS,
+  CELO_SEPOLIA_CUSD_ADDRESS,
+  CELO_SEPOLIA_RPC,
   FA_PROXY_ADDRESS as FEDERATED_ATTESTATIONS_ADDRESS,
   ODIS_PAYMENTS_PROXY_ADDRESS,
 } from './constants'
 
-const ALFAJORES_RPC = 'https://alfajores-forno.celo-testnet.org'
 const ISSUER_PRIVATE_KEY = '0x199abda8320f5af0bb51429d246a4e537d1c85fbfaa30d52f9b34df381bd3a95'
 class ASv2 {
   private walletClient: WalletClient
-  private publicClient: PublicClient<Transport, typeof celoAlfajores>
+  private publicClient: PublicClient<Transport, typeof celoSepolia>
   issuer: PrivateKeyAccount
   authSigner: AuthSigner
   serviceContext: ServiceContext
@@ -36,13 +36,16 @@ class ASv2 {
     this.issuer = privateKeyToAccount(ISSUER_PRIVATE_KEY)
 
     this.walletClient = createWalletClient({
-      chain: celoAlfajores,
-      transport: http(ALFAJORES_RPC),
+      chain: celoSepolia,
+      transport: http(CELO_SEPOLIA_RPC),
       account: this.issuer,
     })
-    this.publicClient = createPublicClient({ chain: celoAlfajores, transport: http(ALFAJORES_RPC) })
+    this.publicClient = createPublicClient({
+      chain: celoSepolia,
+      transport: http(CELO_SEPOLIA_RPC),
+    })
 
-    this.serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.ALFAJORES)
+    this.serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.CELO_SEPOLIA)
     this.authSigner = {
       authenticationMethod: OdisUtils.Query.AuthenticationMethod.WALLET_KEY,
       sign191: (args) => {
@@ -60,7 +63,7 @@ class ASv2 {
       OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     const federatedAttestations = getContract({
@@ -71,7 +74,7 @@ class ASv2 {
 
     await federatedAttestations.write.registerAttestationAsIssuer(
       [obfuscatedIdentifier as Hex, account, attestationIssuedTime],
-      { chain: this.walletClient.chain, account: this.issuer },
+      { chain: this.walletClient.chain, account: this.issuer }
     )
   }
 
@@ -82,7 +85,7 @@ class ASv2 {
       OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     // query on-chain mappings
@@ -101,14 +104,14 @@ class ASv2 {
     const { remainingQuota } = await OdisUtils.Quota.getPnpQuotaStatus(
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     console.log('remaining ODIS quota', remainingQuota)
     if (remainingQuota < 1) {
       const stableTokenContract = getContract({
         abi: stableTokenABI,
-        address: ALFAJORES_CUSD_ADDRESS,
+        address: CELO_SEPOLIA_CUSD_ADDRESS,
         client: { public: this.publicClient, wallet: this.walletClient },
       })
       const odisPaymentsContract = getContract({
@@ -130,7 +133,7 @@ class ASv2 {
       if (currentAllowance <= ONE_CENT_CUSD_WEI) {
         const approvalTxHash = await stableTokenContract.write.increaseAllowance(
           [odisPaymentsContract.address, ONE_CENT_CUSD_WEI],
-          { account: this.issuer, chain: celoAlfajores },
+          { account: this.issuer, chain: celoSepolia }
         )
 
         const approvalTxReceipt = await this.publicClient.waitForTransactionReceipt({
@@ -147,7 +150,7 @@ class ASv2 {
       if (enoughAllowance) {
         const odisPaymentHash = await odisPaymentsContract.write.payInCUSD(
           [this.issuer.address, ONE_CENT_CUSD_WEI],
-          { account: this.issuer, chain: celoAlfajores },
+          { account: this.issuer, chain: celoSepolia }
         )
 
         const odisPaymentReceipt = await this.publicClient.waitForTransactionReceipt({

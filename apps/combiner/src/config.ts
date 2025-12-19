@@ -7,14 +7,14 @@ import {
   TestUtils,
   toBool,
 } from '@celo/phone-number-privacy-common'
-import { celoAlfajores } from 'viem/chains'
+import { celoSepolia } from 'viem/chains'
 
 export function getCombinerVersion(): string {
   return process.env.npm_package_version ?? require('../package.json').version ?? '0.0.0'
 }
 export const DEV_MODE = process.env.NODE_ENV !== 'production'
 
-export const FORNO_ALFAJORES = 'https://alfajores-forno.celo-testnet.org'
+export const FORNO_CELO_SEPOLIA = 'https://forno.celo-sepolia.celo-testnet.org/'
 
 export const E2E_TEST_ACCOUNTS: string[] = ['0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb']
 
@@ -81,8 +81,8 @@ if (DEV_MODE) {
       port: 8081,
     },
     blockchain: {
-      rpcURL: FORNO_ALFAJORES,
-      chainID: celoAlfajores.id,
+      rpcURL: FORNO_CELO_SEPOLIA,
+      chainID: celoSepolia.id,
     },
     phoneNumberPrivacy: {
       serviceName: defaultServiceName,
@@ -169,7 +169,7 @@ if (DEV_MODE) {
     },
     blockchain: {
       rpcURL: env.BLOCKCHAIN_PROVIDER,
-      chainID: env.CHAIN_ID ? Number(env.CHAIN_ID) : celoAlfajores.id,
+      chainID: env.CHAIN_ID ? Number(env.CHAIN_ID) : celoSepolia.id,
       apiKey: env.BLOCKCHAIN_API_KEY,
     },
     phoneNumberPrivacy: {

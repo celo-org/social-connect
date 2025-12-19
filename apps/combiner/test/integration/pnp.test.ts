@@ -37,8 +37,8 @@ import { Server as HttpsServer } from 'https'
 import { Knex } from 'knex'
 import request from 'supertest'
 import { createWalletClient, http, publicActions } from 'viem'
-import { celoAlfajores } from 'viem/chains'
-import config, { getCombinerVersion } from '../../src/config'
+import { celoSepolia } from 'viem/chains'
+import config, { FORNO_CELO_SEPOLIA, getCombinerVersion } from '../../src/config'
 import { startCombiner } from '../../src/server'
 import { getBlindedPhoneNumber, serverClose } from '../utils'
 
@@ -91,8 +91,8 @@ const signerConfig: SignerConfig = {
     },
   },
   blockchain: {
-    rpcURL: 'https://alfajores-forno.celo-testnet.org',
-    chainID: celoAlfajores.id,
+    rpcURL: FORNO_CELO_SEPOLIA,
+    chainID: celoSepolia.id,
     apiKey: undefined,
   },
   db: {
@@ -175,7 +175,7 @@ describe('pnpService', () => {
 
   // Create a mock wallet client that can return mock contract data
   const mockClient = createWalletClient({
-    chain: celoAlfajores,
+    chain: celoSepolia,
     transport: http(),
   })
     .extend(publicActions)
@@ -900,7 +900,7 @@ describe('pnpService', () => {
           it('Should return 401 on failure to fetch DEK', async () => {
             // Create a client that throws an error when getDataEncryptionKey is called
             const errorClient = createWalletClient({
-              chain: celoAlfajores,
+              chain: celoSepolia,
               transport: http(),
             })
               .extend(publicActions)

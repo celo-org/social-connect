@@ -55,7 +55,7 @@ nvm use
 
 #### Install node modules and build with yarn
 
-First, run 
+First, run:
 
 ```bash
 corepack enable
@@ -77,7 +77,7 @@ yarn build
 
 #### Running tests
 
-Our testing suite uses unit, integration and e2e tests. Integration tests spin up and run against local ODIS instances with in-memory DBs, while e2e tests run against actual deployed ODIS instances in staging, alfajores or mainnet environments.
+Our testing suite uses unit, integration and e2e tests. Integration tests spin up and run against local ODIS instances with in-memory DBs, while e2e tests run against actual deployed ODIS instances in staging, celo sepolia or mainnet environments.
 
 To run all unit and integration tests (in both `/apps` and `/packages`) run
 
@@ -85,12 +85,11 @@ To run all unit and integration tests (in both `/apps` and `/packages`) run
 yarn test
 ```
 
-
 To run ODIS e2e tests, navigate to the desired ODIS component subdirectory (either the Combiner or Signer) and run `yarn test:e2e`. You can specify the environment to run against as in the following example (see the relevant `package.json` file for all available test commands).
 
 ```bash
 cd apps/signer
-yarn test:e2e:alfajores
+yarn test:e2e:celo-sepolia
 ```
 
 For load tests, checkout [apps/monitor](../apps/monitor/README.md)

@@ -4,7 +4,8 @@ import { ethers, Wallet } from 'ethers'
 import {
   ACCOUNTS_CONTRACT,
   ACCOUNTS_PROXY_ADDRESS,
-  ALFAJORES_CUSD_ADDRESS,
+  CELO_SEPOLIA_CUSD_ADDRESS,
+  CELO_SEPOLIA_RPC,
   FA_CONTRACT,
   FA_PROXY_ADDRESS,
   ODIS_PAYMENTS_CONTRACT,
@@ -19,14 +20,12 @@ const ISSUER_PRIVATE_KEY = '0x726e53db4f0a79dfd63f58b19874896fce3748fcb80874665e
 const DEK_PUBLIC_KEY = '0x026063780c81991c032fb4fa7485c6607b7542e048ef85d08516fe5c4482360e4b'
 const DEK_PRIVATE_KEY = '0xc2bbdabb440141efed205497a41d5fb6114e0435fd541e368dc628a8e086bfee'
 
-const ALFAJORES_RPC = 'https://alfajores-forno.celo-testnet.org'
-
 const NOW_TIMESTAMP = Math.floor(new Date().getTime() / 1000)
 
 class ASv2 {
-  provider = new ethers.providers.JsonRpcProvider(ALFAJORES_RPC)
+  provider = new ethers.providers.JsonRpcProvider(CELO_SEPOLIA_RPC)
   issuer = new Wallet(ISSUER_PRIVATE_KEY, this.provider)
-  serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.ALFAJORES)
+  serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.CELO_SEPOLIA)
 
   authSigner: AuthSigner = {
     authenticationMethod: AuthenticationMethod.ENCRYPTION_KEY,
@@ -38,17 +37,17 @@ class ASv2 {
   federatedAttestationsContract = new ethers.Contract(
     FA_PROXY_ADDRESS,
     FA_CONTRACT.abi,
-    this.issuer,
+    this.issuer
   )
   odisPaymentsContract = new ethers.Contract(
     ODIS_PAYMENTS_PROXY_ADDRESS,
     ODIS_PAYMENTS_CONTRACT.abi,
-    this.issuer,
+    this.issuer
   )
   stableTokenContract = new ethers.Contract(
-    ALFAJORES_CUSD_ADDRESS,
+    CELO_SEPOLIA_CUSD_ADDRESS,
     STABLE_TOKEN_CONTRACT.abi,
-    this.issuer,
+    this.issuer
   )
 
   constructor() {
@@ -65,7 +64,7 @@ class ASv2 {
         OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
         this.issuer.address,
         this.authSigner,
-        this.serviceContext,
+        this.serviceContext
       )
     ).obfuscatedIdentifier
 
@@ -73,7 +72,7 @@ class ASv2 {
     await this.federatedAttestationsContract.registerAttestationAsIssuer(
       obfuscatedIdentifier,
       account,
-      NOW_TIMESTAMP,
+      NOW_TIMESTAMP
     )
   }
 
@@ -85,14 +84,14 @@ class ASv2 {
         OdisUtils.Identifier.IdentifierPrefix.PHONE_NUMBER,
         this.issuer.address,
         this.authSigner,
-        this.serviceContext,
+        this.serviceContext
       )
     ).obfuscatedIdentifier
 
     // query onchain mappings
     const attestations = await this.federatedAttestationsContract.lookupAttestations(
       obfuscatedIdentifier,
-      [this.issuer.address],
+      [this.issuer.address]
     )
 
     return attestations.accounts
@@ -103,7 +102,7 @@ class ASv2 {
     const { remainingQuota } = await OdisUtils.Quota.getPnpQuotaStatus(
       this.issuer.address,
       this.authSigner,
-      this.serviceContext,
+      this.serviceContext
     )
 
     console.log('remaining ODIS quota', remainingQuota)
@@ -111,7 +110,7 @@ class ASv2 {
       // give odis payment contract permission to use cUSD
       const currentAllowance = await this.stableTokenContract.allowance(
         this.issuer.address,
-        this.odisPaymentsContract.address,
+        this.odisPaymentsContract.address
       )
       console.log('current allowance:', currentAllowance.toString())
       let enoughAllowance: boolean = false
