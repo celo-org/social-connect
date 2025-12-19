@@ -10,6 +10,7 @@ on:
       - main
       - changeset-release/prerelease/*
       - changeset-release/main
+      - palango/*
   pull_request:
     branches:
       - main
