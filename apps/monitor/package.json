@@ -33,7 +33,7 @@
     "@celo/identity": "^5.1.2",
     "@celo/phone-number-privacy-common": "^3.1.2",
     "@celo/utils": "^8.0.0",
-    "@celo/wallet-local": "^6.0.4",
+    "@celo/wallet-local": "^8.0.0",
     "firebase-admin": "^13.5.0",
     "firebase-functions": "^6.4.0",
     "viem": "^2.21.54",
