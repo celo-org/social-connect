@@ -25,6 +25,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import { defined, noBool, noNumber, noString } from '@celo/utils/lib/sign-typed-data-utils'
 import { LocalWallet } from '@celo/wallet-local'
+import { Server } from 'http'
 import { Knex } from 'knex'
 import request from 'supertest'
 import { initDatabase } from '../../src/common/database/database'
@@ -37,6 +38,7 @@ import { initKeyProvider } from '../../src/common/key-management/key-provider'
 import { KeyProvider } from '../../src/common/key-management/key-provider-base'
 import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '../../src/config'
 import { startSigner } from '../../src/server'
+import { serverClose } from '../utils'
 
 jest.setTimeout(20000)
 
@@ -122,7 +124,7 @@ describe('domain', () => {
   }
 
   let keyProvider: KeyProvider
-  let app: any
+  let app: Server
   let db: Knex
 
   // create deep copy
@@ -138,14 +140,14 @@ describe('domain', () => {
   beforeEach(async () => {
     // Create a new in-memory database for each test.
     db = await initDatabase(_config)
-    app = startSigner(_config, db, keyProvider)
+    app = startSigner(_config, db, keyProvider).listen(0)
   })
 
   afterEach(async () => {
     // Close and destroy the in-memory database.
     // Note: If tests start to be too slow, this could be replaced with more complicated logic to
     // reset the database state without destroying and recreating it for each test.
-
+    await serverClose(app)
     await db?.destroy()
   })
 
@@ -293,7 +295,7 @@ describe('domain', () => {
     it('Should respond with 503 on disabled api', async () => {
       const configWithApiDisabled: typeof _config = JSON.parse(JSON.stringify(_config))
       configWithApiDisabled.api.domains.enabled = false
-      const appWithApiDisabled = startSigner(configWithApiDisabled, db, keyProvider)
+      const appWithApiDisabled = startSigner(configWithApiDisabled, db, keyProvider).listen(0)
 
       const req = await disableRequest()
 
@@ -305,6 +307,7 @@ describe('domain', () => {
         version: res.body.version,
         error: WarningMessage.API_UNAVAILABLE,
       })
+      await serverClose(appWithApiDisabled)
     })
 
     describe('functionality in case of errors', () => {
@@ -342,7 +345,7 @@ describe('domain', () => {
 
         const configWithShortTimeout = JSON.parse(JSON.stringify(_config))
         configWithShortTimeout.timeout = testTimeoutMS
-        const appWithShortTimeout = startSigner(configWithShortTimeout, db, keyProvider)
+        const appWithShortTimeout = startSigner(configWithShortTimeout, db, keyProvider).listen(0)
 
         const req = await disableRequest()
         const spy = jest
@@ -364,6 +367,7 @@ describe('domain', () => {
           error: ErrorMessage.TIMEOUT_FROM_SIGNER,
           version: expectedVersion,
         })
+        await serverClose(appWithShortTimeout)
       })
     })
   })
@@ -494,7 +498,7 @@ describe('domain', () => {
     it('Should respond with 503 on disabled api', async () => {
       const configWithApiDisabled: typeof _config = JSON.parse(JSON.stringify(_config))
       configWithApiDisabled.api.domains.enabled = false
-      const appWithApiDisabled = startSigner(configWithApiDisabled, db, keyProvider)
+      const appWithApiDisabled = startSigner(configWithApiDisabled, db, keyProvider).listen(0)
 
       const req = await quotaRequest()
 
@@ -508,6 +512,7 @@ describe('domain', () => {
         version: res.body.version,
         error: WarningMessage.API_UNAVAILABLE,
       })
+      await serverClose(appWithApiDisabled)
     })
 
     describe('functionality in case of errors', () => {
@@ -549,7 +554,7 @@ describe('domain', () => {
 
       const configWithShortTimeout = JSON.parse(JSON.stringify(_config))
       configWithShortTimeout.timeout = testTimeoutMS
-      const appWithShortTimeout = startSigner(configWithShortTimeout, db, keyProvider)
+      const appWithShortTimeout = startSigner(configWithShortTimeout, db, keyProvider).listen(0)
 
       const req = await quotaRequest()
       const spy = jest
@@ -576,6 +581,7 @@ describe('domain', () => {
       })
       // Allow time for non-killed processes to finish
       await new Promise((resolve) => setTimeout(resolve, delay))
+      await serverClose(appWithShortTimeout)
     })
   })
 
@@ -924,7 +930,7 @@ describe('domain', () => {
     it('Should respond with 503 on disabled api', async () => {
       const configWithApiDisabled: typeof _config = JSON.parse(JSON.stringify(_config))
       configWithApiDisabled.api.domains.enabled = false
-      const appWithApiDisabled = startSigner(configWithApiDisabled, db, keyProvider)
+      const appWithApiDisabled = startSigner(configWithApiDisabled, db, keyProvider).listen(0)
 
       const [req, _] = await signatureRequest()
 
@@ -936,6 +942,7 @@ describe('domain', () => {
         version: res.body.version,
         error: WarningMessage.API_UNAVAILABLE,
       })
+      await serverClose(appWithApiDisabled)
     })
 
     describe('functionality in case of errors', () => {
@@ -1017,7 +1024,7 @@ describe('domain', () => {
 
         const configWithShortTimeout = JSON.parse(JSON.stringify(_config))
         configWithShortTimeout.timeout = testTimeoutMS
-        const appWithShortTimeout = startSigner(configWithShortTimeout, db, keyProvider)
+        const appWithShortTimeout = startSigner(configWithShortTimeout, db, keyProvider).listen(0)
 
         const res = await request(appWithShortTimeout).post(SignerEndpoint.DOMAIN_SIGN).send(req)
         expect(res.status).toBe(500)
@@ -1027,6 +1034,7 @@ describe('domain', () => {
           version: expectedVersion,
         })
         spy.mockRestore()
+        await serverClose(appWithShortTimeout)
       })
     })
   })

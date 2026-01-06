@@ -14,6 +14,7 @@ import {
 } from '@celo/phone-number-privacy-common'
 import { BLINDED_PHONE_NUMBER } from '@celo/phone-number-privacy-common/lib/test/values'
 import BigNumber from 'bignumber.js'
+import { Server } from 'http'
 import { Knex } from 'knex'
 import request from 'supertest'
 import { createWalletClient, http, publicActions } from 'viem'
@@ -29,6 +30,7 @@ import { initKeyProvider } from '../../src/common/key-management/key-provider'
 import { KeyProvider } from '../../src/common/key-management/key-provider-base'
 import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '../../src/config'
 import { startSigner } from '../../src/server'
+import { serverClose } from '../utils'
 
 const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
 const ODIS_PAYMENTS_PROXY_ADDRESS = '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49'
@@ -53,7 +55,7 @@ const expectedSignatures: string[] = [
 
 describe('pnp', () => {
   let keyProvider: KeyProvider
-  let app: any
+  let app: Server
   let db: Knex
 
   const onChainBalance = new BigNumber(1e18)
@@ -110,7 +112,7 @@ describe('pnp', () => {
         },
       }))
 
-    app = startSigner(_config, db, keyProvider, mockClient)
+    app = startSigner(_config, db, keyProvider, mockClient).listen(0)
     mockOdisPaymentsTotalPaidCUSD.mockReset()
   })
 
@@ -118,6 +120,7 @@ describe('pnp', () => {
     // Close and destroy the in-memory database.
     // Note: If tests start to be too slow, this could be replaced with more complicated logic to
     // reset the database state without destroying and recreting it for each test.
+    await serverClose(app)
     await db?.destroy()
   })
 
@@ -340,7 +343,7 @@ describe('pnp', () => {
             chain: celoAlfajores,
             transport: http(),
           }),
-        )
+        ).listen(0)
 
         const req = getPnpQuotaRequest(ACCOUNT_ADDRESS1)
         const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
@@ -357,6 +360,7 @@ describe('pnp', () => {
           version: expectedVersion,
           error: WarningMessage.API_UNAVAILABLE,
         })
+        await serverClose(appWithApiDisabled)
       })
 
       describe('functionality in case of errors', () => {
@@ -413,15 +417,13 @@ describe('pnp', () => {
 
           const configWithShortTimeout = JSON.parse(JSON.stringify(_config))
           configWithShortTimeout.timeout = testTimeoutMS
+          // Use undefined for client since this test only mocks database operations
           const appWithShortTimeout = startSigner(
             configWithShortTimeout,
             db,
             keyProvider,
-            createWalletClient({
-              chain: celoAlfajores,
-              transport: http(),
-            }),
-          )
+            undefined,
+          ).listen(0)
           const req = getPnpQuotaRequest(ACCOUNT_ADDRESS1)
           const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
           const res = await sendRequest(
@@ -442,6 +444,7 @@ describe('pnp', () => {
           })
           // Allow time for non-killed processes to finish
           await new Promise((resolve) => setTimeout(resolve, delay))
+          await serverClose(appWithShortTimeout)
         })
       })
     })
@@ -830,7 +833,7 @@ describe('pnp', () => {
             chain: celoAlfajores,
             transport: http(),
           }),
-        )
+        ).listen(0)
 
         const req = getPnpSignRequest(
           ACCOUNT_ADDRESS1,
@@ -851,6 +854,7 @@ describe('pnp', () => {
           version: expectedVersion,
           error: WarningMessage.API_UNAVAILABLE,
         })
+        await serverClose(appWithApiDisabled)
       })
 
       describe('functionality in case of errors', () => {
@@ -913,15 +917,13 @@ describe('pnp', () => {
 
           const configWithShortTimeout = JSON.parse(JSON.stringify(_config))
           configWithShortTimeout.timeout = testTimeoutMS
+          // Use undefined for client since this test only mocks database operations
           const appWithShortTimeout = startSigner(
             configWithShortTimeout,
             db,
             keyProvider,
-            createWalletClient({
-              chain: celoAlfajores,
-              transport: http(),
-            }),
-          )
+            undefined,
+          ).listen(0)
 
           const req = getPnpSignRequest(
             ACCOUNT_ADDRESS1,
@@ -944,6 +946,7 @@ describe('pnp', () => {
             version: expectedVersion,
           })
           spy.mockRestore()
+          await serverClose(appWithShortTimeout)
         })
 
         it('Should return 500 on blockchain totalQuota query failure', async () => {
@@ -992,7 +995,7 @@ describe('pnp', () => {
             db,
             keyProvider,
             failingMockClient,
-          )
+          ).listen(0)
 
           const authorization = getPnpRequestAuthorization(req, PRIVATE_KEY1)
           const res = await sendRequest(
@@ -1009,6 +1012,7 @@ describe('pnp', () => {
             version: expectedVersion,
             error: ErrorMessage.FAILURE_TO_GET_TOTAL_QUOTA,
           })
+          await serverClose(appWithFailOpenDisabled)
         })
 
         it('Should return 500 on failure to increment query count', async () => {
