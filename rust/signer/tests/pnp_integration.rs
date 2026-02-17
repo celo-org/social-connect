@@ -1,6 +1,7 @@
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use http_body_util::BodyExt;
+use tempfile::NamedTempFile;
 use tower::ServiceExt;
 
 use odis_signer::config::{Config, KeystoreType};
@@ -20,13 +21,17 @@ const EXPECTED_SIG_V3: &str =
     "MAAAAAAAAAC4aBbzhHvt6l/b+8F7cILmWxZZ5Q7S6R4RZ/IgZR7Pfb9B1Wg9fsDybgxVTSv5BYEAAAAA";
 
 fn test_config() -> Config {
+    test_config_with_db(":memory:")
+}
+
+fn test_config_with_db(db_path: &str) -> Config {
     Config {
         server_port: 8080,
         pnp_api_enabled: true,
         keystore_type: KeystoreType::Mock,
         pnp_key_name_base: "phoneNumberPrivacy".to_string(),
         pnp_latest_key_version: 1,
-        db_path: ":memory:".to_string(),
+        db_path: db_path.to_string(),
         blockchain_provider: None,
         chain_id: 11142220,
         should_mock_account_service: true,
@@ -90,7 +95,7 @@ async fn sign_returns_correct_signature_for_all_key_versions() {
     ];
 
     for (version, expected_sig) in expected {
-        let app = build_router(test_config());
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(sign_request_with_key_version(&body, version))
@@ -113,7 +118,7 @@ async fn sign_returns_correct_signature_for_all_key_versions() {
 
 #[tokio::test]
 async fn sign_uses_default_key_version_when_header_absent() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
     let response = app.oneshot(sign_request(&body)).await.unwrap();
@@ -128,7 +133,7 @@ async fn sign_uses_default_key_version_when_header_absent() {
 
 #[tokio::test]
 async fn sign_duplicate_returns_cached_signature_without_incrementing_quota() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
     // First request
@@ -155,7 +160,7 @@ async fn sign_duplicate_returns_cached_signature_without_incrementing_quota() {
 async fn sign_returns_403_when_quota_exactly_depleted() {
     let mut config = test_config();
     config.mock_total_quota = 1;
-    let app = build_router(config);
+    let app = build_router(config).await.unwrap();
 
     let body1 = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
@@ -207,7 +212,7 @@ async fn assert_error_body(response: axum::response::Response, status: StatusCod
 #[tokio::test]
 async fn request_validation_matches_the_ts_signer() {
     const ENDPOINTS: [&str; 2] = ["/sign", "/quotaStatus"];
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
 
     let invalid_accounts = [
         serde_json::json!({ "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER }),
@@ -247,7 +252,7 @@ async fn request_validation_matches_the_ts_signer() {
     // With the API disabled, a valid request is refused too.
     let mut config = test_config();
     config.pnp_api_enabled = false;
-    let disabled = build_router(config);
+    let disabled = build_router(config).await.unwrap();
     for uri in ENDPOINTS {
         let response = disabled
             .clone()
@@ -284,7 +289,7 @@ async fn assert_used_quota(app: &axum::Router, expected: u64) {
 
 #[tokio::test]
 async fn sign_returns_500_for_unsupported_key_version() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
     let response = app
@@ -299,7 +304,7 @@ async fn sign_returns_500_for_unsupported_key_version() {
 
 #[tokio::test]
 async fn sign_then_quota_reflects_updated_count() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
 
     // Initially quota is 0
     let response = app.clone().oneshot(quota_request(ACCOUNT)).await.unwrap();
@@ -320,7 +325,7 @@ async fn sign_then_quota_reflects_updated_count() {
 
 #[tokio::test]
 async fn sign_returns_500_for_invalid_blinded_message() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
 
     // Valid base64, 64 chars, but not a valid BLS G1 point
     let body = sign_body(
@@ -344,7 +349,7 @@ async fn sign_returns_500_for_invalid_blinded_message() {
 async fn quota_returns_200_even_when_over_quota() {
     let mut config = test_config();
     config.mock_total_quota = 1;
-    let app = build_router(config);
+    let app = build_router(config).await.unwrap();
 
     // Sign once to use up quota
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
@@ -359,4 +364,103 @@ async fn quota_returns_200_even_when_over_quota() {
     assert_eq!(json["performedQueryCount"], 1);
     assert_eq!(json["totalQuota"], 1);
     assert_eq!(json["success"], true);
+}
+
+#[tokio::test]
+async fn sqlite_sign_and_quota_full_stack() {
+    let db_file = NamedTempFile::new().unwrap();
+    let db_path = db_file.path().to_str().unwrap();
+    let config = test_config_with_db(db_path);
+    let app = build_router(config).await.unwrap();
+
+    // Initially zero quota
+    let response = app.clone().oneshot(quota_request(ACCOUNT)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["performedQueryCount"], 0);
+
+    // Sign a request
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["signature"], EXPECTED_SIG_V1);
+    assert_eq!(json["performedQueryCount"], 1);
+
+    // Duplicate returns cached signature without incrementing quota
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["signature"], EXPECTED_SIG_V1);
+    assert_eq!(json["performedQueryCount"], 1);
+    assert!(
+        json["warnings"][0]
+            .as_str()
+            .unwrap()
+            .contains("CELO_ODIS_WARN_04")
+    );
+
+    // Quota reflects the sign
+    let response = app.oneshot(quota_request(ACCOUNT)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["performedQueryCount"], 1);
+    assert_eq!(json["totalQuota"], 10);
+}
+
+/// Runs a statement on the signer's database from a second connection, to make
+/// its later queries fail.
+async fn break_database(db_path: &str, statement: &str) {
+    let pool = sqlx::SqlitePool::connect(&format!("sqlite:{db_path}"))
+        .await
+        .unwrap();
+    sqlx::query(statement).execute(&pool).await.unwrap();
+    pool.close().await;
+}
+
+async fn assert_server_error(response: axum::response::Response, error: &str) {
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    let json = response_json(response).await;
+    assert_eq!(json["success"], false);
+    assert_eq!(json["error"], error);
+}
+
+/// Each database failure answers with the error string the TS signer sends for
+/// it. A failed duplicate lookup refuses the request, where the TS signer
+/// carries on as if the request were new.
+#[tokio::test]
+async fn database_failures_return_the_ts_error_strings() {
+    const INSERT_FAILURE: &str = "CELO_ODIS_ERR_02 DB_ERR Failed to insert database entry";
+    const GET_FAILURE: &str = "CELO_ODIS_ERR_03 DB_ERR Failed to get database entry";
+    const QUOTA_READ_FAILURE: &str =
+        "CELO_ODIS_ERR_24 DB_ERR Failed to read performedQueryCount from signer db";
+
+    let db_file = NamedTempFile::new().unwrap();
+    let db_path = db_file.path().to_str().unwrap();
+    let app = build_router(test_config_with_db(db_path)).await.unwrap();
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+
+    // Recording the request fails: nothing is charged.
+    break_database(
+        db_path,
+        "CREATE TRIGGER refuse_requests BEFORE INSERT ON requests \
+         BEGIN SELECT RAISE(ABORT, 'refused'); END",
+    )
+    .await;
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_server_error(response, INSERT_FAILURE).await;
+    assert_used_quota(&app, 0).await;
+
+    // The used-quota read fails on both endpoints.
+    break_database(db_path, "ALTER TABLE accounts RENAME TO accounts_moved").await;
+    let response = app.clone().oneshot(quota_request(ACCOUNT)).await.unwrap();
+    assert_server_error(response, QUOTA_READ_FAILURE).await;
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_server_error(response, QUOTA_READ_FAILURE).await;
+
+    // The duplicate lookup fails.
+    break_database(db_path, "DROP TRIGGER refuse_requests").await;
+    break_database(db_path, "ALTER TABLE requests RENAME TO requests_moved").await;
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_server_error(response, GET_FAILURE).await;
 }
