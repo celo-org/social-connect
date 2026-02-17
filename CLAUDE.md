@@ -66,6 +66,15 @@ Uses changesets for versioning. Every PR impacting consumers needs a changeset:
 yarn cs                 # Create a changeset
 ```
 
+## Commit Messages
+
+Subjects follow [Scoped Commits](https://scopedcommits.com): `<scope>: <description>`, for example `monitor: set CHAIN_ID for the mainnet deploy`. There is no type prefix such as `feat` or `fix`.
+
+- The scope names the component the commit changes. An app or package takes its directory name (`signer`, `combiner`, `monitor`, `common`, `identity`, `odis-identifiers`, `encrypted-backup`). A Rust crate takes its directory name under `rust/` plus `-rs` (`signer-rs`), which keeps it apart from the TS app of the same name. Changes outside the components use `ci`, `deps` or `docs`.
+- A commit that changes two components names both, separated by a comma. One that changes the whole repo uses `treewide`.
+- Merges and reverts keep Git's default subject.
+- The description is imperative, starts in lower case and has no full stop. It does not repeat the scope: `signer-rs: add JSON log output`, not `signer-rs: add JSON log output to the Rust signer`.
+
 ## Architecture Notes
 
 **App structure** follows domain-driven design:
@@ -88,3 +97,18 @@ src/
 - `blind-threshold-bls` - BLS threshold signatures (aliased from `@celo/blind-threshold-bls`)
 - `io-ts` / `fp-ts` - Runtime type validation and functional programming
 - `knex` - Database query builder and migrations
+
+## Rust port
+
+There's a WIP Rust port of the signer. The Rust port aims to provide a more efficient and secure implementation of the application's core functionalities. The Rust port is currently in development and will be available soon.
+
+### Conventions
+- Use a workspace layout with `Cargo.toml` at the root modules in the `/rust` directory.
+- Prefer common crates: axum, sqlx, serde, tokio, thiserror, anyhow
+- Use `thiserror` for library errors, `anyhow` sparingly in main/tests only
+- Use `alloy` for Ethereum-related functionality, use the `Address` type for Ethereum addresses and the `Bytes` type for binary data. Also use the `address!` macro to define Ethereum addresses.
+- Use a repository pattern for DB access
+- Config via environment variables with `dotenvy` + manual parsing (no complex config frameworks)
+- Keep structs flat, derive Debug/Clone/Serialize/Deserialize where useful
+- Always add tests, make sure all test cases from the TS signer are copied.
+- Make sure linting and tests pass, add common tasks to the justfile

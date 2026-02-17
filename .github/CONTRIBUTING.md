@@ -95,6 +95,15 @@ yarn test:e2e:celo-sepolia
 
 For load tests, checkout [apps/monitor](../apps/monitor/README.md)
 
+#### Commit messages
+
+Subjects follow [Scoped Commits](https://scopedcommits.com): `<scope>: <description>`, for example `monitor: set CHAIN_ID for the mainnet deploy`. There is no type prefix such as `feat` or `fix`.
+
+* The scope names the component the commit changes. An app or package takes its directory name (`signer`, `combiner`, `monitor`, `common`, `identity`, `odis-identifiers`, `encrypted-backup`). A Rust crate takes its directory name under `rust/` plus `-rs` (`signer-rs`), which keeps it apart from the TS app of the same name. Changes outside the components use `ci`, `deps` or `docs`.
+* A commit that changes two components names both, separated by a comma. One that changes the whole repo uses `treewide`.
+* Merges and reverts keep Git's default subject.
+* The description is imperative, starts in lower case and has no full stop. It does not repeat the scope: `signer-rs: add JSON log output`, not `signer-rs: add JSON log output to the Rust signer`.
+
 #### PRs and Releases
 
 See [Release.md](../RELEASE.md) and [kubernetes-deployment](/kubernetes-deployment)
