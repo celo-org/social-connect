@@ -90,7 +90,7 @@ async fn sign_returns_correct_signature_for_all_key_versions() {
     ];
 
     for (version, expected_sig) in expected {
-        let app = build_router(test_config());
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(sign_request_with_key_version(&body, version))
@@ -113,7 +113,7 @@ async fn sign_returns_correct_signature_for_all_key_versions() {
 
 #[tokio::test]
 async fn sign_uses_default_key_version_when_header_absent() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
     let response = app.oneshot(sign_request(&body)).await.unwrap();
@@ -128,7 +128,7 @@ async fn sign_uses_default_key_version_when_header_absent() {
 
 #[tokio::test]
 async fn sign_duplicate_returns_cached_signature_without_incrementing_quota() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
     // First request
@@ -155,7 +155,7 @@ async fn sign_duplicate_returns_cached_signature_without_incrementing_quota() {
 async fn sign_returns_403_when_quota_exactly_depleted() {
     let mut config = test_config();
     config.mock_total_quota = 1;
-    let app = build_router(config);
+    let app = build_router(config).await.unwrap();
 
     let body1 = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
@@ -174,7 +174,7 @@ async fn sign_returns_403_when_quota_exactly_depleted() {
 
 #[tokio::test]
 async fn sign_returns_500_for_unsupported_key_version() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
     let response = app
@@ -190,7 +190,7 @@ async fn sign_returns_500_for_unsupported_key_version() {
 
 #[tokio::test]
 async fn sign_then_quota_reflects_updated_count() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
 
     // Initially quota is 0
     let response = app.clone().oneshot(quota_request(ACCOUNT)).await.unwrap();
@@ -211,7 +211,7 @@ async fn sign_then_quota_reflects_updated_count() {
 
 #[tokio::test]
 async fn sign_returns_500_for_invalid_blinded_message() {
-    let app = build_router(test_config());
+    let app = build_router(test_config()).await.unwrap();
 
     // Valid base64, 64 chars, but not a valid BLS G1 point
     let body = sign_body(
@@ -231,7 +231,7 @@ async fn sign_returns_500_for_invalid_blinded_message() {
 async fn quota_returns_200_even_when_over_quota() {
     let mut config = test_config();
     config.mock_total_quota = 1;
-    let app = build_router(config);
+    let app = build_router(config).await.unwrap();
 
     // Sign once to use up quota
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
