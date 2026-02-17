@@ -1,0 +1,51 @@
+name: Rust Signer CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - "justfile"
+      - ".config/nextest.toml"
+      - ".github/workflows/rust-signer.yml"
+  pull_request:
+    paths:
+      - "rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - "justfile"
+      - ".config/nextest.toml"
+      - ".github/workflows/rust-signer.yml"
+
+concurrency:
+  group: rust-signer-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    name: Build + Format + Clippy + Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@1.100.0
+        with:
+          components: rustfmt, clippy
+
+      - uses: extractions/setup-just@v2
+
+      - uses: taiki-e/install-action@nextest
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: just build
+      - run: just fmt-check
+      - run: just clippy
+      - run: just test
