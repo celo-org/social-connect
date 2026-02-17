@@ -80,8 +80,8 @@ mod tests {
 
         let message = b"hello world";
         let mut seed = [0u8; 32];
-        for i in 0..31 {
-            seed[i] = i as u8;
+        for (i, byte) in seed[..31].iter_mut().enumerate() {
+            *byte = i as u8;
         }
         let mut rng = ChaChaRng::from_seed(seed);
         let (_blinding_factor, blinded_msg) = SigScheme::blind_msg(message, &mut rng);

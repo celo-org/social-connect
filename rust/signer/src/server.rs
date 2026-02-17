@@ -37,7 +37,7 @@ pub fn build_router(config: Config) -> Router {
             StatusCode::REQUEST_TIMEOUT,
             timeout,
         ))
-        .layer(RequestBodyLimitLayer::new(200 * 1024)) // 0.2 MB
+        .layer(RequestBodyLimitLayer::new(16 * 1024)) // 16 KB, matches TS REASONABLE_BODY_CHAR_LIMIT
         .with_state(state)
 }
 
@@ -68,8 +68,6 @@ mod tests {
     use axum::http::Request;
     use http_body_util::BodyExt;
     use tower::ServiceExt;
-    use tower_http::catch_panic::CatchPanicLayer;
-    use tower_http::trace::TraceLayer;
 
     use crate::config::KeystoreType;
 
