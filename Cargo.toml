@@ -2,7 +2,7 @@
 edition = "2024"
 authors = ["Paul Lange <palango@gmx.de>"]
 license = "MIT"
-rust = "1.93"
+rust-version = "1.93"
 exclude = ["**/target"]
 version = "0.1.0"
 
