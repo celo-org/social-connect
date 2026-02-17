@@ -9,7 +9,7 @@ async fn main() {
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
-    dotenvy::dotenv().expect("failed to load env vars");
+    let _ = dotenvy::dotenv();
 
     let config = Config::from_env().expect("failed to load config");
     let port = config.server_port;
