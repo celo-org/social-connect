@@ -1,0 +1,5 @@
+[profile.default]
+# nextest starts every test in its own process. When many start at once, a
+# finished test can take longer than the default 100ms to close its output,
+# and nextest then reports it as leaky although nothing was left running.
+leak-timeout = "1s"

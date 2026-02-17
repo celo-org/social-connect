@@ -1,0 +1,19 @@
+[workspace.package]
+edition = "2024"
+authors = ["Paul Lange <palango@gmx.de>"]
+license = "MIT"
+rust-version = "1.100"
+exclude = ["**/target"]
+version = "0.1.0"
+
+[workspace]
+members = ["rust/signer"]
+resolver = "2"
+
+[profile.dev]
+split-debuginfo = "unpacked"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
