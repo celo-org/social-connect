@@ -14,3 +14,9 @@ fmt:
 
 fmt-check:
     cargo fmt -p odis-signer -- --check
+
+build:
+    cargo build -p odis-signer
+
+build-release:
+    cargo build --release -p odis-signer
