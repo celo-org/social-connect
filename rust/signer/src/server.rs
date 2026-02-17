@@ -10,9 +10,12 @@ use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::config::Config;
+use crate::errors::OdisError;
 use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
 use crate::key_management::{KeyProvider, MockKeyProvider};
-use crate::request_service::{InMemoryPnpRequestService, PnpRequestService};
+use crate::request_service::{
+    InMemoryPnpRequestService, PnpRequestService, SqlitePnpRequestService,
+};
 
 /// Shared application state available to all handlers.
 #[derive(Clone)]
@@ -23,16 +26,22 @@ pub struct AppState {
 }
 
 /// Build the axum router with all routes and middleware.
-pub fn build_router(config: Config) -> Router {
+pub async fn build_router(config: Config) -> Result<Router, OdisError> {
+    let request_service: Arc<dyn PnpRequestService> = if config.db_path == ":memory:" {
+        Arc::new(InMemoryPnpRequestService::new())
+    } else {
+        Arc::new(SqlitePnpRequestService::new(&config.db_path).await?)
+    };
+
     let state = AppState {
         config: Arc::new(config),
-        request_service: Arc::new(InMemoryPnpRequestService::new()),
+        request_service,
         key_provider: Arc::new(MockKeyProvider::new()),
     };
 
     let timeout = Duration::from_millis(state.config.timeout_ms);
 
-    Router::new()
+    Ok(Router::new()
         .route("/status", get(status_handler))
         .route("/sign", post(pnp_sign_handler))
         .route("/quotaStatus", post(pnp_quota_handler))
@@ -43,7 +52,7 @@ pub fn build_router(config: Config) -> Router {
             timeout,
         ))
         .layer(RequestBodyLimitLayer::new(16 * 1024)) // 16 KB, matches TS REASONABLE_BODY_CHAR_LIMIT
-        .with_state(state)
+        .with_state(state))
 }
 
 #[cfg(test)]
@@ -76,7 +85,7 @@ mod tests {
 
     #[tokio::test]
     async fn status_returns_version() {
-        let app = build_router(test_config(false));
+        let app = build_router(test_config(false)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -106,7 +115,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_200_with_signature() {
-        let app = build_router(test_config(true));
+        let app = build_router(test_config(true)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -133,7 +142,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_400_for_invalid_blinded_query() {
-        let app = build_router(test_config(true));
+        let app = build_router(test_config(true)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -154,7 +163,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_400_for_invalid_key_version() {
-        let app = build_router(test_config(true));
+        let app = build_router(test_config(true)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -174,7 +183,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_duplicate_returns_cached_signature() {
-        let app = build_router(test_config(true));
+        let app = build_router(test_config(true)).await.unwrap();
 
         // First request
         let response = app
@@ -221,7 +230,7 @@ mod tests {
     async fn sign_returns_403_when_quota_exceeded() {
         let mut config = test_config(true);
         config.mock_total_quota = 0;
-        let app = build_router(config);
+        let app = build_router(config).await.unwrap();
 
         let response = app
             .oneshot(
@@ -240,7 +249,7 @@ mod tests {
 
     #[tokio::test]
     async fn quota_returns_200_with_quota_info() {
-        let app = build_router(test_config(true));
+        let app = build_router(test_config(true)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -268,7 +277,7 @@ mod tests {
 
     #[tokio::test]
     async fn quota_returns_400_for_invalid_account() {
-        let app = build_router(test_config(true));
+        let app = build_router(test_config(true)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -287,7 +296,7 @@ mod tests {
 
     #[tokio::test]
     async fn quota_returns_400_for_malformed_json() {
-        let app = build_router(test_config(true));
+        let app = build_router(test_config(true)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -306,7 +315,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_503_when_pnp_disabled() {
-        let app = build_router(test_config(false));
+        let app = build_router(test_config(false)).await.unwrap();
 
         let response = app
             .oneshot(
@@ -325,7 +334,7 @@ mod tests {
 
     #[tokio::test]
     async fn quota_returns_503_when_pnp_disabled() {
-        let app = build_router(test_config(false));
+        let app = build_router(test_config(false)).await.unwrap();
 
         let response = app
             .oneshot(

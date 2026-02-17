@@ -131,7 +131,7 @@ pub async fn pnp_sign_handler(
             .await
             .map_err(|_| OdisError::DatabaseInsertFailure)?;
 
-        (signature, used_quota + 1, vec![])
+        (signature, used_quota.saturating_add(1), vec![])
     };
 
     let mut response_headers = HeaderMap::new();
