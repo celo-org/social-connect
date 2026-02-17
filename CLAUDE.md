@@ -88,3 +88,18 @@ src/
 - `blind-threshold-bls` - BLS threshold signatures (aliased from `@celo/blind-threshold-bls`)
 - `io-ts` / `fp-ts` - Runtime type validation and functional programming
 - `knex` - Database query builder and migrations
+
+## Rust port
+
+There's a WIP Rust port of the signer. The Rust port aims to provide a more efficient and secure implementation of the application's core functionalities. The Rust port is currently in development and will be available soon.
+
+### Conventions
+- Use a workspace layout with `Cargo.toml` at the root modules in the `/rust` directory.
+- Prefer common crates: axum, sqlx, serde, tokio, thiserror, anyhow
+- Use `thiserror` for library errors, `anyhow` sparingly in main/tests only
+- Use `alloy` for Ethereum-related functionality, use the `Address` type for Ethereum addresses and the `Bytes` type for binary data. Also use the `address!` macro to define Ethereum addresses.
+- Use a repository pattern for DB access
+- Config via environment variables with `dotenvy` + manual parsing (no complex config frameworks)
+- Keep structs flat, derive Debug/Clone/Serialize/Deserialize where useful
+- Always add tests, make sure all test cases from the TS signer are copied.
+- Make sure linting and tests pass, add common tasks to the justfile

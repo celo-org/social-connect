@@ -1,0 +1,18 @@
+[workspace.package]
+edition = "2024"
+authors = ["Paul Lange <palango@gmx.de>"]
+license = "MIT"
+rust = "1.93"
+exclude = ["**/target"]
+version = "0.1.0"
+
+[workspace]
+members = ["rust/signer"]
+resolver = "2"
+
+[patch."https://github.com/scipr-lab/zexe"]
+algebra = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "algebra", branch = "patch-rust-compat" }
+algebra-core = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "algebra-core", branch = "patch-rust-compat" }
+algebra-core-derive = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "algebra-core-derive", branch = "patch-rust-compat" }
+bench-utils = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "bench-utils", branch = "patch-rust-compat" }
+crypto-primitives = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "crypto-primitives", branch = "patch-rust-compat" }

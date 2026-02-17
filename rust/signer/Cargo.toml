@@ -1,0 +1,8 @@
+[package]
+name = "odis-signer"
+edition.workspace = true
+authors.workspace = true
+version.workspace = true
+
+[dependencies]
+threshold-bls = { git = "https://github.com/celo-org/celo-threshold-bls-rs", package = "threshold-bls" }
