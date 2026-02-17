@@ -5,6 +5,7 @@ authors.workspace = true
 version.workspace = true
 
 [dependencies]
+alloy = "1"
 axum = "0.8"
 base64 = "0.22"
 bincode = "1"
