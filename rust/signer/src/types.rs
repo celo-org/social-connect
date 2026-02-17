@@ -33,6 +33,22 @@ impl<S: Send + Sync> FromRequestParts<S> for KeyVersion {
 // Body size is enforced by tower's RequestBodyLimitLayer (16 KB) in server.rs,
 // matching the TS REASONABLE_BODY_CHAR_LIMIT of 16,000 chars.
 
+// -- Authentication --
+
+/// Authentication method, matching TS `AuthenticationMethod` enum.
+///
+/// The TS signer accepts any string here and verifies by wallet key unless the
+/// value is exactly `encryption_key`, so an unknown value must parse too.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AuthenticationMethod {
+    WalletKey,
+    EncryptionKey,
+    /// Any other string. Verified by wallet key.
+    #[serde(other)]
+    Other,
+}
+
 // -- Requests --
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -41,7 +57,7 @@ pub struct SignMessageRequest {
     pub account: Address,
     pub blinded_query_phone_number: String,
     #[serde(default)]
-    pub authentication_method: Option<String>,
+    pub authentication_method: Option<AuthenticationMethod>,
     #[serde(default, rename = "sessionID")]
     pub session_id: Option<String>,
     #[serde(default)]
@@ -62,7 +78,7 @@ impl SignMessageRequest {
 pub struct PnpQuotaRequest {
     pub account: Address,
     #[serde(default)]
-    pub authentication_method: Option<String>,
+    pub authentication_method: Option<AuthenticationMethod>,
     #[serde(default, rename = "sessionID")]
     pub session_id: Option<String>,
     #[serde(default)]
@@ -190,6 +206,40 @@ mod tests {
         assert_eq!(req.session_id.as_deref(), Some("sess-1"));
         assert!(req.authentication_method.is_none());
         assert!(req.version.is_none());
+    }
+
+    #[test]
+    fn authentication_method_accepts_any_string() {
+        let parse = |method: &str| {
+            let json = format!(
+                r#"{{"account": "0x0000000000000000000000000000000000007E57", "authenticationMethod": {method}}}"#
+            );
+            serde_json::from_str::<PnpQuotaRequest>(&json).map(|req| req.authentication_method)
+        };
+
+        assert_eq!(
+            parse(r#""wallet_key""#).unwrap(),
+            Some(AuthenticationMethod::WalletKey)
+        );
+        assert_eq!(
+            parse(r#""encryption_key""#).unwrap(),
+            Some(AuthenticationMethod::EncryptionKey)
+        );
+        for unknown in [
+            r#""WALLET_KEY""#,
+            r#""ENCRYPTION_KEY""#,
+            r#""foo""#,
+            r#""""#,
+        ] {
+            assert_eq!(
+                parse(unknown).unwrap(),
+                Some(AuthenticationMethod::Other),
+                "{unknown}"
+            );
+        }
+        // The TS signer refuses a value that is not a string.
+        assert!(parse("1").is_err());
+        assert!(parse("true").is_err());
     }
 
     #[test]

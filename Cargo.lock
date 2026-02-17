@@ -193,6 +193,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "borsh",
+ "k256",
  "serde",
  "thiserror",
 ]
@@ -2762,6 +2763,7 @@ dependencies = [
  "once_cell",
  "serdect",
  "sha2",
+ "signature",
 ]
 
 [[package]]
@@ -3074,6 +3076,8 @@ name = "odis-signer"
 version = "0.1.0"
 dependencies = [
  "alloy",
+ "alloy-signer",
+ "alloy-signer-local",
  "async-trait",
  "axum",
  "base64 0.22.1",
@@ -3081,10 +3085,12 @@ dependencies = [
  "dotenvy",
  "hex",
  "http-body-util",
+ "k256",
  "rand_chacha 0.3.1",
  "rand_core 0.6.4",
  "serde",
  "serde_json",
+ "sha2",
  "sqlx",
  "tempfile",
  "thiserror",
