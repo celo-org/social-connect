@@ -16,3 +16,6 @@ algebra-core = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", pack
 algebra-core-derive = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "algebra-core-derive", branch = "patch-rust-compat" }
 bench-utils = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "bench-utils", branch = "patch-rust-compat" }
 crypto-primitives = { git = "https://github.com/celo-org/arkworks-v0.1.1-patch", package = "crypto-primitives", branch = "patch-rust-compat" }
+
+[profile.dev]
+split-debuginfo = "unpacked"
