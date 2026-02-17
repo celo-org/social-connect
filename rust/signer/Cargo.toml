@@ -6,6 +6,7 @@ version.workspace = true
 
 [dependencies]
 alloy = "1"
+async-trait = "0.1"
 axum = "0.8"
 base64 = "0.22"
 bincode = "1"

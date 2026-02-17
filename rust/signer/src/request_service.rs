@@ -2,18 +2,20 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use alloy::primitives::Address;
+use async_trait::async_trait;
 
 use crate::errors::OdisError;
 
 /// Tracks PNP sign requests and quota usage.
+#[async_trait]
 pub trait PnpRequestService: Send + Sync {
-    fn get_used_quota(&self, address: Address) -> Result<u32, OdisError>;
-    fn get_duplicate_request(
+    async fn get_used_quota(&self, address: Address) -> Result<u32, OdisError>;
+    async fn get_duplicate_request(
         &self,
         address: Address,
         blinded_query: &str,
     ) -> Result<Option<String>, OdisError>;
-    fn record_request(
+    async fn record_request(
         &self,
         address: Address,
         blinded_query: &str,
@@ -44,13 +46,14 @@ impl Default for InMemoryPnpRequestService {
     }
 }
 
+#[async_trait]
 impl PnpRequestService for InMemoryPnpRequestService {
-    fn get_used_quota(&self, address: Address) -> Result<u32, OdisError> {
+    async fn get_used_quota(&self, address: Address) -> Result<u32, OdisError> {
         let quotas = self.quotas.lock().map_err(|_| OdisError::DatabaseError)?;
         Ok(*quotas.get(&address).unwrap_or(&0))
     }
 
-    fn get_duplicate_request(
+    async fn get_duplicate_request(
         &self,
         address: Address,
         blinded_query: &str,
@@ -60,7 +63,7 @@ impl PnpRequestService for InMemoryPnpRequestService {
         Ok(requests.get(&key).cloned())
     }
 
-    fn record_request(
+    async fn record_request(
         &self,
         address: Address,
         blinded_query: &str,
@@ -84,29 +87,34 @@ mod tests {
     const ADDR: Address = address!("0x0000000000000000000000000000000000007E57");
     const OTHER_ADDR: Address = address!("0x0000000000000000000000000000000000000001");
 
-    #[test]
-    fn in_memory_request_service() {
+    #[tokio::test]
+    async fn in_memory_request_service() {
         let svc = InMemoryPnpRequestService::new();
 
         // Initially zero quota
-        assert_eq!(svc.get_used_quota(ADDR).unwrap(), 0);
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 0);
 
         // No duplicate
-        assert!(svc.get_duplicate_request(ADDR, "query1").unwrap().is_none());
+        assert!(
+            svc.get_duplicate_request(ADDR, "query1")
+                .await
+                .unwrap()
+                .is_none()
+        );
 
         // Record a request
-        svc.record_request(ADDR, "query1", "sig1").unwrap();
-        assert_eq!(svc.get_used_quota(ADDR).unwrap(), 1);
+        svc.record_request(ADDR, "query1", "sig1").await.unwrap();
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 1);
         assert_eq!(
-            svc.get_duplicate_request(ADDR, "query1").unwrap(),
+            svc.get_duplicate_request(ADDR, "query1").await.unwrap(),
             Some("sig1".to_string())
         );
 
         // Different query increments quota again
-        svc.record_request(ADDR, "query2", "sig2").unwrap();
-        assert_eq!(svc.get_used_quota(ADDR).unwrap(), 2);
+        svc.record_request(ADDR, "query2", "sig2").await.unwrap();
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 2);
 
         // Different address is independent
-        assert_eq!(svc.get_used_quota(OTHER_ADDR).unwrap(), 0);
+        assert_eq!(svc.get_used_quota(OTHER_ADDR).await.unwrap(), 0);
     }
 }

@@ -35,7 +35,10 @@ pub async fn pnp_quota_handler(
 
     // TODO: authenticate user (mock: always pass)
 
-    let used_quota = state.request_service.get_used_quota(request.account)?;
+    let used_quota = state
+        .request_service
+        .get_used_quota(request.account)
+        .await?;
     let total_quota = state.config.mock_total_quota;
 
     Ok(Json(PnpQuotaResponseSuccess {
@@ -64,9 +67,13 @@ pub async fn pnp_sign_handler(
 
     let duplicate_sig = state
         .request_service
-        .get_duplicate_request(request.account, &request.blinded_query_phone_number)?;
+        .get_duplicate_request(request.account, &request.blinded_query_phone_number)
+        .await?;
 
-    let used_quota = state.request_service.get_used_quota(request.account)?;
+    let used_quota = state
+        .request_service
+        .get_used_quota(request.account)
+        .await?;
     let total_quota = state.config.mock_total_quota;
 
     // If not a duplicate, check quota
@@ -92,11 +99,14 @@ pub async fn pnp_sign_handler(
         let signature = BASE64.encode(&sig_bytes);
 
         // Record the request
-        state.request_service.record_request(
-            request.account,
-            &request.blinded_query_phone_number,
-            &signature,
-        )?;
+        state
+            .request_service
+            .record_request(
+                request.account,
+                &request.blinded_query_phone_number,
+                &signature,
+            )
+            .await?;
 
         (signature, used_quota + 1, vec![])
     };
