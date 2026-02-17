@@ -13,11 +13,22 @@ pub enum OdisError {
     /// 401 — missing or invalid authentication
     UnauthenticatedUser,
     /// 403 — exceeded service query quota
-    ExceededQuota,
-    /// 500 — BLS signature computation failed
-    SignatureComputationFailure,
+    ExceededQuota {
+        total_quota: u32,
+        performed_query_count: u32,
+    },
+    /// 500 — the signing key could not be fetched or the BLS signature
+    /// computation failed
+    SignatureComputationFailure {
+        total_quota: u32,
+        performed_query_count: u32,
+    },
     /// 500 — database read/write failed
     DatabaseError,
+    /// 500 — failed to record a request or charge its quota
+    DatabaseInsertFailure,
+    /// 500 — failed to read an account's used quota
+    FailureToGetPerformedQueryCount,
     /// 500 — failed to retrieve key from keystore
     KeyFetchError,
     /// 500 — generic unknown error
@@ -33,9 +44,11 @@ impl OdisError {
         match self {
             Self::InvalidInput | Self::InvalidKeyVersion => StatusCode::BAD_REQUEST,
             Self::UnauthenticatedUser => StatusCode::UNAUTHORIZED,
-            Self::ExceededQuota => StatusCode::FORBIDDEN,
-            Self::SignatureComputationFailure
+            Self::ExceededQuota { .. } => StatusCode::FORBIDDEN,
+            Self::SignatureComputationFailure { .. }
             | Self::DatabaseError
+            | Self::DatabaseInsertFailure
+            | Self::FailureToGetPerformedQueryCount
             | Self::KeyFetchError
             | Self::Unknown
             | Self::Timeout => StatusCode::INTERNAL_SERVER_ERROR,
@@ -53,11 +66,19 @@ impl OdisError {
             Self::UnauthenticatedUser => {
                 "CELO_ODIS_WARN_02 BAD_INPUT Missing or invalid authentication"
             }
-            Self::ExceededQuota => "CELO_ODIS_WARN_03 QUOTA Requester exceeded service query quota",
-            Self::SignatureComputationFailure => {
+            Self::ExceededQuota { .. } => {
+                "CELO_ODIS_WARN_03 QUOTA Requester exceeded service query quota"
+            }
+            Self::SignatureComputationFailure { .. } => {
                 "CELO_ODIS_ERR_05 SIG_ERR Failed to compute BLS signature"
             }
             Self::DatabaseError => "CELO_ODIS_ERR_03 DB_ERR Failed to get database entry",
+            Self::DatabaseInsertFailure => {
+                "CELO_ODIS_ERR_02 DB_ERR Failed to insert database entry"
+            }
+            Self::FailureToGetPerformedQueryCount => {
+                "CELO_ODIS_ERR_24 DB_ERR Failed to read performedQueryCount from signer db"
+            }
             Self::KeyFetchError => "CELO_ODIS_ERR_04 INIT_ERR Failed to retrieve key from keystore",
             Self::Unknown => "CELO_ODIS_ERR_00 Something went wrong",
             Self::Timeout => "CELO_ODIS_ERR_10 SIG_ERR Timeout from signer",
@@ -75,13 +96,27 @@ impl std::fmt::Display for OdisError {
 impl std::error::Error for OdisError {}
 
 /// JSON error response: `{ success: false, version, error }`.
+/// `ExceededQuota` and `SignatureComputationFailure` additionally include
+/// `totalQuota` and `performedQueryCount`, as in the TS signer.
 impl IntoResponse for OdisError {
     fn into_response(self) -> axum::response::Response {
-        let body = serde_json::json!({
+        let mut body = serde_json::json!({
             "success": false,
             "version": env!("CARGO_PKG_VERSION"),
             "error": self.error_code(),
         });
+        if let Self::ExceededQuota {
+            total_quota,
+            performed_query_count,
+        }
+        | Self::SignatureComputationFailure {
+            total_quota,
+            performed_query_count,
+        } = &self
+        {
+            body["totalQuota"] = serde_json::json!(total_quota);
+            body["performedQueryCount"] = serde_json::json!(performed_query_count);
+        }
         (self.status_code(), Json(body)).into_response()
     }
 }
@@ -105,15 +140,31 @@ mod tests {
             StatusCode::UNAUTHORIZED
         );
         assert_eq!(
-            OdisError::ExceededQuota.status_code(),
+            OdisError::ExceededQuota {
+                total_quota: 0,
+                performed_query_count: 0
+            }
+            .status_code(),
             StatusCode::FORBIDDEN
         );
         assert_eq!(
-            OdisError::SignatureComputationFailure.status_code(),
+            OdisError::SignatureComputationFailure {
+                total_quota: 0,
+                performed_query_count: 0
+            }
+            .status_code(),
             StatusCode::INTERNAL_SERVER_ERROR
         );
         assert_eq!(
             OdisError::DatabaseError.status_code(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+        assert_eq!(
+            OdisError::DatabaseInsertFailure.status_code(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+        assert_eq!(
+            OdisError::FailureToGetPerformedQueryCount.status_code(),
             StatusCode::INTERNAL_SERVER_ERROR
         );
         assert_eq!(
@@ -152,19 +203,35 @@ mod tests {
                 .starts_with("CELO_ODIS_WARN_02")
         );
         assert!(
-            OdisError::ExceededQuota
-                .error_code()
-                .starts_with("CELO_ODIS_WARN_03")
+            OdisError::ExceededQuota {
+                total_quota: 0,
+                performed_query_count: 0
+            }
+            .error_code()
+            .starts_with("CELO_ODIS_WARN_03")
         );
         assert!(
-            OdisError::SignatureComputationFailure
-                .error_code()
-                .starts_with("CELO_ODIS_ERR_05")
+            OdisError::SignatureComputationFailure {
+                total_quota: 0,
+                performed_query_count: 0
+            }
+            .error_code()
+            .starts_with("CELO_ODIS_ERR_05")
         );
         assert!(
             OdisError::DatabaseError
                 .error_code()
                 .starts_with("CELO_ODIS_ERR_03")
+        );
+        assert!(
+            OdisError::DatabaseInsertFailure
+                .error_code()
+                .starts_with("CELO_ODIS_ERR_02")
+        );
+        assert!(
+            OdisError::FailureToGetPerformedQueryCount
+                .error_code()
+                .starts_with("CELO_ODIS_ERR_24")
         );
         assert!(
             OdisError::KeyFetchError
@@ -195,21 +262,51 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn into_response_produces_json_error() {
+    async fn into_response_produces_json_error_with_quota_fields() {
         use http_body_util::BodyExt;
 
-        let response = OdisError::ExceededQuota.into_response();
+        let cases = [
+            (
+                OdisError::ExceededQuota {
+                    total_quota: 10,
+                    performed_query_count: 7,
+                },
+                StatusCode::FORBIDDEN,
+                "CELO_ODIS_WARN_03 QUOTA Requester exceeded service query quota",
+            ),
+            (
+                OdisError::SignatureComputationFailure {
+                    total_quota: 10,
+                    performed_query_count: 7,
+                },
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "CELO_ODIS_ERR_05 SIG_ERR Failed to compute BLS signature",
+            ),
+        ];
+        for (error, status, code) in cases {
+            let response = error.into_response();
+            assert_eq!(response.status(), status);
 
-        assert_eq!(response.status(), StatusCode::FORBIDDEN);
+            let body = response.into_body().collect().await.unwrap().to_bytes();
+            let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
 
+            assert_eq!(json["success"], false);
+            assert_eq!(json["version"], env!("CARGO_PKG_VERSION"));
+            assert_eq!(json["error"], code);
+            assert_eq!(json["totalQuota"], 10);
+            assert_eq!(json["performedQueryCount"], 7);
+        }
+    }
+
+    #[tokio::test]
+    async fn into_response_non_quota_error_has_no_quota_fields() {
+        use http_body_util::BodyExt;
+
+        let response = OdisError::InvalidInput.into_response();
         let body = response.into_body().collect().await.unwrap().to_bytes();
         let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
 
-        assert_eq!(json["success"], false);
-        assert_eq!(json["version"], env!("CARGO_PKG_VERSION"));
-        assert_eq!(
-            json["error"],
-            "CELO_ODIS_WARN_03 QUOTA Requester exceeded service query quota"
-        );
+        assert!(json.get("totalQuota").is_none());
+        assert!(json.get("performedQueryCount").is_none());
     }
 }
