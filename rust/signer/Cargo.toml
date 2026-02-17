@@ -27,3 +27,4 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 http-body-util = "0.1"
 rand_chacha = "0.2"
 rand_core = "0.5"
+tempfile = "3"

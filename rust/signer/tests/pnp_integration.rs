@@ -1,6 +1,7 @@
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use http_body_util::BodyExt;
+use tempfile::NamedTempFile;
 use tower::ServiceExt;
 
 use odis_signer::config::{Config, KeystoreType};
@@ -20,13 +21,17 @@ const EXPECTED_SIG_V3: &str =
     "MAAAAAAAAAC4aBbzhHvt6l/b+8F7cILmWxZZ5Q7S6R4RZ/IgZR7Pfb9B1Wg9fsDybgxVTSv5BYEAAAAA";
 
 fn test_config() -> Config {
+    test_config_with_db(":memory:")
+}
+
+fn test_config_with_db(db_path: &str) -> Config {
     Config {
         server_port: 8080,
         pnp_api_enabled: true,
         keystore_type: KeystoreType::Mock,
         pnp_key_name_base: "phoneNumberPrivacy".to_string(),
         pnp_latest_key_version: 1,
-        db_path: ":memory:".to_string(),
+        db_path: db_path.to_string(),
         blockchain_provider: None,
         chain_id: 44787,
         should_mock_account_service: true,
@@ -246,4 +251,46 @@ async fn quota_returns_200_even_when_over_quota() {
     assert_eq!(json["performedQueryCount"], 1);
     assert_eq!(json["totalQuota"], 1);
     assert_eq!(json["success"], true);
+}
+
+#[tokio::test]
+async fn sqlite_sign_and_quota_full_stack() {
+    let db_file = NamedTempFile::new().unwrap();
+    let db_path = db_file.path().to_str().unwrap();
+    let config = test_config_with_db(db_path);
+    let app = build_router(config).await.unwrap();
+
+    // Initially zero quota
+    let response = app.clone().oneshot(quota_request(ACCOUNT)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["performedQueryCount"], 0);
+
+    // Sign a request
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["signature"], EXPECTED_SIG_V1);
+    assert_eq!(json["performedQueryCount"], 1);
+
+    // Duplicate returns cached signature without incrementing quota
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["signature"], EXPECTED_SIG_V1);
+    assert_eq!(json["performedQueryCount"], 1);
+    assert!(
+        json["warnings"][0]
+            .as_str()
+            .unwrap()
+            .contains("CELO_ODIS_WARN_04")
+    );
+
+    // Quota reflects the sign
+    let response = app.oneshot(quota_request(ACCOUNT)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["performedQueryCount"], 1);
+    assert_eq!(json["totalQuota"], 10);
 }
