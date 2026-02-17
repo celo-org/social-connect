@@ -5,14 +5,16 @@ authors.workspace = true
 version.workspace = true
 
 [dependencies]
-alloy = "1"
+alloy = { version = "1", features = ["k256"] }
 async-trait = "0.1"
 axum = "0.8"
 base64 = "0.22"
 bincode = "1"
 dotenvy = "0.15"
 hex = "0.4"
+k256 = { version = "0.13", features = ["ecdsa"] }
 serde = { version = "1", features = ["derive"] }
+sha2 = "0.10"
 serde_json = "1"
 sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
 thiserror = "2"
@@ -24,6 +26,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
+alloy-signer = "1"
+alloy-signer-local = "1"
 http-body-util = "0.1"
 rand_chacha = "0.2"
 rand_core = "0.5"

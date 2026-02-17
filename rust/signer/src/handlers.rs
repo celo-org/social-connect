@@ -5,11 +5,12 @@ use axum::http::HeaderMap;
 use axum::response::IntoResponse;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 
+use crate::auth::{Authorization, authenticate_user};
 use crate::errors::OdisError;
 use crate::server::AppState;
 use crate::types::{
-    KEY_VERSION_HEADER, KeyVersion, PnpQuotaRequest, PnpQuotaResponseSuccess, SignMessageRequest,
-    SignMessageResponseSuccess,
+    AuthenticationMethod, KEY_VERSION_HEADER, KeyVersion, PnpQuotaRequest, PnpQuotaResponseSuccess,
+    SignMessageRequest, SignMessageResponseSuccess,
 };
 
 /// Duplicate request warning, matching TS `WarningMessage.DUPLICATE_REQUEST_TO_GET_PARTIAL_SIG`.
@@ -22,8 +23,34 @@ pub async fn status_handler() -> impl IntoResponse {
     }))
 }
 
+/// Check authentication unless mock mode is enabled. Returns `Err(401)` on failure.
+fn check_auth(
+    state: &AppState,
+    body: &[u8],
+    authorization: &Authorization,
+    account: alloy::primitives::Address,
+    authentication_method: Option<AuthenticationMethod>,
+) -> Result<(), OdisError> {
+    if state.config.should_mock_account_service {
+        return Ok(());
+    }
+    let mut warnings = vec![];
+    if !authenticate_user(
+        body,
+        authorization.0.as_deref(),
+        account,
+        authentication_method,
+        state.config.mock_dek.as_deref(),
+        &mut warnings,
+    ) {
+        return Err(OdisError::UnauthenticatedUser);
+    }
+    Ok(())
+}
+
 pub async fn pnp_quota_handler(
     State(state): State<AppState>,
+    authorization: Authorization,
     body: Bytes,
 ) -> Result<impl IntoResponse, OdisError> {
     if !state.config.pnp_api_enabled {
@@ -33,7 +60,13 @@ pub async fn pnp_quota_handler(
     let request: PnpQuotaRequest =
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
 
-    // TODO: authenticate user (mock: always pass)
+    check_auth(
+        &state,
+        &body,
+        &authorization,
+        request.account,
+        request.authentication_method,
+    )?;
 
     let used_quota = state
         .request_service
@@ -53,6 +86,7 @@ pub async fn pnp_quota_handler(
 pub async fn pnp_sign_handler(
     State(state): State<AppState>,
     KeyVersion(requested_key_version): KeyVersion,
+    authorization: Authorization,
     body: Bytes,
 ) -> Result<impl IntoResponse, OdisError> {
     if !state.config.pnp_api_enabled {
@@ -63,7 +97,13 @@ pub async fn pnp_sign_handler(
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
     request.validate()?;
 
-    // TODO: authenticate user (mock: always pass)
+    check_auth(
+        &state,
+        &body,
+        &authorization,
+        request.account,
+        request.authentication_method,
+    )?;
 
     let duplicate_sig = state
         .request_service

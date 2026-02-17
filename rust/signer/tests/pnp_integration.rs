@@ -1,3 +1,5 @@
+use alloy_signer::Signer;
+use alloy_signer_local::PrivateKeySigner;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use http_body_util::BodyExt;
@@ -293,4 +295,118 @@ async fn sqlite_sign_and_quota_full_stack() {
     let json = response_json(response).await;
     assert_eq!(json["performedQueryCount"], 1);
     assert_eq!(json["totalQuota"], 10);
+}
+
+// --- Authentication-enabled tests ---
+
+fn auth_config() -> Config {
+    Config {
+        should_mock_account_service: false,
+        ..test_config()
+    }
+}
+
+fn sign_request_with_auth(body: &str, auth: &str) -> Request<Body> {
+    Request::builder()
+        .method("POST")
+        .uri("/sign")
+        .header("content-type", "application/json")
+        .header("Authorization", auth)
+        .body(Body::from(body.to_string()))
+        .unwrap()
+}
+
+fn quota_request_with_auth(body: &str, auth: &str) -> Request<Body> {
+    Request::builder()
+        .method("POST")
+        .uri("/quotaStatus")
+        .header("content-type", "application/json")
+        .header("Authorization", auth)
+        .body(Body::from(body.to_string()))
+        .unwrap()
+}
+
+/// Sign a body with a wallet key and return the hex-encoded signature.
+async fn wallet_sign(signer: &PrivateKeySigner, body: &str) -> String {
+    let sig = signer.sign_message(body.as_bytes()).await.unwrap();
+    hex::encode(sig.as_bytes())
+}
+
+#[tokio::test]
+async fn sign_returns_401_without_authorization_header() {
+    let app = build_router(auth_config()).await.unwrap();
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+
+    let response = app.oneshot(sign_request(&body)).await.unwrap();
+
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+
+    let json = response_json(response).await;
+    assert!(
+        json["error"]
+            .as_str()
+            .unwrap()
+            .contains("CELO_ODIS_WARN_02")
+    );
+}
+
+#[tokio::test]
+async fn quota_returns_401_without_authorization_header() {
+    let app = build_router(auth_config()).await.unwrap();
+
+    let response = app.oneshot(quota_request(ACCOUNT)).await.unwrap();
+
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn sign_succeeds_with_valid_wallet_key_signature() {
+    let signer = PrivateKeySigner::random();
+    let body = sign_body(&format!("{}", signer.address()), BLINDED_PHONE_NUMBER);
+    let sig_hex = wallet_sign(&signer, &body).await;
+
+    let app = build_router(auth_config()).await.unwrap();
+    let response = app
+        .oneshot(sign_request_with_auth(&body, &sig_hex))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["success"], true);
+}
+
+#[tokio::test]
+async fn sign_returns_401_with_wrong_wallet_key() {
+    let signer = PrivateKeySigner::random();
+    let wrong_signer = PrivateKeySigner::random();
+
+    // Sign with wrong_signer but claim to be signer
+    let body = sign_body(&format!("{}", signer.address()), BLINDED_PHONE_NUMBER);
+    let sig_hex = wallet_sign(&wrong_signer, &body).await;
+
+    let app = build_router(auth_config()).await.unwrap();
+    let response = app
+        .oneshot(sign_request_with_auth(&body, &sig_hex))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn quota_succeeds_with_valid_wallet_key_signature() {
+    let signer = PrivateKeySigner::random();
+    let body = serde_json::json!({ "account": format!("{}", signer.address()) }).to_string();
+    let sig_hex = wallet_sign(&signer, &body).await;
+
+    let app = build_router(auth_config()).await.unwrap();
+    let response = app
+        .oneshot(quota_request_with_auth(&body, &sig_hex))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["success"], true);
 }

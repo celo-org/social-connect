@@ -33,6 +33,16 @@ impl<S: Send + Sync> FromRequestParts<S> for KeyVersion {
 // Body size is enforced by tower's RequestBodyLimitLayer (16 KB) in server.rs,
 // matching the TS REASONABLE_BODY_CHAR_LIMIT of 16,000 chars.
 
+// -- Authentication --
+
+/// Authentication method, matching TS `AuthenticationMethod` enum.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AuthenticationMethod {
+    WalletKey,
+    EncryptionKey,
+}
+
 // -- Requests --
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -41,7 +51,7 @@ pub struct SignMessageRequest {
     pub account: Address,
     pub blinded_query_phone_number: String,
     #[serde(default)]
-    pub authentication_method: Option<String>,
+    pub authentication_method: Option<AuthenticationMethod>,
     #[serde(default, rename = "sessionID")]
     pub session_id: Option<String>,
     #[serde(default)]
@@ -62,7 +72,7 @@ impl SignMessageRequest {
 pub struct PnpQuotaRequest {
     pub account: Address,
     #[serde(default)]
-    pub authentication_method: Option<String>,
+    pub authentication_method: Option<AuthenticationMethod>,
     #[serde(default, rename = "sessionID")]
     pub session_id: Option<String>,
     #[serde(default)]
