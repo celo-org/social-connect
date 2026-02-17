@@ -109,7 +109,7 @@ fn is_valid_blinded_phone_number(value: &str) -> bool {
 /// Parses the key version header value. Returns `None` if absent or empty.
 /// Returns `Some(Ok(version))` for valid integers >= 0, `Some(Err(()))` for invalid values.
 /// Matches TS `getRequestKeyVersion` / `parseKeyVersionFromHeader`.
-pub fn parse_key_version_header(value: Option<&str>) -> Option<Result<u32, ()>> {
+fn parse_key_version_header(value: Option<&str>) -> Option<Result<u32, ()>> {
     let value = value?.trim();
     if value.is_empty() || value == "undefined" {
         return None;
