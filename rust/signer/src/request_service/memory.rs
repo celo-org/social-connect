@@ -4,26 +4,10 @@ use std::sync::Mutex;
 use alloy::primitives::Address;
 use async_trait::async_trait;
 
+use super::PnpRequestService;
 use crate::errors::OdisError;
 
-/// Tracks PNP sign requests and quota usage.
-#[async_trait]
-pub trait PnpRequestService: Send + Sync {
-    async fn get_used_quota(&self, address: Address) -> Result<u32, OdisError>;
-    async fn get_duplicate_request(
-        &self,
-        address: Address,
-        blinded_query: &str,
-    ) -> Result<Option<String>, OdisError>;
-    async fn record_request(
-        &self,
-        address: Address,
-        blinded_query: &str,
-        signature: &str,
-    ) -> Result<(), OdisError>;
-}
-
-/// In-memory implementation for testing. Will be replaced by a sqlx-backed one later.
+/// In-memory implementation for testing.
 pub struct InMemoryPnpRequestService {
     /// address → query count
     quotas: Mutex<HashMap<Address, u32>>,
