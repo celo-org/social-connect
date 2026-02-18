@@ -9,7 +9,10 @@ use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
-use crate::config::Config;
+use crate::account_service::{
+    AccountService, CachingAccountService, ClientAccountService, MockAccountService,
+};
+use crate::config::{Config, KeystoreType};
 use crate::errors::OdisError;
 use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
 use crate::key_management::{KeyProvider, MockKeyProvider};
@@ -21,12 +24,47 @@ use crate::request_service::{
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<Config>,
+    pub account_service: Arc<dyn AccountService>,
     pub request_service: Arc<dyn PnpRequestService>,
     pub key_provider: Arc<dyn KeyProvider>,
 }
 
-/// Build the axum router with all routes and middleware.
+/// Build the axum router, constructing the appropriate AccountService from config.
+///
+/// When `blockchain_provider` is set, uses `ClientAccountService` for on-chain lookups.
+/// Otherwise, uses `MockAccountService` — but only allowed with `KeystoreType::Mock`
+/// to prevent accidentally running production keys without on-chain auth and quota.
 pub async fn build_router(config: Config) -> Result<Router, OdisError> {
+    let account_service: Arc<dyn AccountService> = if config.blockchain_provider.is_some() {
+        let client = Arc::new(ClientAccountService::new(&config)?);
+        Arc::new(CachingAccountService::new(client))
+    } else {
+        if config.keystore_type != KeystoreType::Mock {
+            tracing::error!(
+                "BLOCKCHAIN_PROVIDER is required when keystore_type is not Mock. \
+                 Without it, authentication and quota are disabled."
+            );
+            return Err(OdisError::FullNodeError);
+        }
+        tracing::warn!(
+            "BLOCKCHAIN_PROVIDER is not set: requests are not authenticated and every account \
+             gets the mock quota. This mode is for development with the mock key store only."
+        );
+        Arc::new(MockAccountService::new(
+            config.mock_dek.clone(),
+            config.mock_total_quota,
+        ))
+    };
+
+    build_router_with_services(config, account_service).await
+}
+
+/// Build the axum router with an explicit AccountService.
+/// Integration tests use this to inject a mock while still exercising real auth.
+pub async fn build_router_with_services(
+    config: Config,
+    account_service: Arc<dyn AccountService>,
+) -> Result<Router, OdisError> {
     let request_service: Arc<dyn PnpRequestService> = if config.db_path == ":memory:" {
         Arc::new(InMemoryPnpRequestService::new())
     } else {
@@ -35,6 +73,7 @@ pub async fn build_router(config: Config) -> Result<Router, OdisError> {
 
     let state = AppState {
         config: Arc::new(config),
+        account_service,
         request_service,
         key_provider: Arc::new(MockKeyProvider::new()),
     };
@@ -63,8 +102,6 @@ mod tests {
     use http_body_util::BodyExt;
     use tower::ServiceExt;
 
-    use crate::config::KeystoreType;
-
     fn test_config(pnp_enabled: bool) -> Config {
         Config {
             server_port: 8080,
@@ -75,9 +112,12 @@ mod tests {
             db_path: ":memory:".to_string(),
             blockchain_provider: None,
             chain_id: 11142220,
-            should_mock_account_service: true,
             mock_dek: None,
             mock_total_quota: 10,
+            accounts_contract_address: None,
+            odis_payments_contract_address: None,
+            full_node_retry_count: 5,
+            full_node_retry_delay_ms: 100,
             timeout_ms: 5000,
             query_price_per_cusd: 0.001,
         }
@@ -349,5 +389,16 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
+    }
+
+    #[tokio::test]
+    async fn build_router_fails_for_private_key_keystore_without_blockchain_provider() {
+        let config = Config {
+            keystore_type: KeystoreType::PrivateKey,
+            ..test_config(true)
+        };
+
+        let result = build_router(config).await;
+        assert!(result.is_err());
     }
 }
