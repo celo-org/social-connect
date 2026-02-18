@@ -127,7 +127,10 @@ pub async fn pnp_sign_handler(
 
     // If not a duplicate, check quota
     if duplicate_sig.is_none() && used_quota >= total_quota {
-        return Err(OdisError::ExceededQuota);
+        return Err(OdisError::ExceededQuota {
+            total_quota,
+            performed_query_count: used_quota,
+        });
     }
 
     let key_version = requested_key_version.unwrap_or(state.config.pnp_latest_key_version);

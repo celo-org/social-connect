@@ -13,7 +13,10 @@ pub enum OdisError {
     /// 401 — missing or invalid authentication
     UnauthenticatedUser,
     /// 403 — exceeded service query quota
-    ExceededQuota,
+    ExceededQuota {
+        total_quota: u32,
+        performed_query_count: u32,
+    },
     /// 500 — BLS signature computation failed
     SignatureComputationFailure,
     /// 500 — database read/write failed
@@ -39,7 +42,7 @@ impl OdisError {
         match self {
             Self::InvalidInput | Self::InvalidKeyVersion => StatusCode::BAD_REQUEST,
             Self::UnauthenticatedUser => StatusCode::UNAUTHORIZED,
-            Self::ExceededQuota => StatusCode::FORBIDDEN,
+            Self::ExceededQuota { .. } => StatusCode::FORBIDDEN,
             Self::SignatureComputationFailure
             | Self::DatabaseError
             | Self::KeyFetchError
@@ -62,7 +65,9 @@ impl OdisError {
             Self::UnauthenticatedUser => {
                 "CELO_ODIS_WARN_02 BAD_INPUT Missing or invalid authentication"
             }
-            Self::ExceededQuota => "CELO_ODIS_WARN_03 QUOTA Requester exceeded service query quota",
+            Self::ExceededQuota { .. } => {
+                "CELO_ODIS_WARN_03 QUOTA Requester exceeded service query quota"
+            }
             Self::SignatureComputationFailure => {
                 "CELO_ODIS_ERR_05 SIG_ERR Failed to compute BLS signature"
             }
@@ -91,13 +96,22 @@ impl std::fmt::Display for OdisError {
 impl std::error::Error for OdisError {}
 
 /// JSON error response: `{ success: false, version, error }`.
+/// ExceededQuota additionally includes `totalQuota` and `performedQueryCount`.
 impl IntoResponse for OdisError {
     fn into_response(self) -> axum::response::Response {
-        let body = serde_json::json!({
+        let mut body = serde_json::json!({
             "success": false,
             "version": env!("CARGO_PKG_VERSION"),
             "error": self.error_code(),
         });
+        if let Self::ExceededQuota {
+            total_quota,
+            performed_query_count,
+        } = &self
+        {
+            body["totalQuota"] = serde_json::json!(total_quota);
+            body["performedQueryCount"] = serde_json::json!(performed_query_count);
+        }
         (self.status_code(), Json(body)).into_response()
     }
 }
@@ -121,7 +135,11 @@ mod tests {
             StatusCode::UNAUTHORIZED
         );
         assert_eq!(
-            OdisError::ExceededQuota.status_code(),
+            OdisError::ExceededQuota {
+                total_quota: 0,
+                performed_query_count: 0
+            }
+            .status_code(),
             StatusCode::FORBIDDEN
         );
         assert_eq!(
@@ -180,9 +198,12 @@ mod tests {
                 .starts_with("CELO_ODIS_WARN_02")
         );
         assert!(
-            OdisError::ExceededQuota
-                .error_code()
-                .starts_with("CELO_ODIS_WARN_03")
+            OdisError::ExceededQuota {
+                total_quota: 0,
+                performed_query_count: 0
+            }
+            .error_code()
+            .starts_with("CELO_ODIS_WARN_03")
         );
         assert!(
             OdisError::SignatureComputationFailure
@@ -241,7 +262,11 @@ mod tests {
     async fn into_response_produces_json_error() {
         use http_body_util::BodyExt;
 
-        let response = OdisError::ExceededQuota.into_response();
+        let response = OdisError::ExceededQuota {
+            total_quota: 10,
+            performed_query_count: 10,
+        }
+        .into_response();
 
         assert_eq!(response.status(), StatusCode::FORBIDDEN);
 
@@ -254,5 +279,19 @@ mod tests {
             json["error"],
             "CELO_ODIS_WARN_03 QUOTA Requester exceeded service query quota"
         );
+        assert_eq!(json["totalQuota"], 10);
+        assert_eq!(json["performedQueryCount"], 10);
+    }
+
+    #[tokio::test]
+    async fn into_response_non_quota_error_has_no_quota_fields() {
+        use http_body_util::BodyExt;
+
+        let response = OdisError::InvalidInput.into_response();
+        let body = response.into_body().collect().await.unwrap().to_bytes();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+
+        assert!(json.get("totalQuota").is_none());
+        assert!(json.get("performedQueryCount").is_none());
     }
 }
