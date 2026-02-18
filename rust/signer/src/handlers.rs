@@ -1,3 +1,4 @@
+use ::metrics::{counter, histogram};
 use axum::Json;
 use axum::body::Bytes;
 use axum::extract::State;
@@ -7,6 +8,7 @@ use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 
 use crate::auth::{Authorization, authenticate_user};
 use crate::errors::OdisError;
+use crate::metrics as metric_names;
 use crate::server::AppState;
 use crate::types::{
     AuthenticationMethod, KEY_VERSION_HEADER, KeyVersion, PnpQuotaRequest, PnpQuotaResponseSuccess,
@@ -108,6 +110,10 @@ pub async fn pnp_sign_handler(
         )?;
     }
 
+    if request.authentication_method != Some(AuthenticationMethod::EncryptionKey) {
+        counter!(metric_names::REQUESTS_WITH_WALLET_ADDRESS).increment(1);
+    }
+
     let duplicate_sig = state
         .request_service
         .get_duplicate_request(request.account, &request.blinded_query_phone_number)
@@ -126,7 +132,12 @@ pub async fn pnp_sign_handler(
 
     let key_version = requested_key_version.unwrap_or(state.config.pnp_latest_key_version);
 
+    let remaining_quota = total_quota.saturating_sub(used_quota);
+    histogram!(metric_names::USER_REMAINING_QUOTA, "endpoint" => "/sign")
+        .record(remaining_quota as f64);
+
     let (signature, performed_query_count, warnings) = if let Some(sig) = duplicate_sig {
+        counter!(metric_names::DUPLICATE_REQUESTS).increment(1);
         (sig, used_quota, vec![DUPLICATE_REQUEST_WARNING.to_string()])
     } else {
         // Fetch key and compute signature
@@ -138,7 +149,10 @@ pub async fn pnp_sign_handler(
             .decode(&request.blinded_query_phone_number)
             .map_err(|_| OdisError::InvalidInput)?;
         let sig_bytes = crate::crypto::compute_blinded_signature(&blinded_msg, &key_bytes)
-            .map_err(|_| OdisError::SignatureComputationFailure)?;
+            .map_err(|_| {
+                counter!(metric_names::SIGNATURE_COMPUTATION_ERRORS).increment(1);
+                OdisError::SignatureComputationFailure
+            })?;
         let signature = BASE64.encode(&sig_bytes);
 
         // Record the request

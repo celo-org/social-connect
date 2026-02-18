@@ -21,6 +21,8 @@ sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite"] }
 thiserror = "2"
 threshold-bls = { git = "https://github.com/celo-org/celo-threshold-bls-rs", package = "threshold-bls" }
 tokio = { version = "1", features = ["full"] }
+metrics = "0.24"
+metrics-exporter-prometheus = "0.16"
 tower = { version = "0.5", features = ["util"] }
 tower-http = { version = "0.6", features = ["catch-panic", "limit", "timeout", "trace"] }
 tracing = "0.1"

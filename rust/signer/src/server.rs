@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use axum::Router;
 use axum::http::StatusCode;
+use axum::middleware;
 use axum::routing::{get, post};
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::limit::RequestBodyLimitLayer;
@@ -10,14 +11,16 @@ use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::account_service::{
-    AccountService, CachingAccountService, ClientAccountService, MockAccountService,
+    AccountService, CachingAccountService, ClientAccountService, MeteredAccountService,
+    MockAccountService,
 };
 use crate::config::{Config, KeystoreType};
 use crate::errors::OdisError;
 use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
 use crate::key_management::{KeyProvider, MockKeyProvider};
+use crate::metrics;
 use crate::request_service::{
-    InMemoryPnpRequestService, PnpRequestService, SqlitePnpRequestService,
+    InMemoryPnpRequestService, MeteredPnpRequestService, PnpRequestService, SqlitePnpRequestService,
 };
 
 /// Shared application state available to all handlers.
@@ -37,7 +40,8 @@ pub struct AppState {
 pub async fn build_router(config: Config) -> Result<Router, OdisError> {
     let account_service: Arc<dyn AccountService> = if config.blockchain_provider.is_some() {
         let client = Arc::new(ClientAccountService::new(&config)?);
-        Arc::new(CachingAccountService::new(client))
+        let metered = Arc::new(MeteredAccountService::new(client));
+        Arc::new(CachingAccountService::new(metered))
     } else {
         if config.keystore_type != KeystoreType::Mock {
             tracing::error!(
@@ -61,11 +65,15 @@ pub async fn build_router_with_services(
     config: Config,
     account_service: Arc<dyn AccountService>,
 ) -> Result<Router, OdisError> {
-    let request_service: Arc<dyn PnpRequestService> = if config.db_path == ":memory:" {
+    let inner_request_service: Arc<dyn PnpRequestService> = if config.db_path == ":memory:" {
         Arc::new(InMemoryPnpRequestService::new())
     } else {
         Arc::new(SqlitePnpRequestService::new(&config.db_path).await?)
     };
+    let request_service: Arc<dyn PnpRequestService> =
+        Arc::new(MeteredPnpRequestService::new(inner_request_service));
+
+    let metrics_handle = metrics::install_recorder();
 
     let state = AppState {
         config: Arc::new(config),
@@ -80,6 +88,11 @@ pub async fn build_router_with_services(
         .route("/status", get(status_handler))
         .route("/sign", post(pnp_sign_handler))
         .route("/quotaStatus", post(pnp_quota_handler))
+        .route(
+            "/metrics",
+            get(move || std::future::ready(metrics_handle.render())),
+        )
+        .layer(middleware::from_fn(metrics::http_metrics_layer))
         .layer(TraceLayer::new_for_http())
         .layer(CatchPanicLayer::new())
         .layer(TimeoutLayer::with_status_code(
@@ -385,6 +398,32 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
+    }
+
+    #[tokio::test]
+    async fn metrics_endpoint_returns_prometheus_text() {
+        let app = build_router(test_config(false)).await.unwrap();
+
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/metrics")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+
+        let body = response.into_body().collect().await.unwrap().to_bytes();
+        let text = String::from_utf8(body.to_vec()).unwrap();
+        // Prometheus text format uses "# TYPE" and "# HELP" lines
+        // At minimum, the output should be valid (possibly empty if no metrics recorded yet)
+        assert!(
+            text.is_empty() || text.contains("# TYPE") || text.contains("# HELP"),
+            "expected Prometheus text format"
+        );
     }
 
     #[tokio::test]
