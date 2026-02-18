@@ -99,10 +99,15 @@ pub async fn pnp_quota_handler(
 /// encoded. Returns `None` when the key cannot be fetched or the computation
 /// fails, after logging the cause: like the TS signer, the caller reports both
 /// as a signature computation failure.
-fn compute_signature(state: &AppState, key_version: u32, blinded_query: &str) -> Option<String> {
+async fn compute_signature(
+    state: &AppState,
+    key_version: u32,
+    blinded_query: &str,
+) -> Option<String> {
     let hex_key = state
         .key_provider
         .get_key(&state.config.pnp_key_name_base, key_version)
+        .await
         .inspect_err(|e| tracing::error!("failed to fetch key version {key_version}: {e}"))
         .ok()?;
     let key_bytes = hex::decode(&hex_key)
@@ -180,6 +185,7 @@ pub async fn pnp_sign_handler(
         (sig, used_quota, vec![DUPLICATE_REQUEST_WARNING.to_string()])
     } else {
         let signature = compute_signature(&state, key_version, &request.blinded_query_phone_number)
+            .await
             .ok_or(OdisError::SignatureComputationFailure {
                 total_quota,
                 performed_query_count: used_quota,
