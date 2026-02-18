@@ -6,6 +6,8 @@ use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use http_body_util::BodyExt;
+use k256::ecdsa::{SigningKey, signature::Signer as _};
+use sha2::{Digest, Sha256};
 use tempfile::NamedTempFile;
 use tower::ServiceExt;
 
@@ -423,4 +425,183 @@ async fn quota_succeeds_with_valid_wallet_key_signature() {
     assert_eq!(response.status(), StatusCode::OK);
     let json = response_json(response).await;
     assert_eq!(json["success"], true);
+}
+
+// --- DEK authentication tests ---
+
+/// Produce a DEK signature matching the TS `signWithRawKey` function.
+/// Returns a JSON-encoded DER byte array for the Authorization header.
+fn dek_sign(body: &str, signing_key: &SigningKey) -> String {
+    let double_stringified = serde_json::to_string(body).unwrap();
+    let digest = Sha256::digest(double_stringified.as_bytes());
+    let digest_hex = hex::encode(digest);
+    let sig: k256::ecdsa::Signature = signing_key.sign(digest_hex.as_bytes());
+    serde_json::to_string(&sig.to_der().as_bytes()).unwrap()
+}
+
+fn dek_public_key_hex(key: &SigningKey) -> String {
+    hex::encode(key.verifying_key().to_sec1_bytes())
+}
+
+/// Build a router with auth enabled and a DEK registered for the account service.
+async fn build_dek_auth_router(dek_public_key: &str) -> Router {
+    let config = Config {
+        blockchain_provider: Some("http://localhost:8545".to_string()),
+        ..test_config()
+    };
+    let account_service = Arc::new(MockAccountService::new(
+        Some(dek_public_key.to_string()),
+        10,
+    ));
+    build_router_with_services(config, account_service)
+        .await
+        .unwrap()
+}
+
+#[tokio::test]
+async fn sign_succeeds_with_valid_dek_signature() {
+    let dek_key = SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
+    let dek_pub = dek_public_key_hex(&dek_key);
+
+    let app = build_dek_auth_router(&dek_pub).await;
+
+    let body = serde_json::json!({
+        "account": ACCOUNT,
+        "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER,
+        "authenticationMethod": "encryption_key",
+    })
+    .to_string();
+    let auth = dek_sign(&body, &dek_key);
+
+    let response = app
+        .oneshot(sign_request_with_auth(&body, &auth))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["success"], true);
+    assert_eq!(json["signature"], EXPECTED_SIG_V1);
+}
+
+#[tokio::test]
+async fn sign_returns_401_with_wrong_dek() {
+    let dek_key = SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
+    let wrong_key = SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
+    let dek_pub = dek_public_key_hex(&dek_key);
+
+    let app = build_dek_auth_router(&dek_pub).await;
+
+    // Sign with wrong_key but account service has dek_key registered
+    let body = serde_json::json!({
+        "account": ACCOUNT,
+        "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER,
+        "authenticationMethod": "encryption_key",
+    })
+    .to_string();
+    let auth = dek_sign(&body, &wrong_key);
+
+    let response = app
+        .oneshot(sign_request_with_auth(&body, &auth))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+#[tokio::test]
+async fn quota_succeeds_with_valid_dek_signature() {
+    let dek_key = SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
+    let dek_pub = dek_public_key_hex(&dek_key);
+
+    let app = build_dek_auth_router(&dek_pub).await;
+
+    let body = serde_json::json!({
+        "account": ACCOUNT,
+        "authenticationMethod": "encryption_key",
+    })
+    .to_string();
+    let auth = dek_sign(&body, &dek_key);
+
+    let response = app
+        .oneshot(quota_request_with_auth(&body, &auth))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["success"], true);
+}
+
+#[tokio::test]
+async fn quota_returns_401_with_wrong_dek() {
+    let dek_key = SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
+    let wrong_key = SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
+    let dek_pub = dek_public_key_hex(&dek_key);
+
+    let app = build_dek_auth_router(&dek_pub).await;
+
+    let body = serde_json::json!({
+        "account": ACCOUNT,
+        "authenticationMethod": "encryption_key",
+    })
+    .to_string();
+    let auth = dek_sign(&body, &wrong_key);
+
+    let response = app
+        .oneshot(quota_request_with_auth(&body, &auth))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+}
+
+// --- Per-account quota tests ---
+
+#[tokio::test]
+async fn sign_returns_403_when_account_has_zero_quota() {
+    let signer = PrivateKeySigner::random();
+    let config = Config {
+        blockchain_provider: Some("http://localhost:8545".to_string()),
+        ..test_config()
+    };
+    let account_service = Arc::new(MockAccountService::new(None, 0));
+    let app = build_router_with_services(config, account_service)
+        .await
+        .unwrap();
+
+    let body = sign_body(&format!("{}", signer.address()), BLINDED_PHONE_NUMBER);
+    let sig_hex = wallet_sign(&signer, &body).await;
+
+    let response = app
+        .oneshot(sign_request_with_auth(&body, &sig_hex))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::FORBIDDEN);
+}
+
+#[tokio::test]
+async fn quota_reflects_account_service_total_quota() {
+    let signer = PrivateKeySigner::random();
+    let config = Config {
+        blockchain_provider: Some("http://localhost:8545".to_string()),
+        ..test_config()
+    };
+    let account_service = Arc::new(MockAccountService::new(None, 42));
+    let app = build_router_with_services(config, account_service)
+        .await
+        .unwrap();
+
+    let body = serde_json::json!({ "account": format!("{}", signer.address()) }).to_string();
+    let sig_hex = wallet_sign(&signer, &body).await;
+
+    let response = app
+        .oneshot(quota_request_with_auth(&body, &sig_hex))
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["totalQuota"], 42);
 }

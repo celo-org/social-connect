@@ -386,4 +386,15 @@ mod tests {
 
         assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
     }
+
+    #[tokio::test]
+    async fn build_router_fails_for_private_key_keystore_without_blockchain_provider() {
+        let config = Config {
+            keystore_type: KeystoreType::PrivateKey,
+            ..test_config(true)
+        };
+
+        let result = build_router(config).await;
+        assert!(result.is_err());
+    }
 }
