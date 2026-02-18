@@ -211,13 +211,7 @@ mod tests {
 
     #[test]
     fn missing_authorization_header() {
-        assert!(!authenticate_user(
-            b"body",
-            None,
-            Address::ZERO,
-            None,
-            None,
-        ));
+        assert!(!authenticate_user(b"body", None, Address::ZERO, None, None,));
     }
 
     #[test]
