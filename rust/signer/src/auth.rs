@@ -346,4 +346,87 @@ mod tests {
             &mut warnings,
         ));
     }
+
+    #[test]
+    fn dek_invalid_public_key() {
+        let mut warnings = vec![];
+        // "notAValidKeyEncryption" is not valid hex for a sec1 public key
+        assert!(!authenticate_user(
+            DEK_BODY.as_bytes(),
+            Some("sig"),
+            DEK_ACCOUNT,
+            Some(AuthenticationMethod::EncryptionKey),
+            Some("notAValidKeyEncryption"),
+            &mut warnings,
+        ));
+    }
+
+    #[test]
+    fn dek_message_manipulated_after_signing() {
+        let signing_key = dek_signing_key();
+        let authorization = sign_dek(DEK_BODY, &signing_key);
+
+        // Modify every fourth character of the body and verify signature fails
+        let body_bytes = DEK_BODY.as_bytes();
+        for i in (0..body_bytes.len()).step_by(4) {
+            let mut modified = body_bytes.to_vec();
+            modified[i] = modified[i].wrapping_add(1);
+
+            let mut warnings = vec![];
+            assert!(
+                !authenticate_user(
+                    &modified,
+                    Some(&authorization),
+                    DEK_ACCOUNT,
+                    Some(AuthenticationMethod::EncryptionKey),
+                    Some(&public_key_hex(&signing_key)),
+                    &mut warnings,
+                ),
+                "Should fail for body modified at index {i}"
+            );
+        }
+    }
+
+    #[test]
+    fn dek_modified_signature() {
+        let signing_key = dek_signing_key();
+        let authorization = sign_dek(DEK_BODY, &signing_key);
+
+        // Prepend a 0 byte to the DER array to corrupt it
+        let mut der_bytes: Vec<u8> = serde_json::from_str(&authorization).unwrap();
+        der_bytes.insert(0, 0);
+        let modified = serde_json::to_string(&der_bytes).unwrap();
+
+        let mut warnings = vec![];
+        assert!(!authenticate_user(
+            DEK_BODY.as_bytes(),
+            Some(&modified),
+            DEK_ACCOUNT,
+            Some(AuthenticationMethod::EncryptionKey),
+            Some(&public_key_hex(&signing_key)),
+            &mut warnings,
+        ));
+    }
+
+    #[test]
+    fn dek_incorrectly_generated_signature() {
+        // Sign the raw body without the double-stringify + sha256 digest.
+        // This is what happens if someone uses key.sign(body) directly instead of
+        // key.sign(getMessageDigest(body)).
+        let signing_key = dek_signing_key();
+
+        use k256::ecdsa::signature::Signer as _;
+        let sig: K256Signature = signing_key.sign(DEK_BODY.as_bytes());
+        let authorization = serde_json::to_string(&sig.to_der().as_bytes()).unwrap();
+
+        let mut warnings = vec![];
+        assert!(!authenticate_user(
+            DEK_BODY.as_bytes(),
+            Some(&authorization),
+            DEK_ACCOUNT,
+            Some(AuthenticationMethod::EncryptionKey),
+            Some(&public_key_hex(&signing_key)),
+            &mut warnings,
+        ));
+    }
 }
