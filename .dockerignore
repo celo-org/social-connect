@@ -13,5 +13,9 @@ dockerfiles
 # Cargo build output; locally it can hold tens of GB
 target
 
+# build artifacts
+target
+**/target
+
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
