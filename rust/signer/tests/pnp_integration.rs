@@ -152,7 +152,7 @@ async fn sign_duplicate_returns_cached_signature_without_incrementing_quota() {
     assert_eq!(response.status(), StatusCode::OK);
     let json = response_json(response).await;
     assert_eq!(json["performedQueryCount"], 1);
-    assert!(json.get("warnings").is_none());
+    assert_eq!(json["warnings"], serde_json::json!([]));
 
     // Duplicate request
     let response = app.oneshot(sign_request(&body)).await.unwrap();

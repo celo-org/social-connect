@@ -89,7 +89,6 @@ pub struct SignMessageResponseSuccess {
     pub signature: String,
     pub performed_query_count: u32,
     pub total_quota: u32,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub warnings: Vec<String>,
 }
 
@@ -100,7 +99,6 @@ pub struct PnpQuotaResponseSuccess {
     pub version: String,
     pub performed_query_count: u32,
     pub total_quota: u32,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     pub warnings: Vec<String>,
 }
 
@@ -248,7 +246,7 @@ mod tests {
 
     #[test]
     fn sign_response_serialization() {
-        // Success: camelCase keys, empty warnings omitted
+        // Success: camelCase keys, empty warnings always present
         let success = SignMessageResponseSuccess {
             success: true,
             version: "1.0.0".to_string(),
@@ -260,6 +258,6 @@ mod tests {
         let json = serde_json::to_value(&success).unwrap();
         assert_eq!(json["performedQueryCount"], 1);
         assert_eq!(json["totalQuota"], 10);
-        assert!(json.get("warnings").is_none());
+        assert_eq!(json["warnings"], serde_json::json!([]));
     }
 }
