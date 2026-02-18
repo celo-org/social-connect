@@ -93,6 +93,9 @@ src/
 
 There's a WIP Rust port of the signer. The Rust port aims to provide a more efficient and secure implementation of the application's core functionalities. The Rust port is currently in development and will be available soon.
 
+### Design decisions
+- SQLite is the only supported database. No PostgreSQL/MySQL support needed.
+
 ### Conventions
 - Use a workspace layout with `Cargo.toml` at the root modules in the `/rust` directory.
 - Prefer common crates: axum, sqlx, serde, tokio, thiserror, anyhow
