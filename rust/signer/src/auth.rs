@@ -1,7 +1,7 @@
 use alloy::primitives::Address;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use k256::ecdsa::signature::Verifier;
+use k256::ecdsa::signature::hazmat::PrehashVerifier;
 use k256::ecdsa::{Signature as K256Signature, VerifyingKey};
 use sha2::{Digest, Sha256};
 use tracing::{info, warn};
@@ -131,7 +131,6 @@ fn verify_dek_signature(body: &[u8], authorization: &str, dek: &str) -> bool {
     };
     let double_stringified = serde_json::to_string(body_str).unwrap_or_default();
     let digest = Sha256::digest(double_stringified.as_bytes());
-    let digest_hex = hex::encode(digest);
 
     // The Authorization header contains a JSON array of DER byte values, e.g. [48, 68, 2, ...]
     let der_bytes: Vec<u8> = match serde_json::from_str::<Vec<u8>>(authorization) {
@@ -144,14 +143,14 @@ fn verify_dek_signature(body: &[u8], authorization: &str, dek: &str) -> bool {
         Err(_) => return false,
     };
 
-    // The TS `key.verify(hexDigest, parsedSig)` passes the hex-encoded digest as a string.
-    // elliptic.js treats string inputs as character bytes, so the ECDSA verification runs
-    // over the ASCII bytes of the hex string (not the raw digest bytes).
-    // We replicate that by passing `digest_hex.as_bytes()` to `Verifier::verify`, which
-    // internally hashes those bytes before checking the signature.
-    verifying_key
-        .verify(digest_hex.as_bytes(), &signature)
-        .is_ok()
+    // k256 only verifies signatures with a low S. elliptic.js, which clients sign with,
+    // does not normalise S and accepts both forms, so bring a high S down first.
+    let signature = signature.normalize_s().unwrap_or(signature);
+
+    // elliptic.js's `key.verify(hexDigest, sig)` treats the hex string as a BigNumber
+    // (via `new BN(msg, 16)`) and uses it directly as the hash value for ECDSA — no
+    // additional hashing. We must use `verify_prehash` with the raw digest bytes to match.
+    verifying_key.verify_prehash(&digest, &signature).is_ok()
 }
 
 #[cfg(test)]
@@ -167,10 +166,9 @@ mod tests {
     fn sign_dek(body: &str, signing_key: &k256::ecdsa::SigningKey) -> String {
         let double_stringified = serde_json::to_string(body).unwrap();
         let digest = Sha256::digest(double_stringified.as_bytes());
-        let digest_hex = hex::encode(digest);
 
-        use k256::ecdsa::signature::Signer as _;
-        let sig: K256Signature = signing_key.sign(digest_hex.as_bytes());
+        use k256::ecdsa::signature::hazmat::PrehashSigner;
+        let sig: K256Signature = signing_key.sign_prehash(&digest).unwrap();
         serde_json::to_string(&sig.to_der().as_bytes()).unwrap()
     }
 
@@ -370,6 +368,49 @@ mod tests {
             Some(AuthenticationMethod::EncryptionKey),
             Some(&public_key_hex(&signing_key)),
         ));
+    }
+
+    /// Signatures made by the TS SDK (`signWithRawKey`, elliptic 6.6.1) with the DEK test
+    /// key. elliptic does not normalise S, so about half of what clients send has a high S.
+    #[test]
+    fn dek_signatures_from_the_ts_sdk_verify_with_low_and_high_s() {
+        let dek = Some(public_key_hex(&dek_signing_key()));
+        let vectors = [
+            (
+                "low S",
+                r#"{"account":"0xc1912fee45d61c87cc5ea59dae31190fffff232d","authenticationMethod":"encryption_key","sessionID":"vector-2"}"#,
+                "[48,68,2,32,55,234,200,222,162,18,178,238,148,191,10,96,152,167,230,72,40,116,160,249,110,24,164,233,253,16,92,217,41,71,151,195,2,32,101,174,109,236,83,83,238,63,135,247,251,172,121,226,207,31,100,150,65,90,139,254,103,148,110,176,100,240,237,5,95,59]",
+            ),
+            (
+                "high S",
+                r#"{"account":"0xc1912fee45d61c87cc5ea59dae31190fffff232d","authenticationMethod":"encryption_key","sessionID":"vector-0"}"#,
+                "[48,69,2,32,108,69,202,239,20,151,18,175,86,171,254,245,244,243,204,106,211,172,69,130,204,54,192,130,44,35,60,94,147,55,216,189,2,33,0,222,245,206,243,210,56,174,71,182,149,143,239,127,189,254,146,14,174,91,139,241,16,245,204,205,214,154,86,18,10,44,187]",
+            ),
+        ];
+
+        for (name, body, authorization) in vectors {
+            assert!(
+                authenticate_user(
+                    body.as_bytes(),
+                    Some(authorization),
+                    DEK_ACCOUNT,
+                    Some(AuthenticationMethod::EncryptionKey),
+                    dek.as_deref(),
+                ),
+                "{name} signature must verify"
+            );
+            // The same signature over a different body must not verify.
+            assert!(
+                !authenticate_user(
+                    DEK_BODY.as_bytes(),
+                    Some(authorization),
+                    DEK_ACCOUNT,
+                    Some(AuthenticationMethod::EncryptionKey),
+                    dek.as_deref(),
+                ),
+                "{name} signature must not verify for another body"
+            );
+        }
     }
 
     #[tokio::test]

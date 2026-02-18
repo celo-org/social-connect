@@ -1,3 +1,4 @@
+use alloy::primitives::Address;
 use std::env;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -16,9 +17,12 @@ pub struct Config {
     pub db_path: String,
     pub blockchain_provider: Option<String>,
     pub chain_id: u64,
-    pub should_mock_account_service: bool,
     pub mock_dek: Option<String>,
     pub mock_total_quota: u32,
+    pub accounts_contract_address: Option<Address>,
+    pub odis_payments_contract_address: Option<Address>,
+    pub full_node_retry_count: u32,
+    pub full_node_retry_delay_ms: u64,
     pub timeout_ms: u64,
     pub query_price_per_cusd: f64,
 }
@@ -51,12 +55,12 @@ impl Config {
             db_path: parse_env_string("DB_PATH", Some(":memory:"))?,
             blockchain_provider: env::var("BLOCKCHAIN_PROVIDER").ok(),
             chain_id: parse_env("CHAIN_ID", Some(11142220))?,
-            should_mock_account_service: parse_env_bool(
-                "SHOULD_MOCK_ACCOUNT_SERVICE",
-                Some(false),
-            )?,
             mock_dek: env::var("MOCK_DEK").ok(),
             mock_total_quota: parse_env("MOCK_TOTAL_QUOTA", Some(10))?,
+            accounts_contract_address: parse_env_address("ACCOUNTS_CONTRACT_ADDRESS")?,
+            odis_payments_contract_address: parse_env_address("ODIS_PAYMENTS_CONTRACT_ADDRESS")?,
+            full_node_retry_count: parse_env("FULL_NODE_RETRY_COUNT", Some(5))?,
+            full_node_retry_delay_ms: parse_env("FULL_NODE_RETRY_DELAY_MS", Some(100))?,
             timeout_ms: parse_env("ODIS_SIGNER_TIMEOUT", Some(5000))?,
             query_price_per_cusd: parse_env("QUERY_PRICE_PER_CUSD", Some(0.001))?,
         })
@@ -83,6 +87,19 @@ where
             source: Box::new(e),
         }),
         Err(_) => default.ok_or_else(|| ConfigError::Missing(name.to_string())),
+    }
+}
+
+fn parse_env_address(name: &str) -> Result<Option<Address>, ConfigError> {
+    match env::var(name) {
+        Ok(val) => val
+            .parse::<Address>()
+            .map(Some)
+            .map_err(|e| ConfigError::InvalidValue {
+                name: name.to_string(),
+                source: Box::new(e),
+            }),
+        Err(_) => Ok(None),
     }
 }
 
@@ -115,6 +132,7 @@ fn parse_keystore_type() -> Result<KeystoreType, ConfigError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloy::primitives::address;
     use std::sync::Mutex;
 
     // Env vars are process-global, so tests that modify them must not run in parallel.
@@ -135,9 +153,12 @@ mod tests {
             "DB_PATH",
             "BLOCKCHAIN_PROVIDER",
             "CHAIN_ID",
-            "SHOULD_MOCK_ACCOUNT_SERVICE",
             "MOCK_DEK",
             "MOCK_TOTAL_QUOTA",
+            "ACCOUNTS_CONTRACT_ADDRESS",
+            "ODIS_PAYMENTS_CONTRACT_ADDRESS",
+            "FULL_NODE_RETRY_COUNT",
+            "FULL_NODE_RETRY_DELAY_MS",
             "ODIS_SIGNER_TIMEOUT",
             "QUERY_PRICE_PER_CUSD",
         ] {
@@ -163,9 +184,12 @@ mod tests {
         assert_eq!(config.db_path, ":memory:");
         assert!(config.blockchain_provider.is_none());
         assert_eq!(config.chain_id, 11142220);
-        assert!(!config.should_mock_account_service);
         assert!(config.mock_dek.is_none());
         assert_eq!(config.mock_total_quota, 10);
+        assert_eq!(config.accounts_contract_address, None);
+        assert_eq!(config.odis_payments_contract_address, None);
+        assert_eq!(config.full_node_retry_count, 5);
+        assert_eq!(config.full_node_retry_delay_ms, 100);
         assert_eq!(config.timeout_ms, 5000);
         assert!((config.query_price_per_cusd - 0.001).abs() < f64::EPSILON);
     }
@@ -183,9 +207,18 @@ mod tests {
             set("DB_PATH", "/tmp/test.db");
             set("BLOCKCHAIN_PROVIDER", "https://rpc.example.com");
             set("CHAIN_ID", "42220");
-            set("SHOULD_MOCK_ACCOUNT_SERVICE", "1");
             set("MOCK_DEK", "04abc123");
             set("MOCK_TOTAL_QUOTA", "100");
+            set(
+                "ACCOUNTS_CONTRACT_ADDRESS",
+                "0x1234567890abcdef1234567890abcdef12345678",
+            );
+            set(
+                "ODIS_PAYMENTS_CONTRACT_ADDRESS",
+                "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            );
+            set("FULL_NODE_RETRY_COUNT", "3");
+            set("FULL_NODE_RETRY_DELAY_MS", "200");
             set("ODIS_SIGNER_TIMEOUT", "10000");
             set("QUERY_PRICE_PER_CUSD", "0.01");
         }
@@ -203,9 +236,18 @@ mod tests {
             Some("https://rpc.example.com")
         );
         assert_eq!(config.chain_id, 42220);
-        assert!(config.should_mock_account_service);
         assert_eq!(config.mock_dek.as_deref(), Some("04abc123"));
         assert_eq!(config.mock_total_quota, 100);
+        assert_eq!(
+            config.accounts_contract_address,
+            Some(address!("0x1234567890abcdef1234567890abcdef12345678"))
+        );
+        assert_eq!(
+            config.odis_payments_contract_address,
+            Some(address!("0xabcdefabcdefabcdefabcdefabcdefabcdefabcd"))
+        );
+        assert_eq!(config.full_node_retry_count, 3);
+        assert_eq!(config.full_node_retry_delay_ms, 200);
         assert_eq!(config.timeout_ms, 10000);
         assert!((config.query_price_per_cusd - 0.01).abs() < f64::EPSILON);
     }
