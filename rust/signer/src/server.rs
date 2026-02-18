@@ -17,7 +17,7 @@ use crate::account_service::{
 use crate::config::{Config, KeystoreType};
 use crate::errors::OdisError;
 use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
-use crate::key_management::{KeyProvider, MockKeyProvider};
+use crate::key_management::{GoogleSecretManagerKeyProvider, KeyProvider, MockKeyProvider};
 use crate::metrics;
 use crate::request_service::{
     MeteredPnpRequestService, PnpRequestService, SqlitePnpRequestService,
@@ -56,14 +56,32 @@ pub async fn build_router(config: Config) -> Result<Router, OdisError> {
         ))
     };
 
-    build_router_with_services(config, account_service).await
+    let key_provider: Arc<dyn KeyProvider> = match config.keystore_type {
+        KeystoreType::Mock => Arc::new(MockKeyProvider::new()),
+        KeystoreType::GoogleSecretManager => {
+            let project_id = config.google_project_id.as_deref().ok_or_else(|| {
+                tracing::error!(
+                    "KEYSTORE_GOOGLE_PROJECT_ID is required when keystore_type is GoogleSecretManager"
+                );
+                OdisError::KeyFetchError
+            })?;
+            let provider = GoogleSecretManagerKeyProvider::new(project_id).await?;
+            provider
+                .prefetch(&config.pnp_key_name_base, config.pnp_latest_key_version)
+                .await?;
+            Arc::new(provider)
+        }
+    };
+
+    build_router_with_services(config, account_service, key_provider).await
 }
 
-/// Build the axum router with an explicit AccountService.
-/// Integration tests use this to inject a mock while still exercising real auth.
+/// Build the axum router with explicit services.
+/// Integration tests use this to inject mocks while still exercising real auth.
 pub async fn build_router_with_services(
     config: Config,
     account_service: Arc<dyn AccountService>,
+    key_provider: Arc<dyn KeyProvider>,
 ) -> Result<Router, OdisError> {
     let inner_request_service: Arc<dyn PnpRequestService> =
         Arc::new(SqlitePnpRequestService::new(&config.db_path).await?);
@@ -76,7 +94,7 @@ pub async fn build_router_with_services(
         config: Arc::new(config),
         account_service,
         request_service,
-        key_provider: Arc::new(MockKeyProvider::new()),
+        key_provider,
     };
 
     let timeout = Duration::from_millis(state.config.timeout_ms);
@@ -126,6 +144,7 @@ mod tests {
             full_node_retry_delay_ms: 100,
             timeout_ms: 5000,
             query_price_per_cusd: 0.001,
+            google_project_id: None,
         }
     }
 
@@ -424,9 +443,22 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn build_router_fails_for_private_key_keystore_without_blockchain_provider() {
+    async fn build_router_fails_for_google_secret_manager_without_blockchain_provider() {
         let config = Config {
-            keystore_type: KeystoreType::PrivateKey,
+            keystore_type: KeystoreType::GoogleSecretManager,
+            ..test_config(true)
+        };
+
+        let result = build_router(config).await;
+        assert!(result.is_err());
+    }
+
+    #[tokio::test]
+    async fn build_router_fails_for_google_secret_manager_without_project_id() {
+        let config = Config {
+            keystore_type: KeystoreType::GoogleSecretManager,
+            blockchain_provider: Some("http://localhost:8545".to_string()),
+            google_project_id: None,
             ..test_config(true)
         };
 

@@ -4,7 +4,7 @@ use std::env;
 #[derive(Debug, Clone, PartialEq)]
 pub enum KeystoreType {
     Mock,
-    PrivateKey,
+    GoogleSecretManager,
 }
 
 #[derive(Debug, Clone)]
@@ -25,6 +25,7 @@ pub struct Config {
     pub full_node_retry_delay_ms: u64,
     pub timeout_ms: u64,
     pub query_price_per_cusd: f64,
+    pub google_project_id: Option<String>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -63,6 +64,7 @@ impl Config {
             full_node_retry_delay_ms: parse_env("FULL_NODE_RETRY_DELAY_MS", Some(100))?,
             timeout_ms: parse_env("ODIS_SIGNER_TIMEOUT", Some(5000))?,
             query_price_per_cusd: parse_env("QUERY_PRICE_PER_CUSD", Some(0.001))?,
+            google_project_id: env::var("KEYSTORE_GOOGLE_PROJECT_ID").ok(),
         })
     }
 }
@@ -121,7 +123,7 @@ fn parse_keystore_type() -> Result<KeystoreType, ConfigError> {
     let val = parse_env_string("KEYSTORE_TYPE", None)?;
     match val.to_lowercase().as_str() {
         "mock" | "mocksecretmanager" => Ok(KeystoreType::Mock),
-        "privatekey" => Ok(KeystoreType::PrivateKey),
+        "googlesecretmanager" => Ok(KeystoreType::GoogleSecretManager),
         _ => Err(ConfigError::InvalidValue {
             name: "KEYSTORE_TYPE".to_string(),
             source: format!("unknown keystore type: '{val}'").into(),
@@ -161,6 +163,7 @@ mod tests {
             "FULL_NODE_RETRY_DELAY_MS",
             "ODIS_SIGNER_TIMEOUT",
             "QUERY_PRICE_PER_CUSD",
+            "KEYSTORE_GOOGLE_PROJECT_ID",
         ] {
             unsafe { env::remove_var(key) };
         }
@@ -192,6 +195,7 @@ mod tests {
         assert_eq!(config.full_node_retry_delay_ms, 100);
         assert_eq!(config.timeout_ms, 5000);
         assert!((config.query_price_per_cusd - 0.001).abs() < f64::EPSILON);
+        assert!(config.google_project_id.is_none());
     }
 
     #[test]
@@ -201,7 +205,8 @@ mod tests {
             clear_env();
             set("SERVER_PORT", "9090");
             set("PHONE_NUMBER_PRIVACY_API_ENABLED", "true");
-            set("KEYSTORE_TYPE", "PrivateKey");
+            set("KEYSTORE_TYPE", "GoogleSecretManager");
+            set("KEYSTORE_GOOGLE_PROJECT_ID", "my-gcp-project");
             set("PHONE_NUMBER_PRIVACY_KEY_NAME_BASE", "mykey");
             set("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", "3");
             set("DB_PATH", "/tmp/test.db");
@@ -227,7 +232,8 @@ mod tests {
 
         assert_eq!(config.server_port, 9090);
         assert!(config.pnp_api_enabled);
-        assert_eq!(config.keystore_type, KeystoreType::PrivateKey);
+        assert_eq!(config.keystore_type, KeystoreType::GoogleSecretManager);
+        assert_eq!(config.google_project_id.as_deref(), Some("my-gcp-project"));
         assert_eq!(config.pnp_key_name_base, "mykey");
         assert_eq!(config.pnp_latest_key_version, 3);
         assert_eq!(config.db_path, "/tmp/test.db");

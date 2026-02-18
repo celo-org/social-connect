@@ -13,6 +13,7 @@ use tower::ServiceExt;
 
 use odis_signer::account_service::MockAccountService;
 use odis_signer::config::{Config, KeystoreType};
+use odis_signer::key_management::MockKeyProvider;
 use odis_signer::server::{build_router, build_router_with_services};
 
 const BLINDED_PHONE_NUMBER: &str =
@@ -50,6 +51,7 @@ fn test_config_with_db(db_path: &str) -> Config {
         full_node_retry_delay_ms: 100,
         timeout_ms: 5000,
         query_price_per_cusd: 0.001,
+        google_project_id: None,
     }
 }
 
@@ -317,7 +319,7 @@ async fn build_auth_router() -> Router {
         ..test_config()
     };
     let account_service = Arc::new(MockAccountService::new(None, 10));
-    build_router_with_services(config, account_service)
+    build_router_with_services(config, account_service, Arc::new(MockKeyProvider::new()))
         .await
         .unwrap()
 }
@@ -453,7 +455,7 @@ async fn build_dek_auth_router(dek_public_key: &str) -> Router {
         Some(dek_public_key.to_string()),
         10,
     ));
-    build_router_with_services(config, account_service)
+    build_router_with_services(config, account_service, Arc::new(MockKeyProvider::new()))
         .await
         .unwrap()
 }
@@ -566,7 +568,7 @@ async fn sign_returns_403_when_account_has_zero_quota() {
         ..test_config()
     };
     let account_service = Arc::new(MockAccountService::new(None, 0));
-    let app = build_router_with_services(config, account_service)
+    let app = build_router_with_services(config, account_service, Arc::new(MockKeyProvider::new()))
         .await
         .unwrap();
 
@@ -589,7 +591,7 @@ async fn quota_reflects_account_service_total_quota() {
         ..test_config()
     };
     let account_service = Arc::new(MockAccountService::new(None, 42));
-    let app = build_router_with_services(config, account_service)
+    let app = build_router_with_services(config, account_service, Arc::new(MockKeyProvider::new()))
         .await
         .unwrap();
 

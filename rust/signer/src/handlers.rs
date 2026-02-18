@@ -143,7 +143,8 @@ pub async fn pnp_sign_handler(
         // Fetch key and compute signature
         let hex_key = state
             .key_provider
-            .get_key(&state.config.pnp_key_name_base, key_version)?;
+            .get_key(&state.config.pnp_key_name_base, key_version)
+            .await?;
         let key_bytes = hex::decode(&hex_key).map_err(|_| OdisError::KeyFetchError)?;
         let blinded_msg = BASE64
             .decode(&request.blinded_query_phone_number)
