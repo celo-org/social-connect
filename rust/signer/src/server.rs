@@ -9,7 +9,9 @@ use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
-use crate::account_service::{AccountService, ClientAccountService, MockAccountService};
+use crate::account_service::{
+    AccountService, CachingAccountService, ClientAccountService, MockAccountService,
+};
 use crate::config::{Config, KeystoreType};
 use crate::errors::OdisError;
 use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
@@ -34,7 +36,8 @@ pub struct AppState {
 /// to prevent accidentally running production keys without on-chain auth and quota.
 pub async fn build_router(config: Config) -> Result<Router, OdisError> {
     let account_service: Arc<dyn AccountService> = if config.blockchain_provider.is_some() {
-        Arc::new(ClientAccountService::new(&config)?)
+        let client = Arc::new(ClientAccountService::new(&config)?);
+        Arc::new(CachingAccountService::new(client))
     } else {
         if config.keystore_type != KeystoreType::Mock {
             tracing::error!(

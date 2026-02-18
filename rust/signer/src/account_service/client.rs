@@ -1,7 +1,7 @@
 use std::future::Future;
 use std::time::Duration;
 
-use alloy::primitives::{address, Address, U256};
+use alloy::primitives::{Address, U256, address};
 use alloy::providers::ProviderBuilder;
 use alloy::sol;
 use async_trait::async_trait;
@@ -69,14 +69,20 @@ impl ClientAccountService {
             .accounts_contract_address
             .or(defaults.as_ref().map(|d| d.accounts))
             .ok_or_else(|| {
-                warn!(chain_id = config.chain_id, "no Accounts contract address configured");
+                warn!(
+                    chain_id = config.chain_id,
+                    "no Accounts contract address configured"
+                );
                 OdisError::FullNodeError
             })?;
         let odis_payments = config
             .odis_payments_contract_address
             .or(defaults.as_ref().map(|d| d.odis_payments))
             .ok_or_else(|| {
-                warn!(chain_id = config.chain_id, "no OdisPayments contract address configured");
+                warn!(
+                    chain_id = config.chain_id,
+                    "no OdisPayments contract address configured"
+                );
                 OdisError::FullNodeError
             })?;
 
@@ -269,16 +275,11 @@ mod tests {
     #[tokio::test]
     async fn retry_succeeds_after_failures() {
         let attempts = AtomicU32::new(0);
-        let result: Result<u32, &str> =
-            retry_with_backoff(3, Duration::from_millis(1), || async {
-                let n = attempts.fetch_add(1, Ordering::SeqCst);
-                if n < 2 {
-                    Err("not yet")
-                } else {
-                    Ok(99)
-                }
-            })
-            .await;
+        let result: Result<u32, &str> = retry_with_backoff(3, Duration::from_millis(1), || async {
+            let n = attempts.fetch_add(1, Ordering::SeqCst);
+            if n < 2 { Err("not yet") } else { Ok(99) }
+        })
+        .await;
         assert_eq!(result.unwrap(), 99);
         assert_eq!(attempts.load(Ordering::SeqCst), 3);
     }
@@ -286,12 +287,11 @@ mod tests {
     #[tokio::test]
     async fn retry_exhausts_all_attempts() {
         let attempts = AtomicU32::new(0);
-        let result: Result<u32, &str> =
-            retry_with_backoff(2, Duration::from_millis(1), || async {
-                attempts.fetch_add(1, Ordering::SeqCst);
-                Err("always fails")
-            })
-            .await;
+        let result: Result<u32, &str> = retry_with_backoff(2, Duration::from_millis(1), || async {
+            attempts.fetch_add(1, Ordering::SeqCst);
+            Err("always fails")
+        })
+        .await;
         assert_eq!(result.unwrap_err(), "always fails");
         // 1 initial + 2 retries = 3 attempts
         assert_eq!(attempts.load(Ordering::SeqCst), 3);

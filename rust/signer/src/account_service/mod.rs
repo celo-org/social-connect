@@ -1,6 +1,8 @@
+mod caching;
 mod client;
 mod mock;
 
+pub use caching::CachingAccountService;
 pub use client::ClientAccountService;
 pub use mock::MockAccountService;
 
@@ -10,6 +12,7 @@ use async_trait::async_trait;
 use crate::errors::OdisError;
 
 /// On-chain account data needed for PNP request processing.
+#[derive(Clone)]
 pub struct PnpAccount {
     pub address: Address,
     /// Hex-encoded SEC1 public key (data encryption key).

@@ -70,9 +70,7 @@ impl OdisError {
             Self::KeyFetchError => "CELO_ODIS_ERR_04 INIT_ERR Failed to retrieve key from keystore",
             Self::Unknown => "CELO_ODIS_ERR_00 Something went wrong",
             Self::Timeout => "CELO_ODIS_ERR_10 SIG_ERR Timeout from signer",
-            Self::FullNodeError => {
-                "CELO_ODIS_ERR_11 NODE_ERR Failed to read on-chain state"
-            }
+            Self::FullNodeError => "CELO_ODIS_ERR_11 NODE_ERR Failed to read on-chain state",
             Self::FailureToGetTotalQuota => {
                 "CELO_ODIS_ERR_25 NODE_ERR Failed to read on-chain state to calculate total quota"
             }

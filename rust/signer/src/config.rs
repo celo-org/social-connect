@@ -209,8 +209,14 @@ mod tests {
             set("CHAIN_ID", "42220");
             set("MOCK_DEK", "04abc123");
             set("MOCK_TOTAL_QUOTA", "100");
-            set("ACCOUNTS_CONTRACT_ADDRESS", "0x1234567890abcdef1234567890abcdef12345678");
-            set("ODIS_PAYMENTS_CONTRACT_ADDRESS", "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd");
+            set(
+                "ACCOUNTS_CONTRACT_ADDRESS",
+                "0x1234567890abcdef1234567890abcdef12345678",
+            );
+            set(
+                "ODIS_PAYMENTS_CONTRACT_ADDRESS",
+                "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+            );
             set("FULL_NODE_RETRY_COUNT", "3");
             set("FULL_NODE_RETRY_DELAY_MS", "200");
             set("ODIS_SIGNER_TIMEOUT", "10000");

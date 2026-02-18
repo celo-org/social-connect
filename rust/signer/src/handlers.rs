@@ -55,10 +55,7 @@ pub async fn pnp_quota_handler(
     let request: PnpQuotaRequest =
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
 
-    let account = state
-        .account_service
-        .get_account(request.account)
-        .await?;
+    let account = state.account_service.get_account(request.account).await?;
 
     if state.config.blockchain_provider.is_some() {
         check_auth(
@@ -99,10 +96,7 @@ pub async fn pnp_sign_handler(
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
     request.validate()?;
 
-    let account = state
-        .account_service
-        .get_account(request.account)
-        .await?;
+    let account = state.account_service.get_account(request.account).await?;
 
     if state.config.blockchain_provider.is_some() {
         check_auth(
