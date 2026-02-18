@@ -37,7 +37,6 @@ pub fn authenticate_user(
     account: Address,
     authentication_method: Option<AuthenticationMethod>,
     dek: Option<&str>,
-    _warnings: &mut Vec<String>,
 ) -> bool {
     let authorization = match authorization {
         Some(s) if !s.is_empty() => s,
@@ -184,16 +183,13 @@ mod tests {
         let sig = signer.sign_message(body.as_bytes()).await.unwrap();
         let sig_hex = hex::encode(sig.as_bytes());
 
-        let mut warnings = vec![];
         assert!(authenticate_user(
             body.as_bytes(),
             Some(&sig_hex),
             account,
             None,
             None,
-            &mut warnings,
         ));
-        assert!(warnings.is_empty());
     }
 
     #[tokio::test]
@@ -204,79 +200,67 @@ mod tests {
         let sig = signer.sign_message(b"test body").await.unwrap();
         let sig_hex = hex::encode(sig.as_bytes());
 
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             b"test body",
             Some(&sig_hex),
             wrong_account,
             None,
             None,
-            &mut warnings,
         ));
     }
 
     #[test]
     fn missing_authorization_header() {
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             b"body",
             None,
             Address::ZERO,
             None,
             None,
-            &mut warnings,
         ));
     }
 
     #[test]
     fn empty_authorization_header() {
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             b"body",
             Some(""),
             Address::ZERO,
             None,
             None,
-            &mut warnings,
         ));
     }
 
     #[test]
     fn invalid_hex_signature() {
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             b"body",
             Some("not-hex"),
             Address::ZERO,
             None,
             None,
-            &mut warnings,
         ));
     }
 
     #[test]
     fn dek_no_key_registered() {
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             b"body",
             Some("sig"),
             Address::ZERO,
             Some(AuthenticationMethod::EncryptionKey),
             None,
-            &mut warnings,
         ));
     }
 
     #[test]
     fn dek_empty_key() {
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             b"body",
             Some("sig"),
             Address::ZERO,
             Some(AuthenticationMethod::EncryptionKey),
             Some(""),
-            &mut warnings,
         ));
     }
 
@@ -285,16 +269,13 @@ mod tests {
         let signing_key = dek_signing_key();
         let authorization = sign_dek(DEK_BODY, &signing_key);
 
-        let mut warnings = vec![];
         assert!(authenticate_user(
             DEK_BODY.as_bytes(),
             Some(&authorization),
             DEK_ACCOUNT,
             Some(AuthenticationMethod::EncryptionKey),
             Some(&public_key_hex(&signing_key)),
-            &mut warnings,
         ));
-        assert!(warnings.is_empty());
     }
 
     #[tokio::test]
@@ -314,7 +295,6 @@ mod tests {
         let random_key =
             k256::ecdsa::SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
 
-        let mut warnings = vec![];
         // The wallet key hex signature won't parse as a JSON DER array for DEK,
         // so DEK fails and falls through to wallet key which succeeds.
         assert!(authenticate_user(
@@ -323,7 +303,6 @@ mod tests {
             account,
             Some(AuthenticationMethod::EncryptionKey),
             Some(&public_key_hex(&random_key)),
-            &mut warnings,
         ));
     }
 
@@ -335,7 +314,6 @@ mod tests {
         let wrong_key =
             k256::ecdsa::SigningKey::random(&mut k256::elliptic_curve::rand_core::OsRng);
 
-        let mut warnings = vec![];
         // DEK fails (wrong key), wallet key also fails (not an EIP-191 sig).
         assert!(!authenticate_user(
             DEK_BODY.as_bytes(),
@@ -343,13 +321,11 @@ mod tests {
             DEK_ACCOUNT,
             Some(AuthenticationMethod::EncryptionKey),
             Some(&public_key_hex(&wrong_key)),
-            &mut warnings,
         ));
     }
 
     #[test]
     fn dek_invalid_public_key() {
-        let mut warnings = vec![];
         // "notAValidKeyEncryption" is not valid hex for a sec1 public key
         assert!(!authenticate_user(
             DEK_BODY.as_bytes(),
@@ -357,7 +333,6 @@ mod tests {
             DEK_ACCOUNT,
             Some(AuthenticationMethod::EncryptionKey),
             Some("notAValidKeyEncryption"),
-            &mut warnings,
         ));
     }
 
@@ -372,7 +347,6 @@ mod tests {
             let mut modified = body_bytes.to_vec();
             modified[i] = modified[i].wrapping_add(1);
 
-            let mut warnings = vec![];
             assert!(
                 !authenticate_user(
                     &modified,
@@ -380,7 +354,6 @@ mod tests {
                     DEK_ACCOUNT,
                     Some(AuthenticationMethod::EncryptionKey),
                     Some(&public_key_hex(&signing_key)),
-                    &mut warnings,
                 ),
                 "Should fail for body modified at index {i}"
             );
@@ -397,14 +370,12 @@ mod tests {
         der_bytes.insert(0, 0);
         let modified = serde_json::to_string(&der_bytes).unwrap();
 
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             DEK_BODY.as_bytes(),
             Some(&modified),
             DEK_ACCOUNT,
             Some(AuthenticationMethod::EncryptionKey),
             Some(&public_key_hex(&signing_key)),
-            &mut warnings,
         ));
     }
 
@@ -419,14 +390,12 @@ mod tests {
         let sig: K256Signature = signing_key.sign(DEK_BODY.as_bytes());
         let authorization = serde_json::to_string(&sig.to_der().as_bytes()).unwrap();
 
-        let mut warnings = vec![];
         assert!(!authenticate_user(
             DEK_BODY.as_bytes(),
             Some(&authorization),
             DEK_ACCOUNT,
             Some(AuthenticationMethod::EncryptionKey),
             Some(&public_key_hex(&signing_key)),
-            &mut warnings,
         ));
     }
 }

@@ -34,14 +34,12 @@ fn check_auth(
     if state.config.should_mock_account_service {
         return Ok(());
     }
-    let mut warnings = vec![];
     if !authenticate_user(
         body,
         authorization.0.as_deref(),
         account,
         authentication_method,
         state.config.mock_dek.as_deref(),
-        &mut warnings,
     ) {
         return Err(OdisError::UnauthenticatedUser);
     }
