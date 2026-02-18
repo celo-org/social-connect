@@ -71,7 +71,28 @@ fn verify_wallet_key_signature(body: &[u8], authorization: &str, account: Addres
         Err(_) => return false,
     };
 
-    let sig = match alloy::primitives::Signature::try_from(sig_bytes.as_slice()) {
+    if sig_bytes.len() != 65 {
+        return false;
+    }
+
+    // Signatures can be in RSV order (r || s || v, used by alloy/Ethereum JSON-RPC)
+    // or VRS order (v || r || s, used by @celo/utils serializeSignature).
+    // Detect based on where the recovery byte v (27 or 28) is located.
+    let rsv_bytes = if sig_bytes[64] == 27 || sig_bytes[64] == 28 {
+        // Already RSV order
+        sig_bytes
+    } else if sig_bytes[0] == 27 || sig_bytes[0] == 28 {
+        // VRS order — reorder to RSV
+        let mut rsv = [0u8; 65];
+        rsv[..32].copy_from_slice(&sig_bytes[1..33]); // r
+        rsv[32..64].copy_from_slice(&sig_bytes[33..65]); // s
+        rsv[64] = sig_bytes[0]; // v
+        rsv.to_vec()
+    } else {
+        return false;
+    };
+
+    let sig = match alloy::primitives::Signature::try_from(rsv_bytes.as_slice()) {
         Ok(s) => s,
         Err(_) => return false,
     };
