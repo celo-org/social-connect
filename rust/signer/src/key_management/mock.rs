@@ -1,13 +1,9 @@
 use std::collections::HashMap;
 
-use crate::errors::OdisError;
+use async_trait::async_trait;
 
-/// Provides private key shares for BLS signing.
-pub trait KeyProvider: Send + Sync {
-    /// Get a private key by name and version.
-    /// Returns hex-encoded key bytes on success.
-    fn get_key(&self, name: &str, version: u32) -> Result<String, OdisError>;
-}
+use super::KeyProvider;
+use crate::errors::OdisError;
 
 /// Mock key provider with hardcoded dev key shares from values.ts.
 /// Keys are stored as `"{name}-{version}" -> hex_key`.
@@ -44,8 +40,9 @@ impl MockKeyProvider {
     }
 }
 
+#[async_trait]
 impl KeyProvider for MockKeyProvider {
-    fn get_key(&self, name: &str, version: u32) -> Result<String, OdisError> {
+    async fn get_key(&self, name: &str, version: u32) -> Result<String, OdisError> {
         let key_id = format!("{name}-{version}");
         self.keys
             .get(&key_id)
@@ -58,23 +55,23 @@ impl KeyProvider for MockKeyProvider {
 mod tests {
     use super::*;
 
-    #[test]
-    fn mock_provider_returns_keys_for_all_versions() {
+    #[tokio::test]
+    async fn mock_provider_returns_keys_for_all_versions() {
         let provider = MockKeyProvider::new();
 
         for version in 1..=3 {
-            let key = provider.get_key("phoneNumberPrivacy", version);
+            let key = provider.get_key("phoneNumberPrivacy", version).await;
             assert!(key.is_ok(), "version {version} should exist");
             // All dev keys are 72 hex chars (4-byte index + 32-byte scalar)
             assert_eq!(key.unwrap().len(), 72);
         }
     }
 
-    #[test]
-    fn mock_provider_returns_error_for_unknown_key() {
+    #[tokio::test]
+    async fn mock_provider_returns_error_for_unknown_key() {
         let provider = MockKeyProvider::new();
 
-        assert!(provider.get_key("phoneNumberPrivacy", 99).is_err());
-        assert!(provider.get_key("unknown", 1).is_err());
+        assert!(provider.get_key("phoneNumberPrivacy", 99).await.is_err());
+        assert!(provider.get_key("unknown", 1).await.is_err());
     }
 }
