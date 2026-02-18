@@ -1,9 +1,11 @@
 mod caching;
 mod client;
+mod metered;
 mod mock;
 
 pub use caching::CachingAccountService;
 pub use client::ClientAccountService;
+pub use metered::MeteredAccountService;
 pub use mock::MockAccountService;
 
 use alloy::primitives::Address;
