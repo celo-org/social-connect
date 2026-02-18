@@ -1,8 +1,6 @@
-mod memory;
 mod metered;
 mod sqlite;
 
-pub use memory::InMemoryPnpRequestService;
 pub use metered::MeteredPnpRequestService;
 pub use sqlite::SqlitePnpRequestService;
 

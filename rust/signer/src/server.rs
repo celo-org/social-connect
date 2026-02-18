@@ -20,7 +20,7 @@ use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
 use crate::key_management::{KeyProvider, MockKeyProvider};
 use crate::metrics;
 use crate::request_service::{
-    InMemoryPnpRequestService, MeteredPnpRequestService, PnpRequestService, SqlitePnpRequestService,
+    MeteredPnpRequestService, PnpRequestService, SqlitePnpRequestService,
 };
 
 /// Shared application state available to all handlers.
@@ -65,11 +65,8 @@ pub async fn build_router_with_services(
     config: Config,
     account_service: Arc<dyn AccountService>,
 ) -> Result<Router, OdisError> {
-    let inner_request_service: Arc<dyn PnpRequestService> = if config.db_path == ":memory:" {
-        Arc::new(InMemoryPnpRequestService::new())
-    } else {
-        Arc::new(SqlitePnpRequestService::new(&config.db_path).await?)
-    };
+    let inner_request_service: Arc<dyn PnpRequestService> =
+        Arc::new(SqlitePnpRequestService::new(&config.db_path).await?);
     let request_service: Arc<dyn PnpRequestService> =
         Arc::new(MeteredPnpRequestService::new(inner_request_service));
 

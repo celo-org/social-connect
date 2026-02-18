@@ -84,13 +84,17 @@ impl PnpRequestService for MeteredPnpRequestService {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::request_service::InMemoryPnpRequestService;
+    use crate::request_service::SqlitePnpRequestService;
     use alloy::primitives::address;
+
+    async fn test_metered() -> MeteredPnpRequestService {
+        let inner = Arc::new(SqlitePnpRequestService::new(":memory:").await.unwrap());
+        MeteredPnpRequestService::new(inner)
+    }
 
     #[tokio::test]
     async fn records_latency_for_get_used_quota() {
-        let inner = Arc::new(InMemoryPnpRequestService::new());
-        let metered = MeteredPnpRequestService::new(inner);
+        let metered = test_metered().await;
         let addr = address!("0x0000000000000000000000000000000000007E57");
 
         let result = metered.get_used_quota(addr).await;
@@ -100,8 +104,7 @@ mod tests {
 
     #[tokio::test]
     async fn records_latency_for_get_duplicate_request() {
-        let inner = Arc::new(InMemoryPnpRequestService::new());
-        let metered = MeteredPnpRequestService::new(inner);
+        let metered = test_metered().await;
         let addr = address!("0x0000000000000000000000000000000000007E57");
 
         let result = metered.get_duplicate_request(addr, "query").await;
@@ -111,8 +114,7 @@ mod tests {
 
     #[tokio::test]
     async fn records_latency_for_record_request() {
-        let inner = Arc::new(InMemoryPnpRequestService::new());
-        let metered = MeteredPnpRequestService::new(inner);
+        let metered = test_metered().await;
         let addr = address!("0x0000000000000000000000000000000000007E57");
 
         let result = metered.record_request(addr, "query", "sig").await;
