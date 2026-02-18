@@ -1,3 +1,4 @@
+use ::metrics::{counter, histogram};
 use axum::Json;
 use axum::body::Bytes;
 use axum::extract::State;
@@ -7,6 +8,7 @@ use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 
 use crate::auth::{Authorization, authenticate_user};
 use crate::errors::OdisError;
+use crate::metrics as metric_names;
 use crate::server::AppState;
 use crate::types::{
     AuthenticationMethod, KEY_VERSION_HEADER, KeyVersion, PnpQuotaRequest, PnpQuotaResponseSuccess,
@@ -43,6 +45,15 @@ fn check_auth(
     Ok(())
 }
 
+/// Counts a request that states wallet-key authentication. Like the TS signer,
+/// this counts on both PNP endpoints, before the signature is checked, and only
+/// when the request names `wallet_key`.
+fn count_wallet_key_request(authentication_method: Option<AuthenticationMethod>) {
+    if authentication_method == Some(AuthenticationMethod::WalletKey) {
+        counter!(metric_names::REQUESTS_WITH_WALLET_ADDRESS).increment(1);
+    }
+}
+
 pub async fn pnp_quota_handler(
     State(state): State<AppState>,
     authorization: Authorization,
@@ -56,6 +67,7 @@ pub async fn pnp_quota_handler(
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
 
     let account = state.account_service.get_account(request.account).await?;
+    count_wallet_key_request(request.authentication_method);
 
     if state.config.blockchain_provider.is_some() {
         check_auth(
@@ -101,7 +113,10 @@ fn compute_signature(state: &AppState, key_version: u32, blinded_query: &str) ->
         .inspect_err(|e| tracing::error!("blinded message is not valid base64: {e}"))
         .ok()?;
     let sig_bytes = crate::crypto::compute_blinded_signature(&blinded_msg, &key_bytes)
-        .inspect_err(|e| tracing::error!("signature computation failed: {e}"))
+        .inspect_err(|e| {
+            counter!(metric_names::SIGNATURE_COMPUTATION_ERRORS).increment(1);
+            tracing::error!("signature computation failed: {e}");
+        })
         .ok()?;
     Some(BASE64.encode(&sig_bytes))
 }
@@ -121,6 +136,7 @@ pub async fn pnp_sign_handler(
     request.validate()?;
 
     let account = state.account_service.get_account(request.account).await?;
+    count_wallet_key_request(request.authentication_method);
 
     if state.config.blockchain_provider.is_some() {
         check_auth(
@@ -144,6 +160,11 @@ pub async fn pnp_sign_handler(
         .map_err(|_| OdisError::FailureToGetPerformedQueryCount)?;
     let total_quota = account.pnp_total_quota;
 
+    // Recorded before the quota check, as the TS signer does, so that requests
+    // refused for lack of quota are included.
+    histogram!(metric_names::USER_REMAINING_QUOTA, "endpoint" => "/sign")
+        .record(f64::from(total_quota) - f64::from(used_quota));
+
     // If not a duplicate, check quota
     if duplicate_sig.is_none() && used_quota >= total_quota {
         return Err(OdisError::ExceededQuota {
@@ -155,6 +176,7 @@ pub async fn pnp_sign_handler(
     let key_version = requested_key_version.unwrap_or(state.config.pnp_latest_key_version);
 
     let (signature, performed_query_count, warnings) = if let Some(sig) = duplicate_sig {
+        counter!(metric_names::DUPLICATE_REQUESTS).increment(1);
         (sig, used_quota, vec![DUPLICATE_REQUEST_WARNING.to_string()])
     } else {
         let signature = compute_signature(&state, key_version, &request.blinded_query_phone_number)
