@@ -78,6 +78,10 @@ mod tests {
             should_mock_account_service: true,
             mock_dek: None,
             mock_total_quota: 10,
+            accounts_contract_address: None,
+            odis_payments_contract_address: None,
+            full_node_retry_count: 5,
+            full_node_retry_delay_ms: 100,
             timeout_ms: 5000,
             query_price_per_cusd: 0.001,
         }

@@ -24,6 +24,12 @@ pub enum OdisError {
     Unknown,
     /// 500 — timeout
     Timeout,
+    /// 500 — failed to read on-chain state
+    FullNodeError,
+    /// 500 — failed to read on-chain state to calculate total quota
+    FailureToGetTotalQuota,
+    /// 500 — failed to read user's DEK from full-node
+    FailureToGetDek,
     /// 503 — API is unavailable (disabled)
     ApiUnavailable,
 }
@@ -38,7 +44,10 @@ impl OdisError {
             | Self::DatabaseError
             | Self::KeyFetchError
             | Self::Unknown
-            | Self::Timeout => StatusCode::INTERNAL_SERVER_ERROR,
+            | Self::Timeout
+            | Self::FullNodeError
+            | Self::FailureToGetTotalQuota
+            | Self::FailureToGetDek => StatusCode::INTERNAL_SERVER_ERROR,
             Self::ApiUnavailable => StatusCode::SERVICE_UNAVAILABLE,
         }
     }
@@ -61,6 +70,15 @@ impl OdisError {
             Self::KeyFetchError => "CELO_ODIS_ERR_04 INIT_ERR Failed to retrieve key from keystore",
             Self::Unknown => "CELO_ODIS_ERR_00 Something went wrong",
             Self::Timeout => "CELO_ODIS_ERR_10 SIG_ERR Timeout from signer",
+            Self::FullNodeError => {
+                "CELO_ODIS_ERR_11 NODE_ERR Failed to read on-chain state"
+            }
+            Self::FailureToGetTotalQuota => {
+                "CELO_ODIS_ERR_25 NODE_ERR Failed to read on-chain state to calculate total quota"
+            }
+            Self::FailureToGetDek => {
+                "CELO_ODIS_ERR_27 NODE_ERR Failed to read user's DEK from full-node"
+            }
             Self::ApiUnavailable => "CELO_ODIS_WARN_13 BAD_INPUT API is unavailable",
         }
     }
@@ -129,6 +147,18 @@ mod tests {
             StatusCode::INTERNAL_SERVER_ERROR
         );
         assert_eq!(
+            OdisError::FullNodeError.status_code(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+        assert_eq!(
+            OdisError::FailureToGetTotalQuota.status_code(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+        assert_eq!(
+            OdisError::FailureToGetDek.status_code(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+        assert_eq!(
             OdisError::ApiUnavailable.status_code(),
             StatusCode::SERVICE_UNAVAILABLE
         );
@@ -180,6 +210,21 @@ mod tests {
             OdisError::Timeout
                 .error_code()
                 .starts_with("CELO_ODIS_ERR_10")
+        );
+        assert!(
+            OdisError::FullNodeError
+                .error_code()
+                .starts_with("CELO_ODIS_ERR_11")
+        );
+        assert!(
+            OdisError::FailureToGetTotalQuota
+                .error_code()
+                .starts_with("CELO_ODIS_ERR_25")
+        );
+        assert!(
+            OdisError::FailureToGetDek
+                .error_code()
+                .starts_with("CELO_ODIS_ERR_27")
         );
         assert!(
             OdisError::ApiUnavailable
