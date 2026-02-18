@@ -9,6 +9,7 @@ use tower_http::limit::RequestBodyLimitLayer;
 use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
+use crate::account_service::{AccountService, ClientAccountService, MockAccountService};
 use crate::config::Config;
 use crate::errors::OdisError;
 use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
@@ -21,12 +22,31 @@ use crate::request_service::{
 #[derive(Clone)]
 pub struct AppState {
     pub config: Arc<Config>,
+    pub account_service: Arc<dyn AccountService>,
     pub request_service: Arc<dyn PnpRequestService>,
     pub key_provider: Arc<dyn KeyProvider>,
 }
 
-/// Build the axum router with all routes and middleware.
+/// Build the axum router, constructing the appropriate AccountService from config.
 pub async fn build_router(config: Config) -> Result<Router, OdisError> {
+    let account_service: Arc<dyn AccountService> = if config.should_mock_account_service {
+        Arc::new(MockAccountService::new(
+            config.mock_dek.clone(),
+            config.mock_total_quota,
+        ))
+    } else {
+        Arc::new(ClientAccountService::new(&config)?)
+    };
+
+    build_router_with_services(config, account_service).await
+}
+
+/// Build the axum router with an explicit AccountService.
+/// Integration tests use this to inject a mock while still exercising real auth.
+pub async fn build_router_with_services(
+    config: Config,
+    account_service: Arc<dyn AccountService>,
+) -> Result<Router, OdisError> {
     let request_service: Arc<dyn PnpRequestService> = if config.db_path == ":memory:" {
         Arc::new(InMemoryPnpRequestService::new())
     } else {
@@ -35,6 +55,7 @@ pub async fn build_router(config: Config) -> Result<Router, OdisError> {
 
     let state = AppState {
         config: Arc::new(config),
+        account_service,
         request_service,
         key_provider: Arc::new(MockKeyProvider::new()),
     };

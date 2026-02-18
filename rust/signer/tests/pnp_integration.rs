@@ -1,13 +1,17 @@
+use std::sync::Arc;
+
 use alloy_signer::Signer;
 use alloy_signer_local::PrivateKeySigner;
+use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use http_body_util::BodyExt;
 use tempfile::NamedTempFile;
 use tower::ServiceExt;
 
+use odis_signer::account_service::MockAccountService;
 use odis_signer::config::{Config, KeystoreType};
-use odis_signer::server::build_router;
+use odis_signer::server::{build_router, build_router_with_services};
 
 const BLINDED_PHONE_NUMBER: &str =
     "n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB";
@@ -303,11 +307,17 @@ async fn sqlite_sign_and_quota_full_stack() {
 
 // --- Authentication-enabled tests ---
 
-fn auth_config() -> Config {
-    Config {
+/// Build a router with auth enforcement enabled.
+/// Uses MockAccountService with empty DEK so only wallet key auth works.
+async fn build_auth_router() -> Router {
+    let config = Config {
         should_mock_account_service: false,
         ..test_config()
-    }
+    };
+    let account_service = Arc::new(MockAccountService::new(None, 10));
+    build_router_with_services(config, account_service)
+        .await
+        .unwrap()
 }
 
 fn sign_request_with_auth(body: &str, auth: &str) -> Request<Body> {
@@ -338,7 +348,7 @@ async fn wallet_sign(signer: &PrivateKeySigner, body: &str) -> String {
 
 #[tokio::test]
 async fn sign_returns_401_without_authorization_header() {
-    let app = build_router(auth_config()).await.unwrap();
+    let app = build_auth_router().await;
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
     let response = app.oneshot(sign_request(&body)).await.unwrap();
@@ -356,7 +366,7 @@ async fn sign_returns_401_without_authorization_header() {
 
 #[tokio::test]
 async fn quota_returns_401_without_authorization_header() {
-    let app = build_router(auth_config()).await.unwrap();
+    let app = build_auth_router().await;
 
     let response = app.oneshot(quota_request(ACCOUNT)).await.unwrap();
 
@@ -369,7 +379,7 @@ async fn sign_succeeds_with_valid_wallet_key_signature() {
     let body = sign_body(&format!("{}", signer.address()), BLINDED_PHONE_NUMBER);
     let sig_hex = wallet_sign(&signer, &body).await;
 
-    let app = build_router(auth_config()).await.unwrap();
+    let app = build_auth_router().await;
     let response = app
         .oneshot(sign_request_with_auth(&body, &sig_hex))
         .await
@@ -389,7 +399,7 @@ async fn sign_returns_401_with_wrong_wallet_key() {
     let body = sign_body(&format!("{}", signer.address()), BLINDED_PHONE_NUMBER);
     let sig_hex = wallet_sign(&wrong_signer, &body).await;
 
-    let app = build_router(auth_config()).await.unwrap();
+    let app = build_auth_router().await;
     let response = app
         .oneshot(sign_request_with_auth(&body, &sig_hex))
         .await
@@ -404,7 +414,7 @@ async fn quota_succeeds_with_valid_wallet_key_signature() {
     let body = serde_json::json!({ "account": format!("{}", signer.address()) }).to_string();
     let sig_hex = wallet_sign(&signer, &body).await;
 
-    let app = build_router(auth_config()).await.unwrap();
+    let app = build_auth_router().await;
     let response = app
         .oneshot(quota_request_with_auth(&body, &sig_hex))
         .await
