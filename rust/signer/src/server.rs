@@ -10,7 +10,7 @@ use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::account_service::{AccountService, ClientAccountService, MockAccountService};
-use crate::config::Config;
+use crate::config::{Config, KeystoreType};
 use crate::errors::OdisError;
 use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
 use crate::key_management::{KeyProvider, MockKeyProvider};
@@ -28,14 +28,25 @@ pub struct AppState {
 }
 
 /// Build the axum router, constructing the appropriate AccountService from config.
+///
+/// When `blockchain_provider` is set, uses `ClientAccountService` for on-chain lookups.
+/// Otherwise, uses `MockAccountService` — but only allowed with `KeystoreType::Mock`
+/// to prevent accidentally running production keys without on-chain auth and quota.
 pub async fn build_router(config: Config) -> Result<Router, OdisError> {
-    let account_service: Arc<dyn AccountService> = if config.should_mock_account_service {
+    let account_service: Arc<dyn AccountService> = if config.blockchain_provider.is_some() {
+        Arc::new(ClientAccountService::new(&config)?)
+    } else {
+        if config.keystore_type != KeystoreType::Mock {
+            tracing::error!(
+                "BLOCKCHAIN_PROVIDER is required when keystore_type is not Mock. \
+                 Without it, authentication and quota are disabled."
+            );
+            return Err(OdisError::FullNodeError);
+        }
         Arc::new(MockAccountService::new(
             config.mock_dek.clone(),
             config.mock_total_quota,
         ))
-    } else {
-        Arc::new(ClientAccountService::new(&config)?)
     };
 
     build_router_with_services(config, account_service).await
@@ -84,8 +95,6 @@ mod tests {
     use http_body_util::BodyExt;
     use tower::ServiceExt;
 
-    use crate::config::KeystoreType;
-
     fn test_config(pnp_enabled: bool) -> Config {
         Config {
             server_port: 8080,
@@ -96,7 +105,6 @@ mod tests {
             db_path: ":memory:".to_string(),
             blockchain_provider: None,
             chain_id: 44787,
-            should_mock_account_service: true,
             mock_dek: None,
             mock_total_quota: 10,
             accounts_contract_address: None,

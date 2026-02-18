@@ -40,7 +40,6 @@ fn test_config_with_db(db_path: &str) -> Config {
         db_path: db_path.to_string(),
         blockchain_provider: None,
         chain_id: 44787,
-        should_mock_account_service: true,
         mock_dek: None,
         mock_total_quota: 10,
         accounts_contract_address: None,
@@ -308,10 +307,11 @@ async fn sqlite_sign_and_quota_full_stack() {
 // --- Authentication-enabled tests ---
 
 /// Build a router with auth enforcement enabled.
-/// Uses MockAccountService with empty DEK so only wallet key auth works.
+/// Sets a dummy blockchain_provider to enable auth, but uses MockAccountService
+/// with empty DEK so only wallet key auth works.
 async fn build_auth_router() -> Router {
     let config = Config {
-        should_mock_account_service: false,
+        blockchain_provider: Some("http://localhost:8545".to_string()),
         ..test_config()
     };
     let account_service = Arc::new(MockAccountService::new(None, 10));

@@ -17,7 +17,6 @@ pub struct Config {
     pub db_path: String,
     pub blockchain_provider: Option<String>,
     pub chain_id: u64,
-    pub should_mock_account_service: bool,
     pub mock_dek: Option<String>,
     pub mock_total_quota: u32,
     pub accounts_contract_address: Option<Address>,
@@ -56,10 +55,6 @@ impl Config {
             db_path: parse_env_string("DB_PATH", Some(":memory:"))?,
             blockchain_provider: env::var("BLOCKCHAIN_PROVIDER").ok(),
             chain_id: parse_env("CHAIN_ID", Some(44787))?,
-            should_mock_account_service: parse_env_bool(
-                "SHOULD_MOCK_ACCOUNT_SERVICE",
-                Some(false),
-            )?,
             mock_dek: env::var("MOCK_DEK").ok(),
             mock_total_quota: parse_env("MOCK_TOTAL_QUOTA", Some(10))?,
             accounts_contract_address: parse_env_address("ACCOUNTS_CONTRACT_ADDRESS")?,
@@ -158,7 +153,6 @@ mod tests {
             "DB_PATH",
             "BLOCKCHAIN_PROVIDER",
             "CHAIN_ID",
-            "SHOULD_MOCK_ACCOUNT_SERVICE",
             "MOCK_DEK",
             "MOCK_TOTAL_QUOTA",
             "ACCOUNTS_CONTRACT_ADDRESS",
@@ -190,7 +184,6 @@ mod tests {
         assert_eq!(config.db_path, ":memory:");
         assert!(config.blockchain_provider.is_none());
         assert_eq!(config.chain_id, 44787);
-        assert!(!config.should_mock_account_service);
         assert!(config.mock_dek.is_none());
         assert_eq!(config.mock_total_quota, 10);
         assert_eq!(config.accounts_contract_address, None);
@@ -214,7 +207,6 @@ mod tests {
             set("DB_PATH", "/tmp/test.db");
             set("BLOCKCHAIN_PROVIDER", "https://rpc.example.com");
             set("CHAIN_ID", "42220");
-            set("SHOULD_MOCK_ACCOUNT_SERVICE", "1");
             set("MOCK_DEK", "04abc123");
             set("MOCK_TOTAL_QUOTA", "100");
             set("ACCOUNTS_CONTRACT_ADDRESS", "0x1234567890abcdef1234567890abcdef12345678");
@@ -238,7 +230,6 @@ mod tests {
             Some("https://rpc.example.com")
         );
         assert_eq!(config.chain_id, 42220);
-        assert!(config.should_mock_account_service);
         assert_eq!(config.mock_dek.as_deref(), Some("04abc123"));
         assert_eq!(config.mock_total_quota, 100);
         assert_eq!(

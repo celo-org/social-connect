@@ -23,23 +23,20 @@ pub async fn status_handler() -> impl IntoResponse {
     }))
 }
 
-/// Check authentication unless mock mode is enabled. Returns `Err(401)` on failure.
+/// Check authentication. Returns `Err(401)` on failure.
 fn check_auth(
-    state: &AppState,
     body: &[u8],
     authorization: &Authorization,
     account: alloy::primitives::Address,
     authentication_method: Option<AuthenticationMethod>,
+    dek: &str,
 ) -> Result<(), OdisError> {
-    if state.config.should_mock_account_service {
-        return Ok(());
-    }
     if !authenticate_user(
         body,
         authorization.0.as_deref(),
         account,
         authentication_method,
-        state.config.mock_dek.as_deref(),
+        Some(dek).filter(|s| !s.is_empty()),
     ) {
         return Err(OdisError::UnauthenticatedUser);
     }
@@ -58,19 +55,26 @@ pub async fn pnp_quota_handler(
     let request: PnpQuotaRequest =
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
 
-    check_auth(
-        &state,
-        &body,
-        &authorization,
-        request.account,
-        request.authentication_method,
-    )?;
+    let account = state
+        .account_service
+        .get_account(request.account)
+        .await?;
+
+    if state.config.blockchain_provider.is_some() {
+        check_auth(
+            &body,
+            &authorization,
+            request.account,
+            request.authentication_method,
+            &account.dek,
+        )?;
+    }
 
     let used_quota = state
         .request_service
         .get_used_quota(request.account)
         .await?;
-    let total_quota = state.config.mock_total_quota;
+    let total_quota = account.pnp_total_quota;
 
     Ok(Json(PnpQuotaResponseSuccess {
         success: true,
@@ -95,13 +99,20 @@ pub async fn pnp_sign_handler(
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
     request.validate()?;
 
-    check_auth(
-        &state,
-        &body,
-        &authorization,
-        request.account,
-        request.authentication_method,
-    )?;
+    let account = state
+        .account_service
+        .get_account(request.account)
+        .await?;
+
+    if state.config.blockchain_provider.is_some() {
+        check_auth(
+            &body,
+            &authorization,
+            request.account,
+            request.authentication_method,
+            &account.dek,
+        )?;
+    }
 
     let duplicate_sig = state
         .request_service
@@ -112,7 +123,7 @@ pub async fn pnp_sign_handler(
         .request_service
         .get_used_quota(request.account)
         .await?;
-    let total_quota = state.config.mock_total_quota;
+    let total_quota = account.pnp_total_quota;
 
     // If not a duplicate, check quota
     if duplicate_sig.is_none() && used_quota >= total_quota {
