@@ -50,10 +50,12 @@ pub async fn build_router(config: Config) -> Result<Router, OdisError> {
             );
             return Err(OdisError::FullNodeError);
         }
-        Arc::new(MockAccountService::new(
-            config.mock_dek.clone(),
-            config.mock_total_quota,
-        ))
+        let mock_dek = std::env::var("MOCK_DEK").ok();
+        let mock_total_quota = std::env::var("MOCK_TOTAL_QUOTA")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(10);
+        Arc::new(MockAccountService::new(mock_dek, mock_total_quota))
     };
 
     let key_provider: Arc<dyn KeyProvider> = match config.keystore_type {
@@ -136,8 +138,6 @@ mod tests {
             db_path: ":memory:".to_string(),
             blockchain_provider: None,
             chain_id: 44787,
-            mock_dek: None,
-            mock_total_quota: 10,
             accounts_contract_address: None,
             odis_payments_contract_address: None,
             full_node_retry_count: 5,
@@ -293,9 +293,12 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_403_when_quota_exceeded() {
-        let mut config = test_config(true);
-        config.mock_total_quota = 0;
-        let app = build_router(config).await.unwrap();
+        let config = test_config(true);
+        let account_service = Arc::new(MockAccountService::new(None, 0));
+        let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+        let app = build_router_with_services(config, account_service, key_provider)
+            .await
+            .unwrap();
 
         let response = app
             .oneshot(

@@ -43,8 +43,6 @@ fn test_config_with_db(db_path: &str) -> Config {
         db_path: db_path.to_string(),
         blockchain_provider: None,
         chain_id: 44787,
-        mock_dek: None,
-        mock_total_quota: 10,
         accounts_contract_address: None,
         odis_payments_contract_address: None,
         full_node_retry_count: 5,
@@ -171,9 +169,11 @@ async fn sign_duplicate_returns_cached_signature_without_incrementing_quota() {
 
 #[tokio::test]
 async fn sign_returns_403_when_quota_exactly_depleted() {
-    let mut config = test_config();
-    config.mock_total_quota = 1;
-    let app = build_router(config).await.unwrap();
+    let config = test_config();
+    let account_service = Arc::new(MockAccountService::new(None, 1));
+    let app = build_router_with_services(config, account_service, Arc::new(MockKeyProvider::new()))
+        .await
+        .unwrap();
 
     let body1 = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
 
@@ -247,9 +247,11 @@ async fn sign_returns_500_for_invalid_blinded_message() {
 
 #[tokio::test]
 async fn quota_returns_200_even_when_over_quota() {
-    let mut config = test_config();
-    config.mock_total_quota = 1;
-    let app = build_router(config).await.unwrap();
+    let config = test_config();
+    let account_service = Arc::new(MockAccountService::new(None, 1));
+    let app = build_router_with_services(config, account_service, Arc::new(MockKeyProvider::new()))
+        .await
+        .unwrap();
 
     // Sign once to use up quota
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
