@@ -99,6 +99,8 @@ pub async fn build_router_with_services(
         key_provider,
     };
 
+    spawn_pruning_task(state.config.clone(), state.request_service.clone());
+
     let timeout = Duration::from_millis(state.config.timeout_ms);
 
     Ok(Router::new()
@@ -118,6 +120,40 @@ pub async fn build_router_with_services(
         ))
         .layer(RequestBodyLimitLayer::new(16 * 1024)) // 16 KB, matches TS REASONABLE_BODY_CHAR_LIMIT
         .with_state(state))
+}
+
+fn spawn_pruning_task(config: Arc<Config>, request_service: Arc<dyn PnpRequestService>) {
+    let days = config.request_pruning_days;
+    let interval_secs = config.request_pruning_interval_secs;
+
+    if interval_secs == 0 {
+        tracing::info!("request pruning disabled (interval_secs = 0)");
+        return;
+    }
+
+    tracing::info!(
+        days,
+        interval_secs,
+        "request pruning enabled, first run starting now"
+    );
+
+    tokio::spawn(async move {
+        loop {
+            tracing::debug!(days, "starting request pruning cycle");
+            match request_service.delete_old_requests(days).await {
+                Ok(deleted) if deleted > 0 => {
+                    tracing::info!(deleted, days, "pruned old PNP requests");
+                }
+                Ok(_) => {
+                    tracing::debug!(days, "no old PNP requests to prune");
+                }
+                Err(e) => {
+                    tracing::error!(?e, "failed to prune old PNP requests");
+                }
+            }
+            tokio::time::sleep(Duration::from_secs(interval_secs)).await;
+        }
+    });
 }
 
 #[cfg(test)]
@@ -145,6 +181,8 @@ mod tests {
             timeout_ms: 5000,
             query_price_per_cusd: 0.001,
             google_project_id: None,
+            request_pruning_days: 7,
+            request_pruning_interval_secs: 86400,
         }
     }
 

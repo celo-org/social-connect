@@ -128,6 +128,19 @@ impl PnpRequestService for SqlitePnpRequestService {
 
         Ok(())
     }
+
+    async fn delete_old_requests(&self, older_than_days: u64) -> Result<u64, OdisError> {
+        let modifier = format!("-{older_than_days} days");
+        let result = sqlx::query("DELETE FROM requests WHERE timestamp <= datetime('now', ?)")
+            .bind(&modifier)
+            .execute(&self.pool)
+            .await
+            .map_err(|e| {
+                tracing::error!("delete_old_requests failed: {e}");
+                OdisError::DatabaseError
+            })?;
+        Ok(result.rows_affected())
+    }
 }
 
 #[cfg(test)]
@@ -173,6 +186,71 @@ mod tests {
         // Different query increments quota again
         svc.record_request(ADDR, "query2", "sig2").await.unwrap();
         assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 2);
+    }
+
+    /// Insert a request with a specific timestamp (YYYY-MM-DD HH:MM:SS format).
+    async fn insert_with_timestamp(
+        svc: &SqlitePnpRequestService,
+        addr: &str,
+        query: &str,
+        ts: &str,
+    ) {
+        sqlx::query(
+            "INSERT INTO requests (caller_address, blinded_query, signature, timestamp) \
+             VALUES (?, ?, 'sig', ?)",
+        )
+        .bind(addr)
+        .bind(query)
+        .bind(ts)
+        .execute(&svc.pool)
+        .await
+        .unwrap();
+    }
+
+    #[tokio::test]
+    async fn delete_old_requests_removes_expired() {
+        let svc = test_service().await;
+        let addr = ADDR.to_string();
+
+        // Insert a request from 10 days ago
+        insert_with_timestamp(&svc, &addr, "old_query", "2000-01-01 00:00:00").await;
+        // Insert a fresh request (uses default datetime('now'))
+        svc.record_request(ADDR, "new_query", "sig").await.unwrap();
+
+        let deleted = svc.delete_old_requests(7).await.unwrap();
+        assert_eq!(deleted, 1);
+
+        // Old request gone, new one survives
+        assert!(
+            svc.get_duplicate_request(ADDR, "old_query")
+                .await
+                .unwrap()
+                .is_none()
+        );
+        assert!(
+            svc.get_duplicate_request(ADDR, "new_query")
+                .await
+                .unwrap()
+                .is_some()
+        );
+    }
+
+    #[tokio::test]
+    async fn delete_old_requests_with_zero_days_deletes_all() {
+        let svc = test_service().await;
+
+        svc.record_request(ADDR, "q1", "sig1").await.unwrap();
+        svc.record_request(ADDR, "q2", "sig2").await.unwrap();
+
+        let deleted = svc.delete_old_requests(0).await.unwrap();
+        assert_eq!(deleted, 2);
+    }
+
+    #[tokio::test]
+    async fn delete_old_requests_returns_zero_when_nothing_to_prune() {
+        let svc = test_service().await;
+        let deleted = svc.delete_old_requests(7).await.unwrap();
+        assert_eq!(deleted, 0);
     }
 
     #[tokio::test]

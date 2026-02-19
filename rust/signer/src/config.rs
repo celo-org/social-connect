@@ -24,6 +24,8 @@ pub struct Config {
     pub timeout_ms: u64,
     pub query_price_per_cusd: f64,
     pub google_project_id: Option<String>,
+    pub request_pruning_days: u64,
+    pub request_pruning_interval_secs: u64,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -61,6 +63,8 @@ impl Config {
             timeout_ms: parse_env("ODIS_SIGNER_TIMEOUT", Some(5000))?,
             query_price_per_cusd: parse_env("QUERY_PRICE_PER_CUSD", Some(0.001))?,
             google_project_id: env::var("KEYSTORE_GOOGLE_PROJECT_ID").ok(),
+            request_pruning_days: parse_env("REQUEST_PRUNING_DAYS", Some(7))?,
+            request_pruning_interval_secs: parse_env("REQUEST_PRUNING_INTERVAL_SECS", Some(86400))?,
         })
     }
 }
@@ -158,6 +162,8 @@ mod tests {
             "ODIS_SIGNER_TIMEOUT",
             "QUERY_PRICE_PER_CUSD",
             "KEYSTORE_GOOGLE_PROJECT_ID",
+            "REQUEST_PRUNING_DAYS",
+            "REQUEST_PRUNING_INTERVAL_SECS",
         ] {
             unsafe { env::remove_var(key) };
         }
@@ -188,6 +194,8 @@ mod tests {
         assert_eq!(config.timeout_ms, 5000);
         assert!((config.query_price_per_cusd - 0.001).abs() < f64::EPSILON);
         assert!(config.google_project_id.is_none());
+        assert_eq!(config.request_pruning_days, 7);
+        assert_eq!(config.request_pruning_interval_secs, 86400);
     }
 
     #[test]
