@@ -50,6 +50,8 @@ fn test_config_with_db(db_path: &str) -> Config {
         timeout_ms: 5000,
         query_price_per_cusd: 0.001,
         google_project_id: None,
+        request_pruning_days: 7,
+        request_pruning_interval_secs: 86400,
     }
 }
 

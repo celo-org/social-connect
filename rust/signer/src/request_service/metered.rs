@@ -79,6 +79,21 @@ impl PnpRequestService for MeteredPnpRequestService {
 
         result
     }
+
+    async fn delete_old_requests(&self, older_than_days: u64) -> Result<u64, OdisError> {
+        let start = Instant::now();
+        let result = self.inner.delete_old_requests(older_than_days).await;
+        let elapsed = start.elapsed().as_secs_f64();
+
+        histogram!(metrics::DB_OPS_LATENCY, "operation" => "deleteRequestsOlderThan")
+            .record(elapsed);
+
+        if result.is_err() {
+            counter!(metrics::DATABASE_ERRORS, "type" => "batch-delete").increment(1);
+        }
+
+        result
+    }
 }
 
 #[cfg(test)]

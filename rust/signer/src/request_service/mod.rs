@@ -24,4 +24,8 @@ pub trait PnpRequestService: Send + Sync {
         blinded_query: &str,
         signature: &str,
     ) -> Result<(), OdisError>;
+
+    /// Delete requests older than the given number of days.
+    /// Returns the number of deleted rows.
+    async fn delete_old_requests(&self, older_than_days: u64) -> Result<u64, OdisError>;
 }
