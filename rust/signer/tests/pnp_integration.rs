@@ -6,7 +6,7 @@ use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use http_body_util::BodyExt;
-use k256::ecdsa::{SigningKey, signature::Signer as _};
+use k256::ecdsa::{SigningKey, signature::hazmat::PrehashSigner};
 use sha2::{Digest, Sha256};
 use tempfile::NamedTempFile;
 use tower::ServiceExt;
@@ -440,8 +440,7 @@ async fn quota_succeeds_with_valid_wallet_key_signature() {
 fn dek_sign(body: &str, signing_key: &SigningKey) -> String {
     let double_stringified = serde_json::to_string(body).unwrap();
     let digest = Sha256::digest(double_stringified.as_bytes());
-    let digest_hex = hex::encode(digest);
-    let sig: k256::ecdsa::Signature = signing_key.sign(digest_hex.as_bytes());
+    let sig: k256::ecdsa::Signature = signing_key.sign_prehash(&digest).unwrap();
     serde_json::to_string(&sig.to_der().as_bytes()).unwrap()
 }
 

@@ -1,7 +1,7 @@
 use alloy::primitives::Address;
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
-use k256::ecdsa::signature::Verifier;
+use k256::ecdsa::signature::hazmat::PrehashVerifier;
 use k256::ecdsa::{Signature as K256Signature, VerifyingKey};
 use sha2::{Digest, Sha256};
 use tracing::{info, warn};
@@ -134,7 +134,6 @@ fn verify_dek_signature(body: &[u8], authorization: &str, dek: &str) -> bool {
     };
     let double_stringified = serde_json::to_string(body_str).unwrap_or_default();
     let digest = Sha256::digest(double_stringified.as_bytes());
-    let digest_hex = hex::encode(digest);
 
     // The Authorization header contains a JSON array of DER byte values, e.g. [48, 68, 2, ...]
     let der_bytes: Vec<u8> = match serde_json::from_str::<Vec<u8>>(authorization) {
@@ -147,14 +146,10 @@ fn verify_dek_signature(body: &[u8], authorization: &str, dek: &str) -> bool {
         Err(_) => return false,
     };
 
-    // The TS `key.verify(hexDigest, parsedSig)` passes the hex-encoded digest as a string.
-    // elliptic.js treats string inputs as character bytes, so the ECDSA verification runs
-    // over the ASCII bytes of the hex string (not the raw digest bytes).
-    // We replicate that by passing `digest_hex.as_bytes()` to `Verifier::verify`, which
-    // internally hashes those bytes before checking the signature.
-    verifying_key
-        .verify(digest_hex.as_bytes(), &signature)
-        .is_ok()
+    // elliptic.js's `key.verify(hexDigest, sig)` treats the hex string as a BigNumber
+    // (via `new BN(msg, 16)`) and uses it directly as the hash value for ECDSA — no
+    // additional hashing. We must use `verify_prehash` with the raw digest bytes to match.
+    verifying_key.verify_prehash(&digest, &signature).is_ok()
 }
 
 #[cfg(test)]
@@ -170,10 +165,9 @@ mod tests {
     fn sign_dek(body: &str, signing_key: &k256::ecdsa::SigningKey) -> String {
         let double_stringified = serde_json::to_string(body).unwrap();
         let digest = Sha256::digest(double_stringified.as_bytes());
-        let digest_hex = hex::encode(digest);
 
-        use k256::ecdsa::signature::Signer as _;
-        let sig: K256Signature = signing_key.sign(digest_hex.as_bytes());
+        use k256::ecdsa::signature::hazmat::PrehashSigner;
+        let sig: K256Signature = signing_key.sign_prehash(&digest).unwrap();
         serde_json::to_string(&sig.to_der().as_bytes()).unwrap()
     }
 
