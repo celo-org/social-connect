@@ -2,7 +2,7 @@ use std::sync::OnceLock;
 use std::time::Instant;
 
 use ::metrics::{counter, histogram};
-use axum::extract::Request;
+use axum::extract::{MatchedPath, Request};
 use axum::middleware::Next;
 use axum::response::Response;
 use metrics_exporter_prometheus::{Matcher, PrometheusBuilder, PrometheusHandle};
@@ -66,7 +66,11 @@ pub fn install_recorder() -> PrometheusHandle {
 /// - `responses` counter (labels: endpoint, status_code)
 /// - `signature_endpoint_latency` histogram (label: endpoint)
 pub async fn http_metrics_layer(request: Request, next: Next) -> Response {
-    let path = request.uri().path().to_owned();
+    let path = request
+        .extensions()
+        .get::<MatchedPath>()
+        .map(|p| p.as_str().to_owned())
+        .unwrap_or_else(|| "unknown".to_owned());
 
     counter!(REQUESTS, "endpoint" => path.clone()).increment(1);
 
