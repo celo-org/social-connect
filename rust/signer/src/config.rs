@@ -44,7 +44,7 @@ impl Config {
     ///
     /// Call `dotenvy::dotenv()` before this if you want `.env` file support.
     pub fn from_env() -> Result<Self, ConfigError> {
-        Ok(Config {
+        let config = Config {
             server_port: parse_env("SERVER_PORT", Some(8080))?,
             pnp_api_enabled: parse_env_bool("PHONE_NUMBER_PRIVACY_API_ENABLED", Some(false))?,
             keystore_type: parse_keystore_type()?,
@@ -69,7 +69,30 @@ impl Config {
                 .filter(|s| !s.is_empty()),
             request_pruning_days: parse_env("REQUEST_PRUNING_DAYS", Some(7))?,
             request_pruning_interval_secs: parse_env("REQUEST_PRUNING_INTERVAL_SECS", Some(86400))?,
-        })
+        };
+
+        if config.timeout_ms == 0 {
+            return Err(ConfigError::InvalidValue {
+                name: "ODIS_SIGNER_TIMEOUT".to_string(),
+                source: "must be greater than 0".into(),
+            });
+        }
+
+        if !(config.query_price_per_cusd > 0.0 && config.query_price_per_cusd.is_finite()) {
+            return Err(ConfigError::InvalidValue {
+                name: "QUERY_PRICE_PER_CUSD".to_string(),
+                source: "must be a positive finite number".into(),
+            });
+        }
+
+        if config.pnp_latest_key_version == 0 {
+            return Err(ConfigError::InvalidValue {
+                name: "PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION".to_string(),
+                source: "must be >= 1".into(),
+            });
+        }
+
+        Ok(config)
     }
 }
 
@@ -332,6 +355,70 @@ mod tests {
         let config = Config::from_env().unwrap();
         assert!(config.blockchain_provider.is_none());
         assert!(config.google_project_id.is_none());
+    }
+
+    #[test]
+    fn zero_timeout_is_rejected() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("ODIS_SIGNER_TIMEOUT", "0");
+        }
+
+        let result = Config::from_env();
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "ODIS_SIGNER_TIMEOUT")
+        );
+
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("ODIS_SIGNER_TIMEOUT", "-1");
+        }
+
+        let result = Config::from_env();
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "ODIS_SIGNER_TIMEOUT")
+        );
+    }
+
+    #[test]
+    fn invalid_query_price_is_rejected() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("QUERY_PRICE_PER_CUSD", "-1.0");
+        }
+        assert!(
+            matches!(Config::from_env().unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "QUERY_PRICE_PER_CUSD")
+        );
+
+        unsafe { set("QUERY_PRICE_PER_CUSD", "nan") };
+        assert!(
+            matches!(Config::from_env().unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "QUERY_PRICE_PER_CUSD")
+        );
+
+        unsafe { set("QUERY_PRICE_PER_CUSD", "inf") };
+        assert!(
+            matches!(Config::from_env().unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "QUERY_PRICE_PER_CUSD")
+        );
+    }
+
+    #[test]
+    fn zero_key_version_is_rejected() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", "0");
+        }
+
+        let result = Config::from_env();
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION")
+        );
     }
 
     #[test]
