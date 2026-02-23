@@ -27,14 +27,18 @@ impl SqlitePnpRequestService {
             .synchronous(SqliteSynchronous::Normal)
             .busy_timeout(std::time::Duration::from_secs(5));
 
-        let pool = SqlitePoolOptions::new()
-            .max_connections(if is_memory { 1 } else { 5 })
-            .connect_with(options)
-            .await
-            .map_err(|e| {
-                tracing::error!("failed to connect to database: {e}");
-                OdisError::DatabaseError
-            })?;
+        let pool_options = SqlitePoolOptions::new().max_connections(if is_memory { 1 } else { 5 });
+        // For in-memory databases, disable idle timeout to prevent the pool from
+        // dropping the connection (which destroys the database and its schema).
+        let pool_options = if is_memory {
+            pool_options.idle_timeout(None)
+        } else {
+            pool_options
+        };
+        let pool = pool_options.connect_with(options).await.map_err(|e| {
+            tracing::error!("failed to connect to database: {e}");
+            OdisError::DatabaseError
+        })?;
 
         sqlx::migrate!("./migrations")
             .run(&pool)
