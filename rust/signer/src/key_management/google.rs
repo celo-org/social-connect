@@ -74,17 +74,7 @@ impl GoogleSecretManagerKeyProvider {
         })?;
 
         let key = raw.trim().to_string();
-
-        if key.len() != PRIVATE_KEY_HEX_SIZE {
-            tracing::error!(
-                secret_id,
-                expected = PRIVATE_KEY_HEX_SIZE,
-                actual = key.len(),
-                "invalid private key length"
-            );
-            return Err(OdisError::KeyFetchError);
-        }
-
+        validate_key_hex(&key)?;
         Ok(key)
     }
 }
@@ -114,20 +104,41 @@ impl KeyProvider for GoogleSecretManagerKeyProvider {
     }
 }
 
+/// Validate that a key string is the expected length and valid hex.
+fn validate_key_hex(key: &str) -> Result<(), OdisError> {
+    if key.len() != PRIVATE_KEY_HEX_SIZE {
+        tracing::error!(
+            expected = PRIVATE_KEY_HEX_SIZE,
+            actual = key.len(),
+            "invalid private key length"
+        );
+        return Err(OdisError::KeyFetchError);
+    }
+
+    if hex::decode(key).is_err() {
+        tracing::error!("secret payload is not valid hex");
+        return Err(OdisError::KeyFetchError);
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn valid_key_length_is_accepted() {
-        // 72 hex chars = valid
-        let key = "000000000e7e1a2fad3b54deb2b1b32cf4c7b084842d50bbb5c6143b9d9577d16e050f03";
-        assert_eq!(key.len(), PRIVATE_KEY_HEX_SIZE);
-    }
+    fn validate_key_hex_checks_length_and_encoding() {
+        // Valid: 72 hex chars
+        let valid = "000000000e7e1a2fad3b54deb2b1b32cf4c7b084842d50bbb5c6143b9d9577d16e050f03";
+        assert!(validate_key_hex(valid).is_ok());
 
-    #[test]
-    fn invalid_key_lengths_are_rejected() {
-        assert_ne!("too_short".len(), PRIVATE_KEY_HEX_SIZE);
-        assert_ne!("a".repeat(100).len(), PRIVATE_KEY_HEX_SIZE);
+        // Too short / too long
+        assert!(validate_key_hex("abcdef").is_err());
+        assert!(validate_key_hex(&"aa".repeat(72)).is_err());
+
+        // Correct length but not valid hex
+        let non_hex = "z".repeat(PRIVATE_KEY_HEX_SIZE);
+        assert!(validate_key_hex(&non_hex).is_err());
     }
 }
