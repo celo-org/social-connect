@@ -44,7 +44,22 @@ impl Config {
     ///
     /// Call `dotenvy::dotenv()` before this if you want `.env` file support.
     pub fn from_env() -> Result<Self, ConfigError> {
-        Ok(Config {
+        // The TS signer swaps in mock services on these. This signer has no
+        // such switch, and would read the chain and charge quota where the
+        // operator expects mock answers.
+        // TODO: remove once the migration from the TS signer is finished; only TS manifests
+        // set these variables.
+        for ts_variable in ["SHOULD_MOCK_ACCOUNT_SERVICE", "SHOULD_MOCK_REQUEST_SERVICE"] {
+            if env::var(ts_variable).is_ok_and(|v| v.eq_ignore_ascii_case("true")) {
+                return Err(ConfigError::InvalidValue {
+                    name: ts_variable.to_string(),
+                    source: "this signer has no mock services to switch to; remove the variable"
+                        .into(),
+                });
+            }
+        }
+
+        let config = Config {
             server_port: parse_env("SERVER_PORT", Some(8080))?,
             pnp_api_enabled: parse_env_bool("PHONE_NUMBER_PRIVACY_API_ENABLED", Some(false))?,
             keystore_type: parse_keystore_type()?,
@@ -54,7 +69,9 @@ impl Config {
             )?,
             pnp_latest_key_version: parse_env("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", Some(1))?,
             db_path: parse_env_string("DB_PATH", Some(":memory:"))?,
-            blockchain_provider: env::var("BLOCKCHAIN_PROVIDER").ok(),
+            blockchain_provider: env::var("BLOCKCHAIN_PROVIDER")
+                .ok()
+                .filter(|s| !s.is_empty()),
             chain_id: parse_env("CHAIN_ID", Some(11142220))?,
             accounts_contract_address: parse_env_address("ACCOUNTS_CONTRACT_ADDRESS")?,
             odis_payments_contract_address: parse_env_address("ODIS_PAYMENTS_CONTRACT_ADDRESS")?,
@@ -62,10 +79,35 @@ impl Config {
             full_node_retry_delay_ms: parse_env("FULL_NODE_RETRY_DELAY_MS", Some(100))?,
             timeout_ms: parse_env("ODIS_SIGNER_TIMEOUT", Some(5000))?,
             query_price_per_cusd: parse_env("QUERY_PRICE_PER_CUSD", Some(0.001))?,
-            google_project_id: env::var("KEYSTORE_GOOGLE_PROJECT_ID").ok(),
+            google_project_id: env::var("KEYSTORE_GOOGLE_PROJECT_ID")
+                .ok()
+                .filter(|s| !s.is_empty()),
             request_pruning_days: parse_env("REQUEST_PRUNING_DAYS", Some(7))?,
             request_pruning_interval_secs: parse_env("REQUEST_PRUNING_INTERVAL_SECS", Some(86400))?,
-        })
+        };
+
+        if config.timeout_ms == 0 {
+            return Err(ConfigError::InvalidValue {
+                name: "ODIS_SIGNER_TIMEOUT".to_string(),
+                source: "must be greater than 0".into(),
+            });
+        }
+
+        if !(config.query_price_per_cusd > 0.0 && config.query_price_per_cusd.is_finite()) {
+            return Err(ConfigError::InvalidValue {
+                name: "QUERY_PRICE_PER_CUSD".to_string(),
+                source: "must be a positive finite number".into(),
+            });
+        }
+
+        if config.pnp_latest_key_version == 0 {
+            return Err(ConfigError::InvalidValue {
+                name: "PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION".to_string(),
+                source: "must be >= 1".into(),
+            });
+        }
+
+        Ok(config)
     }
 }
 
@@ -108,11 +150,14 @@ fn parse_env_address(name: &str) -> Result<Option<Address>, ConfigError> {
 fn parse_env_bool(name: &str, default: Option<bool>) -> Result<bool, ConfigError> {
     match env::var(name) {
         Ok(val) => match val.to_lowercase().as_str() {
-            "true" | "1" => Ok(true),
-            "false" | "0" => Ok(false),
+            "true" => Ok(true),
+            "false" => Ok(false),
+            // The TS signer reads every value but `true` as false. A value such
+            // as `1` is refused, because reading it as either could switch an
+            // API on or off against the operator's intent.
             _ => Err(ConfigError::InvalidValue {
                 name: name.to_string(),
-                source: format!("expected true/false/1/0, got '{val}'").into(),
+                source: format!("expected true or false, got '{val}'").into(),
             }),
         },
         Err(_) => default.ok_or_else(|| ConfigError::Missing(name.to_string())),
@@ -164,6 +209,8 @@ mod tests {
             "KEYSTORE_GOOGLE_PROJECT_ID",
             "REQUEST_PRUNING_DAYS",
             "REQUEST_PRUNING_INTERVAL_SECS",
+            "SHOULD_MOCK_ACCOUNT_SERVICE",
+            "SHOULD_MOCK_REQUEST_SERVICE",
         ] {
             unsafe { env::remove_var(key) };
         }
@@ -301,18 +348,134 @@ mod tests {
     #[test]
     fn invalid_bool_is_error() {
         let _lock = ENV_LOCK.lock().unwrap();
+        // The TS signer reads `1` as false; reading it as true would switch
+        // the API on with the same manifest.
+        for value in ["yes", "1", "0"] {
+            unsafe {
+                clear_env();
+                set("KEYSTORE_TYPE", "Mock");
+                set("PHONE_NUMBER_PRIVACY_API_ENABLED", value);
+            }
+
+            assert!(
+                matches!(
+                    Config::from_env().unwrap_err(),
+                    ConfigError::InvalidValue { ref name, .. }
+                        if name == "PHONE_NUMBER_PRIVACY_API_ENABLED"
+                ),
+                "{value}"
+            );
+        }
+        for (value, expected) in [("true", true), ("TRUE", true), ("false", false)] {
+            unsafe {
+                clear_env();
+                set("KEYSTORE_TYPE", "Mock");
+                set("PHONE_NUMBER_PRIVACY_API_ENABLED", value);
+            }
+            assert_eq!(Config::from_env().unwrap().pnp_api_enabled, expected);
+        }
+    }
+
+    #[test]
+    fn ts_signer_mock_switches_are_an_error_when_on() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        for ts_variable in ["SHOULD_MOCK_ACCOUNT_SERVICE", "SHOULD_MOCK_REQUEST_SERVICE"] {
+            unsafe {
+                clear_env();
+                set("KEYSTORE_TYPE", "Mock");
+                set(ts_variable, "true");
+            }
+            assert!(
+                matches!(
+                    Config::from_env().unwrap_err(),
+                    ConfigError::InvalidValue { ref name, .. } if name == ts_variable
+                ),
+                "{ts_variable}"
+            );
+
+            // A manifest that switches the mock off says what this signer does anyway.
+            unsafe { set(ts_variable, "false") };
+            assert!(Config::from_env().is_ok(), "{ts_variable}=false");
+        }
+    }
+
+    #[test]
+    fn empty_string_env_vars_are_treated_as_unset() {
+        let _lock = ENV_LOCK.lock().unwrap();
         unsafe {
             clear_env();
             set("KEYSTORE_TYPE", "Mock");
-            set("PHONE_NUMBER_PRIVACY_API_ENABLED", "yes");
+            set("BLOCKCHAIN_PROVIDER", "");
+            set("KEYSTORE_GOOGLE_PROJECT_ID", "");
+        }
+
+        let config = Config::from_env().unwrap();
+        assert!(config.blockchain_provider.is_none());
+        assert!(config.google_project_id.is_none());
+    }
+
+    #[test]
+    fn zero_timeout_is_rejected() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("ODIS_SIGNER_TIMEOUT", "0");
         }
 
         let result = Config::from_env();
-        assert!(result.is_err());
-        assert!(matches!(
-            result.unwrap_err(),
-            ConfigError::InvalidValue { .. }
-        ));
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "ODIS_SIGNER_TIMEOUT")
+        );
+
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("ODIS_SIGNER_TIMEOUT", "-1");
+        }
+
+        let result = Config::from_env();
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "ODIS_SIGNER_TIMEOUT")
+        );
+    }
+
+    #[test]
+    fn invalid_query_price_is_rejected() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("QUERY_PRICE_PER_CUSD", "-1.0");
+        }
+        assert!(
+            matches!(Config::from_env().unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "QUERY_PRICE_PER_CUSD")
+        );
+
+        unsafe { set("QUERY_PRICE_PER_CUSD", "nan") };
+        assert!(
+            matches!(Config::from_env().unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "QUERY_PRICE_PER_CUSD")
+        );
+
+        unsafe { set("QUERY_PRICE_PER_CUSD", "inf") };
+        assert!(
+            matches!(Config::from_env().unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "QUERY_PRICE_PER_CUSD")
+        );
+    }
+
+    #[test]
+    fn zero_key_version_is_rejected() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", "0");
+        }
+
+        let result = Config::from_env();
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION")
+        );
     }
 
     #[test]
