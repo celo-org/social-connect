@@ -30,13 +30,11 @@ impl CachingAccountService {
 #[async_trait]
 impl AccountService for CachingAccountService {
     async fn get_account(&self, address: Address) -> Result<PnpAccount, OdisError> {
-        if let Some(account) = self.cache.get(&address).await {
-            return Ok(account);
-        }
-
-        let account = self.inner.get_account(address).await?;
-        self.cache.insert(address, account.clone()).await;
-        Ok(account)
+        let inner = self.inner.clone();
+        self.cache
+            .try_get_with(address, async move { inner.get_account(address).await })
+            .await
+            .map_err(|e| (*e).clone())
     }
 }
 
