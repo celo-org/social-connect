@@ -61,7 +61,9 @@ impl PnpRequestService for SqlitePnpRequestService {
                     tracing::error!("get_used_quota query failed: {e}");
                     OdisError::DatabaseError
                 })?;
-        Ok(row.map(|(n,)| n as u32).unwrap_or(0))
+        Ok(row
+            .map(|(n,)| u32::try_from(n).unwrap_or(u32::MAX))
+            .unwrap_or(0))
     }
 
     async fn get_duplicate_request(
