@@ -1,8 +1,9 @@
 use std::future::Future;
 use std::time::Duration;
 
+use alloy::network::Ethereum;
 use alloy::primitives::{Address, U256, address};
-use alloy::providers::ProviderBuilder;
+use alloy::providers::{ProviderBuilder, RootProvider};
 use alloy::sol;
 use async_trait::async_trait;
 use tracing::warn;
@@ -51,7 +52,7 @@ fn default_contract_addresses(chain_id: u64) -> Option<ContractAddresses> {
 
 pub struct ClientAccountService {
     contracts: ContractAddresses,
-    provider_url: String,
+    provider: RootProvider<Ethereum>,
     retry_count: u32,
     retry_delay: Duration,
     query_price_per_cusd: f64,
@@ -86,12 +87,18 @@ impl ClientAccountService {
                 OdisError::FullNodeError
             })?;
 
+        let url = provider_url.parse().map_err(|_| {
+            warn!("invalid BLOCKCHAIN_PROVIDER URL");
+            OdisError::FullNodeError
+        })?;
+        let provider = ProviderBuilder::default().connect_http(url);
+
         Ok(Self {
             contracts: ContractAddresses {
                 accounts,
                 odis_payments,
             },
-            provider_url: provider_url.to_string(),
+            provider,
             retry_count: config.full_node_retry_count,
             retry_delay: Duration::from_millis(config.full_node_retry_delay_ms),
             query_price_per_cusd: config.query_price_per_cusd,
@@ -99,13 +106,7 @@ impl ClientAccountService {
     }
 
     async fn get_dek(&self, address: Address) -> Result<String, OdisError> {
-        let provider = ProviderBuilder::new().connect_http(
-            self.provider_url
-                .parse()
-                .map_err(|_| OdisError::FullNodeError)?,
-        );
-
-        let accounts = IAccounts::new(self.contracts.accounts, &provider);
+        let accounts = IAccounts::new(self.contracts.accounts, &self.provider);
         let retry_count = self.retry_count;
         let retry_delay = self.retry_delay;
 
@@ -122,13 +123,7 @@ impl ClientAccountService {
     }
 
     async fn get_total_quota(&self, address: Address) -> Result<u32, OdisError> {
-        let provider = ProviderBuilder::new().connect_http(
-            self.provider_url
-                .parse()
-                .map_err(|_| OdisError::FullNodeError)?,
-        );
-
-        let payments = IOdisPayments::new(self.contracts.odis_payments, &provider);
+        let payments = IOdisPayments::new(self.contracts.odis_payments, &self.provider);
         let retry_count = self.retry_count;
         let retry_delay = self.retry_delay;
 
