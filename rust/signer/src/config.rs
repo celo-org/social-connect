@@ -54,7 +54,9 @@ impl Config {
             )?,
             pnp_latest_key_version: parse_env("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", Some(1))?,
             db_path: parse_env_string("DB_PATH", Some(":memory:"))?,
-            blockchain_provider: env::var("BLOCKCHAIN_PROVIDER").ok(),
+            blockchain_provider: env::var("BLOCKCHAIN_PROVIDER")
+                .ok()
+                .filter(|s| !s.is_empty()),
             chain_id: parse_env("CHAIN_ID", Some(44787))?,
             accounts_contract_address: parse_env_address("ACCOUNTS_CONTRACT_ADDRESS")?,
             odis_payments_contract_address: parse_env_address("ODIS_PAYMENTS_CONTRACT_ADDRESS")?,
@@ -62,7 +64,9 @@ impl Config {
             full_node_retry_delay_ms: parse_env("FULL_NODE_RETRY_DELAY_MS", Some(100))?,
             timeout_ms: parse_env("ODIS_SIGNER_TIMEOUT", Some(5000))?,
             query_price_per_cusd: parse_env("QUERY_PRICE_PER_CUSD", Some(0.001))?,
-            google_project_id: env::var("KEYSTORE_GOOGLE_PROJECT_ID").ok(),
+            google_project_id: env::var("KEYSTORE_GOOGLE_PROJECT_ID")
+                .ok()
+                .filter(|s| !s.is_empty()),
             request_pruning_days: parse_env("REQUEST_PRUNING_DAYS", Some(7))?,
             request_pruning_interval_secs: parse_env("REQUEST_PRUNING_INTERVAL_SECS", Some(86400))?,
         })
@@ -313,6 +317,21 @@ mod tests {
             result.unwrap_err(),
             ConfigError::InvalidValue { .. }
         ));
+    }
+
+    #[test]
+    fn empty_string_env_vars_are_treated_as_unset() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("BLOCKCHAIN_PROVIDER", "");
+            set("KEYSTORE_GOOGLE_PROJECT_ID", "");
+        }
+
+        let config = Config::from_env().unwrap();
+        assert!(config.blockchain_provider.is_none());
+        assert!(config.google_project_id.is_none());
     }
 
     #[test]
