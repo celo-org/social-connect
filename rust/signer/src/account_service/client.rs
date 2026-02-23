@@ -107,10 +107,8 @@ impl ClientAccountService {
 
     async fn get_dek(&self, address: Address) -> Result<String, OdisError> {
         let accounts = IAccounts::new(self.contracts.accounts, &self.provider);
-        let retry_count = self.retry_count;
-        let retry_delay = self.retry_delay;
 
-        let dek_bytes = retry_with_backoff(retry_count, retry_delay, || async {
+        let dek_bytes = retry_with_backoff(self.retry_count, self.retry_delay, || async {
             let result = accounts.getDataEncryptionKey(address).call().await;
             result.map(|r| r.0).map_err(|e| {
                 warn!(error = %e, %address, "failed to fetch DEK");
@@ -124,10 +122,8 @@ impl ClientAccountService {
 
     async fn get_total_quota(&self, address: Address) -> Result<u32, OdisError> {
         let payments = IOdisPayments::new(self.contracts.odis_payments, &self.provider);
-        let retry_count = self.retry_count;
-        let retry_delay = self.retry_delay;
 
-        let total_paid = retry_with_backoff(retry_count, retry_delay, || async {
+        let total_paid = retry_with_backoff(self.retry_count, self.retry_delay, || async {
             let result = payments.totalPaidCUSD(address).call().await;
             result.map_err(|e| {
                 warn!(error = %e, %address, "failed to fetch total paid");
@@ -182,20 +178,24 @@ where
     Fut: Future<Output = Result<T, E>>,
 {
     let mut delay = initial_delay;
-    let mut last_err = None;
 
-    for _ in 0..=max_retries {
+    // Initial attempt
+    let mut last_err = match f().await {
+        Ok(val) => return Ok(val),
+        Err(e) => e,
+    };
+
+    // Retries with backoff
+    for _ in 0..max_retries {
+        tokio::time::sleep(delay).await;
+        delay = delay.mul_f64(1.5);
         match f().await {
             Ok(val) => return Ok(val),
-            Err(e) => {
-                last_err = Some(e);
-                tokio::time::sleep(delay).await;
-                delay = delay.mul_f64(1.5);
-            }
+            Err(e) => last_err = e,
         }
     }
 
-    Err(last_err.unwrap())
+    Err(last_err)
 }
 
 #[cfg(test)]
