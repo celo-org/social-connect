@@ -19,6 +19,20 @@ use crate::types::{
 const DUPLICATE_REQUEST_WARNING: &str =
     "CELO_ODIS_WARN_04 BAD_INPUT Attempt to replay partial signature request";
 
+/// Domain endpoints are not yet implemented in the Rust port.
+/// Return 503 ApiUnavailable, matching the TS signer's disabled-API behavior.
+pub async fn domain_sign_handler() -> OdisError {
+    OdisError::ApiUnavailable
+}
+
+pub async fn domain_quota_handler() -> OdisError {
+    OdisError::ApiUnavailable
+}
+
+pub async fn domain_disable_handler() -> OdisError {
+    OdisError::ApiUnavailable
+}
+
 pub async fn status_handler() -> impl IntoResponse {
     Json(serde_json::json!({
         "version": env!("CARGO_PKG_VERSION"),
