@@ -121,7 +121,7 @@ pub async fn build_router_with_services(
         .layer(TraceLayer::new_for_http())
         .layer(CatchPanicLayer::new())
         .layer(TimeoutLayer::with_status_code(
-            StatusCode::REQUEST_TIMEOUT,
+            StatusCode::INTERNAL_SERVER_ERROR,
             timeout,
         ))
         .layer(RequestBodyLimitLayer::new(16 * 1024)) // 16 KB, matches TS REASONABLE_BODY_CHAR_LIMIT
