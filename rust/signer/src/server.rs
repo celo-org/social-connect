@@ -16,7 +16,10 @@ use crate::account_service::{
 };
 use crate::config::{Config, KeystoreType};
 use crate::errors::OdisError;
-use crate::handlers::{pnp_quota_handler, pnp_sign_handler, status_handler};
+use crate::handlers::{
+    domain_disable_handler, domain_quota_handler, domain_sign_handler, pnp_quota_handler,
+    pnp_sign_handler, status_handler,
+};
 use crate::key_management::{GoogleSecretManagerKeyProvider, KeyProvider, MockKeyProvider};
 use crate::metrics;
 use crate::request_service::{
@@ -107,6 +110,9 @@ pub async fn build_router_with_services(
         .route("/status", get(status_handler))
         .route("/sign", post(pnp_sign_handler))
         .route("/quotaStatus", post(pnp_quota_handler))
+        .route("/domain/sign", post(domain_sign_handler))
+        .route("/domain/quotaStatus", post(domain_quota_handler))
+        .route("/domain/disable", post(domain_disable_handler))
         .route(
             "/metrics",
             get(move || std::future::ready(metrics_handle.render())),
