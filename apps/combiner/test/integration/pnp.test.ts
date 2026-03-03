@@ -37,7 +37,7 @@ import { Server as HttpsServer } from 'https'
 import { Knex } from 'knex'
 import request from 'supertest'
 import { createWalletClient, http, publicActions } from 'viem'
-import { celoAlfajores } from 'viem/chains'
+import { celoSepolia } from 'viem/chains'
 import config, { getCombinerVersion } from '../../src/config'
 import { startCombiner } from '../../src/server'
 import { getBlindedPhoneNumber, serverClose } from '../utils'
@@ -64,8 +64,8 @@ const {
 jest.setTimeout(20000)
 
 const mockAccount = '0x0000000000000000000000000000000000007E57'
-const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
-const ODIS_PAYMENTS_PROXY_ADDRESS = '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49'
+const ACCOUNTS_PROXY_ADDRESS = '0x44957232699ca060B607E77083bDACD350d6b6d1'
+const ODIS_PAYMENTS_PROXY_ADDRESS = '0x96AfaE75F12A759c1dFB364ce93548c3Bd242D58'
 
 // create deep copy of config
 const combinerConfig: typeof config = JSON.parse(JSON.stringify(config))
@@ -91,8 +91,8 @@ const signerConfig: SignerConfig = {
     },
   },
   blockchain: {
-    rpcURL: 'https://alfajores-forno.celo-testnet.org',
-    chainID: celoAlfajores.id,
+    rpcURL: 'https://forno.celo-sepolia.celo-testnet.org',
+    chainID: celoSepolia.id,
     apiKey: undefined,
   },
   db: {
@@ -175,7 +175,7 @@ describe('pnpService', () => {
 
   // Create a mock wallet client that can return mock contract data
   const mockClient = createWalletClient({
-    chain: celoAlfajores,
+    chain: celoSepolia,
     transport: http(),
   })
     .extend(publicActions)
@@ -900,7 +900,7 @@ describe('pnpService', () => {
           it('Should return 401 on failure to fetch DEK', async () => {
             // Create a client that throws an error when getDataEncryptionKey is called
             const errorClient = createWalletClient({
-              chain: celoAlfajores,
+              chain: celoSepolia,
               transport: http(),
             })
               .extend(publicActions)
