@@ -13,9 +13,7 @@
     "@celo/base": "^7.0.0",
     "@celo/identity": "^5.1.2",
     "blind-threshold-bls": "https://github.com/celo-org/blind-threshold-bls-wasm#3d1013a",
-    "ethers": "^5.7.2",
-    "web3": "^1.8.0",
-    "web3-utils": "^1.8.0"
+    "ethers": "^5.7.2"
   },
   "devDependencies": {
     "prettier": "2.7.1"

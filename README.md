@@ -155,7 +155,6 @@ The following steps use the  [Viem](https://viem.sh) to quickly set you up to pl
 | :-------------------------------------------------------------------------------------------: |
 |                            [Viem](docs/examples/viem.ts)                             |
 |                              [EthersJS (v5)](docs/examples/ethers.ts)                              |
-|                                  [web3.js](docs/examples/web3.ts)                                  |
 |         [NextJS based web app (Phone Number)](https://github.com/celo-org/emisianto)          |
 |         [NextJS based templated](https://github.com/celo-org/socialconnect-template)          |
 | [React Native App (Phone Number)](https://github.com/celo-org/SocialConnect-ReactNative-Demo) |
