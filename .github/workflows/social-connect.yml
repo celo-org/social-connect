@@ -194,7 +194,7 @@ jobs:
           yarn --cwd=packages/identity test
 
       - name: Upload Jest Test Results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: Jest Test Results
           path: test-results/jest
