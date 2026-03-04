@@ -1,0 +1,97 @@
+---
+name: Build ODIS Rust signer image
+
+# Builds only when an input of dockerfiles/Dockerfile-signer-rs changes, so a
+# change to the TS signer does not rebuild this image and a change to the Rust
+# signer does not rebuild the TS one.
+#
+# A release is a git tag named odis-rs-signer-<version>. The prefix must not
+# start with odis-signer-, which is the TS signer's release tag and would also
+# build the TS image.
+on:
+  push:
+    paths:
+      - 'dockerfiles/Dockerfile-signer-rs'
+      - 'rust/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/odis-signer-rs-container.yml'
+    branches:
+      - main
+    tags:
+      - 'odis-rs-signer-*'
+  pull_request:
+    paths:
+      - 'dockerfiles/Dockerfile-signer-rs'
+      - 'rust/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/odis-signer-rs-container.yml'
+  workflow_dispatch:
+
+jobs:
+  odis-signer-rs-build-dev:
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
+    name: Build Rust signer image (dev-images/odis-signer)
+    if: |
+      github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+      attestations: write
+      id-token: write
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
+      service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
+      tags: rs-${{ github.sha }}
+      context: .
+      file: dockerfiles/Dockerfile-signer-rs
+      # TODO: turn the image scan on. It is off in every image workflow in this repo.
+      trivy-enabled: false
+
+  odis-signer-rs-build:
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
+    name: Build Rust signer image (social-connect/odis-signer)
+    if: |
+      github.ref == 'refs/heads/main'
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+      attestations: write
+      id-token: write
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
+      service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
+      tags: rs-${{ github.sha }}
+      context: .
+      file: dockerfiles/Dockerfile-signer-rs
+      # TODO: turn the image scan on. It is off in every image workflow in this repo.
+      trivy-enabled: false
+
+  odis-signer-rs-tag:
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
+    name: Build Rust signer image (social-connect/odis-signer) tag
+    if: |
+      startsWith(github.ref, 'refs/tags/odis-rs-signer-')
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+      attestations: write
+      id-token: write
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-tag/providers/github-by-repos
+      service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
+      tags: ${{ github.ref_name }}
+      context: .
+      file: dockerfiles/Dockerfile-signer-rs
+      # TODO: turn the image scan on. It is off in every image workflow in this repo.
+      trivy-enabled: false
