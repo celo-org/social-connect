@@ -48,11 +48,11 @@ Migrations will run automatically on startup.
 ### Blockchain provider
 
 The service needs a connection to a full node in order to access chain state. The `BLOCKCHAIN_PROVIDER` config should be a url to a node with its JSON RPC enabled.
-This could be a node with RPC set up. Preferably this would be an node dedicated to this service. Alternatively, the public Forno endpoints can be used but their uptime guarantees are not as strong. For development with Alfajores, the forno url is `https://alfajores-forno.celo-testnet.org`. For Mainnet, it would be `https://forno.celo.org`
+This could be a node with RPC set up. Preferably this would be an node dedicated to this service. Alternatively, the public Forno endpoints can be used but their uptime guarantees are not as strong. For development with Celo Sepolia, the forno url is `https://forno.celo-sepolia.celo-testnet.org`. For Mainnet, it would be `https://forno.celo.org`
 
 - `BLOCKCHAIN_PROVIDER` - The blockchain node provider for chain state access. `
 - `BLOCKCHAIN_API_KEY` - Optional API key to be added to the authentication header. `
-- `CHAIN_ID` should be 44220 for Celo Mainnet or 44787 for Celo Alfajores
+- `CHAIN_ID` should be 44220 for Celo Mainnet or 11142220 for Celo Sepolia
 
 ### Security
 
@@ -159,9 +159,9 @@ After a key resharing, signers should rotate their key shares as follows:
 
 ### Validate before going live
 
-You can test your mainnet service is set up correctly by running specific tests in the e2e suite ("[Signer configuration test]" cases) which check signatures against the public polynomial for the respective APIs. Because the tests require quota, you must first point your provider endpoint to Alfajores.
+You can test your mainnet service is set up correctly by running specific tests in the e2e suite ("[Signer configuration test]" cases) which check signatures against the public polynomial for the respective APIs. Because the tests require quota, you must first point your provider endpoint to Celo Sepolia.
 
-1. Change your signer’s blockchain provider (`BLOCKCHAIN_PROVIDER`) to Alfajores Forno: `https://alfajores-forno.celo-testnet.org`
+1. Change your signer’s blockchain provider (`BLOCKCHAIN_PROVIDER`) to Celo Sepolia Forno: `https://forno.celo-sepolia.celo-testnet.org`
 2. Navigate to the signer directory in monorepo (this directory).
 3. Modify the .env file:
 
@@ -169,7 +169,7 @@ You can test your mainnet service is set up correctly by running specific tests 
 
 4. Run `yarn test:signer:mainnet`.
 
-   *Technical note: this command intentionally points the test's blockchain provider to Alfajores, in order to top up quota on Alfajores before running the test cases. It still verifies signatures against the respective mainnet polynomials.*
+   *Technical note: this command intentionally points the test’s blockchain provider to Celo Sepolia, in order to top up quota on Celo Sepolia before running the test cases. It still verifies signatures against the respective mainnet polynomials.*
 5. Verify that all tests pass.
 6. Change your signer’s blockchain provider back to its original value (if using Forno: `https://forno.celo.org`).
 

@@ -10,21 +10,6 @@ export interface CircuitBreakerServiceContext {
   publicKey: string
 }
 
-export const VALORA_ALFAJORES_CIRCUIT_BREAKER_ENVIRONMENT: CircuitBreakerServiceContext = {
-  url: 'https://us-central1-celo-mobile-alfajores.cloudfunctions.net/circuitBreaker/',
-  publicKey: `-----BEGIN PUBLIC KEY-----
-MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAsYkNg3iY1ha4KGCGvHLl
-mOMKV63lq+WsHIgUGfEuyfOWEBetVux9gvQEEPYpKbHgVQrfcegp28LoZYehWZHC
-dIHSACcW0SGZagSOFEgxVSY6MgZZjmbTdlUtLac2cvxIDx8qhkoBjWRWu4g5LfdW
-9QA0tiM3dR/pmA8YWcIYtyjGY1zglA/YqHClKsDRY+dbhshfILfohdFsVNJ3CWLS
-J4yGvVe78AE/WiaXISV5ol+bqve4QlxzbBLIV4s44YONCh18/YhmGHCuSn8yy1/0
-q3YW7COaFEGd7m8VnV2rU/dFLKyF0XEanS6xk9ciL9uafR9dMryEQ7AW+yKmfQBG
-H2i5uiKnWW2a3a873ShG2Qphl9mw1Kcrdxug4qk9y7RoKlMnG3Wdr4HMQb9S8KYf
-07ZyVEbFip26ANWGo8dCA8fWvVtU5DByoWPI+PuglOB22z2noXov98imSFJfz9vu
-yGAQt3CUOwUQvt+RObDXiHHIxJjU+6/81X3Jdnt3dFEfAgMBAAE=
------END PUBLIC KEY-----`,
-}
-
 export const VALORA_MAINNET_CIRCUIT_BREAKER_ENVIRONMENT: CircuitBreakerServiceContext = {
   url: 'https://us-central1-celo-mobile-mainnet.cloudfunctions.net/circuitBreaker/',
   publicKey: `-----BEGIN PUBLIC KEY-----
