@@ -2,7 +2,9 @@ name: Rust Signer CI
 
 on:
   push:
-    branches: [main, "palango/*"]
+    branches: [main]
+    paths: ["rust/**", "Cargo.toml", "Cargo.lock", "justfile"]
+  pull_request:
     paths: ["rust/**", "Cargo.toml", "Cargo.lock", "justfile"]
 
 concurrency:
