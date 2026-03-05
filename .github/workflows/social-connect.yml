@@ -148,7 +148,7 @@ jobs:
             others:
               - added|deleted|modified: "!((**/*.md)|(**.md))"
       - name: Find ChangeSet in PR
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@v4
         id: fc
        # Skip if author is github-bot from celo-org or only md files changed
         if: github.event_name == 'pull_request' && github.event.pull_request.user.type != 'Bot' && steps.changes.outputs.others == 'true'
