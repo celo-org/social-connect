@@ -1,5 +1,11 @@
 # @celo/odis-identifiers
 
+## 2.0.0
+
+### Major Changes
+
+- 1e7b82e: Remove Alfajores
+
 ## 1.0.1
 
 ### Patch Changes
