@@ -21,7 +21,7 @@ on:
 
 jobs:
   odis-combiner-build-dev:
-    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1.0-rc.4
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-combiner
     if: |
       github.ref != 'refs/heads/main'
@@ -42,7 +42,7 @@ jobs:
       trivy-enabled: false
 
   odis-combiner-build:
-    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1.0-rc.4
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner
     if: |
       github.ref == 'refs/heads/main'
@@ -63,7 +63,7 @@ jobs:
       trivy-enabled: false
 
   odis-combiner-tag:
-    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1.0-rc.4
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner tag
     if: |
       startsWith(github.ref, 'refs/tags/odis-combiner-')
