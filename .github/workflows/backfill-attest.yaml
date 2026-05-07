@@ -26,7 +26,7 @@ jobs:
           service_account: social-connect-dev@devopsre.iam.gserviceaccount.com
           token_format: access_token
       - name: Auth w/ registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: us-west1-docker.pkg.dev
           username: oauth2accesstoken
