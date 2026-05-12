@@ -45,7 +45,7 @@
     "@celo/wallet-hsm-azure": "^6.0.4",
     "@google-cloud/secret-manager": "3.12.0",
     "@opentelemetry/api": "^1.6.0",
-    "@opentelemetry/auto-instrumentations-node": "^0.39.4",
+    "@opentelemetry/auto-instrumentations-node": "^0.75.0",
     "@opentelemetry/exporter-jaeger": "^1.17.1",
     "@opentelemetry/instrumentation": "^0.44.0",
     "@opentelemetry/propagator-ot-trace": "^0.27.0",
