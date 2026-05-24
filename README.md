@@ -259,11 +259,13 @@ Interested in Integrating SocialConnect, get in touch by filling this [form](htt
 <details>
   <summary>What is a "plainTextIdentifier"?</summary>
 
-`plainTextIdentifier` is any string of text that a user can use to identify other user.
+`plainTextIdentifier` is any string of text that a user can use to identify another user.
 
-Phone number, Twitter handle, GitHub username anything that makes it easier to represent an evm based address.
+Phone number, GitHub username, Discord handle — anything that makes it easier to represent an EVM address.
 
-For example:- Alice's phone number: `+12345678901`
+For example: Alice's phone number: `+12345678901`
+
+For Twitter/X, use the **numeric user ID** (e.g. `"1234567890"`), not the display handle (e.g. `"alice"`). Display handles can be changed or transferred to another account; the numeric ID is permanent and prevents a new owner of a handle from inheriting existing attestations.
 
 </details>
 
