@@ -321,3 +321,19 @@ then countsPerIssuer = [CI1, CI2, ...] where CIx = number of accounts attested u
 Yes, the SDK function `getObfuscatedIdentifier` will only accept E164 formatted phone numbers.
 
 </details>
+
+<details>
+<summary>What are the security best practices for social identifiers (Discord, Telegram, GitHub)?</summary>
+
+When mapping social media platforms (e.g., Discord, Telegram, GitHub, Twitter), developers must be careful about handle mutability.
+
+Unlike phone numbers or email addresses, usernames/handles on platforms like Discord, Telegram, GitHub, and Twitter can be changed by users. If a user changes their handle, their old handle becomes available for anyone else to claim. If your system registers attestations using mutable handles (e.g., `telegram://@username` or `discord://username`), a new user claiming that old handle will resolve to the previous owner's registered wallet address.
+
+**Best Practices:**
+1. **Use Immutable Numeric IDs**: Always use the platform's unique, immutable, numeric user/snowflake ID instead of the display name or handle:
+   - **Discord**: Use the Discord Snowflake ID (e.g., `discord://123456789012345678`).
+   - **Telegram**: Use the Telegram numeric user ID (e.g., `telegram://55394921`).
+   - **GitHub**: Use the GitHub numeric user ID (e.g., `github://1827364`).
+2. **Lookup Resolvers**: During registration and lookup, query the platform's API to resolve the current handle to the numeric ID, or verify the user's oauth/auth token which returns their immutable numeric ID.
+
+</details>
