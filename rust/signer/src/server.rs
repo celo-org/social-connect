@@ -14,7 +14,7 @@ use crate::account_service::{
     AccountService, CachingAccountService, ClientAccountService, MeteredAccountService,
     MockAccountService,
 };
-use crate::config::{Config, KeystoreType};
+use crate::config::{Config, DatabaseConfig, KeystoreType};
 use crate::errors::OdisError;
 use crate::handlers::{
     domain_disable_handler, domain_quota_handler, domain_sign_handler, pnp_quota_handler,
@@ -23,7 +23,7 @@ use crate::handlers::{
 use crate::key_management::{GoogleSecretManagerKeyProvider, KeyProvider, MockKeyProvider};
 use crate::metrics;
 use crate::request_service::{
-    MeteredPnpRequestService, PnpRequestService, SqlitePnpRequestService,
+    MeteredPnpRequestService, PnpRequestService, PostgresPnpRequestService, SqlitePnpRequestService,
 };
 
 /// Shared application state available to all handlers.
@@ -41,6 +41,16 @@ pub struct AppState {
 /// Otherwise, uses `MockAccountService` — but only allowed with `KeystoreType::Mock`
 /// to prevent accidentally running production keys without on-chain auth and quota.
 pub async fn build_router(config: Config) -> Result<Router, OdisError> {
+    if config.keystore_type != KeystoreType::Mock
+        && matches!(&config.database, DatabaseConfig::Sqlite { path } if path == ":memory:")
+    {
+        tracing::error!(
+            "a persistent database is required when keystore_type is not Mock; \
+             set DATABASE_URL. An in-memory database forgets all used quota on restart."
+        );
+        return Err(OdisError::DatabaseError);
+    }
+
     let account_service: Arc<dyn AccountService> = if config.blockchain_provider.is_some() {
         let client = Arc::new(ClientAccountService::new(&config)?);
         let metered = Arc::new(MeteredAccountService::new(client));
@@ -103,8 +113,18 @@ pub async fn build_router_with_services(
     account_service: Arc<dyn AccountService>,
     key_provider: Arc<dyn KeyProvider>,
 ) -> Result<Router, OdisError> {
-    let inner_request_service: Arc<dyn PnpRequestService> =
-        Arc::new(SqlitePnpRequestService::new(&config.db_path).await?);
+    let inner_request_service: Arc<dyn PnpRequestService> = match &config.database {
+        DatabaseConfig::Sqlite { path } => Arc::new(SqlitePnpRequestService::new(path).await?),
+        DatabaseConfig::Postgres { url } => {
+            let service = PostgresPnpRequestService::new(url).await?;
+            if config.migrate_legacy_data {
+                service.run_legacy_migration().await?;
+            } else {
+                service.ensure_legacy_data_imported().await?;
+            }
+            Arc::new(service)
+        }
+    };
     let request_service: Arc<dyn PnpRequestService> =
         Arc::new(MeteredPnpRequestService::new(inner_request_service));
 
@@ -193,7 +213,10 @@ mod tests {
             keystore_type: KeystoreType::Mock,
             pnp_key_name_base: "phoneNumberPrivacy".to_string(),
             pnp_latest_key_version: 1,
-            db_path: ":memory:".to_string(),
+            database: DatabaseConfig::Sqlite {
+                path: ":memory:".to_string(),
+            },
+            migrate_legacy_data: false,
             blockchain_provider: None,
             chain_id: 11142220,
             accounts_contract_address: None,
@@ -551,6 +574,26 @@ mod tests {
 
         let result = build_router(config).await;
         assert!(result.is_err());
+    }
+
+    /// A real keystore with a database that vanishes on restart would hand every
+    /// account its full quota again, so the signer must not start that way.
+    #[tokio::test]
+    async fn build_router_fails_for_a_real_keystore_with_an_in_memory_database() {
+        let config = Config {
+            keystore_type: KeystoreType::GoogleSecretManager,
+            blockchain_provider: Some("http://localhost:8545".to_string()),
+            google_project_id: Some("project".to_string()),
+            database: DatabaseConfig::Sqlite {
+                path: ":memory:".to_string(),
+            },
+            ..test_config(true)
+        };
+
+        assert_eq!(
+            build_router(config).await.err(),
+            Some(OdisError::DatabaseError)
+        );
     }
 
     #[tokio::test]
