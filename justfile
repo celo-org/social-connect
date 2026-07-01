@@ -6,6 +6,10 @@ check:
 test:
     cargo nextest run -p odis-signer
 
+# Run the Postgres/ETL integration tests, requiring Docker (fails if unavailable)
+test-postgres:
+    ODIS_REQUIRE_POSTGRES_TESTS=1 cargo nextest run -p odis-signer --test postgres_integration
+
 clippy:
     cargo clippy -p odis-signer --all-targets -- -D warnings
 

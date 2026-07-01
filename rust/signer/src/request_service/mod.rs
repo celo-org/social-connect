@@ -1,7 +1,11 @@
+mod legacy_migration;
 mod metered;
+mod postgres;
 mod sqlite;
 
+pub use legacy_migration::LegacyMigrationReport;
 pub use metered::MeteredPnpRequestService;
+pub use postgres::PostgresPnpRequestService;
 pub use sqlite::SqlitePnpRequestService;
 
 use alloy::primitives::Address;

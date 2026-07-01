@@ -41,7 +41,7 @@ impl SqlitePnpRequestService {
             OdisError::DatabaseError
         })?;
 
-        sqlx::migrate!("./migrations")
+        sqlx::migrate!("./migrations/sqlite")
             .run(&pool)
             .await
             .map_err(|e| {
