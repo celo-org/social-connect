@@ -17,7 +17,7 @@ import BigNumber from 'bignumber.js'
 import { Knex } from 'knex'
 import request from 'supertest'
 import { createWalletClient, http, publicActions } from 'viem'
-import { celoAlfajores } from 'viem/chains'
+import { celoSepolia } from 'viem/chains'
 import { initDatabase } from '../../src/common/database/database'
 import { countAndThrowDBError } from '../../src/common/database/utils'
 import {
@@ -30,8 +30,8 @@ import { KeyProvider } from '../../src/common/key-management/key-provider-base'
 import { config, getSignerVersion, SupportedDatabase, SupportedKeystore } from '../../src/config'
 import { startSigner } from '../../src/server'
 
-const ACCOUNTS_PROXY_ADDRESS = '0xed7f51A34B4e71fbE69B3091FcF879cD14bD73A9'
-const ODIS_PAYMENTS_PROXY_ADDRESS = '0x645170cdB6B5c1bc80847bb728dBa56C50a20a49'
+const ACCOUNTS_PROXY_ADDRESS = '0x44957232699ca060B607E77083bDACD350d6b6d1'
+const ODIS_PAYMENTS_PROXY_ADDRESS = '0x96AfaE75F12A759c1dFB364ce93548c3Bd242D58'
 
 const { getPnpQuotaRequest, getPnpRequestAuthorization, getPnpSignRequest } = TestUtils.Utils
 const { PRIVATE_KEY1, ACCOUNT_ADDRESS1, mockAccount, DEK_PRIVATE_KEY, DEK_PUBLIC_KEY } =
@@ -78,7 +78,7 @@ describe('pnp', () => {
 
     // Create a mock wallet client that can return mock contract data
     const mockClient = createWalletClient({
-      chain: celoAlfajores,
+      chain: celoSepolia,
       transport: http(),
     })
       .extend(publicActions)
@@ -337,7 +337,7 @@ describe('pnp', () => {
           db,
           keyProvider,
           createWalletClient({
-            chain: celoAlfajores,
+            chain: celoSepolia,
             transport: http(),
           }),
         )
@@ -418,7 +418,7 @@ describe('pnp', () => {
             db,
             keyProvider,
             createWalletClient({
-              chain: celoAlfajores,
+              chain: celoSepolia,
               transport: http(),
             }),
           )
@@ -827,7 +827,7 @@ describe('pnp', () => {
           db,
           keyProvider,
           createWalletClient({
-            chain: celoAlfajores,
+            chain: celoSepolia,
             transport: http(),
           }),
         )
@@ -918,7 +918,7 @@ describe('pnp', () => {
             db,
             keyProvider,
             createWalletClient({
-              chain: celoAlfajores,
+              chain: celoSepolia,
               transport: http(),
             }),
           )
@@ -949,7 +949,7 @@ describe('pnp', () => {
         it('Should return 500 on blockchain totalQuota query failure', async () => {
           // Create a mock client that throws an error for totalPaidCUSD calls
           const failingMockClient = createWalletClient({
-            chain: celoAlfajores,
+            chain: celoSepolia,
             transport: http(),
           })
             .extend(publicActions)

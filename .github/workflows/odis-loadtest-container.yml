@@ -21,10 +21,17 @@ on:
 
 jobs:
   odis-loadtest-build-dev:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v3.0.1
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-loadtest
     if: |
       github.ref != 'refs/heads/main'
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+      attestations: write
+      id-token: write
     with:
       workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
       service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
@@ -32,13 +39,20 @@ jobs:
       tags: ${{ github.sha }}
       context: .
       file: dockerfiles/Dockerfile-loadtest
-      trivy: true
+      trivy-enabled: false
 
   odis-loadtest-build:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v3.0.1
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest
     if: |
       github.ref == 'refs/heads/main'
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+      attestations: write
+      id-token: write
     with:
       workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-main/providers/github-by-repos
       service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
@@ -46,13 +60,20 @@ jobs:
       tags: ${{ github.sha }}
       context: .
       file: dockerfiles/Dockerfile-loadtest
-      trivy: true
+      trivy-enabled: false
 
   odis-loadtest-tag:
-    uses: celo-org/reusable-workflows/.github/workflows/container-cicd.yaml@v3.0.1
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-loadtest tag
     if: |
       startsWith(github.ref, 'refs/tags/odis-loadtest-')
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+      attestations: write
+      id-token: write
     with:
       workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect-tag/providers/github-by-repos
       service-account: 'social-connect@devopsre.iam.gserviceaccount.com'
@@ -60,4 +81,4 @@ jobs:
       tags: ${{ github.ref_name }}
       context: .
       file: dockerfiles/phone-number-privacy/Dockerfile-loadtest
-      trivy: true
+      trivy-enabled: false

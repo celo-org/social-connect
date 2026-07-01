@@ -1,8 +1,8 @@
 import {
   BackupErrorTypes,
   buildOdisDomain,
-  E2E_TESTING_ALFAJORES_CONFIG,
-  NO_QUOTA_ALFAJORES_CONFIG,
+  E2E_TESTING_CELO_SEPOLIA_CONFIG,
+  NO_QUOTA_CELO_SEPOLIA_CONFIG,
   odisHardenKey,
   odisQueryAuthorizer,
   requestOdisDomainQuotaStatus,
@@ -46,7 +46,7 @@ const fullNodeUrl = process.env.ODIS_BLOCKCHAIN_PROVIDER
 
 const authorizer = odisQueryAuthorizer(Buffer.from('combiner e2e authorizer test seed'))
 
-const domain = buildOdisDomain(E2E_TESTING_ALFAJORES_CONFIG.odis!, authorizer.address)
+const domain = buildOdisDomain(E2E_TESTING_CELO_SEPOLIA_CONFIG.odis!, authorizer.address)
 
 const expectedVersion = getCombinerVersion()
 
@@ -244,7 +244,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
     })
 
     it('Should return error on out of quota', async () => {
-      const noQuotaDomain = buildOdisDomain(NO_QUOTA_ALFAJORES_CONFIG.odis!, authorizer.address)
+      const noQuotaDomain = buildOdisDomain(NO_QUOTA_CELO_SEPOLIA_CONFIG.odis!, authorizer.address)
       const res = await odisHardenKey(
         Buffer.from('password'),
         noQuotaDomain,
@@ -260,7 +260,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
 
   describe(`${CombinerEndpoint.DISABLE_DOMAIN}`, () => {
     const domainForDisabling = buildOdisDomain(
-      E2E_TESTING_ALFAJORES_CONFIG.odis!,
+      E2E_TESTING_CELO_SEPOLIA_CONFIG.odis!,
       authorizer.address,
       'e2e testing, okay to disable ' + crypto.randomBytes(16).toString('base64'),
     )

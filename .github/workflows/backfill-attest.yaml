@@ -1,0 +1,51 @@
+name: Backfill image attestation
+on:
+  workflow_dispatch:
+    inputs:
+      image_name:
+        description: Image name without tag
+        required: true
+        default: us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner
+      image_tag:
+        description: Image tag
+        required: true
+        default: odis-combiner-3.3.3
+jobs:
+  attest-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: 'google-github-actions/auth@v3'
+        id: auth1
+        with:
+          workload_identity_provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
+          service_account: social-connect-dev@devopsre.iam.gserviceaccount.com
+          token_format: access_token
+      - name: Auth w/ registry
+        uses: docker/login-action@v4
+        with:
+          registry: us-west1-docker.pkg.dev
+          username: oauth2accesstoken
+          password: ${{ steps.auth1.outputs.access_token }}
+      - name: Set up crane
+        uses: imjasonh/setup-crane@v0.5
+      - name: Resolve image digest
+        id: digest
+        run: |
+          digest="$(crane digest "${{ inputs.image_name }}:${{ inputs.image_tag }}")"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+          echo "$digest"
+      - name: Echo
+        run: |
+          echo "${{ inputs.image_name }}"
+          echo "${{ steps.digest.outputs.digest }}"
+      - name: Attest image
+        uses: actions/attest@v4.1.1
+        with:
+          subject-name: ${{ inputs.image_name }}
+          subject-digest: ${{ steps.digest.outputs.digest }}
+          push-to-registry: true

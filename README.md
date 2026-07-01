@@ -25,7 +25,7 @@ Here are some active issuers verifying and registering attestations:
 | Issuer Name | Address                                                                                                         |
 | ----------- | --------------------------------------------------------------------------------------------------------------- |
 | Kaala       | `0x6549aF2688e07907C1b821cA44d6d65872737f05` (mainnet)                                                          |
-| Libera      | `0x388612590F8cC6577F19c9b61811475Aa432CB44` (mainnet) `0xe3475047EF9F9231CD6fAe02B3cBc5148E8eB2c8` (alfajores) |
+| Libera      | `0x388612590F8cC6577F19c9b61811475Aa432CB44` (mainnet) |
 
 Off-chain identifiers, originally in plaintext, are obfuscated before they are used in on-chain attestations to ensure user privacy and security. This is done with the help of the [Oblivious Decentralized Identifier Service (**ODIS**)](https://docs.celo.org/protocol/identity/odis). The details of the obfuscation process and how to interact with ODIS are described in the [docs about privacy](docs/privacy.md).
 
@@ -51,16 +51,16 @@ The following steps use the  [Viem](https://viem.sh) to quickly set you up to pl
 
     ```ts
     import { createClient } from "viem";
-    import { celoAlfajores } from "viem/chains"
+    import { celoSepolia } from "viem/chains"
     import { privateKeyToAccount } from 'viem/accounts'
     // the issuer is the account that is registering the attestation
     let ISSUER_PRIVATE_KEY;
 
-    // create alfajores viem client with the issuer private key
+    // create celo sepolia viem client with the issuer private key
     const viemClient = createClient({
       account: privateKeyToAccount(ISSUER_PRIVATE_KEY)
       transport: http(),
-      chain: celoAlfajores
+      chain: celoSepolia
     });
 
     // information provided by user, issuer should confirm they do own the identifier
@@ -84,7 +84,7 @@ The following steps use the  [Viem](https://viem.sh) to quickly set you up to pl
     };
     // serviceContext provides the ODIS endpoint and public key
     const serviceContext = OdisUtils.Query.getServiceContext(
-        OdisContextName.ALFAJORES
+        OdisContextName.CELO_SEPOLIA
     );
 
     // check existing quota on issuer account
@@ -154,8 +154,6 @@ The following steps use the  [Viem](https://viem.sh) to quickly set you up to pl
 |                                             Type                                              |
 | :-------------------------------------------------------------------------------------------: |
 |                            [Viem](docs/examples/viem.ts)                             |
-|                              [EthersJS (v5)](docs/examples/ethers.ts)                              |
-|                                  [web3.js](docs/examples/web3.ts)                                  |
 |         [NextJS based web app (Phone Number)](https://github.com/celo-org/emisianto)          |
 |         [NextJS based templated](https://github.com/celo-org/socialconnect-template)          |
 | [React Native App (Phone Number)](https://github.com/celo-org/SocialConnect-ReactNative-Demo) |
@@ -176,6 +174,74 @@ The [emisianto web app](https://emisianto.vercel.app/) is a sample implementatio
 
 <img width="500" alt="image" src="https://user-images.githubusercontent.com/46296830/205343775-60e429ea-f5e5-42b2-9474-8ca7dfe842cc.png">
 
+## 🐦 Using Twitter / X Identifiers
+
+The Quickstart above uses a phone number (`+12345678910`) as the `userPlaintextIdentifier`. Twitter handles work the same way — with one important difference: **use the account's numeric user ID, not the display handle**.
+
+```ts
+// ✅ Correct — numeric user ID is stable; it never changes even if the handle does
+const userPlaintextIdentifier = "1234567890";  // Twitter numeric user ID
+const prefix = OdisUtils.Identifier.IdentifierPrefix.TWITTER; // resolves to "twit"
+
+// ❌ Avoid — display handles can be changed or claimed by someone else
+// const userPlaintextIdentifier = "alice";
+```
+
+Using the numeric ID prevents handle-squatting: if a user changes their Twitter handle, their existing attestation (registered under the numeric ID) remains valid. An attacker who later claims the old handle gets a different numeric ID and cannot inherit the attestation.
+
+### Full example: register a Twitter attestation
+
+```ts
+import { OdisUtils } from "@celo/identity";
+
+// Numeric user ID — fetch this from the Twitter/X API during your verification flow
+const twitterUserId = "1234567890";
+const userAccountAddress = "0x000000000000000000000000000000000000user";
+const attestationVerifiedTime = Date.now();
+
+// Step 1: derive the obfuscated identifier via ODIS
+const { obfuscatedIdentifier } =
+  await OdisUtils.Identifier.getObfuscatedIdentifier(
+    twitterUserId,
+    OdisUtils.Identifier.IdentifierPrefix.TWITTER, // "twit"
+    issuerAddress,
+    authSigner,
+    serviceContext
+  );
+
+// Step 2: register on-chain
+await federatedAttestationsContract
+  .registerAttestationAsIssuer(
+    obfuscatedIdentifier,
+    userAccountAddress,
+    attestationVerifiedTime
+  )
+  .send();
+```
+
+### Full example: look up an address by Twitter user ID
+
+```ts
+const { obfuscatedIdentifier } =
+  await OdisUtils.Identifier.getObfuscatedIdentifier(
+    twitterUserId,                                  // numeric ID, not handle
+    OdisUtils.Identifier.IdentifierPrefix.TWITTER,
+    issuerAddress,
+    authSigner,
+    serviceContext
+  );
+
+const attestations = await federatedAttestationsContract.lookupAttestations(
+  obfuscatedIdentifier,
+  [issuerAddress]  // only trust attestations from issuers you control or whitelist
+);
+
+// attestations.accounts[0] is the on-chain address linked to this Twitter user ID
+console.log(attestations.accounts);
+```
+
+> **Note:** `IdentifierPrefix.TWITTER` resolves to the string `"twit"`. The obfuscated identifier is derived as `sha3(sha3("twit://{twitterUserId}")__{pepper})`. See [`packages/odis-identifiers/src/identifier.ts`](packages/odis-identifiers/src/identifier.ts) for all supported prefixes.
+
 ## 📄 Documentation
 
 For a deeper dive under the hood and specific implementation details, check out the documentation of the [protocol](docs/protocol.md) for details on how to interact with the on-chain registry, [privacy](docs/privacy.md) for how identifiers are obfuscated, and [key-setup](docs/key-setup.md) to setup your role keys to interact with the protocol.
@@ -193,11 +259,13 @@ Interested in Integrating SocialConnect, get in touch by filling this [form](htt
 <details>
   <summary>What is a "plainTextIdentifier"?</summary>
 
-`plainTextIdentifier` is any string of text that a user can use to identify other user.
+`plainTextIdentifier` is any string of text that a user can use to identify another user.
 
-Phone number, Twitter handle, GitHub username anything that makes it easier to represent an evm based address.
+Phone number, GitHub username, Discord handle — anything that makes it easier to represent an EVM address.
 
-For example:- Alice's phone number: `+12345678901`
+For example: Alice's phone number: `+12345678901`
+
+For Twitter/X, use the **numeric user ID** (e.g. `"1234567890"`), not the display handle (e.g. `"alice"`). Display handles can be changed or transferred to another account; the numeric ID is permanent and prevents a new owner of a handle from inheriting existing attestations.
 
 </details>
 

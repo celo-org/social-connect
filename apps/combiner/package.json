@@ -22,7 +22,6 @@
     "test:integration": "jest --runInBand test/integration",
     "test:e2e": "E2E_TESTING=true jest --runInBand test/end-to-end --verbose",
     "test:e2e:staging": "CONTEXT_NAME=staging ODIS_BLOCKCHAIN_PROVIDER=https://forno.celo-sepolia.celo-testnet.org yarn test:e2e",
-    "test:e2e:alfajores": "CONTEXT_NAME=alfajores ODIS_BLOCKCHAIN_PROVIDER=https://alfajores-forno.celo-testnet.org yarn test:e2e",
     "test:e2e:celo-sepolia": "CONTEXT_NAME=celo-sepolia ODIS_BLOCKCHAIN_PROVIDER=https://forno.celo-sepolia.celo-testnet.org yarn test:e2e",
     "test:e2e:mainnet": "CONTEXT_NAME=mainnet yarn test:e2e"
   },
@@ -57,7 +56,7 @@
     "node-fetch": "^2.6.9",
     "pg": "^8.2.1",
     "prom-client": "12.0.0",
-    "uuid": "^7.0.3"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@celo/phone-number-privacy-signer": "workspace:^",

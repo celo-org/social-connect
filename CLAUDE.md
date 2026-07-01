@@ -48,8 +48,8 @@ Jest is configured at root level. Tests are colocated with source in `*.test.ts`
 
 E2E tests run against deployed ODIS instances:
 ```bash
-yarn --cwd=apps/signer test:e2e:alfajores:0-2
-yarn --cwd=apps/combiner test:e2e:alfajores
+yarn --cwd=apps/signer test:e2e:celo-sepolia:0-2
+yarn --cwd=apps/combiner test:e2e:celo-sepolia
 ```
 
 ## Code Quality
