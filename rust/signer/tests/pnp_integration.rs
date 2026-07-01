@@ -12,7 +12,7 @@ use tempfile::NamedTempFile;
 use tower::ServiceExt;
 
 use odis_signer::account_service::MockAccountService;
-use odis_signer::config::{Config, KeystoreType};
+use odis_signer::config::{Config, DatabaseConfig, KeystoreType};
 use odis_signer::key_management::MockKeyProvider;
 use odis_signer::server::{build_router, build_router_with_services};
 
@@ -40,7 +40,10 @@ fn test_config_with_db(db_path: &str) -> Config {
         keystore_type: KeystoreType::Mock,
         pnp_key_name_base: "phoneNumberPrivacy".to_string(),
         pnp_latest_key_version: 1,
-        db_path: db_path.to_string(),
+        database: DatabaseConfig::Sqlite {
+            path: db_path.to_string(),
+        },
+        migrate_legacy_data: false,
         blockchain_provider: None,
         chain_id: 44787,
         accounts_contract_address: None,

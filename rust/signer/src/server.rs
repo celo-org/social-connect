@@ -14,7 +14,7 @@ use crate::account_service::{
     AccountService, CachingAccountService, ClientAccountService, MeteredAccountService,
     MockAccountService,
 };
-use crate::config::{Config, KeystoreType};
+use crate::config::{Config, DatabaseConfig, KeystoreType};
 use crate::errors::OdisError;
 use crate::handlers::{
     domain_disable_handler, domain_quota_handler, domain_sign_handler, pnp_quota_handler,
@@ -23,7 +23,7 @@ use crate::handlers::{
 use crate::key_management::{GoogleSecretManagerKeyProvider, KeyProvider, MockKeyProvider};
 use crate::metrics;
 use crate::request_service::{
-    MeteredPnpRequestService, PnpRequestService, SqlitePnpRequestService,
+    MeteredPnpRequestService, PnpRequestService, PostgresPnpRequestService, SqlitePnpRequestService,
 };
 
 /// Shared application state available to all handlers.
@@ -88,8 +88,16 @@ pub async fn build_router_with_services(
     account_service: Arc<dyn AccountService>,
     key_provider: Arc<dyn KeyProvider>,
 ) -> Result<Router, OdisError> {
-    let inner_request_service: Arc<dyn PnpRequestService> =
-        Arc::new(SqlitePnpRequestService::new(&config.db_path).await?);
+    let inner_request_service: Arc<dyn PnpRequestService> = match &config.database {
+        DatabaseConfig::Sqlite { path } => Arc::new(SqlitePnpRequestService::new(path).await?),
+        DatabaseConfig::Postgres { url } => {
+            let service = PostgresPnpRequestService::new(url).await?;
+            if config.migrate_legacy_data {
+                service.run_legacy_migration().await?;
+            }
+            Arc::new(service)
+        }
+    };
     let request_service: Arc<dyn PnpRequestService> =
         Arc::new(MeteredPnpRequestService::new(inner_request_service));
 
@@ -177,7 +185,10 @@ mod tests {
             keystore_type: KeystoreType::Mock,
             pnp_key_name_base: "phoneNumberPrivacy".to_string(),
             pnp_latest_key_version: 1,
-            db_path: ":memory:".to_string(),
+            database: DatabaseConfig::Sqlite {
+                path: ":memory:".to_string(),
+            },
+            migrate_legacy_data: false,
             blockchain_provider: None,
             chain_id: 44787,
             accounts_contract_address: None,

@@ -7,6 +7,17 @@ pub enum KeystoreType {
     GoogleSecretManager,
 }
 
+/// Which persistence backend to use for PNP request/quota tracking.
+///
+/// Selected from `DATABASE_URL` by scheme; falls back to SQLite via `DB_PATH`.
+#[derive(Debug, Clone, PartialEq)]
+pub enum DatabaseConfig {
+    /// SQLite file path, or `:memory:` for an in-memory database.
+    Sqlite { path: String },
+    /// PostgreSQL connection URL (`postgres://...`).
+    Postgres { url: String },
+}
+
 #[derive(Debug, Clone)]
 pub struct Config {
     pub server_port: u16,
@@ -14,7 +25,10 @@ pub struct Config {
     pub keystore_type: KeystoreType,
     pub pnp_key_name_base: String,
     pub pnp_latest_key_version: u32,
-    pub db_path: String,
+    pub database: DatabaseConfig,
+    /// When true (and using Postgres), run the one-time legacy TS -> canonical
+    /// data migration on startup. Guarded by a marker so it never re-runs.
+    pub migrate_legacy_data: bool,
     pub blockchain_provider: Option<String>,
     pub chain_id: u64,
     pub accounts_contract_address: Option<Address>,
@@ -53,7 +67,8 @@ impl Config {
                 Some("phoneNumberPrivacy"),
             )?,
             pnp_latest_key_version: parse_env("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", Some(1))?,
-            db_path: parse_env_string("DB_PATH", Some(":memory:"))?,
+            database: parse_database_config()?,
+            migrate_legacy_data: parse_env_bool("MIGRATE_LEGACY_DATA", Some(false))?,
             blockchain_provider: env::var("BLOCKCHAIN_PROVIDER")
                 .ok()
                 .filter(|s| !s.is_empty()),
@@ -158,6 +173,45 @@ fn parse_keystore_type() -> Result<KeystoreType, ConfigError> {
     }
 }
 
+/// Selects the persistence backend.
+///
+/// A non-empty `DATABASE_URL` takes precedence and is dispatched by scheme:
+/// `postgres://`/`postgresql://` -> Postgres, `sqlite:`/`sqlite://` -> SQLite.
+/// When `DATABASE_URL` is unset, falls back to SQLite via `DB_PATH`
+/// (default `:memory:`), preserving the original single-backend behavior.
+fn parse_database_config() -> Result<DatabaseConfig, ConfigError> {
+    match env::var("DATABASE_URL").ok().filter(|s| !s.is_empty()) {
+        Some(url) => {
+            // Match the scheme case-insensitively (RFC 3986), but slice the
+            // original URL so the path/DSN keeps its original casing.
+            let lower = url.to_lowercase();
+            if lower.starts_with("postgres://") || lower.starts_with("postgresql://") {
+                Ok(DatabaseConfig::Postgres { url })
+            } else if lower.starts_with("sqlite://") {
+                Ok(DatabaseConfig::Sqlite {
+                    path: url["sqlite://".len()..].to_string(),
+                })
+            } else if lower.starts_with("sqlite:") {
+                // Covers `sqlite::memory:` (-> `:memory:`) and `sqlite:relative/path.db`.
+                Ok(DatabaseConfig::Sqlite {
+                    path: url["sqlite:".len()..].to_string(),
+                })
+            } else {
+                Err(ConfigError::InvalidValue {
+                    name: "DATABASE_URL".to_string(),
+                    source: format!(
+                        "unsupported scheme in '{url}'; expected postgres:// or sqlite:"
+                    )
+                    .into(),
+                })
+            }
+        }
+        None => Ok(DatabaseConfig::Sqlite {
+            path: parse_env_string("DB_PATH", Some(":memory:"))?,
+        }),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -180,6 +234,8 @@ mod tests {
             "PHONE_NUMBER_PRIVACY_KEY_NAME_BASE",
             "PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION",
             "DB_PATH",
+            "DATABASE_URL",
+            "MIGRATE_LEGACY_DATA",
             "BLOCKCHAIN_PROVIDER",
             "CHAIN_ID",
             "ACCOUNTS_CONTRACT_ADDRESS",
@@ -211,7 +267,13 @@ mod tests {
         assert_eq!(config.keystore_type, KeystoreType::Mock);
         assert_eq!(config.pnp_key_name_base, "phoneNumberPrivacy");
         assert_eq!(config.pnp_latest_key_version, 1);
-        assert_eq!(config.db_path, ":memory:");
+        assert_eq!(
+            config.database,
+            DatabaseConfig::Sqlite {
+                path: ":memory:".to_string()
+            }
+        );
+        assert!(!config.migrate_legacy_data);
         assert!(config.blockchain_provider.is_none());
         assert_eq!(config.chain_id, 44787);
         assert_eq!(config.accounts_contract_address, None);
@@ -261,7 +323,12 @@ mod tests {
         assert_eq!(config.google_project_id.as_deref(), Some("my-gcp-project"));
         assert_eq!(config.pnp_key_name_base, "mykey");
         assert_eq!(config.pnp_latest_key_version, 3);
-        assert_eq!(config.db_path, "/tmp/test.db");
+        assert_eq!(
+            config.database,
+            DatabaseConfig::Sqlite {
+                path: "/tmp/test.db".to_string()
+            }
+        );
         assert_eq!(
             config.blockchain_provider.as_deref(),
             Some("https://rpc.example.com")
@@ -431,5 +498,126 @@ mod tests {
 
         let config = Config::from_env().unwrap();
         assert_eq!(config.keystore_type, KeystoreType::Mock);
+    }
+
+    #[test]
+    fn database_url_selects_postgres() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set(
+                "DATABASE_URL",
+                "postgres://user:pw@db.example.com:5432/odis",
+            );
+        }
+
+        let config = Config::from_env().unwrap();
+        assert_eq!(
+            config.database,
+            DatabaseConfig::Postgres {
+                url: "postgres://user:pw@db.example.com:5432/odis".to_string()
+            }
+        );
+    }
+
+    #[test]
+    fn database_url_accepts_postgresql_scheme() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("DATABASE_URL", "postgresql://localhost/odis");
+        }
+
+        let config = Config::from_env().unwrap();
+        assert!(matches!(config.database, DatabaseConfig::Postgres { .. }));
+    }
+
+    #[test]
+    fn database_url_sqlite_dsn_forms() {
+        let _lock = ENV_LOCK.lock().unwrap();
+
+        for (dsn, expected_path) in [
+            ("sqlite://data/signer.db", "data/signer.db"),
+            ("sqlite:relative.db", "relative.db"),
+            ("sqlite::memory:", ":memory:"),
+            // Scheme is case-insensitive; the path keeps its original casing.
+            ("SQLite://Data/Signer.DB", "Data/Signer.DB"),
+            ("SQLITE::memory:", ":memory:"),
+        ] {
+            unsafe {
+                clear_env();
+                set("KEYSTORE_TYPE", "Mock");
+                set("DATABASE_URL", dsn);
+            }
+            let config = Config::from_env().unwrap();
+            assert_eq!(
+                config.database,
+                DatabaseConfig::Sqlite {
+                    path: expected_path.to_string()
+                },
+                "dsn {dsn} should map to path {expected_path}"
+            );
+        }
+    }
+
+    #[test]
+    fn database_url_takes_precedence_over_db_path() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("DB_PATH", "/tmp/ignored.db");
+            set("DATABASE_URL", "postgres://localhost/odis");
+        }
+
+        let config = Config::from_env().unwrap();
+        assert!(matches!(config.database, DatabaseConfig::Postgres { .. }));
+    }
+
+    #[test]
+    fn empty_database_url_falls_back_to_db_path() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("DATABASE_URL", "");
+            set("DB_PATH", "/tmp/fallback.db");
+        }
+
+        let config = Config::from_env().unwrap();
+        assert_eq!(
+            config.database,
+            DatabaseConfig::Sqlite {
+                path: "/tmp/fallback.db".to_string()
+            }
+        );
+    }
+
+    #[test]
+    fn unsupported_database_url_scheme_is_error() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("DATABASE_URL", "mysql://localhost/odis");
+        }
+
+        assert!(
+            matches!(Config::from_env().unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "DATABASE_URL")
+        );
+    }
+
+    #[test]
+    fn migrate_legacy_data_flag() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("MIGRATE_LEGACY_DATA", "true");
+        }
+
+        assert!(Config::from_env().unwrap().migrate_legacy_data);
     }
 }

@@ -32,4 +32,8 @@ jobs:
       - run: just build
       - run: just fmt-check
       - run: just clippy
+      # Docker is available on ubuntu-latest, so the Postgres/ETL testcontainers
+      # tests run for real. Require them so they can never silently skip.
       - run: just test
+        env:
+          ODIS_REQUIRE_POSTGRES_TESTS: "1"
