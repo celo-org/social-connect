@@ -110,7 +110,7 @@ rust/signer/src/
   metrics.rs              # Prometheus recorder + http_metrics_layer middleware
   account_service/        # Trait + impls: mock, on-chain client, caching (moka), metered
   key_management/         # Trait + impls: mock (dev key shares), Google Secret Manager
-  request_service/        # Trait + impls: SQLite (WAL mode, migrations), metered
+  request_service/        # Trait + impls: SQLite (WAL mode), Postgres, legacy TS->canonical ETL, metered
 ```
 
 ### Endpoints
@@ -150,10 +150,12 @@ The default `just` target runs: check, fmt-check, clippy, test.
 Both base images are pinned by digest, like the TS images. The build stage does not read `rust-toolchain.toml`, so the Rust version is set in two places: bump `rust-toolchain.toml` and the `rust:` tag and digest in the Dockerfile together. Keep both stages on the same Debian release, because a binary built on a newer release needs a newer glibc than an older runtime image has. Get a digest with `docker buildx imagetools inspect <image>:<tag>`.
 
 ### Design Decisions
-- SQLite is the only supported database. No PostgreSQL/MySQL support needed.
+- SQLite (dev/default) and PostgreSQL (production) are supported; no MySQL/MSSQL. The backend is selected by `DATABASE_URL` (scheme-dispatched: `postgres://` -> Postgres, `sqlite:` -> SQLite), falling back to `DB_PATH` (SQLite, default `:memory:`) when `DATABASE_URL` is unset.
+- Both backends share one canonical `requests`/`accounts` schema; addresses are stored EIP-55 checksummed (`Address::to_string()`).
+- Postgres can import legacy TS-signer data (`accountsOnChain`/`requestsOnChain`) into the canonical schema when `MIGRATE_LEGACY_DATA=true`: a one-time, marker-guarded, transactional ETL that re-checksums addresses, drops NULL-signature rows, sums quota across address casings, and keeps the latest duplicate request. It never runs twice (guarded by a `legacy_migration` marker row). Without the flag, the signer refuses to start on a database that holds legacy tables but no marker row. See `request_service/legacy_migration.rs`.
 - Service traits (`AccountService`, `PnpRequestService`, `KeyProvider`) behind `Arc<dyn Trait>` in `AppState` for testability
 - Each service has a metered wrapper adding Prometheus counters/histograms
-- Integration tests use `tower::ServiceExt::oneshot` with real SQLite (not mocked)
+- Integration tests use `tower::ServiceExt::oneshot` with real SQLite (not mocked); the Postgres backend and ETL are tested against a real Postgres via testcontainers (needs Docker — skipped locally when absent, required in CI via `ODIS_REQUIRE_POSTGRES_TESTS`)
 
 ### Conventions
 - Workspace layout with `Cargo.toml` at the root, modules in `/rust`
