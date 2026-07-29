@@ -32,7 +32,7 @@ jobs:
           username: oauth2accesstoken
           password: ${{ steps.auth1.outputs.access_token }}
       - name: Set up crane
-        uses: imjasonh/setup-crane@v0.5
+        uses: imjasonh/setup-crane@v0.7
       - name: Resolve image digest
         id: digest
         run: |
@@ -44,7 +44,7 @@ jobs:
           echo "${{ inputs.image_name }}"
           echo "${{ steps.digest.outputs.digest }}"
       - name: Attest image
-        uses: actions/attest@v4.1.0
+        uses: actions/attest@v4.2.0
         with:
           subject-name: ${{ inputs.image_name }}
           subject-digest: ${{ steps.digest.outputs.digest }}
