@@ -44,7 +44,7 @@ jobs:
           echo "${{ inputs.image_name }}"
           echo "${{ steps.digest.outputs.digest }}"
       - name: Attest image
-        uses: actions/attest@v4.2.1
+        uses: actions/attest@v4.2.2
         with:
           subject-name: ${{ inputs.image_name }}
           subject-digest: ${{ steps.digest.outputs.digest }}
