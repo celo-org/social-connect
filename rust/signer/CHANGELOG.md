@@ -21,6 +21,11 @@ such as `statusCode!="200"` matches every Rust response, because the label is ab
 contract call, labelled `getDataEncryptionKey` or `getOnChainOdisPayments`. The Rust signer
 records one sample per account lookup, labelled `getAccount`, which covers both calls.
 
+Other label values keep the TS signer's spelling, such as `operation="insertRequest"`, so one query
+covers both signers. `db_ops_instrumentation` has no `incrementQueryCount` or `getAccountExists`
+series: the Rust signer records a request and charges its quota in one transaction, measured as
+`insertRequest`.
+
 ## Database configuration
 
 The database is set with one variable, `DATABASE_URL` (`postgres://user:password@host:5432/database`

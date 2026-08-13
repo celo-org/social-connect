@@ -3,8 +3,27 @@ use async_trait::async_trait;
 use sqlx::SqlitePool;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions, SqliteSynchronous};
 
-use super::PnpRequestService;
+use super::{PnpRequestService, RecordOutcome};
 use crate::errors::OdisError;
+
+/// Read an account's used quota inside an open transaction. Absent accounts
+/// have used nothing.
+async fn read_used_quota(
+    tx: &mut sqlx::Transaction<'_, sqlx::Sqlite>,
+    address: &str,
+) -> Result<u32, OdisError> {
+    let row: Option<(i64,)> = sqlx::query_as("SELECT num_lookups FROM accounts WHERE address = ?")
+        .bind(address)
+        .fetch_optional(&mut **tx)
+        .await
+        .map_err(|e| {
+            tracing::error!("used quota lookup failed: {e}");
+            OdisError::DatabaseError
+        })?;
+    Ok(row
+        .map(|(n,)| u32::try_from(n).unwrap_or(u32::MAX))
+        .unwrap_or(0))
+}
 
 pub struct SqlitePnpRequestService {
     pool: SqlitePool,
@@ -96,15 +115,20 @@ impl PnpRequestService for SqlitePnpRequestService {
         address: Address,
         blinded_query: &str,
         signature: &str,
-    ) -> Result<(), OdisError> {
+        total_quota: u32,
+    ) -> Result<RecordOutcome, OdisError> {
         let addr = address.to_string();
+        let quota = i64::from(total_quota);
         let mut tx = self.pool.begin().await.map_err(|e| {
             tracing::error!("failed to begin transaction: {e}");
             OdisError::DatabaseError
         })?;
 
-        sqlx::query(
-            "INSERT INTO requests (caller_address, blinded_query, signature) VALUES (?, ?, ?)",
+        // Claim the (address, query) slot. This is the first statement in the
+        // transaction, so it takes the write lock before anything is read.
+        let claimed = sqlx::query(
+            "INSERT INTO requests (caller_address, blinded_query, signature) VALUES (?, ?, ?) \
+             ON CONFLICT (caller_address, blinded_query) DO NOTHING",
         )
         .bind(&addr)
         .bind(blinded_query)
@@ -114,26 +138,80 @@ impl PnpRequestService for SqlitePnpRequestService {
         .map_err(|e| {
             tracing::error!("insert request failed: {e}");
             OdisError::DatabaseError
-        })?;
+        })?
+        .rows_affected()
+            == 1;
 
-        sqlx::query(
-            "INSERT INTO accounts (address, num_lookups) VALUES (?, 1) \
-             ON CONFLICT(address) DO UPDATE SET num_lookups = num_lookups + 1",
+        if !claimed {
+            let existing: Option<(String,)> = sqlx::query_as(
+                "SELECT signature FROM requests WHERE caller_address = ? AND blinded_query = ?",
+            )
+            .bind(&addr)
+            .bind(blinded_query)
+            .fetch_optional(&mut *tx)
+            .await
+            .map_err(|e| {
+                tracing::error!("duplicate signature lookup failed: {e}");
+                OdisError::DatabaseError
+            })?;
+            let used = read_used_quota(&mut tx, &addr).await?;
+            tx.commit().await.map_err(|e| {
+                tracing::error!("failed to commit transaction: {e}");
+                OdisError::DatabaseError
+            })?;
+
+            let Some((existing_sig,)) = existing else {
+                tracing::error!("request insert conflicted but no row was found");
+                return Err(OdisError::DatabaseError);
+            };
+            return Ok(RecordOutcome::Duplicate {
+                signature: existing_sig,
+                performed_query_count: used,
+            });
+        }
+
+        // Charge quota. The bound is re-checked against the stored row inside
+        // the same transaction, so it holds under concurrency. No row comes
+        // back when the account is already at its limit, or when the quota is
+        // zero and the account has no row yet.
+        let charged: Option<(i64,)> = sqlx::query_as(
+            "INSERT INTO accounts (address, num_lookups) SELECT ?, 1 WHERE ? > 0 \
+             ON CONFLICT (address) DO UPDATE SET num_lookups = num_lookups + 1 \
+             WHERE num_lookups < ? \
+             RETURNING num_lookups",
         )
         .bind(&addr)
-        .execute(&mut *tx)
+        .bind(quota)
+        .bind(quota)
+        .fetch_optional(&mut *tx)
         .await
         .map_err(|e| {
             tracing::error!("upsert account failed: {e}");
             OdisError::DatabaseError
         })?;
 
-        tx.commit().await.map_err(|e| {
-            tracing::error!("failed to commit transaction: {e}");
-            OdisError::DatabaseError
-        })?;
-
-        Ok(())
+        match charged {
+            Some((num_lookups,)) => {
+                tx.commit().await.map_err(|e| {
+                    tracing::error!("failed to commit transaction: {e}");
+                    OdisError::DatabaseError
+                })?;
+                Ok(RecordOutcome::Recorded {
+                    performed_query_count: u32::try_from(num_lookups).unwrap_or(u32::MAX),
+                })
+            }
+            None => {
+                let used = read_used_quota(&mut tx, &addr).await?;
+                // Discards the request row claimed above.
+                tx.rollback().await.map_err(|e| {
+                    tracing::error!("failed to roll back transaction: {e}");
+                    OdisError::DatabaseError
+                })?;
+                Ok(RecordOutcome::QuotaExceeded {
+                    performed_query_count: used,
+                })
+            }
+        }
     }
 
     async fn delete_old_requests(&self, older_than_days: u64) -> Result<u64, OdisError> {
@@ -154,6 +232,7 @@ impl PnpRequestService for SqlitePnpRequestService {
 mod tests {
     use super::*;
     use alloy::primitives::address;
+    use std::sync::Arc;
 
     const ADDR: Address = address!("0x0000000000000000000000000000000000007E57");
     const OTHER_ADDR: Address = address!("0x0000000000000000000000000000000000000001");
@@ -192,7 +271,14 @@ mod tests {
     async fn record_increments_quota_and_stores_signature() {
         let svc = test_service().await;
 
-        svc.record_request(ADDR, "query1", "sig1").await.unwrap();
+        assert_eq!(
+            svc.record_request(ADDR, "query1", "sig1", 10)
+                .await
+                .unwrap(),
+            RecordOutcome::Recorded {
+                performed_query_count: 1
+            }
+        );
         assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 1);
         assert_eq!(
             svc.get_duplicate_request(ADDR, "query1").await.unwrap(),
@@ -200,8 +286,79 @@ mod tests {
         );
 
         // Different query increments quota again
-        svc.record_request(ADDR, "query2", "sig2").await.unwrap();
+        assert_eq!(
+            svc.record_request(ADDR, "query2", "sig2", 10)
+                .await
+                .unwrap(),
+            RecordOutcome::Recorded {
+                performed_query_count: 2
+            }
+        );
         assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 2);
+    }
+
+    #[tokio::test]
+    async fn re_recording_the_same_query_returns_the_stored_signature_uncharged() {
+        let svc = test_service().await;
+
+        svc.record_request(ADDR, "query1", "sig1", 10)
+            .await
+            .unwrap();
+
+        // A second attempt is served the signature already on record, even
+        // though this caller offered a different one.
+        assert_eq!(
+            svc.record_request(ADDR, "query1", "sig2", 10)
+                .await
+                .unwrap(),
+            RecordOutcome::Duplicate {
+                signature: "sig1".to_string(),
+                performed_query_count: 1,
+            }
+        );
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 1);
+    }
+
+    #[tokio::test]
+    async fn record_refuses_to_exceed_quota_and_writes_nothing() {
+        let svc = test_service().await;
+
+        svc.record_request(ADDR, "query1", "sig1", 2).await.unwrap();
+        svc.record_request(ADDR, "query2", "sig2", 2).await.unwrap();
+
+        assert_eq!(
+            svc.record_request(ADDR, "query3", "sig3", 2).await.unwrap(),
+            RecordOutcome::QuotaExceeded {
+                performed_query_count: 2
+            }
+        );
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 2);
+        // The rejected request must not linger in the table.
+        assert!(
+            svc.get_duplicate_request(ADDR, "query3")
+                .await
+                .unwrap()
+                .is_none()
+        );
+    }
+
+    #[tokio::test]
+    async fn zero_quota_rejects_a_brand_new_account() {
+        let svc = test_service().await;
+
+        assert_eq!(
+            svc.record_request(ADDR, "query1", "sig1", 0).await.unwrap(),
+            RecordOutcome::QuotaExceeded {
+                performed_query_count: 0
+            }
+        );
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 0);
+        assert!(
+            svc.get_duplicate_request(ADDR, "query1")
+                .await
+                .unwrap()
+                .is_none()
+        );
     }
 
     /// Insert a request with a specific timestamp (YYYY-MM-DD HH:MM:SS format).
@@ -231,7 +388,9 @@ mod tests {
         // Insert a request from 10 days ago
         insert_with_timestamp(&svc, &addr, "old_query", "2000-01-01 00:00:00").await;
         // Insert a fresh request (uses default datetime('now'))
-        svc.record_request(ADDR, "new_query", "sig").await.unwrap();
+        svc.record_request(ADDR, "new_query", "sig", 10)
+            .await
+            .unwrap();
 
         let deleted = svc.delete_old_requests(7).await.unwrap();
         assert_eq!(deleted, 1);
@@ -255,8 +414,8 @@ mod tests {
     async fn delete_old_requests_with_zero_days_deletes_all() {
         let svc = test_service().await;
 
-        svc.record_request(ADDR, "q1", "sig1").await.unwrap();
-        svc.record_request(ADDR, "q2", "sig2").await.unwrap();
+        svc.record_request(ADDR, "q1", "sig1", 10).await.unwrap();
+        svc.record_request(ADDR, "q2", "sig2", 10).await.unwrap();
 
         let deleted = svc.delete_old_requests(0).await.unwrap();
         assert_eq!(deleted, 2);
@@ -273,8 +432,95 @@ mod tests {
     async fn addresses_are_independent() {
         let svc = test_service().await;
 
-        svc.record_request(ADDR, "query1", "sig1").await.unwrap();
+        svc.record_request(ADDR, "query1", "sig1", 10)
+            .await
+            .unwrap();
         assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 1);
         assert_eq!(svc.get_used_quota(OTHER_ADDR).await.unwrap(), 0);
+    }
+
+    /// Concurrency needs a file-backed database: the in-memory service is
+    /// pinned to a single pooled connection.
+    async fn concurrent_test_service() -> (Arc<SqlitePnpRequestService>, tempfile::TempDir) {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("requests.db");
+        let svc = SqlitePnpRequestService::new(path.to_str().unwrap())
+            .await
+            .unwrap();
+        (Arc::new(svc), dir)
+    }
+
+    async fn record_concurrently(
+        svc: &Arc<SqlitePnpRequestService>,
+        queries: Vec<String>,
+        total_quota: u32,
+    ) -> Vec<RecordOutcome> {
+        let handles: Vec<_> = queries
+            .into_iter()
+            .map(|query| {
+                let svc = Arc::clone(svc);
+                tokio::spawn(async move {
+                    svc.record_request(ADDR, &query, &format!("sig-{query}"), total_quota)
+                        .await
+                        .unwrap()
+                })
+            })
+            .collect();
+
+        let mut outcomes = Vec::new();
+        for handle in handles {
+            outcomes.push(handle.await.unwrap());
+        }
+        outcomes
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn concurrent_identical_requests_charge_quota_once() {
+        let (svc, _dir) = concurrent_test_service().await;
+
+        let outcomes = record_concurrently(&svc, vec!["same".to_string(); 8], 100).await;
+
+        let recorded = outcomes
+            .iter()
+            .filter(|o| matches!(o, RecordOutcome::Recorded { .. }))
+            .count();
+        assert_eq!(recorded, 1, "exactly one racer should win the slot");
+
+        // Every loser is served the winner's signature, not an error.
+        for outcome in &outcomes {
+            if let RecordOutcome::Duplicate { signature, .. } = outcome {
+                assert_eq!(signature, "sig-same");
+            }
+        }
+        assert_eq!(outcomes.len() - recorded, 7);
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 1);
+    }
+
+    #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+    async fn concurrent_distinct_requests_cannot_overrun_quota() {
+        let (svc, _dir) = concurrent_test_service().await;
+
+        let queries: Vec<String> = (0..12).map(|i| format!("query{i}")).collect();
+        let outcomes = record_concurrently(&svc, queries, 3).await;
+
+        let recorded = outcomes
+            .iter()
+            .filter(|o| matches!(o, RecordOutcome::Recorded { .. }))
+            .count();
+        let rejected = outcomes
+            .iter()
+            .filter(|o| matches!(o, RecordOutcome::QuotaExceeded { .. }))
+            .count();
+
+        assert_eq!(recorded, 3, "quota bound must hold under concurrency");
+        assert_eq!(rejected, 9);
+        assert_eq!(svc.get_used_quota(ADDR).await.unwrap(), 3);
+
+        // Rejected requests leave no rows behind.
+        let (rows,): (i64,) = sqlx::query_as("SELECT COUNT(*) FROM requests")
+            .fetch_one(&svc.pool)
+            .await
+            .unwrap();
+        assert_eq!(rows, 3);
     }
 }
