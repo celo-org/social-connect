@@ -485,6 +485,37 @@ async fn database_failures_return_the_ts_error_strings() {
     assert_server_error(response, GET_FAILURE).await;
 }
 
+/// Concurrent retries of the same request all clear the duplicate pre-check,
+/// so they collide on the write. Each must still be served the signature and
+/// charged once between them, rather than failing on the primary key.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn concurrent_identical_sign_requests_are_all_served_and_charged_once() {
+    let db_file = NamedTempFile::new().unwrap();
+    let db_path = db_file.path().to_str().unwrap();
+    let app = build_router(test_config_with_db(db_path)).await.unwrap();
+
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let handles: Vec<_> = (0..8)
+        .map(|_| {
+            let app = app.clone();
+            let body = body.clone();
+            tokio::spawn(async move { app.oneshot(sign_request(&body)).await.unwrap() })
+        })
+        .collect();
+
+    for handle in handles {
+        let response = handle.await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let json = response_json(response).await;
+        assert_eq!(json["signature"], EXPECTED_SIG_V1);
+        assert_eq!(json["performedQueryCount"], 1);
+    }
+
+    let response = app.oneshot(quota_request(ACCOUNT)).await.unwrap();
+    let json = response_json(response).await;
+    assert_eq!(json["performedQueryCount"], 1, "quota charged exactly once");
+}
+
 // --- Authentication-enabled tests ---
 
 /// Build a router with auth enforcement enabled.
