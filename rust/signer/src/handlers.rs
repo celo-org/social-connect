@@ -9,6 +9,7 @@ use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 use crate::auth::{Authorization, authenticate_user};
 use crate::errors::OdisError;
 use crate::metrics as metric_names;
+use crate::request_service::RecordOutcome;
 use crate::server::AppState;
 use crate::types::{
     AuthenticationMethod, KEY_VERSION_HEADER, KeyVersion, PnpQuotaRequest, PnpQuotaResponseSuccess,
@@ -198,6 +199,9 @@ pub async fn pnp_sign_handler(
         counter!(metric_names::DUPLICATE_REQUESTS).increment(1);
         (sig, used_quota, vec![DUPLICATE_REQUEST_WARNING.to_string()])
     } else {
+        // The reads above are a fast path that spares the keystore round trip
+        // and the signing work. Duplicate detection and the quota bound are
+        // decided authoritatively by `record_request` below.
         let signature = compute_signature(&state, key_version, &request.blinded_query_phone_number)
             .await
             .ok_or(OdisError::SignatureComputationFailure {
@@ -206,17 +210,44 @@ pub async fn pnp_sign_handler(
             })?;
 
         // Record the request
-        state
+        match state
             .request_service
             .record_request(
                 request.account,
                 &request.blinded_query_phone_number,
                 &signature,
+                total_quota,
             )
             .await
-            .map_err(|_| OdisError::DatabaseInsertFailure)?;
-
-        (signature, used_quota.saturating_add(1), vec![])
+            .map_err(|_| OdisError::DatabaseInsertFailure)?
+        {
+            RecordOutcome::Recorded {
+                performed_query_count,
+            } => (signature, performed_query_count, vec![]),
+            // A concurrent identical request won the race. Serve its signature
+            // rather than charging this account a second time.
+            RecordOutcome::Duplicate {
+                signature,
+                performed_query_count,
+            } => {
+                counter!(metric_names::DUPLICATE_REQUESTS).increment(1);
+                (
+                    signature,
+                    performed_query_count,
+                    vec![DUPLICATE_REQUEST_WARNING.to_string()],
+                )
+            }
+            // Concurrent requests drained the remaining quota after the check
+            // above passed.
+            RecordOutcome::QuotaExceeded {
+                performed_query_count,
+            } => {
+                return Err(OdisError::ExceededQuota {
+                    total_quota,
+                    performed_query_count,
+                });
+            }
+        }
     };
 
     let mut response_headers = HeaderMap::new();
