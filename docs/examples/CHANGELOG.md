@@ -1,5 +1,17 @@
 # odis-example-scripts
 
+## 2.0.0-beta.1
+
+### Major Changes
+
+- 1e7b82e: Remove Alfajores
+
+### Patch Changes
+
+- Updated dependencies [d28d5fe]
+- Updated dependencies [1e7b82e]
+  - @celo/identity@6.0.0-beta.1
+
 ## 1.0.3-beta.0
 
 ### Patch Changes

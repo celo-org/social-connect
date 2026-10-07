@@ -1,5 +1,19 @@
 # @celo/identity
 
+## 6.0.0-beta.1
+
+### Major Changes
+
+- d28d5fe: Require Node.js 22 or later. Older Node lines are end-of-life, and the packages are compiled for ES2022.
+- 1e7b82e: Remove Alfajores
+
+### Patch Changes
+
+- Updated dependencies [d28d5fe]
+- Updated dependencies [1e7b82e]
+  - @celo/phone-number-privacy-common@4.0.0-beta.1
+  - @celo/odis-identifiers@2.0.0-beta.0
+
 ## 6.0.0-beta.0
 
 ### Major Changes

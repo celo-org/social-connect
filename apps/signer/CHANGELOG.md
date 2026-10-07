@@ -1,5 +1,17 @@
 # @celo/phone-number-privacy-signer
 
+## 4.0.0-beta.1
+
+### Major Changes
+
+- 1e7b82e: Remove Alfajores
+
+### Patch Changes
+
+- Updated dependencies [d28d5fe]
+- Updated dependencies [1e7b82e]
+  - @celo/phone-number-privacy-common@4.0.0-beta.1
+
 ## 4.0.0-beta.0
 
 ### Major Changes
