@@ -77,7 +77,7 @@ yarn build
 
 #### Running tests
 
-Our testing suite uses unit, integration and e2e tests. Integration tests spin up and run against local ODIS instances with in-memory DBs, while e2e tests run against actual deployed ODIS instances in staging, alfajores or mainnet environments.
+Our testing suite uses unit, integration and e2e tests. Integration tests spin up and run against local ODIS instances with in-memory DBs, while e2e tests run against actual deployed ODIS instances in staging, celo-sepolia or mainnet environments.
 
 To run all unit and integration tests (in both `/apps` and `/packages`) run
 
@@ -90,7 +90,7 @@ To run ODIS e2e tests, navigate to the desired ODIS component subdirectory (eith
 
 ```bash
 cd apps/signer
-yarn test:e2e:alfajores
+yarn test:e2e:celo-sepolia
 ```
 
 For load tests, checkout [apps/monitor](../apps/monitor/README.md)

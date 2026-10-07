@@ -240,7 +240,7 @@ There are two authentication methods for your `AuthSigner` when interacting with
 The `ServiceContext` object provides the ODIS endpoint URL and public key for the network.
 
 ```typescript
-const serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.ALFAJORES)
+const serviceContext = OdisUtils.Query.getServiceContext(OdisContextName.CELO_SEPOLIA)
 ```
 
 ### Runtime Environments

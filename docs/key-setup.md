@@ -20,7 +20,7 @@ To interact with the SocialConnect protocol, you can use the test keys in the So
 `npm install -g @celo/celocli`
 - Configure the RPC for the network we want to interact with:
     . `celocli config:set --node wss://forno.celo.org/ws` for mainnet
-    . `celocli config:set --node wss://alfajores-forno.celo-testnet.org/ws` for Alfajores testnet
+    . `celocli config:set --node wss://forno.celo-sepolia.celo-testnet.org/ws` for Celo Sepolia testnet
 
 ## Setting Accounts
 

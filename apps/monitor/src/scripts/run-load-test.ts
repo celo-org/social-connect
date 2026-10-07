@@ -1,7 +1,7 @@
 import { OdisContextName } from '@celo/identity/lib/odis/query'
 import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
 import { Hex } from 'viem'
-import { celo, celoAlfajores, celoSepolia } from 'viem/chains'
+import { celo, celoSepolia } from 'viem/chains'
 import yargs from 'yargs'
 import { ChainInfo } from '../query'
 import { concurrentRPSLoadTest } from '../test'
@@ -79,17 +79,11 @@ void yargs
 
       let blockchainProvider: ChainInfo
       switch (contextName) {
+        case 'staging':
         case 'celo-sepolia':
           blockchainProvider = {
             rpcURL: 'https://forno.celo-sepolia.celo-testnet.org',
             chainID: celoSepolia.id,
-          }
-          break
-        case 'alfajoresstaging':
-        case 'alfajores':
-          blockchainProvider = {
-            rpcURL: 'https://alfajores-forno.celo-testnet.org',
-            chainID: celoAlfajores.id,
           }
           break
         case 'mainnet':

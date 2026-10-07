@@ -3,6 +3,10 @@
   "extends": ["local>celo-org/.github:renovate-config"],
   "packageRules": [
     {
+      "matchManagers": ["npm", "yarn"],
+      "enabled": false
+    },
+    {
       "matchDepTypes": ["devDependencies"],
       "matchUpdateTypes": ["patch", "minor"],
       "groupName": "devDependencies (non-major)"
