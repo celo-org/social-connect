@@ -1064,7 +1064,7 @@ __metadata:
     "@celo/dev-utils": "npm:0.0.1-beta.1"
     "@celo/metadata-claims": "npm:^1.0.0"
     "@celo/odis-identifiers": "npm:^2.0.0-beta.0"
-    "@celo/phone-number-privacy-common": "npm:^4.0.0-beta.1"
+    "@celo/phone-number-privacy-common": "npm:^4.0.0-beta.2"
     "@celo/utils": "npm:^6.0.0"
     "@celo/wallet-local": "npm:^6.0.4"
     "@types/debug": "npm:^4.1.10"
@@ -1185,7 +1185,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/phone-number-privacy-common@npm:^4.0.0-beta.1, @celo/phone-number-privacy-common@workspace:packages/common":
+"@celo/phone-number-privacy-common@npm:^4.0.0-beta.1, @celo/phone-number-privacy-common@npm:^4.0.0-beta.2, @celo/phone-number-privacy-common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-common@workspace:packages/common"
   dependencies:
