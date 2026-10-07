@@ -1,5 +1,24 @@
 # @celo/encrypted-backup
 
+## 6.0.0
+
+### Major Changes
+
+- d28d5fe: Require Node.js 22 or later. Older Node lines are end-of-life, and the packages are compiled for ES2022.
+- 1e7b82e: Remove Alfajores
+
+### Patch Changes
+
+- 6dada95: Remove @celo/connect as a depdendency
+- Updated dependencies [49922d5]
+- Updated dependencies [fe06bbf]
+- Updated dependencies [cc5df33]
+- Updated dependencies [d28d5fe]
+- Updated dependencies [cc5df33]
+- Updated dependencies [1e7b82e]
+  - @celo/identity@6.0.0
+  - @celo/phone-number-privacy-common@4.0.0
+
 ## 5.0.6
 
 ### Patch Changes
