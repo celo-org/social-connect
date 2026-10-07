@@ -13,12 +13,14 @@ COPY packages/identity packages/identity
 COPY packages/odis-identifiers packages/odis-identifiers
 
 ##### Main stage
-FROM node:24-alpine
+FROM node:24-trixie-slim@sha256:173f125896c3b47ddf056734c7ea789d04595a6a08769a8f78e0df642781fb66
 LABEL org.opencontainers.image.authors="devops@clabs.co"
 
 # Install dependencies and upgrade OS packages
-RUN apk add --no-cache python3 git bash && \
-    apk upgrade --no-cache
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3 git && \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /celo-phone-number-privacy/
 
