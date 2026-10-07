@@ -1082,6 +1082,7 @@ __metadata:
     jest: "npm:^29.7.0"
     old-celo-base: "npm:@celo/base@1.5.2"
     old-celo-identity: "npm:@celo/identity@5.1.0"
+    viem: "npm:^2.37.3"
   peerDependencies:
     "@celo/contractkit": ^9.0.0
   peerDependenciesMeta:
@@ -1211,6 +1212,7 @@ __metadata:
     is-base64: "npm:^1.1.0"
     jest: "npm:^29.7.0"
     node-fetch: "npm:^2.6.9"
+    viem: "npm:^2.37.3"
   languageName: unknown
   linkType: soft
 
