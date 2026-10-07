@@ -1,5 +1,11 @@
 # @celo/phone-number-privacy-common
 
+## 4.0.0-beta.2
+
+### Patch Changes
+
+- fe06bbf: Declare `viem` as a dependency. Both packages import it at runtime, so installing them in a project without viem failed with `Cannot find module 'viem'`.
+
 ## 4.0.0-beta.1
 
 ### Major Changes
