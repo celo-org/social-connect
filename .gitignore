@@ -120,4 +120,5 @@ packages/odis-identifiers/lib
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
 
+# Rust
 target/
