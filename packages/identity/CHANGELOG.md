@@ -1,5 +1,43 @@
 # @celo/identity
 
+## 6.0.0
+
+### Major Changes
+
+- cc5df33: Contract kit has been replaced with viem as dependency.
+
+  from `lib/odis/query`; WalletKeySigner instead of a contractKit instance now takes a sign191 function
+  - This should use EIP191 to sign the message using the private key assosiated with the account
+
+  Most places that were previously typed as string are now 0x-string typed
+
+  ContractKit is now an optional peer dependency. it is only needed if using the offchain-data-wrapper
+
+- d28d5fe: Require Node.js 22 or later. Older Node lines are end-of-life, and the packages are compiled for ES2022.
+- 1e7b82e: Remove Alfajores
+
+### Minor Changes
+
+- 49922d5: Add Celo Sepolia testnet support and fix E2E tests
+  - Add Celo Sepolia testnet support across ODIS components including combiner, signer, monitor, and identity packages
+  - Add Celo Sepolia contract addresses and RPC endpoints
+  - Add test commands for running E2E tests against Celo Sepolia
+  - Upgrade TypeScript to 5.4.5 in signer package to support @tsconfig/node22
+  - Fix type assertion issues in E2E tests by using proper `as Type` syntax
+  - Standardize DEK test values in common package to prevent conflicts between combiner and signer E2E tests
+  - Both test suites now reference the same DEK values to avoid overriding each other on shared blockchain
+
+### Patch Changes
+
+- fe06bbf: Declare `viem` as a dependency. Both packages import it at runtime, so installing them in a project without viem failed with `Cannot find module 'viem'`.
+- Updated dependencies [49922d5]
+- Updated dependencies [fe06bbf]
+- Updated dependencies [d28d5fe]
+- Updated dependencies [cc5df33]
+- Updated dependencies [1e7b82e]
+  - @celo/phone-number-privacy-common@4.0.0
+  - @celo/odis-identifiers@2.0.0
+
 ## 5.1.2
 
 ### Patch Changes
