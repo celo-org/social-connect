@@ -11,7 +11,7 @@ on:
       - main
       - 'prerelease/*'
     tags:
-      - odis-combiner-.*
+      - 'odis-combiner-*'
   pull_request:
     paths:
       - 'dockerfiles/Dockerfile-combiner'
@@ -24,7 +24,7 @@ jobs:
     uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-combiner
     if: |
-      github.ref != 'refs/heads/main'
+      github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags/')
     permissions:
       actions: read
       contents: write
@@ -80,5 +80,5 @@ jobs:
       artifact-registry: us-west1-docker.pkg.dev/devopsre/social-connect/odis-combiner
       tags: ${{ github.ref_name }}
       context: .
-      file: dockerfiles/phone-number-privacy/Dockerfile-combiner
+      file: dockerfiles/Dockerfile-combiner
       trivy-enabled: false
