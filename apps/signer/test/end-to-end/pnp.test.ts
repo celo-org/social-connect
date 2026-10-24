@@ -47,6 +47,7 @@ const getViemChain = () => {
       return celo
     case 'staging':
     case 'celo-sepolia':
+    case 'local':
       return celoSepolia
     default:
       throw new Error(`Unknown CONTEXT_NAME: ${process.env.CONTEXT_NAME}`)
