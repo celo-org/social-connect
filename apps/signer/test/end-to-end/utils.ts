@@ -47,6 +47,15 @@ export function getTestParamsForContext(): E2ETestParams {
         domainsPubKey: process.env.MAINNET_DOMAINS_PUBKEY!,
         domainsKeyVersion: process.env.ODIS_DOMAINS_TEST_KEY_VERSION!,
       }
+    case 'local':
+      return {
+        blockchainProviderURL: process.env.CELO_SEPOLIA_ODIS_BLOCKCHAIN_PROVIDER!,
+        pnpPolynomial: process.env.LOCAL_PHONE_NUMBER_PRIVACY_POLYNOMIAL!,
+        pnpKeyVersion: process.env.ODIS_PNP_TEST_KEY_VERSION!,
+        domainsPolynomial: process.env.CELO_SEPOLIA_DOMAINS_POLYNOMIAL!,
+        domainsPubKey: process.env.CELO_SEPOLIA_DOMAINS_PUBKEY!,
+        domainsKeyVersion: process.env.ODIS_DOMAINS_TEST_KEY_VERSION!,
+      }
     default:
       throw new Error(`No parameter settings stored for context: ${process.env.CONTEXT_NAME}`)
   }
