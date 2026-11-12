@@ -67,6 +67,6 @@ module.exports = [
   },
   prettier,
   {
-    ignores: ['**/lib/*', '**/dist/*', '**/*.js'],
+    ignores: ['**/lib/*', '**/dist/*', '**/*.js', 'apps/monitor/deploy/*'],
   },
 ]

@@ -5,6 +5,8 @@ package.json
 .git/
 
 apps/**/dist
+apps/monitor/deploy
+apps/monitor/meta.json
 packages/**/dist
 packages/**/lib
 docs/examples/**/lib

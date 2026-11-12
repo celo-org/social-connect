@@ -1,6 +1,11 @@
 {
   "functions": {
-    "source": ".",
-    "predeploy": ["yarn run lint", "yarn run build"]
+    "source": "deploy",
+    "predeploy": [
+      "yarn --cwd \"$RESOURCE_DIR/..\" run lint",
+      "yarn --cwd \"$RESOURCE_DIR/..\" run build",
+      "yarn --cwd \"$RESOURCE_DIR/..\" run bundle",
+      "npm --prefix \"$RESOURCE_DIR\" ci --ignore-scripts --no-audit --no-fund"
+    ]
   }
 }

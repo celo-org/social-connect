@@ -1,4 +1,6 @@
 dist/
+deploy/
+meta.json
 
 # Firebase cache
 .firebase/
