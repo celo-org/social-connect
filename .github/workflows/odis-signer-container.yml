@@ -41,6 +41,27 @@ jobs:
       file: dockerfiles/Dockerfile-signer
       trivy-enabled: false
 
+  odis-signer-rs-build-dev:
+    uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
+    name: Build us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
+    if: |
+      github.ref != 'refs/heads/main'
+    permissions:
+      actions: read
+      contents: write
+      pull-requests: write
+      security-events: write
+      attestations: write
+      id-token: write
+    with:
+      workload-id-provider: projects/1094498259535/locations/global/workloadIdentityPools/gh-social-connect/providers/github-by-repos
+      service-account: 'social-connect-dev@devopsre.iam.gserviceaccount.com'
+      artifact-registry: us-west1-docker.pkg.dev/devopsre/dev-images/odis-signer
+      tags: rs-${{ github.sha }}
+      context: .
+      file: dockerfiles/Dockerfile-signer-rs
+      trivy-enabled: false
+
   odis-signer-build:
     uses: celo-org/reusable-workflows/.github/workflows/docker-build.yaml@v3.1
     name: Build us-west1-docker.pkg.dev/devopsre/social-connect/odis-signer
