@@ -107,7 +107,13 @@ export async function thresholdCallToSigners<R extends OdisRequest>(
             logger.warn('Not possible to reach a threshold of signer responses. Failing fast')
             manualAbort.abort()
           }
-          responses.push({ res: responseData, url: signer.url })
+          // Only keep error bodies that are ODIS responses (e.g. out-of-quota with a domain status).
+          // Anything else, such as a reverse proxy error page, still counts as an error above.
+          if (responseSchema.is(responseData)) {
+            responses.push({ res: responseData, url: signer.url })
+          } else {
+            logger.warn({ signer: signer.url }, 'Ignoring non-ODIS error response from signer')
+          }
           return
         }
 
