@@ -218,6 +218,7 @@ mod tests {
             },
             migrate_legacy_data: false,
             blockchain_provider: None,
+            blockchain_api_key: None,
             chain_id: 11142220,
             accounts_contract_address: None,
             odis_payments_contract_address: None,

@@ -5,6 +5,7 @@ use alloy::network::Ethereum;
 use alloy::primitives::{Address, U256, address};
 use alloy::providers::{ProviderBuilder, RootProvider};
 use alloy::sol;
+use alloy::transports::http::reqwest;
 use async_trait::async_trait;
 use tracing::warn;
 
@@ -50,6 +51,31 @@ fn default_contract_addresses(chain_id: u64) -> Option<ContractAddresses> {
     }
 }
 
+/// Name of the header that carries the full node API key, as the TS signer sends it.
+const API_KEY_HEADER: &str = "apiKey";
+
+/// Builds the HTTP client for full node requests. With an API key, every
+/// request carries it in the `apiKey` header.
+fn build_http_client(api_key: Option<&str>) -> Result<reqwest::Client, OdisError> {
+    let mut headers = reqwest::header::HeaderMap::new();
+    if let Some(api_key) = api_key {
+        let mut value = reqwest::header::HeaderValue::from_str(api_key).map_err(|_| {
+            warn!("BLOCKCHAIN_API_KEY is not a valid HTTP header value");
+            OdisError::FullNodeError
+        })?;
+        // Keeps the key out of debug output of the header map.
+        value.set_sensitive(true);
+        headers.insert(API_KEY_HEADER, value);
+    }
+    reqwest::Client::builder()
+        .default_headers(headers)
+        .build()
+        .map_err(|e| {
+            warn!(error = %e, "failed to build full node HTTP client");
+            OdisError::FullNodeError
+        })
+}
+
 pub struct ClientAccountService {
     contracts: ContractAddresses,
     provider: RootProvider<Ethereum>,
@@ -91,7 +117,8 @@ impl ClientAccountService {
             warn!("invalid BLOCKCHAIN_PROVIDER URL");
             OdisError::FullNodeError
         })?;
-        let provider = ProviderBuilder::default().connect_http(url);
+        let http_client = build_http_client(config.blockchain_api_key.as_deref())?;
+        let provider = ProviderBuilder::default().connect_reqwest(http_client, url);
 
         Ok(Self {
             contracts: ContractAddresses {
@@ -203,8 +230,88 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::{DatabaseConfig, KeystoreType};
     use alloy::primitives::U256;
+    use axum::http::HeaderMap;
     use std::sync::atomic::{AtomicU32, Ordering};
+    use std::sync::{Arc, Mutex};
+
+    /// Starts a JSON-RPC server on a free local port that answers every call
+    /// with 1 cUSD (1e18) and records the headers of each request it receives.
+    async fn spawn_full_node() -> (String, Arc<Mutex<Vec<HeaderMap>>>) {
+        let seen = Arc::new(Mutex::new(Vec::new()));
+        let recorder = seen.clone();
+        let app = axum::Router::new().fallback(
+            move |headers: HeaderMap, axum::Json(request): axum::Json<serde_json::Value>| {
+                let recorder = recorder.clone();
+                async move {
+                    recorder.lock().unwrap().push(headers);
+                    axum::Json(serde_json::json!({
+                        "jsonrpc": "2.0",
+                        "id": request["id"],
+                        "result": format!("0x{:064x}", 1_000_000_000_000_000_000u128),
+                    }))
+                }
+            },
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        (url, seen)
+    }
+
+    fn config_for(provider_url: String, api_key: Option<&str>) -> Config {
+        Config {
+            server_port: 0,
+            pnp_api_enabled: true,
+            keystore_type: KeystoreType::Mock,
+            pnp_key_name_base: "phoneNumberPrivacy".to_string(),
+            pnp_latest_key_version: 1,
+            database: DatabaseConfig::Sqlite {
+                path: ":memory:".to_string(),
+            },
+            migrate_legacy_data: false,
+            blockchain_provider: Some(provider_url),
+            blockchain_api_key: api_key.map(String::from),
+            chain_id: 11142220,
+            accounts_contract_address: None,
+            odis_payments_contract_address: None,
+            full_node_retry_count: 0,
+            full_node_retry_delay_ms: 1,
+            timeout_ms: 5000,
+            query_price_per_cusd: 0.001,
+            google_project_id: None,
+            request_pruning_days: 7,
+            request_pruning_interval_secs: 86400,
+        }
+    }
+
+    #[tokio::test]
+    async fn api_key_is_sent_to_the_full_node_only_when_configured() {
+        let (url, seen) = spawn_full_node().await;
+
+        let with_key = ClientAccountService::new(&config_for(url.clone(), Some("forno-key")))
+            .expect("client with API key");
+        assert_eq!(with_key.get_total_quota(Address::ZERO).await, Ok(1000));
+
+        let without_key =
+            ClientAccountService::new(&config_for(url, None)).expect("client without API key");
+        assert_eq!(without_key.get_total_quota(Address::ZERO).await, Ok(1000));
+
+        let seen = seen.lock().unwrap();
+        assert_eq!(seen.len(), 2);
+        assert_eq!(seen[0].get("apiKey").unwrap(), "forno-key");
+        assert!(seen[1].get("apiKey").is_none());
+    }
+
+    #[test]
+    fn api_key_that_is_not_a_valid_header_value_is_rejected() {
+        let config = config_for("http://localhost:8545".to_string(), Some("bad\nkey"));
+        assert!(matches!(
+            ClientAccountService::new(&config),
+            Err(OdisError::FullNodeError)
+        ));
+    }
 
     #[test]
     fn default_contract_addresses_by_chain() {
