@@ -47,6 +47,8 @@ pub struct Config {
     pub odis_payments_contract_address: Option<Address>,
     pub full_node_retry_count: u32,
     pub full_node_retry_delay_ms: u64,
+    /// Limit in milliseconds for one full node lookup, retries included.
+    pub full_node_timeout_ms: u64,
     pub timeout_ms: u64,
     pub query_price_per_cusd: f64,
     pub google_project_id: Option<String>,
@@ -106,6 +108,7 @@ impl Config {
             odis_payments_contract_address: parse_env_address("ODIS_PAYMENTS_CONTRACT_ADDRESS")?,
             full_node_retry_count: parse_env("FULL_NODE_RETRY_COUNT", Some(5))?,
             full_node_retry_delay_ms: parse_env("FULL_NODE_RETRY_DELAY_MS", Some(100))?,
+            full_node_timeout_ms: parse_env("FULL_NODE_TIMEOUT_MS", Some(1000))?,
             timeout_ms: parse_env("ODIS_SIGNER_TIMEOUT", Some(5000))?,
             query_price_per_cusd: parse_env("QUERY_PRICE_PER_CUSD", Some(0.001))?,
             google_project_id: env::var("KEYSTORE_GOOGLE_PROJECT_ID")
@@ -119,6 +122,13 @@ impl Config {
         if config.timeout_ms == 0 {
             return Err(ConfigError::InvalidValue {
                 name: "ODIS_SIGNER_TIMEOUT".to_string(),
+                source: "must be greater than 0".into(),
+            });
+        }
+
+        if config.full_node_timeout_ms == 0 {
+            return Err(ConfigError::InvalidValue {
+                name: "FULL_NODE_TIMEOUT_MS".to_string(),
                 source: "must be greater than 0".into(),
             });
         }
@@ -320,6 +330,7 @@ mod tests {
             "ODIS_PAYMENTS_CONTRACT_ADDRESS",
             "FULL_NODE_RETRY_COUNT",
             "FULL_NODE_RETRY_DELAY_MS",
+            "FULL_NODE_TIMEOUT_MS",
             "ODIS_SIGNER_TIMEOUT",
             "QUERY_PRICE_PER_CUSD",
             "KEYSTORE_GOOGLE_PROJECT_ID",
@@ -362,6 +373,7 @@ mod tests {
         assert_eq!(config.odis_payments_contract_address, None);
         assert_eq!(config.full_node_retry_count, 5);
         assert_eq!(config.full_node_retry_delay_ms, 100);
+        assert_eq!(config.full_node_timeout_ms, 1000);
         assert_eq!(config.timeout_ms, 5000);
         assert!((config.query_price_per_cusd - 0.001).abs() < f64::EPSILON);
         assert!(config.google_project_id.is_none());
@@ -395,6 +407,7 @@ mod tests {
             );
             set("FULL_NODE_RETRY_COUNT", "3");
             set("FULL_NODE_RETRY_DELAY_MS", "200");
+            set("FULL_NODE_TIMEOUT_MS", "2500");
             set("ODIS_SIGNER_TIMEOUT", "10000");
             set("QUERY_PRICE_PER_CUSD", "0.01");
         }
@@ -429,6 +442,7 @@ mod tests {
         );
         assert_eq!(config.full_node_retry_count, 3);
         assert_eq!(config.full_node_retry_delay_ms, 200);
+        assert_eq!(config.full_node_timeout_ms, 2500);
         assert_eq!(config.timeout_ms, 10000);
         assert!((config.query_price_per_cusd - 0.01).abs() < f64::EPSILON);
     }
@@ -610,6 +624,17 @@ mod tests {
         let result = Config::from_env();
         assert!(
             matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "ODIS_SIGNER_TIMEOUT")
+        );
+
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("FULL_NODE_TIMEOUT_MS", "0");
+        }
+
+        let result = Config::from_env();
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "FULL_NODE_TIMEOUT_MS")
         );
     }
 

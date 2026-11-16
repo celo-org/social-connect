@@ -151,6 +151,29 @@ pub async fn pnp_sign_handler(
         return Err(OdisError::ApiUnavailable);
     }
 
+    // The request runs in its own task so that it is finished and charged even
+    // when this handler is dropped, which happens when the caller disconnects or
+    // the request times out. The combiner disconnects from the slower signers as
+    // soon as it has enough partial signatures; if those signers then skipped the
+    // charge, their counts for the account would fall behind the others. The TS
+    // signer finishes such requests too. A retry is served the stored signature.
+    let task = tokio::spawn(sign(state, requested_key_version, authorization, body));
+    match task.await {
+        Ok(result) => result,
+        Err(join_error) => match join_error.try_into_panic() {
+            Ok(panic) => std::panic::resume_unwind(panic),
+            Err(_) => Err(OdisError::Unknown),
+        },
+    }
+}
+
+/// Authenticates, signs and records one PNP sign request.
+async fn sign(
+    state: AppState,
+    requested_key_version: Option<u32>,
+    authorization: Authorization,
+    body: Bytes,
+) -> Result<(HeaderMap, Json<SignMessageResponseSuccess>), OdisError> {
     let request: SignMessageRequest =
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
     request.validate()?;

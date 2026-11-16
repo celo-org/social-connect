@@ -152,6 +152,7 @@ fn pg_config(url: &str, migrate_legacy_data: bool) -> Config {
         odis_payments_contract_address: None,
         full_node_retry_count: 5,
         full_node_retry_delay_ms: 100,
+        full_node_timeout_ms: 1000,
         timeout_ms: 5000,
         query_price_per_cusd: 0.001,
         google_project_id: None,

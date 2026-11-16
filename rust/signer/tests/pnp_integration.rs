@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::Duration;
 
 use alloy_signer::Signer;
 use alloy_signer_local::PrivateKeySigner;
@@ -13,7 +14,8 @@ use tower::ServiceExt;
 
 use odis_signer::account_service::MockAccountService;
 use odis_signer::config::{Config, DatabaseConfig, KeystoreType, LogFormat};
-use odis_signer::key_management::MockKeyProvider;
+use odis_signer::errors::OdisError;
+use odis_signer::key_management::{KeyProvider, MockKeyProvider};
 use odis_signer::server::{build_router, build_router_with_services};
 
 const BLINDED_PHONE_NUMBER: &str =
@@ -51,6 +53,7 @@ fn test_config_with_db(db_path: &str) -> Config {
         odis_payments_contract_address: None,
         full_node_retry_count: 5,
         full_node_retry_delay_ms: 100,
+        full_node_timeout_ms: 1000,
         timeout_ms: 5000,
         query_price_per_cusd: 0.001,
         google_project_id: None,
@@ -886,4 +889,122 @@ async fn quota_reflects_account_service_total_quota() {
     assert_eq!(response.status(), StatusCode::OK);
     let json = response_json(response).await;
     assert_eq!(json["totalQuota"], 42);
+}
+
+// ── Aborted and timed-out requests ───────────────────────────────────
+
+/// Key provider that answers after a delay, which keeps a /sign request in
+/// flight long enough for the caller to give up or the signer to time out.
+struct SlowKeyProvider {
+    inner: MockKeyProvider,
+    delay: Duration,
+}
+
+#[async_trait::async_trait]
+impl KeyProvider for SlowKeyProvider {
+    async fn get_key(&self, name: &str, version: u32) -> Result<String, OdisError> {
+        tokio::time::sleep(self.delay).await;
+        self.inner.get_key(name, version).await
+    }
+}
+
+async fn build_slow_router(key_delay: Duration, signer_timeout: Duration) -> Router {
+    let config = Config {
+        timeout_ms: signer_timeout.as_millis() as u64,
+        ..test_config()
+    };
+    let key_provider = Arc::new(SlowKeyProvider {
+        inner: MockKeyProvider::new(),
+        delay: key_delay,
+    });
+    build_router_with_services(
+        config,
+        Arc::new(MockAccountService::new(None, 10)),
+        key_provider,
+    )
+    .await
+    .unwrap()
+}
+
+/// Polls /quotaStatus until the account's used quota reaches `expected`.
+async fn wait_for_used_quota(app: &Router, expected: u64) {
+    for _ in 0..100 {
+        let response = app.clone().oneshot(quota_request(ACCOUNT)).await.unwrap();
+        if response_json(response).await["performedQueryCount"] == expected {
+            return;
+        }
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    panic!("used quota never reached {expected}");
+}
+
+async fn metrics_text(app: &Router) -> String {
+    let request = Request::builder()
+        .uri("/metrics")
+        .body(Body::empty())
+        .unwrap();
+    let response = app.clone().oneshot(request).await.unwrap();
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    String::from_utf8(body.to_vec()).unwrap()
+}
+
+/// The combiner drops its connection to the slower signers once it has enough
+/// partial signatures. Like the TS signer, the request must still be finished
+/// and charged, so that all signers keep the same count for the account.
+#[tokio::test]
+async fn sign_is_finished_and_charged_when_the_caller_gives_up() {
+    let app = build_slow_router(Duration::from_millis(200), Duration::from_secs(5)).await;
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+
+    // Dropping the response future is what the server does to a handler when
+    // its connection closes.
+    let abandoned = tokio::time::timeout(
+        Duration::from_millis(50),
+        app.clone().oneshot(sign_request(&body)),
+    )
+    .await;
+    assert!(abandoned.is_err(), "the caller must give up first");
+
+    wait_for_used_quota(&app, 1).await;
+
+    // The retry is a replay: same signature, no second charge.
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    let json = response_json(response).await;
+    assert_eq!(json["signature"], EXPECTED_SIG_V1);
+    assert_eq!(json["performedQueryCount"], 1);
+    assert_eq!(
+        json["warnings"][0],
+        "CELO_ODIS_WARN_04 BAD_INPUT Attempt to replay partial signature request"
+    );
+}
+
+#[tokio::test]
+async fn sign_timeout_returns_the_odis_error_and_is_counted_and_charged() {
+    let app = build_slow_router(Duration::from_millis(300), Duration::from_millis(50)).await;
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    let json = response_json(response).await;
+    assert_eq!(json["success"], false);
+    assert_eq!(
+        json["error"],
+        "CELO_ODIS_ERR_10 SIG_ERR Timeout from signer"
+    );
+    assert!(json["version"].is_string());
+
+    let metrics = metrics_text(&app).await;
+    assert!(
+        metrics.lines().any(|l| l.starts_with("timeouts ")),
+        "timeouts counter missing in:\n{metrics}"
+    );
+    assert!(
+        metrics.contains(r#"responses{endpoint="/sign",status_code="500"}"#),
+        "timed-out response not counted in:\n{metrics}"
+    );
+
+    // The work goes on after the 500, as in the TS signer.
+    wait_for_used_quota(&app, 1).await;
 }
