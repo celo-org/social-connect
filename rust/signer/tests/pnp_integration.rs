@@ -12,7 +12,7 @@ use tempfile::NamedTempFile;
 use tower::ServiceExt;
 
 use odis_signer::account_service::MockAccountService;
-use odis_signer::config::{Config, DatabaseConfig, KeystoreType};
+use odis_signer::config::{Config, DatabaseConfig, KeystoreType, LogFormat};
 use odis_signer::key_management::MockKeyProvider;
 use odis_signer::server::{build_router, build_router_with_services};
 
@@ -56,6 +56,7 @@ fn test_config_with_db(db_path: &str) -> Config {
         google_project_id: None,
         request_pruning_days: 7,
         request_pruning_interval_secs: 86400,
+        log_format: LogFormat::Text,
     }
 }
 

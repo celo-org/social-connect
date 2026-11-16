@@ -201,6 +201,7 @@ fn spawn_pruning_task(config: Arc<Config>, request_service: Arc<dyn PnpRequestSe
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::config::LogFormat;
     use axum::body::Body;
     use axum::http::Request;
     use http_body_util::BodyExt;
@@ -229,6 +230,7 @@ mod tests {
             google_project_id: None,
             request_pruning_days: 7,
             request_pruning_interval_secs: 86400,
+            log_format: LogFormat::Text,
         }
     }
 
