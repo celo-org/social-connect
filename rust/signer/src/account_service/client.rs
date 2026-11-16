@@ -230,7 +230,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::config::{DatabaseConfig, KeystoreType};
+    use crate::config::{DatabaseConfig, KeystoreType, LogFormat};
     use alloy::primitives::U256;
     use axum::http::HeaderMap;
     use std::sync::atomic::{AtomicU32, Ordering};
@@ -283,6 +283,7 @@ mod tests {
             google_project_id: None,
             request_pruning_days: 7,
             request_pruning_interval_secs: 86400,
+            log_format: LogFormat::Text,
         }
     }
 

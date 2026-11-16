@@ -7,6 +7,15 @@ pub enum KeystoreType {
     GoogleSecretManager,
 }
 
+/// How log lines are written to stdout.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum LogFormat {
+    /// Human-readable lines, for local use.
+    Text,
+    /// One JSON object per line, for log collectors.
+    Json,
+}
+
 /// Which persistence backend to use for PNP request/quota tracking.
 ///
 /// Selected from `DATABASE_URL` by scheme; falls back to SQLite via `DB_PATH`.
@@ -43,6 +52,7 @@ pub struct Config {
     pub google_project_id: Option<String>,
     pub request_pruning_days: u64,
     pub request_pruning_interval_secs: u64,
+    pub log_format: LogFormat,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -105,6 +115,7 @@ impl Config {
                 .filter(|s| !s.is_empty()),
             request_pruning_days: parse_env("REQUEST_PRUNING_DAYS", Some(7))?,
             request_pruning_interval_secs: parse_env("REQUEST_PRUNING_INTERVAL_SECS", Some(86400))?,
+            log_format: parse_log_format()?,
         };
 
         if config.timeout_ms == 0 {
@@ -193,6 +204,18 @@ fn parse_keystore_type() -> Result<KeystoreType, ConfigError> {
         _ => Err(ConfigError::InvalidValue {
             name: "KEYSTORE_TYPE".to_string(),
             source: format!("unknown keystore type: '{val}'").into(),
+        }),
+    }
+}
+
+fn parse_log_format() -> Result<LogFormat, ConfigError> {
+    let val = parse_env_string("LOG_FORMAT", Some("text"))?;
+    match val.to_lowercase().as_str() {
+        "text" => Ok(LogFormat::Text),
+        "json" => Ok(LogFormat::Json),
+        _ => Err(ConfigError::InvalidValue {
+            name: "LOG_FORMAT".to_string(),
+            source: format!("unknown log format: '{val}', expected 'text' or 'json'").into(),
         }),
     }
 }
@@ -304,6 +327,7 @@ mod tests {
             "KEYSTORE_GOOGLE_PROJECT_ID",
             "REQUEST_PRUNING_DAYS",
             "REQUEST_PRUNING_INTERVAL_SECS",
+            "LOG_FORMAT",
             "SHOULD_MOCK_ACCOUNT_SERVICE",
             "SHOULD_MOCK_REQUEST_SERVICE",
         ] {
@@ -345,6 +369,7 @@ mod tests {
         assert!(config.google_project_id.is_none());
         assert_eq!(config.request_pruning_days, 7);
         assert_eq!(config.request_pruning_interval_secs, 86400);
+        assert_eq!(config.log_format, LogFormat::Text);
     }
 
     #[test]
@@ -434,6 +459,23 @@ mod tests {
         assert!(matches!(
             result.unwrap_err(),
             ConfigError::InvalidValue { .. }
+        ));
+    }
+
+    #[test]
+    fn log_format_is_parsed_case_insensitively_and_rejects_unknown_values() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("LOG_FORMAT", "JSON");
+        }
+        assert_eq!(Config::from_env().unwrap().log_format, LogFormat::Json);
+
+        unsafe { set("LOG_FORMAT", "stackdriver") };
+        assert!(matches!(
+            Config::from_env().unwrap_err(),
+            ConfigError::InvalidValue { name, .. } if name == "LOG_FORMAT"
         ));
     }
 
