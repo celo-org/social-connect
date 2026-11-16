@@ -81,6 +81,10 @@ pub struct ClientAccountService {
     provider: RootProvider<Ethereum>,
     retry_count: u32,
     retry_delay: Duration,
+    /// Limit for one contract lookup, all of its retries included, as in the TS
+    /// signer. A sign request keeps running after its caller has gone, so a full
+    /// node that never answers must not hold it for long.
+    lookup_timeout: Duration,
     query_price_per_cusd: f64,
 }
 
@@ -128,6 +132,7 @@ impl ClientAccountService {
             provider,
             retry_count: config.full_node_retry_count,
             retry_delay: Duration::from_millis(config.full_node_retry_delay_ms),
+            lookup_timeout: Duration::from_millis(config.full_node_timeout_ms),
             query_price_per_cusd: config.query_price_per_cusd,
         })
     }
@@ -135,14 +140,19 @@ impl ClientAccountService {
     async fn get_dek(&self, address: Address) -> Result<String, OdisError> {
         let accounts = IAccounts::new(self.contracts.accounts, &self.provider);
 
-        let dek_bytes = retry_with_backoff(self.retry_count, self.retry_delay, || async {
+        let lookup = retry_with_backoff(self.retry_count, self.retry_delay, || async {
             let result = accounts.getDataEncryptionKey(address).call().await;
             result.map(|r| r.0).map_err(|e| {
                 warn!(error = %e, %address, "failed to fetch DEK");
                 OdisError::FailureToGetDek
             })
-        })
-        .await?;
+        });
+        let dek_bytes = tokio::time::timeout(self.lookup_timeout, lookup)
+            .await
+            .map_err(|_| {
+                warn!(%address, "timed out fetching DEK");
+                OdisError::FailureToGetDek
+            })??;
 
         Ok(hex::encode(&dek_bytes))
     }
@@ -150,14 +160,19 @@ impl ClientAccountService {
     async fn get_total_quota(&self, address: Address) -> Result<u32, OdisError> {
         let payments = IOdisPayments::new(self.contracts.odis_payments, &self.provider);
 
-        let total_paid = retry_with_backoff(self.retry_count, self.retry_delay, || async {
+        let lookup = retry_with_backoff(self.retry_count, self.retry_delay, || async {
             let result = payments.totalPaidCUSD(address).call().await;
             result.map_err(|e| {
                 warn!(error = %e, %address, "failed to fetch total paid");
                 OdisError::FailureToGetTotalQuota
             })
-        })
-        .await?;
+        });
+        let total_paid = tokio::time::timeout(self.lookup_timeout, lookup)
+            .await
+            .map_err(|_| {
+                warn!(%address, "timed out fetching total paid");
+                OdisError::FailureToGetTotalQuota
+            })??;
 
         Ok(calculate_quota(total_paid, self.query_price_per_cusd))
     }
@@ -278,6 +293,7 @@ mod tests {
             odis_payments_contract_address: None,
             full_node_retry_count: 0,
             full_node_retry_delay_ms: 1,
+            full_node_timeout_ms: 1000,
             timeout_ms: 5000,
             query_price_per_cusd: 0.001,
             google_project_id: None,
@@ -303,6 +319,29 @@ mod tests {
         assert_eq!(seen.len(), 2);
         assert_eq!(seen[0].get("apiKey").unwrap(), "forno-key");
         assert!(seen[1].get("apiKey").is_none());
+    }
+
+    #[tokio::test]
+    async fn lookup_fails_after_the_timeout_when_the_full_node_never_answers() {
+        let app = axum::Router::new().fallback(std::future::pending::<()>);
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+
+        // Retries are on, to show that the limit covers them too.
+        let config = Config {
+            full_node_timeout_ms: 100,
+            full_node_retry_count: 5,
+            ..config_for(url, None)
+        };
+        let service = ClientAccountService::new(&config).unwrap();
+
+        let started = std::time::Instant::now();
+        let result = service.get_account(Address::ZERO).await;
+
+        // Both lookups fail; the DEK error is reported, as by the TS signer.
+        assert_eq!(result.err(), Some(OdisError::FailureToGetDek));
+        assert!(started.elapsed() < Duration::from_secs(2));
     }
 
     #[test]

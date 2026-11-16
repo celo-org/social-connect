@@ -1,13 +1,14 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use ::metrics::counter;
 use axum::Router;
-use axum::http::StatusCode;
-use axum::middleware;
+use axum::extract::{Request, State};
+use axum::middleware::{self, Next};
+use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::limit::RequestBodyLimitLayer;
-use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
 use crate::account_service::{
@@ -140,8 +141,6 @@ pub async fn build_router_with_services(
 
     spawn_pruning_task(state.config.clone(), state.request_service.clone());
 
-    let timeout = Duration::from_millis(state.config.timeout_ms);
-
     Ok(Router::new()
         .route("/status", get(status_handler))
         .route("/sign", post(pnp_sign_handler))
@@ -153,15 +152,35 @@ pub async fn build_router_with_services(
             "/metrics",
             get(move || std::future::ready(metrics_handle.render())),
         )
+        // Layers run from the bottom up, so the timeout sits inside the metrics
+        // layer and a timed-out request is counted like any other response.
+        .layer(middleware::from_fn_with_state(
+            state.clone(),
+            request_timeout_layer,
+        ))
         .layer(middleware::from_fn(metrics::http_metrics_layer))
         .layer(TraceLayer::new_for_http())
         .layer(CatchPanicLayer::new())
-        .layer(TimeoutLayer::with_status_code(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            timeout,
-        ))
         .layer(RequestBodyLimitLayer::new(16 * 1024)) // 16 KB, matches TS REASONABLE_BODY_CHAR_LIMIT
         .with_state(state))
+}
+
+/// Answers with the ODIS timeout error when a request takes longer than
+/// `ODIS_SIGNER_TIMEOUT`, as the TS signer does. Only the wait ends here: a
+/// /sign request that is already under way finishes in its own task.
+async fn request_timeout_layer(
+    State(state): State<AppState>,
+    request: Request,
+    next: Next,
+) -> Response {
+    let limit = Duration::from_millis(state.config.timeout_ms);
+    match tokio::time::timeout(limit, next.run(request)).await {
+        Ok(response) => response,
+        Err(_) => {
+            counter!(metrics::TIMEOUTS).increment(1);
+            OdisError::Timeout.into_response()
+        }
+    }
 }
 
 fn spawn_pruning_task(config: Arc<Config>, request_service: Arc<dyn PnpRequestService>) {
@@ -204,6 +223,7 @@ mod tests {
     use crate::config::LogFormat;
     use axum::body::Body;
     use axum::http::Request;
+    use axum::http::StatusCode;
     use http_body_util::BodyExt;
     use tower::ServiceExt;
 
@@ -225,6 +245,7 @@ mod tests {
             odis_payments_contract_address: None,
             full_node_retry_count: 5,
             full_node_retry_delay_ms: 100,
+            full_node_timeout_ms: 1000,
             timeout_ms: 5000,
             query_price_per_cusd: 0.001,
             google_project_id: None,
