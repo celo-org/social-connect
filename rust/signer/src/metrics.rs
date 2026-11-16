@@ -16,6 +16,7 @@ pub const BLOCKCHAIN_ERRORS: &str = "blockchain_errors";
 pub const SIGNATURE_COMPUTATION_ERRORS: &str = "signature_computation_errors";
 pub const DUPLICATE_REQUESTS: &str = "duplicate_requests";
 pub const REQUESTS_WITH_WALLET_ADDRESS: &str = "requests_with_wallet_address";
+pub const TIMEOUTS: &str = "timeouts";
 
 // -- Histograms --
 
@@ -116,6 +117,7 @@ mod tests {
             SIGNATURE_COMPUTATION_ERRORS,
             DUPLICATE_REQUESTS,
             REQUESTS_WITH_WALLET_ADDRESS,
+            TIMEOUTS,
             RESPONSE_LATENCY,
             FULL_NODE_LATENCY,
             DB_OPS_LATENCY,
