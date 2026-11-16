@@ -1008,3 +1008,163 @@ async fn sign_timeout_returns_the_odis_error_and_is_counted_and_charged() {
     // The work goes on after the 500, as in the TS signer.
     wait_for_used_quota(&app, 1).await;
 }
+
+/// Pins the metric names and labels that dashboards and alert rules query.
+/// A change here must be deliberate and recorded in rust/signer/CHANGELOG.md.
+#[tokio::test]
+async fn metrics_expose_the_documented_names_and_labels() {
+    let app = build_router(test_config()).await.unwrap();
+    // Naming the method makes the request count in requests_with_wallet_address.
+    let body = serde_json::json!({
+        "account": ACCOUNT,
+        "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER,
+        "authenticationMethod": "wallet_key",
+    })
+    .to_string();
+
+    for _ in 0..2 {
+        let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+    let response = app.clone().oneshot(quota_request(ACCOUNT)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let metrics = metrics_text(&app).await;
+    for series in [
+        r#"requests{endpoint="/sign"}"#,
+        r#"requests{endpoint="/quotaStatus"}"#,
+        r#"responses{endpoint="/sign",status_code="200"}"#,
+        r#"responses{endpoint="/quotaStatus",status_code="200"}"#,
+        r#"signature_endpoint_latency_bucket{endpoint="/sign",le="0.001"}"#,
+        // A bound that only the TS signer's bucket list has.
+        r#"signature_endpoint_latency_bucket{endpoint="/sign",le="1.2"}"#,
+        r#"user_remaining_quota_at_request_bucket{endpoint="/sign",le="1.2"}"#,
+        r#"db_ops_instrumentation_bucket{operation="getPerformedQueryCount",le="0.001"}"#,
+        r#"db_ops_instrumentation_bucket{operation="getRequestIfExists",le="0.001"}"#,
+        r#"db_ops_instrumentation_bucket{operation="insertRequest",le="0.001"}"#,
+        "duplicate_requests ",
+        "requests_with_wallet_address ",
+    ] {
+        assert!(metrics.contains(series), "{series} missing in:\n{metrics}");
+    }
+}
+
+/// Value of the `requests_with_wallet_address` counter; 0 before its first increment.
+async fn wallet_key_request_count(app: &Router) -> u64 {
+    metrics_text(app)
+        .await
+        .lines()
+        .find_map(|line| line.strip_prefix("requests_with_wallet_address "))
+        .map_or(0, |value| value.parse().unwrap())
+}
+
+/// The TS signer counts a request on both PNP endpoints, before it checks the
+/// signature, and only when the request names `wallet_key`.
+#[tokio::test]
+async fn wallet_key_requests_are_counted_as_the_ts_signer_counts_them() {
+    let body_with = |method: Option<&str>| {
+        let mut body = serde_json::json!({
+            "account": ACCOUNT,
+            "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER,
+        });
+        if let Some(method) = method {
+            body["authenticationMethod"] = method.into();
+        }
+        body.to_string()
+    };
+    let quota_request_with = |body: String| {
+        Request::builder()
+            .method("POST")
+            .uri("/quotaStatus")
+            .header("content-type", "application/json")
+            .body(Body::from(body))
+            .unwrap()
+    };
+
+    let app = build_router(test_config()).await.unwrap();
+    let start = wallet_key_request_count(&app).await;
+
+    let response = app
+        .clone()
+        .oneshot(sign_request(&body_with(Some("wallet_key"))))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(wallet_key_request_count(&app).await, start + 1);
+
+    let response = app
+        .clone()
+        .oneshot(quota_request_with(body_with(Some("wallet_key"))))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(wallet_key_request_count(&app).await, start + 2);
+
+    // Neither another method nor a missing one is counted.
+    for method in [Some("encryption_key"), Some("WALLET_KEY"), None] {
+        let response = app
+            .clone()
+            .oneshot(sign_request(&body_with(method)))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let response = app
+            .clone()
+            .oneshot(quota_request_with(body_with(method)))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+    assert_eq!(wallet_key_request_count(&app).await, start + 2);
+
+    // A request that fails authentication is counted too.
+    let auth_app = build_auth_router().await;
+    let response = auth_app
+        .clone()
+        .oneshot(sign_request(&body_with(Some("wallet_key"))))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    assert_eq!(wallet_key_request_count(&auth_app).await, start + 3);
+}
+
+/// The TS signer records the remaining quota before the quota check, so a
+/// request refused for lack of quota is recorded too, with a value of 0.
+#[tokio::test]
+async fn remaining_quota_is_recorded_for_a_request_refused_for_quota() {
+    async fn metric(app: &Router, suffix: &str) -> f64 {
+        let prefix = format!(r#"user_remaining_quota_at_request_{suffix}{{endpoint="/sign"}} "#);
+        metrics_text(app)
+            .await
+            .lines()
+            .find_map(|line| line.strip_prefix(&prefix).map(str::to_owned))
+            .map_or(0.0, |value| value.parse().unwrap())
+    }
+
+    let account_service = Arc::new(MockAccountService::new(None, 1));
+    let app = build_router_with_services(
+        test_config(),
+        account_service,
+        Arc::new(MockKeyProvider::new()),
+    )
+    .await
+    .unwrap();
+    let (count, sum) = (metric(&app, "count").await, metric(&app, "sum").await);
+
+    // One unit of quota is left when the first request arrives.
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(metric(&app, "count").await, count + 1.0);
+    assert_eq!(metric(&app, "sum").await, sum + 1.0);
+
+    // None is left for the second, which is refused and still recorded.
+    let body = sign_body(
+        ACCOUNT,
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    );
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::FORBIDDEN);
+    assert_eq!(metric(&app, "count").await, count + 2.0);
+    assert_eq!(metric(&app, "sum").await, sum + 1.0);
+}
