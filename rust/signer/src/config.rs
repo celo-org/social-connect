@@ -30,6 +30,9 @@ pub struct Config {
     /// data migration on startup. Guarded by a marker so it never re-runs.
     pub migrate_legacy_data: bool,
     pub blockchain_provider: Option<String>,
+    /// Sent as the `apiKey` header on every request to `blockchain_provider`,
+    /// which is how forno identifies clients with a raised rate limit.
+    pub blockchain_api_key: Option<String>,
     pub chain_id: u64,
     pub accounts_contract_address: Option<Address>,
     pub odis_payments_contract_address: Option<Address>,
@@ -85,6 +88,9 @@ impl Config {
             database: parse_database_config()?,
             migrate_legacy_data: parse_env_bool("MIGRATE_LEGACY_DATA", Some(false))?,
             blockchain_provider: env::var("BLOCKCHAIN_PROVIDER")
+                .ok()
+                .filter(|s| !s.is_empty()),
+            blockchain_api_key: env::var("BLOCKCHAIN_API_KEY")
                 .ok()
                 .filter(|s| !s.is_empty()),
             chain_id: parse_env("CHAIN_ID", Some(11142220))?,
@@ -287,6 +293,7 @@ mod tests {
             "DB_TYPE",
             "MIGRATE_LEGACY_DATA",
             "BLOCKCHAIN_PROVIDER",
+            "BLOCKCHAIN_API_KEY",
             "CHAIN_ID",
             "ACCOUNTS_CONTRACT_ADDRESS",
             "ODIS_PAYMENTS_CONTRACT_ADDRESS",
@@ -327,6 +334,7 @@ mod tests {
         );
         assert!(!config.migrate_legacy_data);
         assert!(config.blockchain_provider.is_none());
+        assert!(config.blockchain_api_key.is_none());
         assert_eq!(config.chain_id, 11142220);
         assert_eq!(config.accounts_contract_address, None);
         assert_eq!(config.odis_payments_contract_address, None);
@@ -352,6 +360,7 @@ mod tests {
             set("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", "3");
             set("DB_PATH", "/tmp/test.db");
             set("BLOCKCHAIN_PROVIDER", "https://rpc.example.com");
+            set("BLOCKCHAIN_API_KEY", "forno-key");
             set("CHAIN_ID", "42220");
             set(
                 "ACCOUNTS_CONTRACT_ADDRESS",
@@ -385,6 +394,7 @@ mod tests {
             config.blockchain_provider.as_deref(),
             Some("https://rpc.example.com")
         );
+        assert_eq!(config.blockchain_api_key.as_deref(), Some("forno-key"));
         assert_eq!(config.chain_id, 42220);
         assert_eq!(
             config.accounts_contract_address,
@@ -527,11 +537,13 @@ mod tests {
             clear_env();
             set("KEYSTORE_TYPE", "Mock");
             set("BLOCKCHAIN_PROVIDER", "");
+            set("BLOCKCHAIN_API_KEY", "");
             set("KEYSTORE_GOOGLE_PROJECT_ID", "");
         }
 
         let config = Config::from_env().unwrap();
         assert!(config.blockchain_provider.is_none());
+        assert!(config.blockchain_api_key.is_none());
         assert!(config.google_project_id.is_none());
     }
 
