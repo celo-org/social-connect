@@ -20,7 +20,7 @@ use testcontainers_modules::testcontainers::ImageExt;
 use testcontainers_modules::testcontainers::runners::AsyncRunner;
 
 use odis_signer::account_service::MockAccountService;
-use odis_signer::config::{Config, DatabaseConfig, KeystoreType};
+use odis_signer::config::{Config, DatabaseConfig, KeystoreType, LogFormat};
 use odis_signer::errors::OdisError;
 use odis_signer::key_management::{KeyProvider, MockKeyProvider};
 use odis_signer::request_service::{PnpRequestService, PostgresPnpRequestService, RecordOutcome};
@@ -157,6 +157,7 @@ fn pg_config(url: &str, migrate_legacy_data: bool) -> Config {
         google_project_id: None,
         request_pruning_days: 7,
         request_pruning_interval_secs: 86400,
+        log_format: LogFormat::Text,
     }
 }
 

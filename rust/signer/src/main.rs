@@ -1,17 +1,13 @@
 use odis_signer::config::Config;
 use odis_signer::server::build_router;
 use tokio::net::TcpListener;
-use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
-
     let _ = dotenvy::dotenv();
 
     let config = Config::from_env().expect("failed to load config");
+    odis_signer::logging::init(config.log_format);
     let port = config.server_port;
 
     let app = build_router(config).await.expect("failed to build router");
