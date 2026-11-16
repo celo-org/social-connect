@@ -146,6 +146,7 @@ fn pg_config(url: &str, migrate_legacy_data: bool) -> Config {
         },
         migrate_legacy_data,
         blockchain_provider: None,
+        blockchain_api_key: None,
         chain_id: 11142220,
         accounts_contract_address: None,
         odis_payments_contract_address: None,
