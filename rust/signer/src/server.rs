@@ -115,10 +115,13 @@ pub async fn build_router_with_services(
     account_service: Arc<dyn AccountService>,
     key_provider: Arc<dyn KeyProvider>,
 ) -> Result<Router, OdisError> {
+    let db_timeout = Duration::from_millis(config.db_timeout_ms);
     let inner_request_service: Arc<dyn PnpRequestService> = match &config.database {
-        DatabaseConfig::Sqlite { path } => Arc::new(SqlitePnpRequestService::new(path).await?),
+        DatabaseConfig::Sqlite { path } => {
+            Arc::new(SqlitePnpRequestService::new(path, db_timeout).await?)
+        }
         DatabaseConfig::Postgres { url } => {
-            let service = PostgresPnpRequestService::new(url).await?;
+            let service = PostgresPnpRequestService::new(url, db_timeout).await?;
             if config.migrate_legacy_data {
                 service.run_legacy_migration().await?;
             } else {
@@ -239,6 +242,7 @@ mod tests {
                 path: ":memory:".to_string(),
             },
             migrate_legacy_data: false,
+            db_timeout_ms: 1000,
             blockchain_provider: None,
             blockchain_api_key: None,
             chain_id: 11142220,

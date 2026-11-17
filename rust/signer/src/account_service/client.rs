@@ -328,6 +328,7 @@ mod tests {
                 path: ":memory:".to_string(),
             },
             migrate_legacy_data: false,
+            db_timeout_ms: 1000,
             blockchain_provider: Some(provider_url),
             blockchain_api_key: api_key.map(String::from),
             chain_id: 11142220,
