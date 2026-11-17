@@ -1,4 +1,5 @@
 use ::metrics::{counter, histogram};
+use alloy::primitives::Address;
 use axum::Json;
 use axum::body::Bytes;
 use axum::extract::State;
@@ -6,6 +7,7 @@ use axum::http::HeaderMap;
 use axum::response::IntoResponse;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
 
+use crate::account_service::PnpAccount;
 use crate::auth::{Authorization, authenticate_user};
 use crate::errors::OdisError;
 use crate::metrics as metric_names;
@@ -40,33 +42,38 @@ pub async fn status_handler() -> impl IntoResponse {
     }))
 }
 
-/// Check authentication. Returns `Err(401)` on failure.
-fn check_auth(
+/// Looks up the account and authenticates the request against it. Both PNP
+/// endpoints go through here, so they count and verify requests the same way.
+///
+/// Like the TS signer, a request that names `wallet_key` is counted before its
+/// signature is checked. The signature is only checked when a full node is
+/// configured, because the DEK comes from chain. Returns `Err(401)` when the
+/// check fails.
+async fn authenticated_account(
+    state: &AppState,
     body: &[u8],
     authorization: &Authorization,
-    account: alloy::primitives::Address,
+    address: Address,
     authentication_method: Option<AuthenticationMethod>,
-    dek: &str,
-) -> Result<(), OdisError> {
-    if !authenticate_user(
-        body,
-        authorization.0.as_deref(),
-        account,
-        authentication_method,
-        Some(dek).filter(|s| !s.is_empty()),
-    ) {
-        return Err(OdisError::UnauthenticatedUser);
-    }
-    Ok(())
-}
+) -> Result<PnpAccount, OdisError> {
+    let account = state.account_service.get_account(address).await?;
 
-/// Counts a request that states wallet-key authentication. Like the TS signer,
-/// this counts on both PNP endpoints, before the signature is checked, and only
-/// when the request names `wallet_key`.
-fn count_wallet_key_request(authentication_method: Option<AuthenticationMethod>) {
     if authentication_method == Some(AuthenticationMethod::WalletKey) {
         counter!(metric_names::REQUESTS_WITH_WALLET_ADDRESS).increment(1);
     }
+
+    if state.config.blockchain_provider.is_some()
+        && !authenticate_user(
+            body,
+            authorization.0.as_deref(),
+            address,
+            authentication_method,
+            Some(account.dek.as_str()).filter(|s| !s.is_empty()),
+        )
+    {
+        return Err(OdisError::UnauthenticatedUser);
+    }
+    Ok(account)
 }
 
 pub async fn pnp_quota_handler(
@@ -81,18 +88,14 @@ pub async fn pnp_quota_handler(
     let request: PnpQuotaRequest =
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
 
-    let account = state.account_service.get_account(request.account).await?;
-    count_wallet_key_request(request.authentication_method);
-
-    if state.config.blockchain_provider.is_some() {
-        check_auth(
-            &body,
-            &authorization,
-            request.account,
-            request.authentication_method,
-            &account.dek,
-        )?;
-    }
+    let account = authenticated_account(
+        &state,
+        &body,
+        &authorization,
+        request.account,
+        request.authentication_method,
+    )
+    .await?;
 
     let used_quota = state
         .request_service
@@ -178,18 +181,14 @@ async fn sign(
         serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
     request.validate()?;
 
-    let account = state.account_service.get_account(request.account).await?;
-    count_wallet_key_request(request.authentication_method);
-
-    if state.config.blockchain_provider.is_some() {
-        check_auth(
-            &body,
-            &authorization,
-            request.account,
-            request.authentication_method,
-            &account.dek,
-        )?;
-    }
+    let account = authenticated_account(
+        &state,
+        &body,
+        &authorization,
+        request.account,
+        request.authentication_method,
+    )
+    .await?;
 
     let duplicate_sig = state
         .request_service
