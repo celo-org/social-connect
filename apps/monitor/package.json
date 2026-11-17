@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "scripts": {
     "login": "yarn firebase logout && yarn firebase login",
-    "deploy": "yarn firebase deploy --only functions:odisMonitorScheduleFunctionPNPGen2,functions:odisMonitorScheduleFunctionDomainsGen2",
+    "deploy": "yarn firebase deploy --only functions:odisMonitorScheduleFunctionPNPGen2",
     "deploy:staging": "yarn deploy --project celo-phone-number-privacy-stg",
     "deploy:celo-sepolia": "yarn deploy --project phone-number-privacy-sepolia",
     "deploy:mainnet": "yarn deploy --project celo-pgpnp-mainnet",
@@ -27,7 +27,6 @@
   "dependencies": {
     "@celo/base": "^7.0.0",
     "@celo/cryptographic-utils": "^6.0.0",
-    "@celo/encrypted-backup": "^5.0.6",
     "@celo/identity": "^5.1.2",
     "@celo/phone-number-privacy-common": "^3.1.2",
     "@celo/utils": "^8.0.0",

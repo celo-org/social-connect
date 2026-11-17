@@ -1,13 +1,11 @@
 import { sleep } from '@celo/base'
-import { Result } from '@celo/base/lib/result'
-import { BackupError } from '@celo/encrypted-backup'
 import { IdentifierHashDetails } from '@celo/identity/lib/odis/identifier'
 import { ErrorMessages, OdisContextName } from '@celo/identity/lib/odis/query'
 import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
 import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
 import { performance } from 'perf_hooks'
 import { Hex } from 'viem'
-import { ChainInfo, queryOdisDomain, queryOdisForQuota, queryOdisForSalt } from './query'
+import { ChainInfo, queryOdisForQuota, queryOdisForSalt } from './query'
 
 const getLogger = () => rootLogger('odis-monitor')
 
@@ -70,24 +68,6 @@ export async function testPNPQuotaQuery(
     getLogger().error('ODIS quota request failed.')
     getLogger().error({ err })
     throw err
-  }
-}
-
-export async function testDomainSignQuery(contextName: OdisContextName) {
-  getLogger().info('Performing test domains query')
-  let odisResponse: Result<Buffer, BackupError>
-  try {
-    odisResponse = await queryOdisDomain(contextName)
-    getLogger().info({ odisResponse }, 'ODIS response')
-  } catch (err) {
-    getLogger().error('ODIS key hardening request failed.')
-    getLogger().error({ err })
-    throw err
-  }
-  if (odisResponse.ok) {
-    getLogger().info('System is healthy')
-  } else {
-    throw new Error('Received not ok response')
   }
 }
 
