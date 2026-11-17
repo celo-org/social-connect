@@ -26,6 +26,14 @@ covers both signers. `db_ops_instrumentation` has no `incrementQueryCount` or `g
 series: the Rust signer records a request and charges its quota in one transaction, measured as
 `insertRequest`.
 
+Two error counters differ:
+
+- `errors_caught_in_endpoint_handler` counts handler panics only. The TS signer also counted full
+  node and database failures there; in the Rust signer those show in `blockchain_errors`,
+  `database_errors` and `responses`.
+- `errors_thrown_after_response_sent` does not exist. A Rust handler returns its response, so it
+  cannot fail after sending one.
+
 ## Database configuration
 
 The database is set with one variable, `DATABASE_URL` (`postgres://user:password@host:5432/database`

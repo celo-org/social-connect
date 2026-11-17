@@ -17,6 +17,8 @@ pub const SIGNATURE_COMPUTATION_ERRORS: &str = "signature_computation_errors";
 pub const DUPLICATE_REQUESTS: &str = "duplicate_requests";
 pub const REQUESTS_WITH_WALLET_ADDRESS: &str = "requests_with_wallet_address";
 pub const TIMEOUTS: &str = "timeouts";
+pub const ERRORS_CAUGHT_IN_ENDPOINT_HANDLER: &str = "errors_caught_in_endpoint_handler";
+pub const CONNECTION_CLOSED: &str = "connection_closed";
 
 // -- Histograms --
 
@@ -73,10 +75,26 @@ pub fn install_recorder() -> PrometheusHandle {
         .clone()
 }
 
+/// Counts a request that ends without a response. The server drops a request's
+/// future when its caller closes the connection, so a guard that is dropped
+/// before the response is ready means the caller has gone.
+struct ConnectionClosedGuard {
+    answered: bool,
+}
+
+impl Drop for ConnectionClosedGuard {
+    fn drop(&mut self) {
+        if !self.answered {
+            counter!(CONNECTION_CLOSED).increment(1);
+        }
+    }
+}
+
 /// Axum middleware that records per-request metrics:
 /// - `requests` counter (label: endpoint)
 /// - `responses` counter (labels: endpoint, status_code)
 /// - `signature_endpoint_latency` histogram (label: endpoint)
+/// - `connection_closed` counter
 pub async fn http_metrics_layer(request: Request, next: Next) -> Response {
     // Like the TS signer, only the API endpoints are counted. Scrapes, probes
     // and requests for paths that do not exist would otherwise fill the request
@@ -92,9 +110,11 @@ pub async fn http_metrics_layer(request: Request, next: Next) -> Response {
 
     counter!(REQUESTS, "endpoint" => path.clone()).increment(1);
 
+    let mut guard = ConnectionClosedGuard { answered: false };
     let start = Instant::now();
     let response = next.run(request).await;
     let elapsed = start.elapsed().as_secs_f64();
+    guard.answered = true;
 
     let status = response.status().as_u16().to_string();
     counter!(RESPONSES, "endpoint" => path.clone(), "status_code" => status).increment(1);
@@ -118,6 +138,8 @@ mod tests {
             DUPLICATE_REQUESTS,
             REQUESTS_WITH_WALLET_ADDRESS,
             TIMEOUTS,
+            ERRORS_CAUGHT_IN_ENDPOINT_HANDLER,
+            CONNECTION_CLOSED,
             RESPONSE_LATENCY,
             FULL_NODE_LATENCY,
             DB_OPS_LATENCY,
