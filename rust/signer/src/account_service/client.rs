@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use alloy::network::Ethereum;
 use alloy::primitives::{Address, U256, address};
-use alloy::providers::{ProviderBuilder, RootProvider};
+use alloy::providers::{Provider, ProviderBuilder, RootProvider};
 use alloy::sol;
 use alloy::transports::http::reqwest;
 use async_trait::async_trait;
@@ -77,6 +77,7 @@ fn build_http_client(api_key: Option<&str>) -> Result<reqwest::Client, OdisError
 }
 
 pub struct ClientAccountService {
+    chain_id: u64,
     contracts: ContractAddresses,
     provider: RootProvider<Ethereum>,
     retry_count: u32,
@@ -125,6 +126,7 @@ impl ClientAccountService {
         let provider = ProviderBuilder::default().connect_reqwest(http_client, url);
 
         Ok(Self {
+            chain_id: config.chain_id,
             contracts: ContractAddresses {
                 accounts,
                 odis_payments,
@@ -135,6 +137,37 @@ impl ClientAccountService {
             lookup_timeout: Duration::from_millis(config.full_node_timeout_ms),
             query_price_per_cusd: config.query_price_per_cusd,
         })
+    }
+
+    /// Fails unless the full node reports the configured chain ID.
+    ///
+    /// The chain ID selects the contract addresses. On another chain those
+    /// addresses hold no contract and every lookup would fail, so the signer
+    /// checks this once at startup. A full node that does not answer fails the
+    /// check too.
+    pub async fn verify_chain_id(&self) -> Result<(), OdisError> {
+        let lookup = retry_with_backoff(self.retry_count, self.retry_delay, || async {
+            self.provider.get_chain_id().await.map_err(|e| {
+                warn!(error = %e, "failed to fetch the full node's chain ID");
+                OdisError::FullNodeError
+            })
+        });
+        let node_chain_id = tokio::time::timeout(self.lookup_timeout, lookup)
+            .await
+            .map_err(|_| {
+                warn!("timed out fetching the full node's chain ID");
+                OdisError::FullNodeError
+            })??;
+
+        if node_chain_id != self.chain_id {
+            tracing::error!(
+                configured = self.chain_id,
+                full_node = node_chain_id,
+                "CHAIN_ID does not match the chain of the full node at BLOCKCHAIN_PROVIDER"
+            );
+            return Err(OdisError::FullNodeError);
+        }
+        Ok(())
     }
 
     async fn get_dek(&self, address: Address) -> Result<String, OdisError> {
@@ -251,8 +284,12 @@ mod tests {
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::{Arc, Mutex};
 
-    /// Starts a JSON-RPC server on a free local port that answers every call
-    /// with 1 cUSD (1e18) and records the headers of each request it receives.
+    /// Chain ID that the local full node reports.
+    const NODE_CHAIN_ID: u64 = 11142220;
+
+    /// Starts a JSON-RPC server on a free local port that answers `eth_chainId`
+    /// with `NODE_CHAIN_ID` and every other call with 1 cUSD (1e18), and records
+    /// the headers of each request it receives.
     async fn spawn_full_node() -> (String, Arc<Mutex<Vec<HeaderMap>>>) {
         let seen = Arc::new(Mutex::new(Vec::new()));
         let recorder = seen.clone();
@@ -261,10 +298,15 @@ mod tests {
                 let recorder = recorder.clone();
                 async move {
                     recorder.lock().unwrap().push(headers);
+                    let result = if request["method"] == "eth_chainId" {
+                        format!("0x{NODE_CHAIN_ID:x}")
+                    } else {
+                        format!("0x{:064x}", 1_000_000_000_000_000_000u128)
+                    };
                     axum::Json(serde_json::json!({
                         "jsonrpc": "2.0",
                         "id": request["id"],
-                        "result": format!("0x{:064x}", 1_000_000_000_000_000_000u128),
+                        "result": result,
                     }))
                 }
             },
@@ -321,12 +363,47 @@ mod tests {
         assert!(seen[1].get("apiKey").is_none());
     }
 
-    #[tokio::test]
-    async fn lookup_fails_after_the_timeout_when_the_full_node_never_answers() {
+    /// Starts a server on a free local port that accepts requests and never answers.
+    async fn spawn_silent_full_node() -> String {
         let app = axum::Router::new().fallback(std::future::pending::<()>);
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let url = format!("http://{}", listener.local_addr().unwrap());
         tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        url
+    }
+
+    #[tokio::test]
+    async fn chain_id_check_passes_only_for_the_full_nodes_chain() {
+        let (url, _seen) = spawn_full_node().await;
+
+        let matching = ClientAccountService::new(&config_for(url.clone(), None)).unwrap();
+        assert_eq!(matching.verify_chain_id().await, Ok(()));
+
+        // Mainnet is configured, but the full node is on Celo Sepolia.
+        let config = Config {
+            chain_id: 42220,
+            ..config_for(url, None)
+        };
+        let mismatched = ClientAccountService::new(&config).unwrap();
+        assert_eq!(
+            mismatched.verify_chain_id().await,
+            Err(OdisError::FullNodeError)
+        );
+
+        let config = Config {
+            full_node_timeout_ms: 100,
+            ..config_for(spawn_silent_full_node().await, None)
+        };
+        let unanswered = ClientAccountService::new(&config).unwrap();
+        assert_eq!(
+            unanswered.verify_chain_id().await,
+            Err(OdisError::FullNodeError)
+        );
+    }
+
+    #[tokio::test]
+    async fn lookup_fails_after_the_timeout_when_the_full_node_never_answers() {
+        let url = spawn_silent_full_node().await;
 
         // Retries are on, to show that the limit covers them too.
         let config = Config {
