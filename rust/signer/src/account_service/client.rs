@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use alloy::network::Ethereum;
 use alloy::primitives::{Address, U256, address};
-use alloy::providers::{ProviderBuilder, RootProvider};
+use alloy::providers::{Provider, ProviderBuilder, RootProvider};
 use alloy::sol;
 use alloy::transports::http::reqwest;
 use async_trait::async_trait;
@@ -77,6 +77,7 @@ fn build_http_client(api_key: Option<&str>) -> Result<reqwest::Client, OdisError
 }
 
 pub struct ClientAccountService {
+    chain_id: u64,
     contracts: ContractAddresses,
     provider: RootProvider<Ethereum>,
     retry_count: u32,
@@ -86,6 +87,9 @@ pub struct ClientAccountService {
     /// node that never answers must not hold it for long.
     lookup_timeout: Duration,
     query_price_per_cusd: f64,
+    /// Forms of `BLOCKCHAIN_PROVIDER` that log lines must not carry: some
+    /// providers put the API key in the URL, and transport errors name the URL.
+    secrets: Vec<String>,
 }
 
 impl ClientAccountService {
@@ -117,14 +121,25 @@ impl ClientAccountService {
                 OdisError::FullNodeError
             })?;
 
-        let url = provider_url.parse().map_err(|_| {
+        let url: reqwest::Url = provider_url.parse().map_err(|_| {
             warn!("invalid BLOCKCHAIN_PROVIDER URL");
             OdisError::FullNodeError
         })?;
+        // Longest first, so a full URL is replaced before the path inside it.
+        let mut secrets = vec![provider_url.to_string(), url.to_string()];
+        if url.path().len() > 1 {
+            secrets.push(url.path().to_string());
+        }
+        // A URL that ends in `?` has an empty query, and replacing an empty string would put
+        // the marker between every character.
+        if let Some(query) = url.query().filter(|query| !query.is_empty()) {
+            secrets.push(query.to_string());
+        }
         let http_client = build_http_client(config.blockchain_api_key.as_deref())?;
         let provider = ProviderBuilder::default().connect_reqwest(http_client, url);
 
         Ok(Self {
+            chain_id: config.chain_id,
             contracts: ContractAddresses {
                 accounts,
                 odis_payments,
@@ -134,7 +149,48 @@ impl ClientAccountService {
             retry_delay: Duration::from_millis(config.full_node_retry_delay_ms),
             lookup_timeout: Duration::from_millis(config.full_node_timeout_ms),
             query_price_per_cusd: config.query_price_per_cusd,
+            secrets,
         })
+    }
+
+    /// The text of a full node error with the provider URL removed.
+    fn redact(&self, error: &impl std::fmt::Display) -> String {
+        let mut text = error.to_string();
+        for secret in &self.secrets {
+            text = text.replace(secret.as_str(), "<BLOCKCHAIN_PROVIDER>");
+        }
+        text
+    }
+
+    /// Fails unless the full node reports the configured chain ID.
+    ///
+    /// The chain ID selects the contract addresses. On another chain those
+    /// addresses hold no contract and every lookup would fail, so the signer
+    /// checks this once at startup. A full node that does not answer fails the
+    /// check too.
+    pub async fn verify_chain_id(&self) -> Result<(), OdisError> {
+        let lookup = retry_with_backoff(self.retry_count, self.retry_delay, || async {
+            self.provider.get_chain_id().await.map_err(|e| {
+                warn!(error = %self.redact(&e), "failed to fetch the full node's chain ID");
+                OdisError::FullNodeError
+            })
+        });
+        let node_chain_id = tokio::time::timeout(self.lookup_timeout, lookup)
+            .await
+            .map_err(|_| {
+                warn!("timed out fetching the full node's chain ID");
+                OdisError::FullNodeError
+            })??;
+
+        if node_chain_id != self.chain_id {
+            tracing::error!(
+                configured = self.chain_id,
+                full_node = node_chain_id,
+                "CHAIN_ID does not match the chain of the full node at BLOCKCHAIN_PROVIDER"
+            );
+            return Err(OdisError::FullNodeError);
+        }
+        Ok(())
     }
 
     async fn get_dek(&self, address: Address) -> Result<String, OdisError> {
@@ -143,7 +199,7 @@ impl ClientAccountService {
         let lookup = retry_with_backoff(self.retry_count, self.retry_delay, || async {
             let result = accounts.getDataEncryptionKey(address).call().await;
             result.map(|r| r.0).map_err(|e| {
-                warn!(error = %e, %address, "failed to fetch DEK");
+                warn!(error = %self.redact(&e), %address, "failed to fetch DEK");
                 OdisError::FailureToGetDek
             })
         });
@@ -163,7 +219,7 @@ impl ClientAccountService {
         let lookup = retry_with_backoff(self.retry_count, self.retry_delay, || async {
             let result = payments.totalPaidCUSD(address).call().await;
             result.map_err(|e| {
-                warn!(error = %e, %address, "failed to fetch total paid");
+                warn!(error = %self.redact(&e), %address, "failed to fetch total paid");
                 OdisError::FailureToGetTotalQuota
             })
         });
@@ -251,8 +307,12 @@ mod tests {
     use std::sync::atomic::{AtomicU32, Ordering};
     use std::sync::{Arc, Mutex};
 
-    /// Starts a JSON-RPC server on a free local port that answers every call
-    /// with 1 cUSD (1e18) and records the headers of each request it receives.
+    /// Chain ID that the local full node reports.
+    const NODE_CHAIN_ID: u64 = 11142220;
+
+    /// Starts a JSON-RPC server on a free local port that answers `eth_chainId`
+    /// with `NODE_CHAIN_ID` and every other call with 1 cUSD (1e18), and records
+    /// the headers of each request it receives.
     async fn spawn_full_node() -> (String, Arc<Mutex<Vec<HeaderMap>>>) {
         let seen = Arc::new(Mutex::new(Vec::new()));
         let recorder = seen.clone();
@@ -261,10 +321,15 @@ mod tests {
                 let recorder = recorder.clone();
                 async move {
                     recorder.lock().unwrap().push(headers);
+                    let result = if request["method"] == "eth_chainId" {
+                        format!("0x{NODE_CHAIN_ID:x}")
+                    } else {
+                        format!("0x{:064x}", 1_000_000_000_000_000_000u128)
+                    };
                     axum::Json(serde_json::json!({
                         "jsonrpc": "2.0",
                         "id": request["id"],
-                        "result": format!("0x{:064x}", 1_000_000_000_000_000_000u128),
+                        "result": result,
                     }))
                 }
             },
@@ -321,12 +386,163 @@ mod tests {
         assert!(seen[1].get("apiKey").is_none());
     }
 
-    #[tokio::test]
-    async fn lookup_fails_after_the_timeout_when_the_full_node_never_answers() {
+    /// Starts a server on a free local port that accepts requests and never answers.
+    async fn spawn_silent_full_node() -> String {
         let app = axum::Router::new().fallback(std::future::pending::<()>);
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
         let url = format!("http://{}", listener.local_addr().unwrap());
         tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        url
+    }
+
+    #[tokio::test]
+    async fn chain_id_check_passes_only_for_the_full_nodes_chain() {
+        let (url, _seen) = spawn_full_node().await;
+
+        let matching = ClientAccountService::new(&config_for(url.clone(), None)).unwrap();
+        assert_eq!(matching.verify_chain_id().await, Ok(()));
+
+        // Mainnet is configured, but the full node is on Celo Sepolia.
+        let config = Config {
+            chain_id: 42220,
+            ..config_for(url, None)
+        };
+        let mismatched = ClientAccountService::new(&config).unwrap();
+        assert_eq!(
+            mismatched.verify_chain_id().await,
+            Err(OdisError::FullNodeError)
+        );
+
+        let config = Config {
+            full_node_timeout_ms: 100,
+            ..config_for(spawn_silent_full_node().await, None)
+        };
+        let unanswered = ClientAccountService::new(&config).unwrap();
+        assert_eq!(
+            unanswered.verify_chain_id().await,
+            Err(OdisError::FullNodeError)
+        );
+    }
+
+    #[derive(Clone, Default)]
+    struct LogCapture(Arc<Mutex<Vec<u8>>>);
+
+    impl std::io::Write for LogCapture {
+        fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+            self.0.lock().unwrap().extend_from_slice(buf);
+            Ok(buf.len())
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+
+    impl<'a> tracing_subscriber::fmt::MakeWriter<'a> for LogCapture {
+        type Writer = LogCapture;
+        fn make_writer(&'a self) -> Self::Writer {
+            self.clone()
+        }
+    }
+
+    impl LogCapture {
+        /// Captures this thread's log lines until the guard is dropped.
+        fn install(&self) -> tracing::subscriber::DefaultGuard {
+            let subscriber = tracing_subscriber::fmt()
+                .with_writer(self.clone())
+                .with_ansi(false)
+                .finish();
+            tracing::subscriber::set_default(subscriber)
+        }
+
+        fn text(&self) -> String {
+            String::from_utf8(self.0.lock().unwrap().clone()).unwrap()
+        }
+    }
+
+    #[tokio::test]
+    async fn provider_url_stays_out_of_full_node_logs() {
+        // A closed port makes each failure a transport error, which names the URL.
+        let port = {
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+            listener.local_addr().unwrap().port()
+        };
+        let url = format!("http://127.0.0.1:{port}/v3/SECRET-KEY-123?key=SECRET-QUERY-456");
+        let service = ClientAccountService::new(&config_for(url, None)).unwrap();
+        let capture = LogCapture::default();
+        let _guard = capture.install();
+
+        assert_eq!(
+            service.get_dek(Address::ZERO).await,
+            Err(OdisError::FailureToGetDek)
+        );
+        assert_eq!(
+            service.get_total_quota(Address::ZERO).await,
+            Err(OdisError::FailureToGetTotalQuota)
+        );
+        assert_eq!(
+            service.verify_chain_id().await,
+            Err(OdisError::FullNodeError)
+        );
+
+        let logs = capture.text();
+        for message in [
+            "failed to fetch DEK",
+            "failed to fetch total paid",
+            "failed to fetch the full node's chain ID",
+        ] {
+            assert!(logs.contains(message), "{logs}");
+        }
+        assert!(logs.contains("<BLOCKCHAIN_PROVIDER>"), "{logs}");
+        assert!(!logs.contains("SECRET-KEY-123"), "{logs}");
+        assert!(!logs.contains("SECRET-QUERY-456"), "{logs}");
+    }
+
+    #[tokio::test]
+    async fn chain_id_mismatch_is_logged_with_both_chains() {
+        let (url, _seen) = spawn_full_node().await;
+        let config = Config {
+            chain_id: 42220,
+            ..config_for(url, None)
+        };
+        let capture = LogCapture::default();
+        let _guard = capture.install();
+
+        assert_eq!(
+            ClientAccountService::new(&config)
+                .unwrap()
+                .verify_chain_id()
+                .await,
+            Err(OdisError::FullNodeError)
+        );
+
+        let logs = capture.text();
+        assert!(
+            logs.contains(
+                "CHAIN_ID does not match the chain of the full node at BLOCKCHAIN_PROVIDER"
+            ),
+            "{logs}"
+        );
+        assert!(
+            logs.contains("configured=42220") && logs.contains("full_node=11142220"),
+            "{logs}"
+        );
+    }
+
+    #[test]
+    fn redaction_skips_an_empty_query() {
+        let url = "http://127.0.0.1:1/?";
+        let service = ClientAccountService::new(&config_for(url.to_string(), None)).unwrap();
+
+        assert_eq!(service.redact(&"connection refused"), "connection refused");
+        assert_eq!(
+            service.redact(&format!("error sending request for url ({url})")),
+            "error sending request for url (<BLOCKCHAIN_PROVIDER>)"
+        );
+    }
+
+    #[tokio::test]
+    async fn lookup_fails_after_the_timeout_when_the_full_node_never_answers() {
+        let url = spawn_silent_full_node().await;
 
         // Retries are on, to show that the limit covers them too.
         let config = Config {
