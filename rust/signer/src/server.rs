@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -156,17 +157,31 @@ pub async fn build_router_with_services(
             "/metrics",
             get(move || std::future::ready(metrics_handle.render())),
         )
-        // Layers run from the bottom up, so the timeout sits inside the metrics
-        // layer and a timed-out request is counted like any other response.
+        // Layers run from the bottom up, so the panic and timeout layers sit
+        // inside the metrics layer, and a request that panics or times out is
+        // counted like any other response.
+        .layer(CatchPanicLayer::custom(panic_response))
         .layer(middleware::from_fn_with_state(
             state.clone(),
             request_timeout_layer,
         ))
         .layer(middleware::from_fn(metrics::http_metrics_layer))
         .layer(TraceLayer::new_for_http())
-        .layer(CatchPanicLayer::new())
         .layer(RequestBodyLimitLayer::new(16 * 1024)) // 16 KB, matches TS REASONABLE_BODY_CHAR_LIMIT
         .with_state(state))
+}
+
+/// Answers a handler panic with the ODIS error for an unknown failure, as the
+/// TS signer answers an error that escapes its handlers.
+fn panic_response(panic: Box<dyn Any + Send + 'static>) -> Response {
+    let message = panic
+        .downcast_ref::<String>()
+        .map(String::as_str)
+        .or_else(|| panic.downcast_ref::<&str>().copied())
+        .unwrap_or("no message");
+    tracing::error!(message, "request handler panicked");
+    counter!(metrics::ERRORS_CAUGHT_IN_ENDPOINT_HANDLER).increment(1);
+    OdisError::Unknown.into_response()
 }
 
 /// Answers with the ODIS timeout error when a request takes longer than

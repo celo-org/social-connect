@@ -939,6 +939,16 @@ async fn wait_for_used_quota(app: &Router, expected: u64) {
     panic!("used quota never reached {expected}");
 }
 
+/// Value of a counter without labels; 0 before its first increment.
+async fn counter_value(app: &Router, name: &str) -> u64 {
+    let prefix = format!("{name} ");
+    metrics_text(app)
+        .await
+        .lines()
+        .find_map(|line| line.strip_prefix(&prefix).map(str::to_owned))
+        .map_or(0, |value| value.parse().unwrap())
+}
+
 async fn metrics_text(app: &Router) -> String {
     let request = Request::builder()
         .uri("/metrics")
@@ -956,6 +966,7 @@ async fn metrics_text(app: &Router) -> String {
 async fn sign_is_finished_and_charged_when_the_caller_gives_up() {
     let app = build_slow_router(Duration::from_millis(200), Duration::from_secs(5)).await;
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let closed = counter_value(&app, "connection_closed").await;
 
     // Dropping the response future is what the server does to a handler when
     // its connection closes.
@@ -965,6 +976,7 @@ async fn sign_is_finished_and_charged_when_the_caller_gives_up() {
     )
     .await;
     assert!(abandoned.is_err(), "the caller must give up first");
+    assert_eq!(counter_value(&app, "connection_closed").await, closed + 1);
 
     wait_for_used_quota(&app, 1).await;
 
@@ -1050,13 +1062,50 @@ async fn metrics_expose_the_documented_names_and_labels() {
     }
 }
 
-/// Value of the `requests_with_wallet_address` counter; 0 before its first increment.
+/// Value of `requests_with_wallet_address`.
 async fn wallet_key_request_count(app: &Router) -> u64 {
-    metrics_text(app)
-        .await
-        .lines()
-        .find_map(|line| line.strip_prefix("requests_with_wallet_address "))
-        .map_or(0, |value| value.parse().unwrap())
+    counter_value(app, "requests_with_wallet_address").await
+}
+
+/// A handler panic must reach the caller as the ODIS error for an unknown
+/// failure and be counted, as an error that escapes the TS signer's handlers is.
+#[tokio::test]
+async fn handler_panic_returns_the_odis_error_and_is_counted() {
+    struct PanickingKeyProvider;
+
+    #[async_trait::async_trait]
+    impl KeyProvider for PanickingKeyProvider {
+        async fn get_key(&self, _name: &str, _version: u32) -> Result<String, OdisError> {
+            panic!("key provider failed");
+        }
+    }
+
+    let app = build_router_with_services(
+        test_config(),
+        Arc::new(MockAccountService::new(None, 10)),
+        Arc::new(PanickingKeyProvider),
+    )
+    .await
+    .unwrap();
+    let caught = counter_value(&app, "errors_caught_in_endpoint_handler").await;
+
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    let json = response_json(response).await;
+    assert_eq!(json["success"], false);
+    assert_eq!(json["error"], "CELO_ODIS_ERR_00 Something went wrong");
+
+    assert_eq!(
+        counter_value(&app, "errors_caught_in_endpoint_handler").await,
+        caught + 1
+    );
+    let metrics = metrics_text(&app).await;
+    assert!(
+        metrics.contains(r#"responses{endpoint="/sign",status_code="500"}"#),
+        "panic response not counted in:\n{metrics}"
+    );
 }
 
 /// The TS signer counts a request on both PNP endpoints, before it checks the
