@@ -20,6 +20,19 @@ pub const TIMEOUTS: &str = "timeouts";
 pub const ERRORS_CAUGHT_IN_ENDPOINT_HANDLER: &str = "errors_caught_in_endpoint_handler";
 pub const CONNECTION_CLOSED: &str = "connection_closed";
 
+/// Counters without labels. They are exported at 0 from startup, as in the TS
+/// signer. A counter that first appears at 1 has no earlier sample, so
+/// `rate()` and `increase()` would miss the first event after every restart.
+const UNLABELLED_COUNTERS: &[&str] = &[
+    BLOCKCHAIN_ERRORS,
+    SIGNATURE_COMPUTATION_ERRORS,
+    DUPLICATE_REQUESTS,
+    REQUESTS_WITH_WALLET_ADDRESS,
+    TIMEOUTS,
+    ERRORS_CAUGHT_IN_ENDPOINT_HANDLER,
+    CONNECTION_CLOSED,
+];
+
 // -- Histograms --
 
 pub const RESPONSE_LATENCY: &str = "signature_endpoint_latency";
@@ -66,11 +79,15 @@ pub fn spawn_upkeep_task(handle: PrometheusHandle) {
 pub fn install_recorder() -> PrometheusHandle {
     PROMETHEUS_HANDLE
         .get_or_init(|| {
-            PrometheusBuilder::new()
+            let handle = PrometheusBuilder::new()
                 .set_buckets(HISTOGRAM_BUCKETS)
                 .unwrap()
                 .install_recorder()
-                .expect("failed to install Prometheus recorder")
+                .expect("failed to install Prometheus recorder");
+            for name in UNLABELLED_COUNTERS {
+                counter!(*name).increment(0);
+            }
+            handle
         })
         .clone()
 }
