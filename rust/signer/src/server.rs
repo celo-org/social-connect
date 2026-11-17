@@ -275,6 +275,38 @@ mod tests {
         }
     }
 
+    /// A config that passes every startup check for a real key store up to the
+    /// one a test removes: a database file, a full node and a project ID.
+    fn real_keystore_config(db_file: &tempfile::NamedTempFile) -> Config {
+        Config {
+            keystore_type: KeystoreType::GoogleSecretManager,
+            blockchain_provider: Some("http://localhost:8545".to_string()),
+            google_project_id: Some("project".to_string()),
+            database: DatabaseConfig::Sqlite {
+                path: db_file.path().to_str().unwrap().to_string(),
+            },
+            ..test_config(true)
+        }
+    }
+
+    /// Starts a JSON-RPC server on a free local port that answers every call
+    /// with `chain_id`, and returns its URL.
+    async fn spawn_full_node(chain_id: u64) -> String {
+        let app = Router::new().fallback(
+            move |axum::Json(request): axum::Json<serde_json::Value>| async move {
+                axum::Json(serde_json::json!({
+                    "jsonrpc": "2.0",
+                    "id": request["id"],
+                    "result": format!("0x{chain_id:x}"),
+                }))
+            },
+        );
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        tokio::spawn(async move { axum::serve(listener, app).await.unwrap() });
+        url
+    }
+
     #[tokio::test]
     async fn status_returns_version() {
         let app = build_router(test_config(false)).await.unwrap();
@@ -611,13 +643,16 @@ mod tests {
 
     #[tokio::test]
     async fn build_router_fails_for_google_secret_manager_without_blockchain_provider() {
+        let db_file = tempfile::NamedTempFile::new().unwrap();
         let config = Config {
-            keystore_type: KeystoreType::GoogleSecretManager,
-            ..test_config(true)
+            blockchain_provider: None,
+            ..real_keystore_config(&db_file)
         };
 
-        let result = build_router(config).await;
-        assert!(result.is_err());
+        assert_eq!(
+            build_router(config).await.err(),
+            Some(OdisError::FullNodeError)
+        );
     }
 
     /// A real keystore with a database that vanishes on restart would hand every
@@ -666,14 +701,18 @@ mod tests {
 
     #[tokio::test]
     async fn build_router_fails_for_google_secret_manager_without_project_id() {
+        let db_file = tempfile::NamedTempFile::new().unwrap();
+        let base = real_keystore_config(&db_file);
         let config = Config {
-            keystore_type: KeystoreType::GoogleSecretManager,
-            blockchain_provider: Some("http://localhost:8545".to_string()),
+            // The chain ID check comes first and must pass to reach the key store.
+            blockchain_provider: Some(spawn_full_node(base.chain_id).await),
             google_project_id: None,
-            ..test_config(true)
+            ..base
         };
 
-        let result = build_router(config).await;
-        assert!(result.is_err());
+        assert_eq!(
+            build_router(config).await.err(),
+            Some(OdisError::KeyFetchError)
+        );
     }
 }
