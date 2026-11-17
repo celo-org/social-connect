@@ -1,7 +1,9 @@
+use std::time::Duration;
+
 use alloy::primitives::Address;
 use async_trait::async_trait;
 use sqlx::PgPool;
-use sqlx::postgres::PgPoolOptions;
+use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 
 use super::legacy_migration::{
     LegacyMigrationReport, ensure_legacy_data_imported, run_legacy_migration,
@@ -32,13 +34,30 @@ async fn read_used_quota(
 /// `requests`/`accounts` schema as the SQLite backend.
 pub struct PostgresPnpRequestService {
     pool: PgPool,
+    /// Connection settings without the statement timeout, for the legacy import.
+    untimed_options: PgConnectOptions,
 }
 
 impl PostgresPnpRequestService {
-    pub async fn new(url: &str) -> Result<Self, OdisError> {
+    /// Connects and runs the schema migrations.
+    ///
+    /// `timeout` limits each statement and each wait for a free connection, as
+    /// `DB_TIMEOUT` does in the TS signer. The server enforces the statement
+    /// limit, so a stalled query is cancelled and its connection can be used
+    /// again. A sign request keeps running after its caller has gone; without
+    /// the limit, stalled queries would hold every connection of the pool.
+    pub async fn new(url: &str, timeout: Duration) -> Result<Self, OdisError> {
+        let untimed_options: PgConnectOptions = url.parse().map_err(|e| {
+            tracing::error!("invalid Postgres URL: {e}");
+            OdisError::DatabaseError
+        })?;
+        let options = untimed_options
+            .clone()
+            .options([("statement_timeout", timeout.as_millis().to_string())]);
         let pool = PgPoolOptions::new()
             .max_connections(10)
-            .connect(url)
+            .acquire_timeout(timeout)
+            .connect_with(options)
             .await
             .map_err(|e| {
                 tracing::error!("failed to connect to Postgres: {e}");
@@ -53,13 +72,29 @@ impl PostgresPnpRequestService {
                 OdisError::DatabaseError
             })?;
 
-        Ok(Self { pool })
+        Ok(Self {
+            pool,
+            untimed_options,
+        })
     }
 
     /// Run the one-time legacy TS -> canonical data migration. Idempotent:
     /// guarded by a marker table so a completed import never re-runs.
+    ///
+    /// The import counts and reads whole tables, which can take longer than the
+    /// statement timeout, so it runs on its own connections without that limit.
     pub async fn run_legacy_migration(&self) -> Result<LegacyMigrationReport, OdisError> {
-        run_legacy_migration(&self.pool).await
+        let pool = PgPoolOptions::new()
+            .max_connections(2)
+            .connect_with(self.untimed_options.clone())
+            .await
+            .map_err(|e| {
+                tracing::error!("failed to connect to Postgres for the legacy import: {e}");
+                OdisError::DatabaseError
+            })?;
+        let report = run_legacy_migration(&pool).await;
+        pool.close().await;
+        report
     }
 
     /// Fails when the database holds TS signer tables that were never imported.
@@ -212,16 +247,26 @@ impl PnpRequestService for PostgresPnpRequestService {
 
     async fn delete_old_requests(&self, older_than_days: u64) -> Result<u64, OdisError> {
         let days = i32::try_from(older_than_days).unwrap_or(i32::MAX);
+        let failed = |e: sqlx::Error| {
+            tracing::error!("delete_old_requests failed: {e}");
+            OdisError::DatabaseError
+        };
+
+        // Pruning a large table can take longer than the statement timeout, so
+        // the limit is switched off for this transaction only.
+        let mut tx = self.pool.begin().await.map_err(failed)?;
+        sqlx::query("SET LOCAL statement_timeout = 0")
+            .execute(&mut *tx)
+            .await
+            .map_err(failed)?;
         let result = sqlx::query(
             "DELETE FROM requests WHERE \"timestamp\" <= now() - make_interval(days => $1::int)",
         )
         .bind(days)
-        .execute(&self.pool)
+        .execute(&mut *tx)
         .await
-        .map_err(|e| {
-            tracing::error!("delete_old_requests failed: {e}");
-            OdisError::DatabaseError
-        })?;
+        .map_err(failed)?;
+        tx.commit().await.map_err(failed)?;
         Ok(result.rows_affected())
     }
 }

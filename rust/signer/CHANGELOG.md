@@ -32,6 +32,10 @@ The database is set with one variable, `DATABASE_URL` (`postgres://user:password
 or `sqlite:path`). The TS signer's `DB_TYPE`, `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`,
 `DB_DATABASE` and `DB_USE_SSL` are not read.
 
+`DB_TIMEOUT` is read and means what it meant in the TS signer: the limit in milliseconds for one
+statement, default 1000. On Postgres the server enforces it, and it also limits the wait for a free
+connection. On SQLite it is the wait for a lock. Pruning and the legacy import are not limited.
+
 Three cases stop the signer at startup, so a manifest written for the TS signer cannot start it on an
 empty database:
 

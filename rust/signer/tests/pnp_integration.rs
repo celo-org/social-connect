@@ -46,6 +46,7 @@ fn test_config_with_db(db_path: &str) -> Config {
             path: db_path.to_string(),
         },
         migrate_legacy_data: false,
+        db_timeout_ms: 1000,
         blockchain_provider: None,
         blockchain_api_key: None,
         chain_id: 11142220,

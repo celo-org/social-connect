@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use alloy::primitives::Address;
 use async_trait::async_trait;
 use sqlx::SqlitePool;
@@ -30,7 +32,9 @@ pub struct SqlitePnpRequestService {
 }
 
 impl SqlitePnpRequestService {
-    pub async fn new(db_path: &str) -> Result<Self, OdisError> {
+    /// Opens the database and runs the schema migrations. `timeout` is how long
+    /// a statement waits for a lock held by another connection.
+    pub async fn new(db_path: &str, timeout: Duration) -> Result<Self, OdisError> {
         let is_memory = db_path == ":memory:";
         let base = if is_memory {
             SqliteConnectOptions::new()
@@ -44,7 +48,7 @@ impl SqlitePnpRequestService {
         let options = base
             .journal_mode(SqliteJournalMode::Wal)
             .synchronous(SqliteSynchronous::Normal)
-            .busy_timeout(std::time::Duration::from_secs(5));
+            .busy_timeout(timeout);
 
         let pool_options = SqlitePoolOptions::new().max_connections(if is_memory { 1 } else { 5 });
         // An in-memory database lives in its one connection, so the pool must
@@ -236,9 +240,13 @@ mod tests {
 
     const ADDR: Address = address!("0x0000000000000000000000000000000000007E57");
     const OTHER_ADDR: Address = address!("0x0000000000000000000000000000000000000001");
+    /// The default of `DB_TIMEOUT`.
+    const TIMEOUT: Duration = Duration::from_millis(1000);
 
     async fn test_service() -> SqlitePnpRequestService {
-        SqlitePnpRequestService::new(":memory:").await.unwrap()
+        SqlitePnpRequestService::new(":memory:", TIMEOUT)
+            .await
+            .unwrap()
     }
 
     #[tokio::test]
@@ -444,7 +452,7 @@ mod tests {
     async fn concurrent_test_service() -> (Arc<SqlitePnpRequestService>, tempfile::TempDir) {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("requests.db");
-        let svc = SqlitePnpRequestService::new(path.to_str().unwrap())
+        let svc = SqlitePnpRequestService::new(path.to_str().unwrap(), TIMEOUT)
             .await
             .unwrap();
         (Arc::new(svc), dir)

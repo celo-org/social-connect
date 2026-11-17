@@ -38,6 +38,9 @@ pub struct Config {
     /// When true (and using Postgres), run the one-time legacy TS -> canonical
     /// data migration on startup. Guarded by a marker so it never re-runs.
     pub migrate_legacy_data: bool,
+    /// Limit in milliseconds for one database statement and for the wait for a
+    /// free connection.
+    pub db_timeout_ms: u64,
     pub blockchain_provider: Option<String>,
     /// Sent as the `apiKey` header on every request to `blockchain_provider`,
     /// which is how forno identifies clients with a raised rate limit.
@@ -99,6 +102,7 @@ impl Config {
             pnp_latest_key_version: parse_env("PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION", Some(1))?,
             database: parse_database_config()?,
             migrate_legacy_data: parse_env_bool("MIGRATE_LEGACY_DATA", Some(false))?,
+            db_timeout_ms: parse_env("DB_TIMEOUT", Some(1000))?,
             blockchain_provider: env::var("BLOCKCHAIN_PROVIDER")
                 .ok()
                 .filter(|s| !s.is_empty()),
@@ -124,6 +128,13 @@ impl Config {
         if config.timeout_ms == 0 {
             return Err(ConfigError::InvalidValue {
                 name: "ODIS_SIGNER_TIMEOUT".to_string(),
+                source: "must be greater than 0".into(),
+            });
+        }
+
+        if config.db_timeout_ms == 0 {
+            return Err(ConfigError::InvalidValue {
+                name: "DB_TIMEOUT".to_string(),
                 source: "must be greater than 0".into(),
             });
         }
@@ -325,6 +336,7 @@ mod tests {
             "DB_HOST",
             "DB_TYPE",
             "MIGRATE_LEGACY_DATA",
+            "DB_TIMEOUT",
             "BLOCKCHAIN_PROVIDER",
             "BLOCKCHAIN_API_KEY",
             "CHAIN_ID",
@@ -376,6 +388,7 @@ mod tests {
         assert_eq!(config.full_node_retry_count, 5);
         assert_eq!(config.full_node_retry_delay_ms, 100);
         assert_eq!(config.full_node_timeout_ms, 1000);
+        assert_eq!(config.db_timeout_ms, 1000);
         assert_eq!(config.timeout_ms, 5000);
         assert!((config.query_price_per_cusd - 0.001).abs() < f64::EPSILON);
         assert!(config.google_project_id.is_none());
@@ -410,6 +423,7 @@ mod tests {
             set("FULL_NODE_RETRY_COUNT", "3");
             set("FULL_NODE_RETRY_DELAY_MS", "200");
             set("FULL_NODE_TIMEOUT_MS", "2500");
+            set("DB_TIMEOUT", "750");
             set("ODIS_SIGNER_TIMEOUT", "10000");
             set("QUERY_PRICE_PER_CUSD", "0.01");
         }
@@ -445,6 +459,7 @@ mod tests {
         assert_eq!(config.full_node_retry_count, 3);
         assert_eq!(config.full_node_retry_delay_ms, 200);
         assert_eq!(config.full_node_timeout_ms, 2500);
+        assert_eq!(config.db_timeout_ms, 750);
         assert_eq!(config.timeout_ms, 10000);
         assert!((config.query_price_per_cusd - 0.01).abs() < f64::EPSILON);
     }
@@ -637,6 +652,17 @@ mod tests {
         let result = Config::from_env();
         assert!(
             matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "FULL_NODE_TIMEOUT_MS")
+        );
+
+        unsafe {
+            clear_env();
+            set("KEYSTORE_TYPE", "Mock");
+            set("DB_TIMEOUT", "0");
+        }
+
+        let result = Config::from_env();
+        assert!(
+            matches!(result.unwrap_err(), ConfigError::InvalidValue { ref name, .. } if name == "DB_TIMEOUT")
         );
     }
 
