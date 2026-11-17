@@ -54,6 +54,7 @@ pub async fn build_router(config: Config) -> Result<Router, OdisError> {
 
     let account_service: Arc<dyn AccountService> = if config.blockchain_provider.is_some() {
         let client = Arc::new(ClientAccountService::new(&config)?);
+        client.verify_chain_id().await?;
         let metered = Arc::new(MeteredAccountService::new(client));
         Arc::new(CachingAccountService::new(metered))
     } else {
