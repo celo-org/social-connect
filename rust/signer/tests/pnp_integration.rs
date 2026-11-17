@@ -1218,3 +1218,28 @@ async fn remaining_quota_is_recorded_for_a_request_refused_for_quota() {
     assert_eq!(metric(&app, "count").await, count + 2.0);
     assert_eq!(metric(&app, "sum").await, sum + 1.0);
 }
+
+/// A counter that is missing until its first event cannot show that event in
+/// `rate()` or `increase()`, so every counter without labels starts at 0.
+#[tokio::test]
+async fn counters_without_labels_are_exported_before_their_first_event() {
+    let app = build_router(test_config()).await.unwrap();
+
+    let metrics = metrics_text(&app).await;
+    for name in [
+        "blockchain_errors",
+        "signature_computation_errors",
+        "duplicate_requests",
+        "requests_with_wallet_address",
+        "timeouts",
+        "errors_caught_in_endpoint_handler",
+        "connection_closed",
+    ] {
+        assert!(
+            metrics
+                .lines()
+                .any(|line| line.starts_with(&format!("{name} "))),
+            "{name} missing in:\n{metrics}"
+        );
+    }
+}
