@@ -5,6 +5,7 @@
 //! daemon) each test logs a skip notice and returns green instead of failing.
 
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use alloy::primitives::Address;
 use axum::body::Body;
@@ -25,6 +26,9 @@ use odis_signer::errors::OdisError;
 use odis_signer::key_management::{KeyProvider, MockKeyProvider};
 use odis_signer::request_service::{PnpRequestService, PostgresPnpRequestService, RecordOutcome};
 use odis_signer::server::build_router_with_services;
+
+/// The default of `DB_TIMEOUT`.
+const DB_TIMEOUT: Duration = Duration::from_millis(1000);
 
 /// The same checksummed address in mixed and lower case; both must collapse to
 /// one canonical account during migration.
@@ -145,6 +149,7 @@ fn pg_config(url: &str, migrate_legacy_data: bool) -> Config {
             url: url.to_string(),
         },
         migrate_legacy_data,
+        db_timeout_ms: 1000,
         blockchain_provider: None,
         blockchain_api_key: None,
         chain_id: 11142220,
@@ -167,7 +172,9 @@ async fn postgres_backend_behaviour() {
     let Some((_node, url)) = start_postgres().await else {
         return;
     };
-    let svc = PostgresPnpRequestService::new(&url).await.unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
 
     let addr: Address = TEST_ADDRESS.parse().unwrap();
     let other: Address = "0x0000000000000000000000000000000000000001"
@@ -269,7 +276,11 @@ async fn concurrent_identical_requests_charge_quota_once() {
     let Some((_node, url)) = start_postgres().await else {
         return;
     };
-    let svc = Arc::new(PostgresPnpRequestService::new(&url).await.unwrap());
+    let svc = Arc::new(
+        PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+            .await
+            .unwrap(),
+    );
     let addr: Address = TEST_ADDRESS.parse().unwrap();
 
     let outcomes = record_concurrently(&svc, addr, vec!["same".to_string(); 8], 100).await;
@@ -295,7 +306,11 @@ async fn concurrent_distinct_requests_cannot_overrun_quota() {
     let Some((_node, url)) = start_postgres().await else {
         return;
     };
-    let svc = Arc::new(PostgresPnpRequestService::new(&url).await.unwrap());
+    let svc = Arc::new(
+        PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+            .await
+            .unwrap(),
+    );
     let addr: Address = TEST_ADDRESS.parse().unwrap();
 
     let queries: Vec<String> = (0..10).map(|i| format!("query{i}")).collect();
@@ -337,7 +352,9 @@ async fn legacy_migration_normalizes_and_dedups() {
         .unwrap();
     seed_legacy(&setup_pool).await;
 
-    let svc = PostgresPnpRequestService::new(&url).await.unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
     let report = svc.run_legacy_migration().await.unwrap();
 
     assert!(report.legacy_tables_present);
@@ -382,7 +399,9 @@ async fn legacy_migration_no_op_without_legacy_tables() {
     let Some((_node, url)) = start_postgres().await else {
         return;
     };
-    let svc = PostgresPnpRequestService::new(&url).await.unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
 
     let report = svc.run_legacy_migration().await.unwrap();
     assert!(!report.legacy_tables_present);
@@ -431,6 +450,69 @@ async fn full_stack_serves_migrated_quota() {
     // Quota was migrated from the legacy tables and is served from Postgres.
     assert_eq!(json["performedQueryCount"], 7);
     assert_eq!(json["totalQuota"], 100);
+}
+
+/// A statement that waits on a lock must fail after the timeout, and its
+/// connection must be usable again once the lock is gone.
+#[tokio::test]
+async fn stalled_statement_fails_after_the_timeout() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, Duration::from_millis(200))
+        .await
+        .unwrap();
+    let addr: Address = TEST_ADDRESS.parse().unwrap();
+
+    let other = PgPoolOptions::new()
+        .max_connections(1)
+        .connect(&url)
+        .await
+        .unwrap();
+    let mut lock = other.begin().await.unwrap();
+    sqlx::query("LOCK TABLE accounts IN ACCESS EXCLUSIVE MODE")
+        .execute(&mut *lock)
+        .await
+        .unwrap();
+
+    let started = Instant::now();
+    assert_eq!(
+        svc.get_used_quota(addr).await,
+        Err(OdisError::DatabaseError)
+    );
+    assert!(started.elapsed() < Duration::from_secs(3));
+
+    lock.rollback().await.unwrap();
+    assert_eq!(svc.get_used_quota(addr).await, Ok(0));
+}
+
+/// Pruning may run longer than the statement timeout.
+#[tokio::test]
+async fn pruning_is_not_limited_by_the_statement_timeout() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, Duration::from_millis(200))
+        .await
+        .unwrap();
+
+    let other = PgPoolOptions::new()
+        .max_connections(1)
+        .connect(&url)
+        .await
+        .unwrap();
+    let mut lock = other.begin().await.unwrap();
+    sqlx::query("LOCK TABLE requests IN ACCESS EXCLUSIVE MODE")
+        .execute(&mut *lock)
+        .await
+        .unwrap();
+
+    // The delete waits on the lock for longer than the timeout, then succeeds.
+    let pruning = tokio::spawn(async move { svc.delete_old_requests(7).await });
+    tokio::time::sleep(Duration::from_millis(600)).await;
+    lock.rollback().await.unwrap();
+
+    assert_eq!(pruning.await.unwrap(), Ok(0));
 }
 
 #[tokio::test]
@@ -527,7 +609,9 @@ async fn legacy_migration_paginates_across_pages() {
     .await
     .unwrap();
 
-    let svc = PostgresPnpRequestService::new(&url).await.unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
     let report = svc.run_legacy_migration().await.unwrap();
 
     assert_eq!(report.accounts_imported, rows as u64);

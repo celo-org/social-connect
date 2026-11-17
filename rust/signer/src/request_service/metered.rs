@@ -104,7 +104,11 @@ mod tests {
     use alloy::primitives::address;
 
     async fn test_metered() -> MeteredPnpRequestService {
-        let inner = Arc::new(SqlitePnpRequestService::new(":memory:").await.unwrap());
+        let inner = Arc::new(
+            SqlitePnpRequestService::new(":memory:", std::time::Duration::from_secs(1))
+                .await
+                .unwrap(),
+        );
         MeteredPnpRequestService::new(inner)
     }
 
