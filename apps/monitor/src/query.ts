@@ -1,10 +1,4 @@
 import { generateKeys, generateMnemonic, MnemonicStrength } from '@celo/cryptographic-utils'
-import {
-  buildOdisDomain,
-  OdisHardeningConfig,
-  odisHardenKey,
-  odisQueryAuthorizer,
-} from '@celo/encrypted-backup'
 import { OdisUtils } from '@celo/identity'
 import {
   AuthSigner,
@@ -18,7 +12,6 @@ import {
   normalizeAddressWith0x,
   privateKeyToAddress,
 } from '@celo/utils/lib/address'
-import { defined } from '@celo/utils/lib/sign-typed-data-utils'
 import { defineString } from 'firebase-functions/params'
 import { Address } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
@@ -153,28 +146,6 @@ export const queryOdisForQuota = async (
     clearTimeout(timeout)
     throw error
   }
-}
-
-export const queryOdisDomain = async (contextName: OdisContextName) => {
-  getLogger().debug({ contextName }, 'Querying ODIS domain')
-
-  const serviceContext = getServiceContext(contextName, OdisAPI.DOMAIN)
-  const monitorDomainConfig: OdisHardeningConfig = {
-    rateLimit: [
-      {
-        delay: 0,
-        resetTimer: defined(true),
-        // Running every 5 min, this should not run out for the next 9 million years
-        batchSize: defined(1000000000000),
-        repetitions: defined(1000000000000),
-      },
-    ],
-    environment: serviceContext,
-  }
-  const authorizer = odisQueryAuthorizer(Buffer.from('ODIS domains monitor authorizer test seed'))
-  const domain = buildOdisDomain(monitorDomainConfig, authorizer.address)
-  // Throws if signature verification fails
-  return odisHardenKey(Buffer.from('password'), domain, serviceContext, authorizer.wallet)
 }
 
 async function getAuthSignerAndAccount(

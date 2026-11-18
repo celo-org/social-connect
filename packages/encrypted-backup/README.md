@@ -1,5 +1,11 @@
 # Pin/Password-Encrypted Backup SDK
 
+## Deprecated
+
+The ODIS domains API, which this package depends on, is deprecated and will be switched off. Do not
+use this package for new work. A backup made with it cannot be opened once the API is off, because
+the hardened key can only be recomputed through ODIS.
+
 ## Overview
 
 This package provides an SDK for creating PIN/password encrypted user data backups, as is used in
@@ -9,8 +15,7 @@ the [PIN/Password Encrypted Account Recovery (PEAR)].
 
 It includes functionality to create, serialize, deserialize, and open encrypted backups.
 
-**Note that this SDK relies on the [Domains extension] to ODIS, which is not currently deployed to
-the Mainnet operators**
+This SDK relies on the [Domains extension] to ODIS.
 
 [Domains extension]: https://docs.celo.org/celo-codebase/protocol/odis/domains
 

@@ -67,6 +67,9 @@ export const ODIS_CELO_SEPOLIA_CONTEXT_PNP: ServiceContext = {
     'kPoRxWdEdZ/Nd3uQnp3FJFs54zuiS+ksqvOm9x8vY6KHPG8jrfqysvIRU0wtqYsBKA7SoAsICMBv8C/Fb2ZpDOqhSqvr/sZbZoHmQfvbqrzbtDIPvUIrHgRS0ydJCMsA',
 }
 
+/**
+ * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
+ */
 export const ODIS_CELO_SEPOLIA_CONTEXT_DOMAINS: ServiceContext = {
   odisUrl: 'https://odis-combiner.celo-sepolia.celo-testnet.org',
   odisPubKey:
@@ -79,6 +82,9 @@ export const ODIS_MAINNET_CONTEXT_PNP: ServiceContext = {
     'FvreHfLmhBjwxHxsxeyrcOLtSonC9j7K3WrS4QapYsQH6LdaDTaNGmnlQMfFY04Bp/K4wAvqQwO9/bqPVCKf8Ze8OZo8Frmog4JY4xAiwrsqOXxug11+htjEe1pj4uMA',
 }
 
+/**
+ * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
+ */
 export const ODIS_MAINNET_CONTEXT_DOMAINS: ServiceContext = {
   odisUrl: 'https://odis-combiner-mainnet.rc1-europe-west1.celo-testnet.org',
   odisPubKey:
@@ -87,6 +93,9 @@ export const ODIS_MAINNET_CONTEXT_DOMAINS: ServiceContext = {
 
 export enum OdisAPI {
   PNP = 'pnp',
+  /**
+   * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
+   */
   DOMAIN = 'domain',
 }
 
@@ -228,6 +237,8 @@ export async function queryOdis<R extends OdisRequest>(
 
 /**
  * Send the given domain request to ODIS (e.g. to get a POPRF evaluation or check quota).
+ *
+ * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
  *
  * @param body Request to send in the body of the HTTP request.
  * @param context Contains service URL and public to determine which instance to contact.
