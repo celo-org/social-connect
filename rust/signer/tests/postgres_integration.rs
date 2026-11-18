@@ -24,7 +24,9 @@ use odis_signer::account_service::MockAccountService;
 use odis_signer::config::{Config, DatabaseConfig, KeystoreType, LogFormat};
 use odis_signer::errors::OdisError;
 use odis_signer::key_management::{KeyProvider, MockKeyProvider};
-use odis_signer::request_service::{PnpRequestService, PostgresPnpRequestService, RecordOutcome};
+use odis_signer::request_service::{
+    PnpRequestService, PostgresPnpRequestService, RecordOutcome, RecordedRequest,
+};
 use odis_signer::server::build_router_with_services;
 
 /// The default of `DB_TIMEOUT`.
@@ -185,7 +187,7 @@ async fn postgres_backend_behaviour() {
     assert_eq!(svc.get_duplicate_request(addr, "q1").await.unwrap(), None);
 
     assert_eq!(
-        svc.record_request(addr, "q1", "sig1", 10).await.unwrap(),
+        svc.record_request(addr, "q1", "sig1", 1, 10).await.unwrap(),
         RecordOutcome::Recorded {
             performed_query_count: 1
         }
@@ -193,34 +195,46 @@ async fn postgres_backend_behaviour() {
     assert_eq!(svc.get_used_quota(addr).await.unwrap(), 1);
     assert_eq!(
         svc.get_duplicate_request(addr, "q1").await.unwrap(),
-        Some("sig1".to_string())
+        Some(RecordedRequest {
+            signature: "sig1".to_string(),
+            key_version: Some(1),
+        })
     );
 
     // A different query increments quota again.
     assert_eq!(
-        svc.record_request(addr, "q2", "sig2", 10).await.unwrap(),
+        svc.record_request(addr, "q2", "sig2", 1, 10).await.unwrap(),
         RecordOutcome::Recorded {
             performed_query_count: 2
         }
     );
     assert_eq!(svc.get_used_quota(addr).await.unwrap(), 2);
 
-    // Re-recording a stored query is served from the table, uncharged.
-    assert_eq!(
-        svc.record_request(addr, "q1", "other-sig", 10)
-            .await
-            .unwrap(),
-        RecordOutcome::Duplicate {
-            signature: "sig1".to_string(),
-            performed_query_count: 2,
-        }
-    );
+    // Re-recording a stored query is not charged and leaves the record as it
+    // was, under the same key version and under another one.
+    for key_version in [1, 2] {
+        assert_eq!(
+            svc.record_request(addr, "q1", "other-sig", key_version, 10)
+                .await
+                .unwrap(),
+            RecordOutcome::Duplicate {
+                performed_query_count: 2,
+            }
+        );
+    }
     assert_eq!(svc.get_used_quota(addr).await.unwrap(), 2);
+    assert_eq!(
+        svc.get_duplicate_request(addr, "q1").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "sig1".to_string(),
+            key_version: Some(1),
+        })
+    );
 
     // The quota bound is enforced by the write itself, and a rejected request
     // leaves no row behind.
     assert_eq!(
-        svc.record_request(addr, "q3", "sig3", 2).await.unwrap(),
+        svc.record_request(addr, "q3", "sig3", 1, 2).await.unwrap(),
         RecordOutcome::QuotaExceeded {
             performed_query_count: 2
         }
@@ -229,7 +243,7 @@ async fn postgres_backend_behaviour() {
 
     // Zero quota rejects an account that has no row yet.
     assert_eq!(
-        svc.record_request(other, "q1", "sig1", 0).await.unwrap(),
+        svc.record_request(other, "q1", "sig1", 1, 0).await.unwrap(),
         RecordOutcome::QuotaExceeded {
             performed_query_count: 0
         }
@@ -245,7 +259,8 @@ async fn postgres_backend_behaviour() {
     assert_eq!(svc.get_duplicate_request(addr, "q1").await.unwrap(), None);
 }
 
-/// Fire `queries` at the service concurrently and collect the outcomes.
+/// Fire `queries` at the service concurrently and collect the outcomes. The
+/// requests alternate between key versions 1 and 2.
 async fn record_concurrently(
     svc: &Arc<PostgresPnpRequestService>,
     addr: Address,
@@ -254,10 +269,13 @@ async fn record_concurrently(
 ) -> Vec<RecordOutcome> {
     let handles: Vec<_> = queries
         .into_iter()
-        .map(|query| {
+        .enumerate()
+        .map(|(i, query)| {
             let svc = Arc::clone(svc);
+            let key_version = 1 + (i % 2) as u32;
             tokio::spawn(async move {
-                svc.record_request(addr, &query, &format!("sig-{query}"), total_quota)
+                let signature = format!("sig-{query}-v{key_version}");
+                svc.record_request(addr, &query, &signature, key_version, total_quota)
                     .await
                     .unwrap()
             })
@@ -291,13 +309,25 @@ async fn concurrent_identical_requests_charge_quota_once() {
         .count();
     assert_eq!(recorded, 1, "exactly one racer should win the slot");
 
-    // Every loser is served the winner's signature rather than a primary-key error.
-    for outcome in &outcomes {
-        if let RecordOutcome::Duplicate { signature, .. } = outcome {
-            assert_eq!(signature, "sig-same");
-        }
-    }
-    assert_eq!(outcomes.len() - recorded, 7);
+    // Every loser learns that the query is on record, rather than failing on
+    // the primary key.
+    let duplicates = outcomes
+        .iter()
+        .filter(|o| matches!(o, RecordOutcome::Duplicate { .. }))
+        .count();
+    assert_eq!(duplicates, 7);
+
+    // The record holds the winner's signature with the winner's key version.
+    let recorded_request = svc
+        .get_duplicate_request(addr, "same")
+        .await
+        .unwrap()
+        .unwrap();
+    let key_version = recorded_request.key_version.unwrap();
+    assert_eq!(
+        recorded_request.signature,
+        format!("sig-same-v{key_version}")
+    );
     assert_eq!(svc.get_used_quota(addr).await.unwrap(), 1);
 }
 
@@ -376,10 +406,14 @@ async fn legacy_migration_normalizes_and_dedups() {
     assert_eq!(svc.get_used_quota(vitalik).await.unwrap(), 7);
     // NULL num_lookups coalesces to 0.
     assert_eq!(svc.get_used_quota(test_addr).await.unwrap(), 0);
-    // Duplicate (address, query) keeps the most recent signature.
+    // Duplicate (address, query) keeps the most recent signature. The TS signer
+    // did not store which key made it, so its version is unknown.
     assert_eq!(
         svc.get_duplicate_request(vitalik, "q1").await.unwrap(),
-        Some("sigB".to_string())
+        Some(RecordedRequest {
+            signature: "sigB".to_string(),
+            key_version: None,
+        })
     );
     // The NULL-signature request was dropped.
     assert_eq!(
@@ -392,6 +426,48 @@ async fn legacy_migration_normalizes_and_dedups() {
     assert!(report2.already_migrated);
     assert_eq!(report2.accounts_imported, 0);
     assert_eq!(report2.requests_imported, 0);
+}
+
+/// The import replaces a request row that the Rust signer wrote when the TS
+/// signer's row for the same query is newer. The key version on record belongs
+/// to the replaced signature, so it must go with it.
+#[tokio::test]
+async fn legacy_migration_forgets_the_key_version_of_a_signature_it_replaces() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    svc.record_request(vitalik, "q9", "rust-sig", 2, 10)
+        .await
+        .unwrap();
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature)
+           VALUES ($1, now() + interval '1 hour', 'q9', 'ts-sig')"#,
+    )
+    .bind(VITALIK_LOWERCASE)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+
+    svc.run_legacy_migration().await.unwrap();
+
+    assert_eq!(
+        svc.get_duplicate_request(vitalik, "q9").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "ts-sig".to_string(),
+            key_version: None,
+        })
+    );
 }
 
 #[tokio::test]
@@ -450,6 +526,206 @@ async fn full_stack_serves_migrated_quota() {
     // Quota was migrated from the legacy tables and is served from Postgres.
     assert_eq!(json["performedQueryCount"], 7);
     assert_eq!(json["totalQuota"], 100);
+}
+
+const BLINDED_PHONE_NUMBER: &str =
+    "n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB";
+/// What key versions 1 and 2 of the mock key store sign `BLINDED_PHONE_NUMBER` to.
+const EXPECTED_SIG_V1: &str =
+    "MAAAAAAAAACEVdw1ULDwAiTcZuPnZxHHh38PNa+/g997JgV10QnEq9yeuLxbM9l7vk0EAicV7IAAAAAA";
+const EXPECTED_SIG_V2: &str =
+    "MAAAAAAAAAAmUJY0s9p7fMfs7GIoSiGJoObAN8ZpA7kRqeC9j/Q23TBrG3Jtxc8xWibhNVZhbYEAAAAA";
+const DUPLICATE_WARNING: &str =
+    "CELO_ODIS_WARN_04 BAD_INPUT Attempt to replay partial signature request";
+
+/// A /sign request for `BLINDED_PHONE_NUMBER`, with the `odis-key-version`
+/// header when `key_version` is given.
+fn sign_request(account: &str, key_version: Option<&str>) -> Request<Body> {
+    let mut request = Request::builder()
+        .method("POST")
+        .uri("/sign")
+        .header("content-type", "application/json");
+    if let Some(key_version) = key_version {
+        request = request.header("odis-key-version", key_version);
+    }
+    let body = serde_json::json!({
+        "account": account,
+        "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER,
+    });
+    request.body(Body::from(body.to_string())).unwrap()
+}
+
+async fn response_json(response: axum::response::Response) -> serde_json::Value {
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    serde_json::from_slice(&body).unwrap()
+}
+
+/// The TS signer did not store which key made a signature, so the signature of
+/// an imported request is never served. A replay is signed again with the key
+/// it asks for, and the charge the TS signer made is the only one.
+#[tokio::test]
+async fn replay_of_an_imported_request_is_signed_again_and_not_charged() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+    // Recent, so that the pruning at startup keeps it.
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature)
+           VALUES ($1, now(), $2, 'signature from the TS signer')"#,
+    )
+    .bind(VITALIK_LOWERCASE)
+    .bind(BLINDED_PHONE_NUMBER)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+
+    let account_service = Arc::new(MockAccountService::new(None, 100));
+    let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+    let app = build_router_with_services(pg_config(&url, true), account_service, key_provider)
+        .await
+        .unwrap();
+
+    // The second and third request find the record still without a version:
+    // a replay never rewrites it.
+    for (header, version, expected_sig) in [
+        (Some("2"), "2", EXPECTED_SIG_V2),
+        (None, "1", EXPECTED_SIG_V1),
+        (Some("2"), "2", EXPECTED_SIG_V2),
+    ] {
+        let response = app
+            .clone()
+            .oneshot(sign_request(VITALIK_CHECKSUMMED, header))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        assert_eq!(
+            response_json(response).await,
+            serde_json::json!({
+                "success": true,
+                "version": env!("CARGO_PKG_VERSION"),
+                "signature": expected_sig,
+                "performedQueryCount": 7,
+                "totalQuota": 100,
+                "warnings": [DUPLICATE_WARNING],
+            })
+        );
+    }
+
+    // A key version the signer does not hold fails as it does for a new request.
+    let response = app
+        .clone()
+        .oneshot(sign_request(VITALIK_CHECKSUMMED, Some("99")))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    assert_eq!(
+        response_json(response).await,
+        serde_json::json!({
+            "success": false,
+            "version": env!("CARGO_PKG_VERSION"),
+            "error": "CELO_ODIS_ERR_05 SIG_ERR Failed to compute BLS signature",
+            "performedQueryCount": 7,
+            "totalQuota": 100,
+        })
+    );
+
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    assert_eq!(svc.get_used_quota(vitalik).await.unwrap(), 7);
+}
+
+/// The same query under key versions 1, 2, 1 and then, at once, four times
+/// under each: every answer carries the partial signature of its version and
+/// the account is charged once.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn sign_under_several_key_versions_is_signed_per_version_and_charged_once() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let build_app = || async {
+        let account_service = Arc::new(MockAccountService::new(None, 100));
+        let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+        build_router_with_services(pg_config(&url, false), account_service, key_provider)
+            .await
+            .unwrap()
+    };
+    let expected_sig = |version: &str| match version {
+        "1" => EXPECTED_SIG_V1,
+        _ => EXPECTED_SIG_V2,
+    };
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    // One after the other. Only the first request is new.
+    let app = build_app().await;
+    for (step, version) in ["1", "2", "1"].into_iter().enumerate() {
+        let response = app
+            .clone()
+            .oneshot(sign_request(TEST_ADDRESS, Some(version)))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        let warnings = if step == 0 {
+            serde_json::json!([])
+        } else {
+            serde_json::json!([DUPLICATE_WARNING])
+        };
+        assert_eq!(
+            response_json(response).await,
+            serde_json::json!({
+                "success": true,
+                "version": env!("CARGO_PKG_VERSION"),
+                "signature": expected_sig(version),
+                "performedQueryCount": 1,
+                "totalQuota": 100,
+                "warnings": warnings,
+            })
+        );
+    }
+
+    // All at once, for an account with nothing on record.
+    let handles: Vec<_> = (0..8)
+        .map(|i| {
+            let app = app.clone();
+            let version = if i % 2 == 0 { "1" } else { "2" };
+            tokio::spawn(async move {
+                let response = app
+                    .oneshot(sign_request(VITALIK_CHECKSUMMED, Some(version)))
+                    .await
+                    .unwrap();
+                (response, version)
+            })
+        })
+        .collect();
+    for handle in handles {
+        let (response, version) = handle.await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        let json = response_json(response).await;
+        assert_eq!(
+            json["signature"],
+            expected_sig(version),
+            "version {version}"
+        );
+        assert_eq!(json["performedQueryCount"], 1);
+    }
+
+    for account in [TEST_ADDRESS, VITALIK_CHECKSUMMED] {
+        let address: Address = account.parse().unwrap();
+        assert_eq!(svc.get_used_quota(address).await.unwrap(), 1);
+    }
 }
 
 /// A statement that waits on a lock must fail after the timeout, and its
@@ -624,6 +900,9 @@ async fn legacy_migration_paginates_across_pages() {
     assert_eq!(svc.get_used_quota(last).await.unwrap(), 1);
     assert_eq!(
         svc.get_duplicate_request(last, "q").await.unwrap(),
-        Some("sig".to_string())
+        Some(RecordedRequest {
+            signature: "sig".to_string(),
+            key_version: None,
+        })
     );
 }

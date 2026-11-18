@@ -22,17 +22,29 @@ use crate::errors::OdisError;
 pub enum RecordOutcome {
     /// The request was new and within quota. Quota was charged.
     Recorded { performed_query_count: u32 },
-    /// An identical request was already on record. Quota was not charged again,
-    /// and the signature already on record is returned.
-    Duplicate {
-        signature: String,
-        performed_query_count: u32,
-    },
+    /// The query was already on record for this account, under any key
+    /// version. Quota was not charged again and the record was left as it was.
+    Duplicate { performed_query_count: u32 },
     /// The account was out of quota. Nothing was written.
     QuotaExceeded { performed_query_count: u32 },
 }
 
+/// A charged query as it is on record.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RecordedRequest {
+    pub signature: String,
+    /// The key version `signature` was made with. `None` when it is unknown:
+    /// the row was imported from the TS signer, which never stored it. Such a
+    /// signature must not be served, because it cannot be matched to the
+    /// version a request asks for.
+    pub key_version: Option<u32>,
+}
+
 /// Tracks PNP sign requests and quota usage.
+///
+/// A query is charged once per account, whatever key version signs it, so
+/// there is one record per `(address, blinded_query)`. The record keeps the
+/// signature of the request that was charged, and its key version.
 #[async_trait]
 pub trait PnpRequestService: Send + Sync {
     async fn get_used_quota(&self, address: Address) -> Result<u32, OdisError>;
@@ -40,10 +52,10 @@ pub trait PnpRequestService: Send + Sync {
         &self,
         address: Address,
         blinded_query: &str,
-    ) -> Result<Option<String>, OdisError>;
+    ) -> Result<Option<RecordedRequest>, OdisError>;
 
     /// Atomically record a request and charge one unit of quota against
-    /// `total_quota`.
+    /// `total_quota`. `signature` was made with key version `key_version`.
     ///
     /// Duplicate detection and the quota bound are both enforced inside the
     /// write transaction, so concurrent requests for the same account can
@@ -53,6 +65,7 @@ pub trait PnpRequestService: Send + Sync {
         address: Address,
         blinded_query: &str,
         signature: &str,
+        key_version: u32,
         total_quota: u32,
     ) -> Result<RecordOutcome, OdisError>;
 

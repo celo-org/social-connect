@@ -190,10 +190,20 @@ async fn sign(
     )
     .await?;
 
-    let duplicate_sig = state
+    let key_version = requested_key_version.unwrap_or(state.config.pnp_latest_key_version);
+
+    let duplicate = state
         .request_service
         .get_duplicate_request(request.account, &request.blinded_query_phone_number)
         .await?;
+    let is_duplicate = duplicate.is_some();
+    // The signature on record answers this request only if it is known to have
+    // been made with the key version this request resolves to. A record of
+    // another version, or of an unknown one, still marks the query as charged,
+    // but the request is signed again.
+    let stored_signature = duplicate
+        .filter(|recorded| recorded.key_version == Some(key_version))
+        .map(|recorded| recorded.signature);
 
     let used_quota = state
         .request_service
@@ -208,16 +218,14 @@ async fn sign(
         .record(f64::from(total_quota) - f64::from(used_quota));
 
     // If not a duplicate, check quota
-    if duplicate_sig.is_none() && used_quota >= total_quota {
+    if !is_duplicate && used_quota >= total_quota {
         return Err(OdisError::ExceededQuota {
             total_quota,
             performed_query_count: used_quota,
         });
     }
 
-    let key_version = requested_key_version.unwrap_or(state.config.pnp_latest_key_version);
-
-    let (signature, performed_query_count, warnings) = if let Some(sig) = duplicate_sig {
+    let (signature, performed_query_count, warnings) = if let Some(sig) = stored_signature {
         counter!(metric_names::DUPLICATE_REQUESTS).increment(1);
         (sig, used_quota, vec![DUPLICATE_REQUEST_WARNING.to_string()])
     } else {
@@ -238,6 +246,7 @@ async fn sign(
                 request.account,
                 &request.blinded_query_phone_number,
                 &signature,
+                key_version,
                 total_quota,
             )
             .await
@@ -246,10 +255,11 @@ async fn sign(
             RecordOutcome::Recorded {
                 performed_query_count,
             } => (signature, performed_query_count, vec![]),
-            // A concurrent identical request won the race. Serve its signature
-            // rather than charging this account a second time.
+            // The query is already charged: a concurrent request won the race,
+            // or the record holds a signature that could not be served for this
+            // key version. The signature computed above is the answer either
+            // way, because it was made with the key this request asked for.
             RecordOutcome::Duplicate {
-                signature,
                 performed_query_count,
             } => {
                 counter!(metric_names::DUPLICATE_REQUESTS).increment(1);

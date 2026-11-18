@@ -8,7 +8,7 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use super::legacy_migration::{
     LegacyMigrationReport, ensure_legacy_data_imported, run_legacy_migration,
 };
-use super::{PnpRequestService, RecordOutcome};
+use super::{PnpRequestService, RecordOutcome, RecordedRequest};
 use crate::errors::OdisError;
 
 /// Read an account's used quota inside an open transaction. Absent accounts
@@ -125,10 +125,10 @@ impl PnpRequestService for PostgresPnpRequestService {
         &self,
         address: Address,
         blinded_query: &str,
-    ) -> Result<Option<String>, OdisError> {
+    ) -> Result<Option<RecordedRequest>, OdisError> {
         let addr = address.to_string();
-        let row: Option<(String,)> = sqlx::query_as(
-            "SELECT signature FROM requests WHERE caller_address = $1 AND blinded_query = $2 LIMIT 1",
+        let row: Option<(String, Option<i64>)> = sqlx::query_as(
+            "SELECT signature, key_version FROM requests WHERE caller_address = $1 AND blinded_query = $2 LIMIT 1",
         )
         .bind(&addr)
         .bind(blinded_query)
@@ -138,7 +138,10 @@ impl PnpRequestService for PostgresPnpRequestService {
             tracing::error!("get_duplicate_request query failed: {e}");
             OdisError::DatabaseError
         })?;
-        Ok(row.map(|(sig,)| sig))
+        Ok(row.map(|(signature, key_version)| RecordedRequest {
+            signature,
+            key_version: key_version.and_then(|version| u32::try_from(version).ok()),
+        }))
     }
 
     async fn record_request(
@@ -146,6 +149,7 @@ impl PnpRequestService for PostgresPnpRequestService {
         address: Address,
         blinded_query: &str,
         signature: &str,
+        key_version: u32,
         total_quota: u32,
     ) -> Result<RecordOutcome, OdisError> {
         let addr = address.to_string();
@@ -158,12 +162,14 @@ impl PnpRequestService for PostgresPnpRequestService {
         // Claim the (address, query) slot. A racing identical request blocks
         // here until this transaction resolves, then sees the conflict.
         let claimed = sqlx::query(
-            "INSERT INTO requests (caller_address, blinded_query, signature) VALUES ($1, $2, $3) \
+            "INSERT INTO requests (caller_address, blinded_query, signature, key_version) \
+             VALUES ($1, $2, $3, $4) \
              ON CONFLICT (caller_address, blinded_query) DO NOTHING",
         )
         .bind(&addr)
         .bind(blinded_query)
         .bind(signature)
+        .bind(i64::from(key_version))
         .execute(&mut *tx)
         .await
         .map_err(|e| {
@@ -173,30 +179,16 @@ impl PnpRequestService for PostgresPnpRequestService {
         .rows_affected()
             == 1;
 
+        // The query is already on record and charged, under this or another
+        // key version. The record stays as it is.
         if !claimed {
-            let existing: Option<(String,)> = sqlx::query_as(
-                "SELECT signature FROM requests WHERE caller_address = $1 AND blinded_query = $2",
-            )
-            .bind(&addr)
-            .bind(blinded_query)
-            .fetch_optional(&mut *tx)
-            .await
-            .map_err(|e| {
-                tracing::error!("duplicate signature lookup failed: {e}");
-                OdisError::DatabaseError
-            })?;
             let used = read_used_quota(&mut tx, &addr).await?;
             tx.commit().await.map_err(|e| {
                 tracing::error!("failed to commit transaction: {e}");
                 OdisError::DatabaseError
             })?;
 
-            let Some((existing_sig,)) = existing else {
-                tracing::error!("request insert conflicted but no row was found");
-                return Err(OdisError::DatabaseError);
-            };
             return Ok(RecordOutcome::Duplicate {
-                signature: existing_sig,
                 performed_query_count: used,
             });
         }
