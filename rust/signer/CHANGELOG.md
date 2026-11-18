@@ -176,3 +176,31 @@ signer reads the header with JavaScript's `Number()`, so it also accepts `1.0`, 
 version 1; the Rust signer answers those with 400 `CELO_ODIS_WARN_12`. For a number of 2^32 or more
 the TS signer answers 500 `CELO_ODIS_ERR_05`, because it holds no such key, and the Rust signer
 answers 400 `CELO_ODIS_WARN_12`. The combiner sends plain decimal digits.
+
+## Authentication
+
+A request that comes through the combiner is authenticated as by the TS signer, with the one
+exception at the end of this section. The other differences show only to a caller that reaches a
+signer directly.
+
+The signature is checked over the body as sent. The TS signer parses the body and checks the
+signature over what JavaScript writes back, which has no whitespace. The combiner forwards bodies in
+that form, so both signers see the bytes the client signed. A direct caller that signs one spelling
+of the body and sends another is answered 401 `CELO_ODIS_WARN_02` here and accepted by the TS
+signer. One that signs and sends a body with extra whitespace is accepted here and refused there.
+
+The account address is read less strictly. An address in upper case, with a wrong checksum, without
+`0x` or with `0X` is accepted. The combiner answers such a request with 401, so it does not reach a
+signer. A TS signer called directly answers it with 500 `CELO_ODIS_ERR_27`.
+
+A wallet-key signature may be sent without its `0x` prefix. The TS signer and the combiner answer
+that with 401.
+
+The exception: a malformed wallet-key signature that the TS services accept is refused here. They
+drop the first two characters of the signature whatever they are and read 65 bytes from there. So
+they accept a signature that starts with `0X` or any other two characters, one with text after it,
+one of 66 bytes, and in some cases one that lacks its last character. The Rust signer wants an
+optional `0x` and exactly 65 bytes of hex, and answers anything else with 401 `CELO_ODIS_WARN_02`.
+The combiner forwards the signature unchanged, so for such a request TS signers sign and charge
+while Rust signers refuse. This is deliberate. Both accept a well-formed signature, and only a
+client that sends a malformed one sees the difference.
