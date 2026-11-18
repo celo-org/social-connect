@@ -50,15 +50,25 @@ These TS variables are not read. Replace the ones you set:
 | `REQUEST_PRUNNING_DAYS`                                                 | `REQUEST_PRUNING_DAYS`                                                                 |
 | `REQUEST_PRUNNING_AT_SERVER_START`, `REQUEST_PRUNNING_JOB_CRON_PATTERN` | `REQUEST_PRUNING_INTERVAL_SECS`: prunes at every start, then on this interval          |
 | `SERVER_SSL_KEY_PATH`, `SERVER_SSL_CERT_PATH`                           | None. The signer serves plain HTTP; terminate TLS in front of it.                      |
+| `PHONE_NUMBER_PRIVACY_API_ENABLED`                                      | None. The PNP endpoints are always on, also when this is `false`.                      |
 | `DOMAINS_API_ENABLED` and the `DOMAINS_*` key variables                 | None. The domain endpoints return 503.                                                 |
 | `KEYSTORE_AZURE_*`, `KEYSTORE_AWS_*`                                    | None. Only Google Secret Manager is supported.                                         |
 | `SHOULD_MOCK_ACCOUNT_SERVICE`, `SHOULD_MOCK_REQUEST_SERVICE`            | None. There are no mock services to switch to; set to `true`, either stops the signer. |
 | `TRACER_ENDPOINT`, `TRACING_SERVICE_NAME`                               | None. The signer exports no traces.                                                    |
 
-`SERVER_PORT`, `PHONE_NUMBER_PRIVACY_API_ENABLED`, `PHONE_NUMBER_PRIVACY_KEY_NAME_BASE`,
+`SERVER_PORT`, `PHONE_NUMBER_PRIVACY_KEY_NAME_BASE`,
 `PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION`, `KEYSTORE_GOOGLE_PROJECT_ID`, `BLOCKCHAIN_PROVIDER`,
 `BLOCKCHAIN_API_KEY`, `ODIS_SIGNER_TIMEOUT`, `DB_TIMEOUT` and `QUERY_PRICE_PER_CUSD` keep their names and
 meaning.
+
+The TS signer answered `/sign` and `/quotaStatus` with 503 `CELO_ODIS_WARN_13` unless
+`PHONE_NUMBER_PRIVACY_API_ENABLED` was `true`. The Rust signer has no such switch: a running signer
+serves both endpoints. To take a signer out of service, stop it or remove it from the combiner's
+signer list.
+
+`DOMAINS_API_ENABLED` is not read either. The domain endpoints `/domain/sign`, `/domain/quotaStatus`
+and `/domain/disable` answer 503 `CELO_ODIS_WARN_13` whatever its value, as a TS signer does with
+`DOMAINS_API_ENABLED=false`. A deployment that serves domain requests cannot move to the Rust signer.
 
 Values are read more strictly than by the TS signer. A boolean must be `true` or `false`; the TS
 signer read anything else, such as `1`, as false. A number or boolean set to an empty string stops

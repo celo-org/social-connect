@@ -28,7 +28,6 @@ build-release:
 # Start signer locally with mock keys against Celo Sepolia for E2E testing
 run-e2e-signer:
     KEYSTORE_TYPE=Mock \
-    PHONE_NUMBER_PRIVACY_API_ENABLED=true \
     BLOCKCHAIN_PROVIDER=https://forno.celo-sepolia.celo-testnet.org \
     CHAIN_ID=11142220 \
     DB_PATH=:memory: \
