@@ -15,7 +15,9 @@
 //! - accounts whose casings collapse to the same checksummed address have their
 //!   `num_lookups` summed (never under-counting billed usage),
 //! - requests that collapse to the same `(caller_address, blinded_query)` keep
-//!   the row with the most recent timestamp.
+//!   the row with the most recent timestamp,
+//! - every request is imported with an unknown key version (`key_version` NULL):
+//!   the TS signer did not store which key made a signature.
 //!
 //! The whole import runs in a single transaction alongside a marker row, so a
 //! failure rolls everything back and a completed import never re-runs.
@@ -338,7 +340,8 @@ async fn import_requests(
                 "INSERT INTO requests (caller_address, blinded_query, signature, \"timestamp\") \
                  VALUES ($1, $2, $3, COALESCE($4::timestamptz, now())) \
                  ON CONFLICT (caller_address, blinded_query) DO UPDATE SET \
-                     signature = EXCLUDED.signature, \"timestamp\" = EXCLUDED.\"timestamp\" \
+                     signature = EXCLUDED.signature, key_version = NULL, \
+                     \"timestamp\" = EXCLUDED.\"timestamp\" \
                  WHERE EXCLUDED.\"timestamp\" > requests.\"timestamp\"",
             )
             .bind(&checksummed)

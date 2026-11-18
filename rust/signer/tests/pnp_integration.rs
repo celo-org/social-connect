@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use alloy::primitives::Address;
 use alloy_signer::Signer;
 use alloy_signer_local::PrivateKeySigner;
 use axum::Router;
@@ -176,6 +177,164 @@ async fn sign_duplicate_returns_cached_signature_without_incrementing_quota() {
     let warnings = json["warnings"].as_array().unwrap();
     assert_eq!(warnings.len(), 1);
     assert!(warnings[0].as_str().unwrap().contains("CELO_ODIS_WARN_04"));
+}
+
+const DUPLICATE_WARNING: &str =
+    "CELO_ODIS_WARN_04 BAD_INPUT Attempt to replay partial signature request";
+
+/// Sends the same query once per entry of `steps`, each with the given
+/// `odis-key-version` header or none, and asserts that every answer carries
+/// the partial signature of the key version it names. Only the first request
+/// is charged; the others are replays.
+async fn assert_signed_per_key_version(app: &Router, steps: &[(Option<&str>, &str, &str)]) {
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+
+    for (step, (header, version, expected_sig)) in steps.iter().enumerate() {
+        let request = match header {
+            Some(version) => sign_request_with_key_version(&body, version),
+            None => sign_request(&body),
+        };
+        let response = app.clone().oneshot(request).await.unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK, "step {step}");
+        assert_eq!(
+            response.headers().get("odis-key-version").unwrap(),
+            version,
+            "step {step}"
+        );
+        let warnings = if step == 0 {
+            serde_json::json!([])
+        } else {
+            serde_json::json!([DUPLICATE_WARNING])
+        };
+        assert_eq!(
+            response_json(response).await,
+            serde_json::json!({
+                "success": true,
+                "version": env!("CARGO_PKG_VERSION"),
+                "signature": expected_sig,
+                "performedQueryCount": 1,
+                "totalQuota": 10,
+                "warnings": warnings,
+            }),
+            "step {step}"
+        );
+    }
+
+    assert_used_quota(app, 1).await;
+}
+
+/// A replay under another key version must not be served the stored partial
+/// signature of the first version. The query is still charged once.
+#[tokio::test]
+async fn sign_replay_under_another_key_version_is_signed_with_that_version() {
+    let app = build_router(test_config()).await.unwrap();
+    assert_signed_per_key_version(
+        &app,
+        &[
+            (Some("1"), "1", EXPECTED_SIG_V1),
+            (Some("2"), "2", EXPECTED_SIG_V2),
+            (Some("1"), "1", EXPECTED_SIG_V1),
+        ],
+    )
+    .await;
+
+    // A request without the header resolves to the configured default version,
+    // here 1, and is held to the same rule.
+    let app = build_router(test_config()).await.unwrap();
+    assert_signed_per_key_version(
+        &app,
+        &[
+            (Some("2"), "2", EXPECTED_SIG_V2),
+            (None, "1", EXPECTED_SIG_V1),
+            (Some("2"), "2", EXPECTED_SIG_V2),
+            (None, "1", EXPECTED_SIG_V1),
+        ],
+    )
+    .await;
+}
+
+/// A replay under a key version the signer does not hold fails as a first
+/// request for that version would, and leaves the original charge in place.
+#[tokio::test]
+async fn sign_replay_under_an_unavailable_key_version_fails_without_a_charge() {
+    let app = build_router(test_config()).await.unwrap();
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+
+    let response = app.clone().oneshot(sign_request(&body)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+
+    let response = app
+        .clone()
+        .oneshot(sign_request_with_key_version(&body, "99"))
+        .await
+        .unwrap();
+    assert_signing_failure(response, 1).await;
+    assert_used_quota(&app, 1).await;
+}
+
+/// A request row whose signing key version is unknown, as rows imported from
+/// the TS signer are, is never served from the store: the stored signature may
+/// belong to any version. The row still marks the query as charged.
+#[tokio::test]
+async fn sign_replay_of_a_request_of_unknown_key_version_is_signed_again() {
+    let db_file = NamedTempFile::new().unwrap();
+    let db_path = db_file.path().to_str().unwrap();
+    let app = build_router(test_config_with_db(db_path)).await.unwrap();
+
+    // The signer stores addresses in checksummed form.
+    let account = ACCOUNT.parse::<Address>().unwrap().to_string();
+    let pool = sqlx::SqlitePool::connect(&format!("sqlite:{db_path}"))
+        .await
+        .unwrap();
+    sqlx::query(
+        "INSERT INTO requests (caller_address, blinded_query, signature) \
+         VALUES (?, ?, 'signature of unknown key version')",
+    )
+    .bind(&account)
+    .bind(BLINDED_PHONE_NUMBER)
+    .execute(&pool)
+    .await
+    .unwrap();
+    sqlx::query("INSERT INTO accounts (address, num_lookups) VALUES (?, 1)")
+        .bind(&account)
+        .execute(&pool)
+        .await
+        .unwrap();
+    pool.close().await;
+
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    for (header, version, expected_sig) in [
+        (None, "1", EXPECTED_SIG_V1),
+        (Some("2"), "2", EXPECTED_SIG_V2),
+    ] {
+        let request = match header {
+            Some(version) => sign_request_with_key_version(&body, version),
+            None => sign_request(&body),
+        };
+        let response = app.clone().oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        assert_eq!(
+            response_json(response).await,
+            serde_json::json!({
+                "success": true,
+                "version": env!("CARGO_PKG_VERSION"),
+                "signature": expected_sig,
+                "performedQueryCount": 1,
+                "totalQuota": 10,
+                "warnings": [DUPLICATE_WARNING],
+            })
+        );
+    }
+
+    let response = app
+        .clone()
+        .oneshot(sign_request_with_key_version(&body, "99"))
+        .await
+        .unwrap();
+    assert_signing_failure(response, 1).await;
+    assert_used_quota(&app, 1).await;
 }
 
 #[tokio::test]
@@ -520,6 +679,61 @@ async fn concurrent_identical_sign_requests_are_all_served_and_charged_once() {
     let response = app.oneshot(quota_request(ACCOUNT)).await.unwrap();
     let json = response_json(response).await;
     assert_eq!(json["performedQueryCount"], 1, "quota charged exactly once");
+}
+
+/// Sends the same query four times under key version 1 and four times under
+/// version 2, all at once, and asserts that each answer carries the partial
+/// signature of its version and that the query is charged once.
+async fn assert_concurrent_key_versions_are_each_signed_and_charged_once(app: Router) {
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let handles: Vec<_> = (0..8)
+        .map(|i| {
+            let app = app.clone();
+            let body = body.clone();
+            let (version, expected_sig) = if i % 2 == 0 {
+                ("1", EXPECTED_SIG_V1)
+            } else {
+                ("2", EXPECTED_SIG_V2)
+            };
+            tokio::spawn(async move {
+                let response = app
+                    .oneshot(sign_request_with_key_version(&body, version))
+                    .await
+                    .unwrap();
+                (response, version, expected_sig)
+            })
+        })
+        .collect();
+
+    for handle in handles {
+        let (response, version, expected_sig) = handle.await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        let json = response_json(response).await;
+        assert_eq!(json["signature"], expected_sig, "version {version}");
+        assert_eq!(json["performedQueryCount"], 1);
+    }
+
+    assert_used_quota(&app, 1).await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn concurrent_sign_requests_under_two_key_versions_are_each_signed_and_charged_once() {
+    let db_file = NamedTempFile::new().unwrap();
+    let db_path = db_file.path().to_str().unwrap();
+    let app = build_router(test_config_with_db(db_path)).await.unwrap();
+
+    assert_concurrent_key_versions_are_each_signed_and_charged_once(app).await;
+}
+
+/// The slow key store holds every request between its duplicate lookup, which
+/// finds nothing, and its write. All but one therefore learn inside the write
+/// transaction that the query is already on record.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn sign_requests_that_collide_on_the_write_are_signed_with_their_own_key_version() {
+    let app = build_slow_router(Duration::from_millis(200), Duration::from_secs(5)).await;
+
+    assert_concurrent_key_versions_are_each_signed_and_charged_once(app).await;
 }
 
 // --- Authentication-enabled tests ---

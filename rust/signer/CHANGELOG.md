@@ -119,6 +119,25 @@ empty database:
 - The Postgres database holds the TS signer's tables (`accountsOnChain` or `requestsOnChain`), they
   were never imported, and `MIGRATE_LEGACY_DATA` is not `true`.
 
+## Replays under another key version
+
+A query is charged once per account, whichever key versions sign it. The signer stores, with each
+charged request, the signature and the key version that made it. A replay is answered from the
+store only when the stored version is the one the replay resolves to, by its `odis-key-version`
+header or by `PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION`. Otherwise the signer signs again with the
+requested key and answers with the replay warning, without a second charge. If it does not hold
+that key, it answers 500 with `CELO_ODIS_ERR_05`, as for a new request.
+
+The TS signer answers every replay with the stored signature and names the requested version in the
+`odis-key-version` header, so a replay under another version gets a partial signature made with the
+wrong key. A combiner with both kinds of signers gets valid partial signatures for such a replay
+from the Rust signers only.
+
+The version is the nullable column `requests.key_version`. Rows imported from the TS signer have no
+version, because the TS signer never recorded it. Their stored signature is never served: each
+replay of such a request is signed again. The stored row is not rewritten, so this lasts until the
+row is pruned (`REQUEST_PRUNING_DAYS`, default 7).
+
 ## Database failures
 
 If the lookup for a replayed request fails, `/sign` answers 500 with `CELO_ODIS_ERR_03`. The TS
