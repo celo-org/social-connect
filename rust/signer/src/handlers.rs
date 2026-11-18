@@ -103,10 +103,6 @@ pub async fn pnp_quota_handler(
     authorization: Authorization,
     body: Bytes,
 ) -> Result<impl IntoResponse, OdisError> {
-    if !state.config.pnp_api_enabled {
-        return Err(OdisError::ApiUnavailable);
-    }
-
     let request: PnpQuotaRequest = parse_body(&body)?;
 
     let account = authenticated_account(
@@ -171,10 +167,6 @@ pub async fn pnp_sign_handler(
     authorization: Authorization,
     body: Bytes,
 ) -> Result<impl IntoResponse, OdisError> {
-    if !state.config.pnp_api_enabled {
-        return Err(OdisError::ApiUnavailable);
-    }
-
     // The request runs in its own task so that it is finished and charged even
     // when this handler is dropped, which happens when the caller disconnects or
     // the request times out. The combiner disconnects from the slower signers as

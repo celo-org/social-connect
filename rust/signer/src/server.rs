@@ -252,10 +252,9 @@ mod tests {
     use http_body_util::BodyExt;
     use tower::ServiceExt;
 
-    fn test_config(pnp_enabled: bool) -> Config {
+    fn test_config() -> Config {
         Config {
             server_port: 8080,
-            pnp_api_enabled: pnp_enabled,
             keystore_type: KeystoreType::Mock,
             pnp_key_name_base: "phoneNumberPrivacy".to_string(),
             pnp_latest_key_version: 1,
@@ -291,7 +290,7 @@ mod tests {
             database: DatabaseConfig::Sqlite {
                 path: db_file.path().to_str().unwrap().to_string(),
             },
-            ..test_config(true)
+            ..test_config()
         }
     }
 
@@ -315,7 +314,7 @@ mod tests {
 
     #[tokio::test]
     async fn status_returns_version() {
-        let app = build_router(test_config(false)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -345,7 +344,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_200_with_signature() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -372,7 +371,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_400_for_invalid_blinded_query() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -393,7 +392,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_400_for_invalid_key_version() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -413,7 +412,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_duplicate_returns_cached_signature() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         // First request
         let response = app
@@ -458,7 +457,7 @@ mod tests {
 
     #[tokio::test]
     async fn sign_returns_403_when_quota_exceeded() {
-        let config = test_config(true);
+        let config = test_config();
         let account_service = Arc::new(MockAccountService::new(None, 0));
         let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
         let app = build_router_with_services(config, account_service, key_provider)
@@ -482,7 +481,7 @@ mod tests {
 
     #[tokio::test]
     async fn quota_returns_200_with_quota_info() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -510,7 +509,7 @@ mod tests {
 
     #[tokio::test]
     async fn quota_returns_400_for_invalid_account() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -529,7 +528,7 @@ mod tests {
 
     #[tokio::test]
     async fn quota_returns_400_for_malformed_json() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -547,46 +546,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn sign_returns_503_when_pnp_disabled() {
-        let app = build_router(test_config(false)).await.unwrap();
-
-        let response = app
-            .oneshot(
-                Request::builder()
-                    .method("POST")
-                    .uri("/sign")
-                    .header("content-type", "application/json")
-                    .body(Body::from("{}"))
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
-
-        assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
-    }
-
-    #[tokio::test]
-    async fn quota_returns_503_when_pnp_disabled() {
-        let app = build_router(test_config(false)).await.unwrap();
-
-        let response = app
-            .oneshot(
-                Request::builder()
-                    .method("POST")
-                    .uri("/quotaStatus")
-                    .header("content-type", "application/json")
-                    .body(Body::from("{}"))
-                    .unwrap(),
-            )
-            .await
-            .unwrap();
-
-        assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
-    }
-
-    #[tokio::test]
     async fn metrics_endpoint_returns_prometheus_text() {
-        let app = build_router(test_config(false)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
 
         let response = app
             .oneshot(
@@ -614,7 +575,7 @@ mod tests {
     /// metrics: not scrapes, probes or paths that do not exist.
     #[tokio::test]
     async fn request_metrics_count_only_the_api_endpoints() {
-        let app = build_router(test_config(true)).await.unwrap();
+        let app = build_router(test_config()).await.unwrap();
         let get = |uri: &str| Request::builder().uri(uri).body(Body::empty()).unwrap();
 
         for uri in ["/status", "/metrics", "/no-such-path"] {
@@ -672,7 +633,7 @@ mod tests {
             database: DatabaseConfig::Sqlite {
                 path: ":memory:".to_string(),
             },
-            ..test_config(true)
+            ..test_config()
         };
 
         assert_eq!(
@@ -684,11 +645,11 @@ mod tests {
     #[tokio::test]
     async fn build_router_fails_when_the_key_store_lacks_the_latest_key() {
         // The mock key store holds phoneNumberPrivacy-1 to -3.
-        assert!(build_router(test_config(true)).await.is_ok());
+        assert!(build_router(test_config()).await.is_ok());
 
         let unknown_version = Config {
             pnp_latest_key_version: 4,
-            ..test_config(true)
+            ..test_config()
         };
         assert_eq!(
             build_router(unknown_version).await.err(),
@@ -697,7 +658,7 @@ mod tests {
 
         let unknown_name = Config {
             pnp_key_name_base: "custom".to_string(),
-            ..test_config(true)
+            ..test_config()
         };
         assert_eq!(
             build_router(unknown_name).await.err(),

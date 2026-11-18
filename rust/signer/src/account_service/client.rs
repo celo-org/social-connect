@@ -320,7 +320,6 @@ mod tests {
     fn config_for(provider_url: String, api_key: Option<&str>) -> Config {
         Config {
             server_port: 0,
-            pnp_api_enabled: true,
             keystore_type: KeystoreType::Mock,
             pnp_key_name_base: "phoneNumberPrivacy".to_string(),
             pnp_latest_key_version: 1,
