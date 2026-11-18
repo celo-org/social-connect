@@ -149,3 +149,12 @@ row is pruned (`REQUEST_PRUNING_DAYS`, default 7).
 
 If the lookup for a replayed request fails, `/sign` answers 500 with `CELO_ODIS_ERR_03`. The TS
 signer logged the failure and carried on as if the request were new.
+
+## Request body size
+
+`/sign` and `/quotaStatus` refuse a body of more than 16,000 characters with 400
+`CELO_ODIS_WARN_01`, as the TS signer does. Characters are counted as JavaScript counts them, so a
+body the combiner accepts is accepted here. The Rust signer counts the body as sent; the TS signer
+counts it after parsing and writing it out again, so a body padded with whitespace can be refused
+here and accepted there. The combiner forwards bodies without such padding. A body over 0.2 MB is
+answered 413, as by the TS signer.

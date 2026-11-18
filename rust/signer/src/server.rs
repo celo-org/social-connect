@@ -37,6 +37,12 @@ pub struct AppState {
     pub key_provider: Arc<dyn KeyProvider>,
 }
 
+/// Largest request body read from the network, matching the TS signer's
+/// `express.json({ limit: '0.2mb' })`. The handlers apply the much lower limit
+/// on a request's length, so that a body over that limit gets the ODIS error
+/// response and is counted in the metrics.
+const TRANSPORT_BODY_LIMIT_BYTES: usize = 209_715;
+
 /// Build the axum router, constructing the appropriate AccountService from config.
 ///
 /// When `blockchain_provider` is set, uses `ClientAccountService` for on-chain lookups.
@@ -167,7 +173,7 @@ pub async fn build_router_with_services(
         ))
         .layer(middleware::from_fn(metrics::http_metrics_layer))
         .layer(TraceLayer::new_for_http())
-        .layer(RequestBodyLimitLayer::new(16 * 1024)) // 16 KB, matches TS REASONABLE_BODY_CHAR_LIMIT
+        .layer(RequestBodyLimitLayer::new(TRANSPORT_BODY_LIMIT_BYTES))
         .with_state(state))
 }
 
