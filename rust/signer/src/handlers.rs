@@ -15,8 +15,8 @@ use crate::metrics as metric_names;
 use crate::request_service::RecordOutcome;
 use crate::server::AppState;
 use crate::types::{
-    AuthenticationMethod, KEY_VERSION_HEADER, KeyVersion, PnpQuotaRequest, PnpQuotaResponseSuccess,
-    SignMessageRequest, SignMessageResponseSuccess,
+    AuthenticationMethod, KEY_VERSION_HEADER, PnpQuotaRequest, PnpQuotaResponseSuccess,
+    SignMessageRequest, SignMessageResponseSuccess, requested_key_version,
 };
 
 /// Duplicate request warning, matching TS `WarningMessage.DUPLICATE_REQUEST_TO_GET_PARTIAL_SIG`.
@@ -167,7 +167,7 @@ async fn compute_signature(
 
 pub async fn pnp_sign_handler(
     State(state): State<AppState>,
-    KeyVersion(requested_key_version): KeyVersion,
+    headers: HeaderMap,
     authorization: Authorization,
     body: Bytes,
 ) -> Result<impl IntoResponse, OdisError> {
@@ -181,7 +181,7 @@ pub async fn pnp_sign_handler(
     // soon as it has enough partial signatures; if those signers then skipped the
     // charge, their counts for the account would fall behind the others. The TS
     // signer finishes such requests too. A retry is served the stored signature.
-    let task = tokio::spawn(sign(state, requested_key_version, authorization, body));
+    let task = tokio::spawn(sign(state, headers, authorization, body));
     match task.await {
         Ok(result) => result,
         Err(join_error) => match join_error.try_into_panic() {
@@ -194,12 +194,16 @@ pub async fn pnp_sign_handler(
 /// Authenticates, signs and records one PNP sign request.
 async fn sign(
     state: AppState,
-    requested_key_version: Option<u32>,
+    headers: HeaderMap,
     authorization: Authorization,
     body: Bytes,
 ) -> Result<(HeaderMap, Json<SignMessageResponseSuccess>), OdisError> {
     let request: SignMessageRequest = parse_body(&body)?;
     request.validate()?;
+    // Read after the body is validated, as in the TS signer, so that a request
+    // with both an invalid body and an invalid header is refused for its body.
+    let key_version =
+        requested_key_version(&headers)?.unwrap_or(state.config.pnp_latest_key_version);
 
     let account = authenticated_account(
         &state,
@@ -209,8 +213,6 @@ async fn sign(
         request.authentication_method,
     )
     .await?;
-
-    let key_version = requested_key_version.unwrap_or(state.config.pnp_latest_key_version);
 
     let duplicate = state
         .request_service
