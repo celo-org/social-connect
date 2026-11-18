@@ -1,4 +1,4 @@
-use alloy::primitives::Address;
+use alloy::primitives::{Address, B256, keccak256};
 use axum::extract::FromRequestParts;
 use axum::http::request::Parts;
 use k256::ecdsa::signature::hazmat::PrehashVerifier;
@@ -71,6 +71,10 @@ pub fn authenticate_user(
 /// The bytes alone do not say which one it is, so each reading is tried and the one
 /// that recovers `account` wins.
 fn verify_wallet_key_signature(body: &[u8], authorization: &str, account: Address) -> bool {
+    let Some(hash) = wallet_key_message_hash(body) else {
+        return false;
+    };
+
     let sig_bytes = match hex::decode(authorization.strip_prefix("0x").unwrap_or(authorization)) {
         Ok(b) => b,
         Err(_) => return false,
@@ -84,19 +88,34 @@ fn verify_wallet_key_signature(body: &[u8], authorization: &str, account: Addres
     let as_vrs = (&sig_bytes[1..], sig_bytes[0]);
     [as_rsv, as_vrs]
         .into_iter()
-        .any(|(r_and_s, v)| recovers_account(body, r_and_s, v, account))
+        .any(|(r_and_s, v)| recovers_account(hash, r_and_s, v, account))
 }
 
-/// Whether the signature `r_and_s` with recovery value `v` over `body` was made by
+/// The hash a wallet key signs for `body`, as `hashMessageWithPrefix` in @celo/utils
+/// computes it: the EIP-191 prefix, the length of the body, then the body in UTF-8.
+///
+/// The length is counted in UTF-16 code units, where EIP-191 counts bytes, because
+/// @celo/utils writes the length of a JavaScript string. The two differ for a body
+/// with non-ASCII characters, and the TS combiner and signers accept only a signature
+/// over this hash. Returns `None` for a body that is not UTF-8, which no JavaScript
+/// string encodes to.
+fn wallet_key_message_hash(body: &[u8]) -> Option<B256> {
+    let length = std::str::from_utf8(body).ok()?.encode_utf16().count();
+    let mut message = format!("\x19Ethereum Signed Message:\n{length}").into_bytes();
+    message.extend_from_slice(body);
+    Some(keccak256(message))
+}
+
+/// Whether the signature `r_and_s` with recovery value `v` over `hash` was made by
 /// `account`. `v` may be written as 27/28 or as 0/1.
-fn recovers_account(body: &[u8], r_and_s: &[u8], v: u8, account: Address) -> bool {
+fn recovers_account(hash: B256, r_and_s: &[u8], v: u8, account: Address) -> bool {
     let y_parity = match v {
         0 | 27 => false,
         1 | 28 => true,
         _ => return false,
     };
     alloy::primitives::Signature::from_bytes_and_parity(r_and_s, y_parity)
-        .recover_address_from_msg(body)
+        .recover_address_from_prehash(&hash)
         .is_ok_and(|recovered| recovered == account)
 }
 
@@ -288,6 +307,131 @@ mod tests {
             None,
             None
         ));
+    }
+
+    /// One request body signed with the wallet key in two ways, read from
+    /// `tests/data/wallet_key_vectors.json`.
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct WalletKeyVector {
+        description: String,
+        body: String,
+        utf16_length: usize,
+        byte_length: usize,
+        /// Made by @celo/utils, which the TS services verify with.
+        celo_utils_signature: String,
+        /// Made by viem, as EIP-191 says.
+        standard_signature: String,
+        /// What @celo/utils `verifySignature` answers for the standard signature.
+        ts_accepts_standard_signature: bool,
+    }
+
+    #[derive(serde::Deserialize)]
+    struct WalletKeyVectors {
+        account: Address,
+        vectors: Vec<WalletKeyVector>,
+    }
+
+    fn wallet_key_vectors() -> WalletKeyVectors {
+        serde_json::from_str(include_str!("../tests/data/wallet_key_vectors.json")).unwrap()
+    }
+
+    /// The TS services write the length in the EIP-191 prefix in UTF-16 code
+    /// units, EIP-191 in bytes. Over an ASCII body the two signatures are both
+    /// valid. Over any other body only the TS one is, here as in the TS services.
+    #[test]
+    fn wallet_key_answers_ts_and_standard_signatures_as_the_ts_services_do() {
+        let WalletKeyVectors { account, vectors } = wallet_key_vectors();
+
+        // (bytes - UTF-16 units) of each body: 0 for ASCII, 1 for a two-byte
+        // character, 2 for a three-byte one, 2 for a surrogate pair, 5 for all.
+        let length_differences: Vec<usize> = vectors
+            .iter()
+            .map(|vector| {
+                assert_eq!(vector.body.encode_utf16().count(), vector.utf16_length);
+                assert_eq!(vector.body.len(), vector.byte_length);
+                vector.byte_length - vector.utf16_length
+            })
+            .collect();
+        assert_eq!(length_differences, [0, 1, 2, 2, 5]);
+
+        for vector in &vectors {
+            assert_eq!(
+                vector.ts_accepts_standard_signature,
+                vector.utf16_length == vector.byte_length
+            );
+            for (kind, signature, ts_accepts) in [
+                ("@celo/utils", &vector.celo_utils_signature, true),
+                (
+                    "standard",
+                    &vector.standard_signature,
+                    vector.ts_accepts_standard_signature,
+                ),
+            ] {
+                assert_eq!(
+                    authenticate_user(vector.body.as_bytes(), Some(signature), account, None, None),
+                    ts_accepts,
+                    "{kind} signature over a body with {}",
+                    vector.description
+                );
+            }
+        }
+    }
+
+    /// A body is JSON, which is UTF-8. Other bytes have no JavaScript string to
+    /// take a length from, so no signature over them is accepted.
+    #[tokio::test]
+    async fn wallet_key_refuses_a_body_that_is_not_utf8() {
+        let signer = PrivateKeySigner::random();
+        let body = b"\xff\xfe";
+        let signature = signer.sign_message(body).await.unwrap();
+
+        assert!(!authenticate_user(
+            body,
+            Some(&hex::encode(signature.as_bytes())),
+            signer.address(),
+            None,
+            None,
+        ));
+    }
+
+    #[test]
+    fn wallet_key_refuses_a_vector_signature_for_another_body_or_account() {
+        let WalletKeyVectors { account, vectors } = wallet_key_vectors();
+        let stranger = address!("0x0000000000000000000000000000000000007E57");
+
+        for (index, vector) in vectors.iter().enumerate() {
+            for signature in [&vector.celo_utils_signature, &vector.standard_signature] {
+                for (other_index, other) in vectors.iter().enumerate() {
+                    if other_index == index {
+                        continue;
+                    }
+                    assert!(
+                        !authenticate_user(
+                            other.body.as_bytes(),
+                            Some(signature),
+                            account,
+                            None,
+                            None
+                        ),
+                        "a signature over a body with {} must not verify over one with {}",
+                        vector.description,
+                        other.description
+                    );
+                }
+                assert!(
+                    !authenticate_user(
+                        vector.body.as_bytes(),
+                        Some(signature),
+                        stranger,
+                        None,
+                        None
+                    ),
+                    "a signature over a body with {} must not authenticate another account",
+                    vector.description
+                );
+            }
+        }
     }
 
     #[tokio::test]
