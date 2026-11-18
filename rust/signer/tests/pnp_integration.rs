@@ -485,6 +485,71 @@ async fn sign_returns_500_for_unsupported_key_version() {
     assert_used_quota(&app, 0).await;
 }
 
+/// A sign request body padded through its session ID.
+fn sign_body_with_session_id(session_id: &str) -> String {
+    serde_json::json!({
+        "account": ACCOUNT,
+        "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER,
+        "sessionID": session_id,
+    })
+    .to_string()
+}
+
+fn quota_request_with_body(body: &str) -> Request<Body> {
+    Request::builder()
+        .method("POST")
+        .uri("/quotaStatus")
+        .header("content-type", "application/json")
+        .body(Body::from(body.to_string()))
+        .unwrap()
+}
+
+/// The TS signer and the combiner refuse a body of more than 16,000 JavaScript
+/// string characters. A body the combiner forwards must get the same answer
+/// here, so the limit counts characters and not bytes.
+#[tokio::test]
+async fn body_length_limit_counts_characters_as_the_ts_signer_does() {
+    let app = build_router(test_config()).await.unwrap();
+    let padding = 16_000 - sign_body_with_session_id("").len();
+
+    let at_limit = sign_body_with_session_id(&"a".repeat(padding));
+    assert_eq!(at_limit.len(), 16_000);
+    let over_limit = sign_body_with_session_id(&"a".repeat(padding + 1));
+    // Under the limit in characters, over it in bytes: three bytes a character.
+    let multi_byte = sign_body_with_session_id(&"\u{8a9e}".repeat(6_000));
+    assert!(multi_byte.len() > 18_000);
+
+    for body in [&at_limit, &multi_byte] {
+        let response = app.clone().oneshot(sign_request(body)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        let response = app
+            .clone()
+            .oneshot(quota_request_with_body(body))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+    }
+
+    for request in [
+        sign_request(&over_limit),
+        quota_request_with_body(&over_limit),
+    ] {
+        let response = app.clone().oneshot(request).await.unwrap();
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+        let json = response_json(response).await;
+        assert_eq!(json["success"], false);
+        assert_eq!(
+            json["error"],
+            "CELO_ODIS_WARN_01 BAD_INPUT Invalid input parameters"
+        );
+    }
+
+    // Beyond what the server reads at all, as in the TS signer.
+    let huge = sign_body_with_session_id(&"a".repeat(300_000));
+    let response = app.clone().oneshot(sign_request(&huge)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
+}
+
 #[tokio::test]
 async fn sign_then_quota_reflects_updated_count() {
     let app = build_router(test_config()).await.unwrap();

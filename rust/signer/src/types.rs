@@ -30,9 +30,6 @@ impl<S: Send + Sync> FromRequestParts<S> for KeyVersion {
     }
 }
 
-// Body size is enforced by tower's RequestBodyLimitLayer (16 KB) in server.rs,
-// matching the TS REASONABLE_BODY_CHAR_LIMIT of 16,000 chars.
-
 // -- Authentication --
 
 /// Authentication method, matching TS `AuthenticationMethod` enum.

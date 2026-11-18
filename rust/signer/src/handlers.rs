@@ -6,6 +6,7 @@ use axum::extract::State;
 use axum::http::HeaderMap;
 use axum::response::IntoResponse;
 use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
+use serde::de::DeserializeOwned;
 
 use crate::account_service::PnpAccount;
 use crate::auth::{Authorization, authenticate_user};
@@ -21,6 +22,27 @@ use crate::types::{
 /// Duplicate request warning, matching TS `WarningMessage.DUPLICATE_REQUEST_TO_GET_PARTIAL_SIG`.
 const DUPLICATE_REQUEST_WARNING: &str =
     "CELO_ODIS_WARN_04 BAD_INPUT Attempt to replay partial signature request";
+
+/// Longest request body accepted, matching TS `REASONABLE_BODY_CHAR_LIMIT`.
+const BODY_CHAR_LIMIT: usize = 16_000;
+
+/// Parses a request body, refusing one that is too long or is not valid JSON
+/// for `T`.
+///
+/// The length is counted in UTF-16 code units, not bytes, because the TS signer
+/// and the combiner count the characters of a JavaScript string. A body that
+/// the combiner forwards must get the same answer here as from a TS signer.
+///
+/// TODO: remove this length check once the Rust combiner has replaced the TS
+/// combiner. It exists only to agree with JavaScript's count; the transport
+/// limit in `server.rs` can then be the one limit, in bytes.
+fn parse_body<T: DeserializeOwned>(body: &[u8]) -> Result<T, OdisError> {
+    let text = std::str::from_utf8(body).map_err(|_| OdisError::InvalidInput)?;
+    if text.encode_utf16().count() > BODY_CHAR_LIMIT {
+        return Err(OdisError::InvalidInput);
+    }
+    serde_json::from_str(text).map_err(|_| OdisError::InvalidInput)
+}
 
 /// Domain endpoints are not yet implemented in the Rust port.
 /// Return 503 ApiUnavailable, matching the TS signer's disabled-API behavior.
@@ -85,8 +107,7 @@ pub async fn pnp_quota_handler(
         return Err(OdisError::ApiUnavailable);
     }
 
-    let request: PnpQuotaRequest =
-        serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
+    let request: PnpQuotaRequest = parse_body(&body)?;
 
     let account = authenticated_account(
         &state,
@@ -177,8 +198,7 @@ async fn sign(
     authorization: Authorization,
     body: Bytes,
 ) -> Result<(HeaderMap, Json<SignMessageResponseSuccess>), OdisError> {
-    let request: SignMessageRequest =
-        serde_json::from_slice(&body).map_err(|_| OdisError::InvalidInput)?;
+    let request: SignMessageRequest = parse_body(&body)?;
     request.validate()?;
 
     let account = authenticated_account(
