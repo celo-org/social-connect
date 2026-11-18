@@ -115,7 +115,7 @@ rust/signer/src/
 rust/signer/tests/
   pnp_integration.rs      # HTTP tests against the real router with SQLite
   postgres_integration.rs # Postgres backend and ETL against a real Postgres
-  data/                   # BLS vectors from the TS library, and the script that writes them
+  data/                   # BLS and wallet-key vectors from the TS libraries, and the scripts that write them
 ```
 
 ### Endpoints
@@ -182,4 +182,5 @@ A combiner uses Rust and TS signers side by side, so a request the combiner forw
 - To test a database failure, break a real SQLite file from a second connection (see `database_failures_return_the_ts_error_strings`); do not fake the request service.
 - Tests that read a counter compare its value before and after. They are exact under `cargo nextest`, which runs each test in its own process; under plain `cargo test` all tests share one metrics recorder.
 - `tests/data/bls_vectors.json` holds what the TS signer's BLS library answers. Do not edit it by hand; regenerate it with `node rust/signer/tests/data/generate_bls_vectors.js`. A change to the `threshold-bls` pin must keep `signatures_equal_the_ts_library` and `edge_inputs_are_answered_as_by_the_ts_library` passing; the one known difference is named in the second test.
+- `tests/data/wallet_key_vectors.json` holds wallet-key signatures made by `@celo/utils` and by viem, and what the TS services answer for each. Do not edit it by hand; regenerate it with `node rust/signer/tests/data/generate_wallet_key_vectors.js`. The wallet-key hash counts the body length in UTF-16 code units, as `@celo/utils` does, not in bytes as EIP-191 says.
 - Make sure linting and tests pass, add common tasks to the justfile
