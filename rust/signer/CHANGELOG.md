@@ -158,3 +158,11 @@ body the combiner accepts is accepted here. The Rust signer counts the body as s
 counts it after parsing and writing it out again, so a body padded with whitespace can be refused
 here and accepted there. The combiner forwards bodies without such padding. A body over 0.2 MB is
 answered 413, as by the TS signer.
+
+## Key version header
+
+The `odis-key-version` header must be a whole number written in decimal digits, below 2^32. The TS
+signer reads the header with JavaScript's `Number()`, so it also accepts `1.0`, `0x1` and `1e0` as
+version 1; the Rust signer answers those with 400 `CELO_ODIS_WARN_12`. For a number of 2^32 or more
+the TS signer answers 500 `CELO_ODIS_ERR_05`, because it holds no such key, and the Rust signer
+answers 400 `CELO_ODIS_WARN_12`. The combiner sends plain decimal digits.

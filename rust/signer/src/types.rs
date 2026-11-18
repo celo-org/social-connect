@@ -1,6 +1,5 @@
 use alloy::primitives::Address;
-use axum::extract::FromRequestParts;
-use axum::http::request::Parts;
+use axum::http::HeaderMap;
 use serde::{Deserialize, Serialize};
 
 use crate::errors::OdisError;
@@ -8,26 +7,32 @@ use crate::errors::OdisError;
 /// Header name for key version, matching TS `KEY_VERSION_HEADER`.
 pub const KEY_VERSION_HEADER: &str = "odis-key-version";
 
-/// Axum extractor for the optional key version header.
-/// Yields `None` when the header is absent/empty, `Some(version)` when valid,
-/// and rejects the request with `OdisError::InvalidKeyVersion` when malformed.
-#[derive(Debug)]
-pub struct KeyVersion(pub Option<u32>);
-
-impl<S: Send + Sync> FromRequestParts<S> for KeyVersion {
-    type Rejection = OdisError;
-
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        let value = parts
-            .headers
-            .get(KEY_VERSION_HEADER)
-            .and_then(|v| v.to_str().ok());
-        match parse_key_version_header(value) {
-            Some(Ok(v)) => Ok(KeyVersion(Some(v))),
-            Some(Err(())) => Err(OdisError::InvalidKeyVersion),
-            None => Ok(KeyVersion(None)),
-        }
+/// Reads the key version a request asks for from its headers. `None` when the
+/// header is absent, empty or the string `undefined`, as in TS
+/// `getRequestKeyVersion`: the request is then signed with the latest key.
+///
+/// A header that is sent more than once or is not ASCII is refused. Node joins
+/// repeated headers with a comma and the TS signer then fails to read a number
+/// from the result, so neither names a version there either.
+pub fn requested_key_version(headers: &HeaderMap) -> Result<Option<u32>, OdisError> {
+    let mut values = headers.get_all(KEY_VERSION_HEADER).iter();
+    let Some(value) = values.next() else {
+        return Ok(None);
+    };
+    if values.next().is_some() {
+        return Err(OdisError::InvalidKeyVersion);
     }
+    let value = value
+        .to_str()
+        .map_err(|_| OdisError::InvalidKeyVersion)?
+        .trim();
+    if value.is_empty() || value == "undefined" {
+        return Ok(None);
+    }
+    value
+        .parse()
+        .map(Some)
+        .map_err(|_| OdisError::InvalidKeyVersion)
 }
 
 // -- Authentication --
@@ -117,17 +122,6 @@ fn is_valid_blinded_phone_number(value: &str) -> bool {
             .is_ok()
 }
 
-/// Parses the key version header value. Returns `None` if absent or empty.
-/// Returns `Some(Ok(version))` for valid integers >= 0, `Some(Err(()))` for invalid values.
-/// Matches TS `getRequestKeyVersion` / `parseKeyVersionFromHeader`.
-fn parse_key_version_header(value: Option<&str>) -> Option<Result<u32, ()>> {
-    let value = value?.trim();
-    if value.is_empty() || value == "undefined" {
-        return None;
-    }
-    Some(value.parse::<u32>().map_err(|_| ()))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -171,23 +165,53 @@ mod tests {
         assert!(serde_json::from_str::<PnpQuotaRequest>(json).is_err());
     }
 
+    /// Headers with one key version header per given value.
+    fn key_version_headers(values: &[&[u8]]) -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        for value in values {
+            headers.append(
+                KEY_VERSION_HEADER,
+                axum::http::HeaderValue::from_bytes(value).unwrap(),
+            );
+        }
+        headers
+    }
+
     #[test]
     fn key_version_header_parsing() {
         // Absent, empty, "undefined" → None
-        assert!(parse_key_version_header(None).is_none());
-        assert!(parse_key_version_header(Some("")).is_none());
-        assert!(parse_key_version_header(Some("  ")).is_none());
-        assert!(parse_key_version_header(Some("undefined")).is_none());
+        let absent: [&[&[u8]]; 4] = [&[], &[b""], &[b"  "], &[b"undefined"]];
+        for values in absent {
+            assert_eq!(
+                requested_key_version(&key_version_headers(values)),
+                Ok(None)
+            );
+        }
 
         // Valid integers
-        assert_eq!(parse_key_version_header(Some("1")), Some(Ok(1)));
-        assert_eq!(parse_key_version_header(Some(" 3 ")), Some(Ok(3)));
-        assert_eq!(parse_key_version_header(Some("0")), Some(Ok(0)));
+        let valid: [(&[u8], u32); 4] = [(b"1", 1), (b" 3 ", 3), (b"0", 0), (b"2", 2)];
+        for (value, version) in valid {
+            assert_eq!(
+                requested_key_version(&key_version_headers(&[value])),
+                Ok(Some(version))
+            );
+        }
 
-        // Invalid
-        assert_eq!(parse_key_version_header(Some("abc")), Some(Err(())));
-        assert_eq!(parse_key_version_header(Some("-1")), Some(Err(())));
-        assert_eq!(parse_key_version_header(Some("1.5")), Some(Err(())));
+        // Invalid: not a whole number, not ASCII, or sent twice
+        let invalid: [&[&[u8]]; 6] = [
+            &[b"abc"],
+            &[b"-1"],
+            &[b"1.5"],
+            &[b"\xff1"],
+            &[b"1", b"1"],
+            &[b"", b""],
+        ];
+        for values in invalid {
+            assert_eq!(
+                requested_key_version(&key_version_headers(values)),
+                Err(OdisError::InvalidKeyVersion)
+            );
+        }
     }
 
     #[test]
@@ -245,40 +269,6 @@ mod tests {
         let req: PnpQuotaRequest = serde_json::from_str(json).unwrap();
         assert_eq!(req.account, VALID_ACCOUNT);
         assert!(req.session_id.is_none());
-    }
-
-    #[tokio::test]
-    async fn key_version_extractor() {
-        use axum::http::Request;
-
-        // No header → None
-        let (mut parts, _) = Request::builder().body(()).unwrap().into_parts();
-        let KeyVersion(v) = KeyVersion::from_request_parts(&mut parts, &())
-            .await
-            .unwrap();
-        assert!(v.is_none());
-
-        // Valid header → Some(version)
-        let (mut parts, _) = Request::builder()
-            .header(KEY_VERSION_HEADER, "2")
-            .body(())
-            .unwrap()
-            .into_parts();
-        let KeyVersion(v) = KeyVersion::from_request_parts(&mut parts, &())
-            .await
-            .unwrap();
-        assert_eq!(v, Some(2));
-
-        // Invalid header → rejection
-        let (mut parts, _) = Request::builder()
-            .header(KEY_VERSION_HEADER, "abc")
-            .body(())
-            .unwrap()
-            .into_parts();
-        let err = KeyVersion::from_request_parts(&mut parts, &())
-            .await
-            .unwrap_err();
-        assert_eq!(err, OdisError::InvalidKeyVersion);
     }
 
     #[test]

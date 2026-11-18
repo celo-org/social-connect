@@ -550,6 +550,95 @@ async fn body_length_limit_counts_characters_as_the_ts_signer_does() {
     assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
 }
 
+/// The key version header is checked where the TS signer checks it: after the
+/// API switch and the body, so a request with several faults is refused for
+/// the same one by both signers.
+#[tokio::test]
+async fn key_version_header_is_checked_after_the_api_switch_and_the_body() {
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+
+    let disabled = Config {
+        pnp_api_enabled: false,
+        ..test_config()
+    };
+    let app = build_router(disabled).await.unwrap();
+    let response = app
+        .oneshot(sign_request_with_key_version(&body, "abc"))
+        .await
+        .unwrap();
+    assert_error_body(
+        response,
+        StatusCode::SERVICE_UNAVAILABLE,
+        "CELO_ODIS_WARN_13 BAD_INPUT API is unavailable",
+    )
+    .await;
+
+    let app = build_router(test_config()).await.unwrap();
+    let invalid_body = sign_body("not-an-address", BLINDED_PHONE_NUMBER);
+    let response = app
+        .clone()
+        .oneshot(sign_request_with_key_version(&invalid_body, "abc"))
+        .await
+        .unwrap();
+    assert_error_body(
+        response,
+        StatusCode::BAD_REQUEST,
+        "CELO_ODIS_WARN_01 BAD_INPUT Invalid input parameters",
+    )
+    .await;
+
+    // With nothing else wrong, the header is what the request is refused for.
+    let response = app
+        .oneshot(sign_request_with_key_version(&body, "abc"))
+        .await
+        .unwrap();
+    assert_error_body(
+        response,
+        StatusCode::BAD_REQUEST,
+        "CELO_ODIS_WARN_12 BAD_INPUT Request key version header is invalid",
+    )
+    .await;
+}
+
+/// A key version header that is sent twice or is not ASCII names no version.
+/// The request is refused, as by the TS signer, and not signed with the first
+/// value or with the default key.
+#[tokio::test]
+async fn repeated_or_non_ascii_key_version_header_is_refused() {
+    let app = build_router(test_config()).await.unwrap();
+    let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
+    let request = || {
+        Request::builder()
+            .method("POST")
+            .uri("/sign")
+            .header("content-type", "application/json")
+    };
+
+    let repeated = request()
+        .header("odis-key-version", "1")
+        .header("odis-key-version", "1")
+        .body(Body::from(body.clone()))
+        .unwrap();
+    let non_ascii = request()
+        .header(
+            "odis-key-version",
+            axum::http::HeaderValue::from_bytes(b"\xff1").unwrap(),
+        )
+        .body(Body::from(body.clone()))
+        .unwrap();
+
+    for request in [repeated, non_ascii] {
+        let response = app.clone().oneshot(request).await.unwrap();
+        assert_error_body(
+            response,
+            StatusCode::BAD_REQUEST,
+            "CELO_ODIS_WARN_12 BAD_INPUT Request key version header is invalid",
+        )
+        .await;
+    }
+    assert_used_quota(&app, 0).await;
+}
+
 #[tokio::test]
 async fn sign_then_quota_reflects_updated_count() {
     let app = build_router(test_config()).await.unwrap();
