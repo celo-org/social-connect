@@ -143,7 +143,6 @@ async fn seed_legacy(pool: &PgPool) {
 fn pg_config(url: &str, migrate_legacy_data: bool) -> Config {
     Config {
         server_port: 8080,
-        pnp_api_enabled: true,
         keystore_type: KeystoreType::Mock,
         pnp_key_name_base: "phoneNumberPrivacy".to_string(),
         pnp_latest_key_version: 1,

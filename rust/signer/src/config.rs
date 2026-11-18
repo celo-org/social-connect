@@ -30,7 +30,6 @@ pub enum DatabaseConfig {
 #[derive(Debug, Clone)]
 pub struct Config {
     pub server_port: u16,
-    pub pnp_api_enabled: bool,
     pub keystore_type: KeystoreType,
     pub pnp_key_name_base: String,
     pub pnp_latest_key_version: u32,
@@ -93,7 +92,6 @@ impl Config {
 
         let config = Config {
             server_port: parse_env("SERVER_PORT", Some(8080))?,
-            pnp_api_enabled: parse_env_bool("PHONE_NUMBER_PRIVACY_API_ENABLED", Some(false))?,
             keystore_type: parse_keystore_type()?,
             pnp_key_name_base: parse_env_string(
                 "PHONE_NUMBER_PRIVACY_KEY_NAME_BASE",
@@ -327,7 +325,6 @@ mod tests {
     unsafe fn clear_env() {
         for key in [
             "SERVER_PORT",
-            "PHONE_NUMBER_PRIVACY_API_ENABLED",
             "KEYSTORE_TYPE",
             "PHONE_NUMBER_PRIVACY_KEY_NAME_BASE",
             "PHONE_NUMBER_PRIVACY_LATEST_KEY_VERSION",
@@ -369,7 +366,6 @@ mod tests {
         let config = Config::from_env().unwrap();
 
         assert_eq!(config.server_port, 8080);
-        assert!(!config.pnp_api_enabled);
         assert_eq!(config.keystore_type, KeystoreType::Mock);
         assert_eq!(config.pnp_key_name_base, "phoneNumberPrivacy");
         assert_eq!(config.pnp_latest_key_version, 1);
@@ -403,7 +399,6 @@ mod tests {
         unsafe {
             clear_env();
             set("SERVER_PORT", "9090");
-            set("PHONE_NUMBER_PRIVACY_API_ENABLED", "true");
             set("KEYSTORE_TYPE", "GoogleSecretManager");
             set("KEYSTORE_GOOGLE_PROJECT_ID", "my-gcp-project");
             set("PHONE_NUMBER_PRIVACY_KEY_NAME_BASE", "mykey");
@@ -431,7 +426,6 @@ mod tests {
         let config = Config::from_env().unwrap();
 
         assert_eq!(config.server_port, 9090);
-        assert!(config.pnp_api_enabled);
         assert_eq!(config.keystore_type, KeystoreType::GoogleSecretManager);
         assert_eq!(config.google_project_id.as_deref(), Some("my-gcp-project"));
         assert_eq!(config.pnp_key_name_base, "mykey");
@@ -525,23 +519,39 @@ mod tests {
         ));
     }
 
+    /// The PNP API has no switch. The TS signer's variable for it is not read,
+    /// so no value of it stops the signer.
     #[test]
-    fn invalid_bool_is_error() {
+    fn ts_signer_pnp_api_switch_is_not_read() {
         let _lock = ENV_LOCK.lock().unwrap();
-        // The TS signer reads `1` as false; reading it as true would switch
-        // the API on with the same manifest.
-        for value in ["yes", "1", "0"] {
+        for value in ["true", "false", "1", ""] {
             unsafe {
                 clear_env();
                 set("KEYSTORE_TYPE", "Mock");
                 set("PHONE_NUMBER_PRIVACY_API_ENABLED", value);
+            }
+            assert!(Config::from_env().is_ok(), "{value}");
+        }
+        unsafe { env::remove_var("PHONE_NUMBER_PRIVACY_API_ENABLED") };
+    }
+
+    #[test]
+    fn invalid_bool_is_error() {
+        let _lock = ENV_LOCK.lock().unwrap();
+        // The TS signer reads `1` as false; reading it as true would switch
+        // a setting on with the same manifest.
+        for value in ["yes", "1", "0"] {
+            unsafe {
+                clear_env();
+                set("KEYSTORE_TYPE", "Mock");
+                set("MIGRATE_LEGACY_DATA", value);
             }
 
             assert!(
                 matches!(
                     Config::from_env().unwrap_err(),
                     ConfigError::InvalidValue { ref name, .. }
-                        if name == "PHONE_NUMBER_PRIVACY_API_ENABLED"
+                        if name == "MIGRATE_LEGACY_DATA"
                 ),
                 "{value}"
             );
@@ -550,9 +560,9 @@ mod tests {
             unsafe {
                 clear_env();
                 set("KEYSTORE_TYPE", "Mock");
-                set("PHONE_NUMBER_PRIVACY_API_ENABLED", value);
+                set("MIGRATE_LEGACY_DATA", value);
             }
-            assert_eq!(Config::from_env().unwrap().pnp_api_enabled, expected);
+            assert_eq!(Config::from_env().unwrap().migrate_legacy_data, expected);
         }
     }
 

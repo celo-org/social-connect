@@ -39,7 +39,6 @@ fn test_config() -> Config {
 fn test_config_with_db(db_path: &str) -> Config {
     Config {
         server_port: 8080,
-        pnp_api_enabled: true,
         keystore_type: KeystoreType::Mock,
         pnp_key_name_base: "phoneNumberPrivacy".to_string(),
         pnp_latest_key_version: 1,
@@ -431,24 +430,6 @@ async fn request_validation_matches_the_ts_signer() {
             .unwrap();
         assert_eq!(response.status(), StatusCode::OK, "{uri}");
     }
-
-    // With the API disabled, a valid request is refused too.
-    let mut config = test_config();
-    config.pnp_api_enabled = false;
-    let disabled = build_router(config).await.unwrap();
-    for uri in ENDPOINTS {
-        let response = disabled
-            .clone()
-            .oneshot(post_request(uri, &extra_field))
-            .await
-            .unwrap();
-        assert_error_body(
-            response,
-            StatusCode::SERVICE_UNAVAILABLE,
-            "CELO_ODIS_WARN_13 BAD_INPUT API is unavailable",
-        )
-        .await;
-    }
 }
 
 /// Asserts the body the TS signer sends when it cannot fetch the key or compute
@@ -551,27 +532,11 @@ async fn body_length_limit_counts_characters_as_the_ts_signer_does() {
 }
 
 /// The key version header is checked where the TS signer checks it: after the
-/// API switch and the body, so a request with several faults is refused for
-/// the same one by both signers.
+/// body, so a request with several faults is refused for the same one by both
+/// signers.
 #[tokio::test]
-async fn key_version_header_is_checked_after_the_api_switch_and_the_body() {
+async fn key_version_header_is_checked_after_the_body() {
     let body = sign_body(ACCOUNT, BLINDED_PHONE_NUMBER);
-
-    let disabled = Config {
-        pnp_api_enabled: false,
-        ..test_config()
-    };
-    let app = build_router(disabled).await.unwrap();
-    let response = app
-        .oneshot(sign_request_with_key_version(&body, "abc"))
-        .await
-        .unwrap();
-    assert_error_body(
-        response,
-        StatusCode::SERVICE_UNAVAILABLE,
-        "CELO_ODIS_WARN_13 BAD_INPUT API is unavailable",
-    )
-    .await;
 
     let app = build_router(test_config()).await.unwrap();
     let invalid_body = sign_body("not-an-address", BLINDED_PHONE_NUMBER);
