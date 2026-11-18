@@ -5,7 +5,7 @@ use ::metrics::{counter, histogram};
 use alloy::primitives::Address;
 use async_trait::async_trait;
 
-use super::{PnpRequestService, RecordOutcome};
+use super::{PnpRequestService, RecordOutcome, RecordedRequest};
 use crate::errors::OdisError;
 use crate::metrics;
 
@@ -41,7 +41,7 @@ impl PnpRequestService for MeteredPnpRequestService {
         &self,
         address: Address,
         blinded_query: &str,
-    ) -> Result<Option<String>, OdisError> {
+    ) -> Result<Option<RecordedRequest>, OdisError> {
         let start = Instant::now();
         let result = self
             .inner
@@ -63,12 +63,13 @@ impl PnpRequestService for MeteredPnpRequestService {
         address: Address,
         blinded_query: &str,
         signature: &str,
+        key_version: u32,
         total_quota: u32,
     ) -> Result<RecordOutcome, OdisError> {
         let start = Instant::now();
         let result = self
             .inner
-            .record_request(address, blinded_query, signature, total_quota)
+            .record_request(address, blinded_query, signature, key_version, total_quota)
             .await;
         let elapsed = start.elapsed().as_secs_f64();
 
@@ -137,7 +138,7 @@ mod tests {
         let metered = test_metered().await;
         let addr = address!("0x0000000000000000000000000000000000007E57");
 
-        let result = metered.record_request(addr, "query", "sig", 10).await;
+        let result = metered.record_request(addr, "query", "sig", 1, 10).await;
         assert_eq!(
             result.unwrap(),
             RecordOutcome::Recorded {
