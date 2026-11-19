@@ -179,8 +179,8 @@ answers 400 `CELO_ODIS_WARN_12`. The combiner sends plain decimal digits.
 
 ## Authentication
 
-A request that comes through the combiner is authenticated as by the TS signer, with the one
-exception at the end of this section. The other differences show only to a caller that reaches a
+A request that comes through the combiner is authenticated as by the TS signer, with the two
+exceptions at the end of this section. The other differences show only to a caller that reaches a
 signer directly.
 
 The signature is checked over the body as sent. The TS signer parses the body and checks the
@@ -196,7 +196,7 @@ signer. A TS signer called directly answers it with 500 `CELO_ODIS_ERR_27`.
 A wallet-key signature may be sent without its `0x` prefix. The TS signer and the combiner answer
 that with 401.
 
-The exception: a malformed wallet-key signature that the TS services accept is refused here. They
+The first exception: a malformed wallet-key signature that the TS services accept is refused here. They
 drop the first two characters of the signature whatever they are and read 65 bytes from there. So
 they accept a signature that starts with `0X` or any other two characters, one with text after it,
 one of 66 bytes, and in some cases one that lacks its last character. The Rust signer wants an
@@ -204,3 +204,9 @@ optional `0x` and exactly 65 bytes of hex, and answers anything else with 401 `C
 The combiner forwards the signature unchanged, so for such a request TS signers sign and charge
 while Rust signers refuse. This is deliberate. Both accept a well-formed signature, and only a
 client that sends a malformed one sees the difference.
+
+The second exception: a DEK signature must be a JSON array of DER bytes, the form the SDK writes.
+The TS services hand the parsed header to elliptic, which also accepts the DER as a hex string in
+quotes and an object of hex `r` and `s`. The Rust signer answers those with 401
+`CELO_ODIS_WARN_02`. The combiner forwards them unchanged, so TS signers sign and charge while Rust
+signers refuse. The SDK never sends these forms; whether another client does is not yet known.
