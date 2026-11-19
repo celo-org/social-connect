@@ -1,0 +1,51 @@
+{
+  "source": "@celo/utils 8.0.0 signMessage and verifySignature, viem 2.37.9 signMessage",
+  "account": "0x2c7536E3605D9C16a7a3D7b1898e529396a65c23",
+  "vectors": [
+    {
+      "description": "ASCII only",
+      "body": "{\"account\":\"0x2c7536E3605D9C16a7a3D7b1898e529396a65c23\",\"blindedQueryPhoneNumber\":\"n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB\",\"sessionID\":\"session\"}",
+      "utf16Length": 171,
+      "byteLength": 171,
+      "celoUtilsSignature": "0x1c47e0bcaa40f11dc1a0485f62f2bd0384bbb7438723ebc6a4baae6877c35acb7b4b75de4091c3e0077fcfbac1687f61d49b696a479e6d8ba51fd9640dae9e4d27",
+      "standardSignature": "0x47e0bcaa40f11dc1a0485f62f2bd0384bbb7438723ebc6a4baae6877c35acb7b4b75de4091c3e0077fcfbac1687f61d49b696a479e6d8ba51fd9640dae9e4d271c",
+      "tsAcceptsStandardSignature": true
+    },
+    {
+      "description": "a two-byte character",
+      "body": "{\"account\":\"0x2c7536E3605D9C16a7a3D7b1898e529396a65c23\",\"blindedQueryPhoneNumber\":\"n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB\",\"sessionID\":\"sé\"}",
+      "utf16Length": 166,
+      "byteLength": 167,
+      "celoUtilsSignature": "0x1cb9ed1f9183a1f123ea714820611dca80ffbc52273c1af0f952766e307e2de5bd568294cd522218b18eaec0026abf7fd21d76681652853bea69d1a239078f3a9d",
+      "standardSignature": "0xb6632ce94ca0671924019c114e88b18e6558a70e71388faa8975c4cf953877355e706d23ff51c1e9106f9c294d7cb435d38c979dbab53859f6ddfe76e6183ec51b",
+      "tsAcceptsStandardSignature": false
+    },
+    {
+      "description": "a three-byte character",
+      "body": "{\"account\":\"0x2c7536E3605D9C16a7a3D7b1898e529396a65c23\",\"blindedQueryPhoneNumber\":\"n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB\",\"sessionID\":\"s€\"}",
+      "utf16Length": 166,
+      "byteLength": 168,
+      "celoUtilsSignature": "0x1c5b7e0bfb4dc235916fb902c1fb6ba8309e7cc249acc9352f97069b32878acfc306e507bf02b474dd5ac655cc49a7ba6f4e53ddf86afbaedab3246fa5988f1b2e",
+      "standardSignature": "0x845c422798f5ab0f22028d49e4d853babf8adad539ad42624068d157432a292646537f9aea7d2ac7cb1ad983ca4e7ad593323741c74689cca2ff594c885f22471b",
+      "tsAcceptsStandardSignature": false
+    },
+    {
+      "description": "a character outside the BMP, a surrogate pair in UTF-16",
+      "body": "{\"account\":\"0x2c7536E3605D9C16a7a3D7b1898e529396a65c23\",\"blindedQueryPhoneNumber\":\"n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB\",\"sessionID\":\"s😀\"}",
+      "utf16Length": 167,
+      "byteLength": 169,
+      "celoUtilsSignature": "0x1c092c223753f02930f3d2e070ee8003b6d3d2c57a9e82fd9d3552ada77a70f1fc1f6f11c6f32d4088b6f7ea269b19aa0fd223323bea507bfbc6f95d69475a5074",
+      "standardSignature": "0x5a10fca9b9dc5b0ff38e6e56c89ae12d7952ffa551cc7859325cd3dbd5e9a8cc16402c0e032f064b6eddb3fe01049ff17c8bcf3b05c682db8850a1fb3389e5b31b",
+      "tsAcceptsStandardSignature": false
+    },
+    {
+      "description": "all of them",
+      "body": "{\"account\":\"0x2c7536E3605D9C16a7a3D7b1898e529396a65c23\",\"blindedQueryPhoneNumber\":\"n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB\",\"sessionID\":\"sé€😀\"}",
+      "utf16Length": 169,
+      "byteLength": 174,
+      "celoUtilsSignature": "0x1be4d77f78ce085c2546776743aba686c9a0452695dc3b2bbe1f1f6b73bf95f5f92cbd4835bd6a402c0746224a33944df99774ffaeb7e6c4700fa07e7f288ec9ae",
+      "standardSignature": "0x324945144b020b8a05fecfd1b19f139495c68cc6aa44969c72c1908033f894d123b3fc348dc33c3c3c8aa4344da55184c0cbe2c74eaf0fc0ae7064aa1cd6767d1c",
+      "tsAcceptsStandardSignature": false
+    }
+  ]
+}

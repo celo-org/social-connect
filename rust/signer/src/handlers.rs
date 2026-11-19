@@ -1,0 +1,313 @@
+use ::metrics::{counter, histogram};
+use alloy::primitives::Address;
+use axum::Json;
+use axum::body::Bytes;
+use axum::extract::State;
+use axum::http::HeaderMap;
+use axum::response::IntoResponse;
+use base64::{Engine, engine::general_purpose::STANDARD as BASE64};
+use serde::de::DeserializeOwned;
+
+use crate::account_service::PnpAccount;
+use crate::auth::{Authorization, authenticate_user};
+use crate::errors::OdisError;
+use crate::metrics as metric_names;
+use crate::request_service::RecordOutcome;
+use crate::server::AppState;
+use crate::types::{
+    AuthenticationMethod, KEY_VERSION_HEADER, PnpQuotaRequest, PnpQuotaResponseSuccess,
+    SignMessageRequest, SignMessageResponseSuccess, requested_key_version,
+};
+
+/// Duplicate request warning, matching TS `WarningMessage.DUPLICATE_REQUEST_TO_GET_PARTIAL_SIG`.
+const DUPLICATE_REQUEST_WARNING: &str =
+    "CELO_ODIS_WARN_04 BAD_INPUT Attempt to replay partial signature request";
+
+/// Longest request body accepted, matching TS `REASONABLE_BODY_CHAR_LIMIT`.
+const BODY_CHAR_LIMIT: usize = 16_000;
+
+/// Parses a request body, refusing one that is too long or is not valid JSON
+/// for `T`.
+///
+/// The length is counted in UTF-16 code units, not bytes, because the TS signer
+/// and the combiner count the characters of a JavaScript string. A body that
+/// the combiner forwards must get the same answer here as from a TS signer.
+///
+/// TODO: remove this length check once the Rust combiner has replaced the TS
+/// combiner. It exists only to agree with JavaScript's count; the transport
+/// limit in `server.rs` can then be the one limit, in bytes.
+fn parse_body<T: DeserializeOwned>(body: &[u8]) -> Result<T, OdisError> {
+    let text = std::str::from_utf8(body).map_err(|_| OdisError::InvalidInput)?;
+    if text.encode_utf16().count() > BODY_CHAR_LIMIT {
+        return Err(OdisError::InvalidInput);
+    }
+    serde_json::from_str(text).map_err(|_| OdisError::InvalidInput)
+}
+
+/// Domain endpoints are not yet implemented in the Rust port.
+/// Return 503 ApiUnavailable, matching the TS signer's disabled-API behavior.
+pub async fn domain_sign_handler() -> OdisError {
+    OdisError::ApiUnavailable
+}
+
+pub async fn domain_quota_handler() -> OdisError {
+    OdisError::ApiUnavailable
+}
+
+pub async fn domain_disable_handler() -> OdisError {
+    OdisError::ApiUnavailable
+}
+
+pub async fn status_handler() -> impl IntoResponse {
+    Json(serde_json::json!({
+        "version": env!("CARGO_PKG_VERSION"),
+    }))
+}
+
+/// Looks up the account and authenticates the request against it. Both PNP
+/// endpoints go through here, so they count and verify requests the same way.
+///
+/// Like the TS signer, a request that names `wallet_key` is counted before its
+/// signature is checked. The signature is only checked when a full node is
+/// configured, because the DEK comes from chain. Returns `Err(401)` when the
+/// check fails.
+async fn authenticated_account(
+    state: &AppState,
+    body: &[u8],
+    authorization: &Authorization,
+    address: Address,
+    authentication_method: Option<AuthenticationMethod>,
+) -> Result<PnpAccount, OdisError> {
+    let account = state.account_service.get_account(address).await?;
+
+    if authentication_method == Some(AuthenticationMethod::WalletKey) {
+        counter!(metric_names::REQUESTS_WITH_WALLET_ADDRESS).increment(1);
+    }
+
+    if state.config.blockchain_provider.is_some()
+        && !authenticate_user(
+            body,
+            authorization.0.as_deref(),
+            address,
+            authentication_method,
+            Some(account.dek.as_str()).filter(|s| !s.is_empty()),
+        )
+    {
+        return Err(OdisError::UnauthenticatedUser);
+    }
+    Ok(account)
+}
+
+pub async fn pnp_quota_handler(
+    State(state): State<AppState>,
+    authorization: Authorization,
+    body: Bytes,
+) -> Result<impl IntoResponse, OdisError> {
+    let request: PnpQuotaRequest = parse_body(&body)?;
+
+    let account = authenticated_account(
+        &state,
+        &body,
+        &authorization,
+        request.account,
+        request.authentication_method,
+    )
+    .await?;
+
+    let used_quota = state
+        .request_service
+        .get_used_quota(request.account)
+        .await
+        .map_err(|_| OdisError::FailureToGetPerformedQueryCount)?;
+    let total_quota = account.pnp_total_quota;
+
+    Ok(Json(PnpQuotaResponseSuccess {
+        success: true,
+        version: env!("CARGO_PKG_VERSION").to_string(),
+        performed_query_count: used_quota,
+        total_quota,
+        warnings: vec![],
+    }))
+}
+
+/// Fetches the signing key and computes the blind partial signature, base64
+/// encoded. Returns `None` when the key cannot be fetched or the computation
+/// fails, after logging the cause: like the TS signer, the caller reports both
+/// as a signature computation failure.
+async fn compute_signature(
+    state: &AppState,
+    key_version: u32,
+    blinded_query: &str,
+) -> Option<String> {
+    let hex_key = state
+        .key_provider
+        .get_key(&state.config.pnp_key_name_base, key_version)
+        .await
+        .inspect_err(|e| tracing::error!("failed to fetch key version {key_version}: {e}"))
+        .ok()?;
+    let key_bytes = hex::decode(&hex_key)
+        .inspect_err(|e| tracing::error!("key version {key_version} is not valid hex: {e}"))
+        .ok()?;
+    let blinded_msg = BASE64
+        .decode(blinded_query)
+        .inspect_err(|e| tracing::error!("blinded message is not valid base64: {e}"))
+        .ok()?;
+    let sig_bytes = crate::crypto::compute_blinded_signature(&blinded_msg, &key_bytes)
+        .inspect_err(|e| {
+            counter!(metric_names::SIGNATURE_COMPUTATION_ERRORS).increment(1);
+            tracing::error!("signature computation failed: {e}");
+        })
+        .ok()?;
+    Some(BASE64.encode(&sig_bytes))
+}
+
+pub async fn pnp_sign_handler(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    authorization: Authorization,
+    body: Bytes,
+) -> Result<impl IntoResponse, OdisError> {
+    // The request runs in its own task so that it is finished and charged even
+    // when this handler is dropped, which happens when the caller disconnects or
+    // the request times out. The combiner disconnects from the slower signers as
+    // soon as it has enough partial signatures; if those signers then skipped the
+    // charge, their counts for the account would fall behind the others. The TS
+    // signer finishes such requests too. A retry is served the stored signature.
+    let task = tokio::spawn(sign(state, headers, authorization, body));
+    match task.await {
+        Ok(result) => result,
+        Err(join_error) => match join_error.try_into_panic() {
+            Ok(panic) => std::panic::resume_unwind(panic),
+            Err(_) => Err(OdisError::Unknown),
+        },
+    }
+}
+
+/// Authenticates, signs and records one PNP sign request.
+async fn sign(
+    state: AppState,
+    headers: HeaderMap,
+    authorization: Authorization,
+    body: Bytes,
+) -> Result<(HeaderMap, Json<SignMessageResponseSuccess>), OdisError> {
+    let request: SignMessageRequest = parse_body(&body)?;
+    request.validate()?;
+    // Read after the body is validated, as in the TS signer, so that a request
+    // with both an invalid body and an invalid header is refused for its body.
+    let key_version =
+        requested_key_version(&headers)?.unwrap_or(state.config.pnp_latest_key_version);
+
+    let account = authenticated_account(
+        &state,
+        &body,
+        &authorization,
+        request.account,
+        request.authentication_method,
+    )
+    .await?;
+
+    let duplicate = state
+        .request_service
+        .get_duplicate_request(request.account, &request.blinded_query_phone_number)
+        .await?;
+    let is_duplicate = duplicate.is_some();
+    // The signature on record answers this request only if it is known to have
+    // been made with the key version this request resolves to. A record of
+    // another version, or of an unknown one, still marks the query as charged,
+    // but the request is signed again.
+    let stored_signature = duplicate
+        .filter(|recorded| recorded.key_version == Some(key_version))
+        .map(|recorded| recorded.signature);
+
+    let used_quota = state
+        .request_service
+        .get_used_quota(request.account)
+        .await
+        .map_err(|_| OdisError::FailureToGetPerformedQueryCount)?;
+    let total_quota = account.pnp_total_quota;
+
+    // Recorded before the quota check, as the TS signer does, so that requests
+    // refused for lack of quota are included.
+    histogram!(metric_names::USER_REMAINING_QUOTA, "endpoint" => "/sign")
+        .record(f64::from(total_quota) - f64::from(used_quota));
+
+    // If not a duplicate, check quota
+    if !is_duplicate && used_quota >= total_quota {
+        return Err(OdisError::ExceededQuota {
+            total_quota,
+            performed_query_count: used_quota,
+        });
+    }
+
+    let (signature, performed_query_count, warnings) = if let Some(sig) = stored_signature {
+        counter!(metric_names::DUPLICATE_REQUESTS).increment(1);
+        (sig, used_quota, vec![DUPLICATE_REQUEST_WARNING.to_string()])
+    } else {
+        // The reads above are a fast path that spares the keystore round trip
+        // and the signing work. Duplicate detection and the quota bound are
+        // decided authoritatively by `record_request` below.
+        let signature = compute_signature(&state, key_version, &request.blinded_query_phone_number)
+            .await
+            .ok_or(OdisError::SignatureComputationFailure {
+                total_quota,
+                performed_query_count: used_quota,
+            })?;
+
+        // Record the request
+        match state
+            .request_service
+            .record_request(
+                request.account,
+                &request.blinded_query_phone_number,
+                &signature,
+                key_version,
+                total_quota,
+            )
+            .await
+            .map_err(|_| OdisError::DatabaseInsertFailure)?
+        {
+            RecordOutcome::Recorded {
+                performed_query_count,
+            } => (signature, performed_query_count, vec![]),
+            // The query is already charged: a concurrent request won the race,
+            // or the record holds a signature that could not be served for this
+            // key version. The signature computed above is the answer either
+            // way, because it was made with the key this request asked for.
+            RecordOutcome::Duplicate {
+                performed_query_count,
+            } => {
+                counter!(metric_names::DUPLICATE_REQUESTS).increment(1);
+                (
+                    signature,
+                    performed_query_count,
+                    vec![DUPLICATE_REQUEST_WARNING.to_string()],
+                )
+            }
+            // Concurrent requests drained the remaining quota after the check
+            // above passed.
+            RecordOutcome::QuotaExceeded {
+                performed_query_count,
+            } => {
+                return Err(OdisError::ExceededQuota {
+                    total_quota,
+                    performed_query_count,
+                });
+            }
+        }
+    };
+
+    let mut response_headers = HeaderMap::new();
+    response_headers.insert(KEY_VERSION_HEADER, key_version.to_string().parse().unwrap());
+
+    Ok((
+        response_headers,
+        Json(SignMessageResponseSuccess {
+            success: true,
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            signature,
+            performed_query_count,
+            total_quota,
+            warnings,
+        }),
+    ))
+}

@@ -1,0 +1,907 @@
+//! Integration tests for the PostgreSQL backend and the legacy TS -> canonical
+//! data migration, run against a real Postgres via testcontainers.
+//!
+//! These require Docker. When Docker is unavailable (e.g. local dev without a
+//! daemon) each test logs a skip notice and returns green instead of failing.
+
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+
+use alloy::primitives::Address;
+use axum::body::Body;
+use axum::http::{Request, StatusCode};
+use http_body_util::BodyExt;
+use sqlx::PgPool;
+use sqlx::postgres::PgPoolOptions;
+use tower::ServiceExt;
+
+use testcontainers_modules::postgres::Postgres;
+use testcontainers_modules::testcontainers::ContainerAsync;
+use testcontainers_modules::testcontainers::ImageExt;
+use testcontainers_modules::testcontainers::runners::AsyncRunner;
+
+use odis_signer::account_service::MockAccountService;
+use odis_signer::config::{Config, DatabaseConfig, KeystoreType, LogFormat};
+use odis_signer::errors::OdisError;
+use odis_signer::key_management::{KeyProvider, MockKeyProvider};
+use odis_signer::request_service::{
+    PnpRequestService, PostgresPnpRequestService, RecordOutcome, RecordedRequest,
+};
+use odis_signer::server::build_router_with_services;
+
+/// The default of `DB_TIMEOUT`.
+const DB_TIMEOUT: Duration = Duration::from_millis(1000);
+
+/// The same checksummed address in mixed and lower case; both must collapse to
+/// one canonical account during migration.
+const VITALIK_CHECKSUMMED: &str = "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045";
+const VITALIK_LOWERCASE: &str = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
+const TEST_ADDRESS: &str = "0x0000000000000000000000000000000000007E57";
+
+/// Install a `tracing` subscriber so the migration's progress and summary logs
+/// are printed. Idempotent across tests; honors `RUST_LOG` (defaults to `info`).
+/// Output is shown when running with `cargo nextest run --no-capture`.
+fn init_logging() {
+    use tracing_subscriber::EnvFilter;
+    let _ = tracing_subscriber::fmt()
+        .with_test_writer()
+        .with_env_filter(EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()))
+        .try_init();
+}
+
+/// Postgres image tag the tests run against: the major version the deployed
+/// signer databases use.
+const POSTGRES_IMAGE_TAG: &str = "16-alpine";
+
+/// Start a Postgres container, returning `None` (with a skip notice) when Docker
+/// is unavailable. The returned container must stay in scope for the test.
+///
+/// When `ODIS_REQUIRE_POSTGRES_TESTS` is set (CI does this), a Docker failure is
+/// a hard error instead of a skip, so the Postgres suite can never silently
+/// no-op and hide a regression.
+async fn start_postgres() -> Option<(ContainerAsync<Postgres>, String)> {
+    match Postgres::default()
+        .with_tag(POSTGRES_IMAGE_TAG)
+        .start()
+        .await
+    {
+        Ok(node) => {
+            let port = node
+                .get_host_port_ipv4(5432_u16)
+                .await
+                .expect("failed to get mapped Postgres port");
+            let url = format!("postgres://postgres:postgres@127.0.0.1:{port}/postgres");
+            Some((node, url))
+        }
+        Err(e) => {
+            if std::env::var_os("ODIS_REQUIRE_POSTGRES_TESTS").is_some() {
+                panic!("Postgres tests are required but Docker is unavailable: {e}");
+            }
+            eprintln!("skipping Postgres integration test (Docker unavailable): {e}");
+            None
+        }
+    }
+}
+
+/// Create the legacy TS tables and seed them with data exercising every cleanup
+/// path: mixed casing, NULL num_lookups, NULL signature, unparseable addresses,
+/// and duplicate (address, blinded_query) pairs.
+async fn seed_legacy(pool: &PgPool) {
+    sqlx::query(
+        r#"CREATE TABLE "accountsOnChain" (
+            address varchar(255) NOT NULL PRIMARY KEY,
+            created_at timestamptz NOT NULL,
+            num_lookups integer
+        )"#,
+    )
+    .execute(pool)
+    .await
+    .unwrap();
+
+    sqlx::query(
+        r#"CREATE TABLE "requestsOnChain" (
+            caller_address varchar(255) NOT NULL,
+            timestamp timestamptz NOT NULL,
+            blinded_query varchar(255) NOT NULL,
+            signature varchar(255),
+            PRIMARY KEY (caller_address, blinded_query, timestamp)
+        )"#,
+    )
+    .execute(pool)
+    .await
+    .unwrap();
+
+    sqlx::query(
+        r#"INSERT INTO "accountsOnChain" (address, created_at, num_lookups) VALUES
+            ($1, '2020-01-01 00:00:00+00', 3),
+            ($2, '2021-01-01 00:00:00+00', 4),
+            ($3, '2022-01-01 00:00:00+00', NULL),
+            ('not-an-address', '2022-06-01 00:00:00+00', 9)"#,
+    )
+    .bind(VITALIK_CHECKSUMMED)
+    .bind(VITALIK_LOWERCASE)
+    .bind(TEST_ADDRESS)
+    .execute(pool)
+    .await
+    .unwrap();
+
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature) VALUES
+            ($1, '2023-01-01 00:00:00+00', 'q1', 'sigA'),
+            ($2, '2023-06-01 00:00:00+00', 'q1', 'sigB'),
+            ($3, '2023-01-01 00:00:00+00', 'q2', NULL),
+            ('bad-addr',                   '2023-01-01 00:00:00+00', 'q3', 'sigC')"#,
+    )
+    .bind(VITALIK_LOWERCASE)
+    .bind(VITALIK_CHECKSUMMED)
+    .bind(TEST_ADDRESS)
+    .execute(pool)
+    .await
+    .unwrap();
+}
+
+fn pg_config(url: &str, migrate_legacy_data: bool) -> Config {
+    Config {
+        server_port: 8080,
+        keystore_type: KeystoreType::Mock,
+        pnp_key_name_base: "phoneNumberPrivacy".to_string(),
+        pnp_latest_key_version: 1,
+        database: DatabaseConfig::Postgres {
+            url: url.to_string(),
+        },
+        migrate_legacy_data,
+        db_timeout_ms: 1000,
+        blockchain_provider: None,
+        blockchain_api_key: None,
+        chain_id: 11142220,
+        accounts_contract_address: None,
+        odis_payments_contract_address: None,
+        full_node_retry_count: 5,
+        full_node_retry_delay_ms: 100,
+        full_node_timeout_ms: 1000,
+        timeout_ms: 5000,
+        query_price_per_cusd: 0.001,
+        google_project_id: None,
+        request_pruning_days: 7,
+        request_pruning_interval_secs: 86400,
+        log_format: LogFormat::Text,
+    }
+}
+
+#[tokio::test]
+async fn postgres_backend_behaviour() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    let addr: Address = TEST_ADDRESS.parse().unwrap();
+    let other: Address = "0x0000000000000000000000000000000000000001"
+        .parse()
+        .unwrap();
+
+    assert_eq!(svc.get_used_quota(addr).await.unwrap(), 0);
+    assert_eq!(svc.get_duplicate_request(addr, "q1").await.unwrap(), None);
+
+    assert_eq!(
+        svc.record_request(addr, "q1", "sig1", 1, 10).await.unwrap(),
+        RecordOutcome::Recorded {
+            performed_query_count: 1
+        }
+    );
+    assert_eq!(svc.get_used_quota(addr).await.unwrap(), 1);
+    assert_eq!(
+        svc.get_duplicate_request(addr, "q1").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "sig1".to_string(),
+            key_version: Some(1),
+        })
+    );
+
+    // A different query increments quota again.
+    assert_eq!(
+        svc.record_request(addr, "q2", "sig2", 1, 10).await.unwrap(),
+        RecordOutcome::Recorded {
+            performed_query_count: 2
+        }
+    );
+    assert_eq!(svc.get_used_quota(addr).await.unwrap(), 2);
+
+    // Re-recording a stored query is not charged and leaves the record as it
+    // was, under the same key version and under another one.
+    for key_version in [1, 2] {
+        assert_eq!(
+            svc.record_request(addr, "q1", "other-sig", key_version, 10)
+                .await
+                .unwrap(),
+            RecordOutcome::Duplicate {
+                performed_query_count: 2,
+            }
+        );
+    }
+    assert_eq!(svc.get_used_quota(addr).await.unwrap(), 2);
+    assert_eq!(
+        svc.get_duplicate_request(addr, "q1").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "sig1".to_string(),
+            key_version: Some(1),
+        })
+    );
+
+    // The quota bound is enforced by the write itself, and a rejected request
+    // leaves no row behind.
+    assert_eq!(
+        svc.record_request(addr, "q3", "sig3", 1, 2).await.unwrap(),
+        RecordOutcome::QuotaExceeded {
+            performed_query_count: 2
+        }
+    );
+    assert_eq!(svc.get_duplicate_request(addr, "q3").await.unwrap(), None);
+
+    // Zero quota rejects an account that has no row yet.
+    assert_eq!(
+        svc.record_request(other, "q1", "sig1", 1, 0).await.unwrap(),
+        RecordOutcome::QuotaExceeded {
+            performed_query_count: 0
+        }
+    );
+
+    // Accounts are independent.
+    assert_eq!(svc.get_used_quota(other).await.unwrap(), 0);
+
+    // Freshly inserted rows aren't pruned by a 7-day cutoff, but a 0-day cutoff
+    // removes everything.
+    assert_eq!(svc.delete_old_requests(7).await.unwrap(), 0);
+    assert_eq!(svc.delete_old_requests(0).await.unwrap(), 2);
+    assert_eq!(svc.get_duplicate_request(addr, "q1").await.unwrap(), None);
+}
+
+/// Fire `queries` at the service concurrently and collect the outcomes. The
+/// requests alternate between key versions 1 and 2.
+async fn record_concurrently(
+    svc: &Arc<PostgresPnpRequestService>,
+    addr: Address,
+    queries: Vec<String>,
+    total_quota: u32,
+) -> Vec<RecordOutcome> {
+    let handles: Vec<_> = queries
+        .into_iter()
+        .enumerate()
+        .map(|(i, query)| {
+            let svc = Arc::clone(svc);
+            let key_version = 1 + (i % 2) as u32;
+            tokio::spawn(async move {
+                let signature = format!("sig-{query}-v{key_version}");
+                svc.record_request(addr, &query, &signature, key_version, total_quota)
+                    .await
+                    .unwrap()
+            })
+        })
+        .collect();
+
+    let mut outcomes = Vec::new();
+    for handle in handles {
+        outcomes.push(handle.await.unwrap());
+    }
+    outcomes
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn concurrent_identical_requests_charge_quota_once() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = Arc::new(
+        PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+            .await
+            .unwrap(),
+    );
+    let addr: Address = TEST_ADDRESS.parse().unwrap();
+
+    let outcomes = record_concurrently(&svc, addr, vec!["same".to_string(); 8], 100).await;
+
+    let recorded = outcomes
+        .iter()
+        .filter(|o| matches!(o, RecordOutcome::Recorded { .. }))
+        .count();
+    assert_eq!(recorded, 1, "exactly one racer should win the slot");
+
+    // Every loser learns that the query is on record, rather than failing on
+    // the primary key.
+    let duplicates = outcomes
+        .iter()
+        .filter(|o| matches!(o, RecordOutcome::Duplicate { .. }))
+        .count();
+    assert_eq!(duplicates, 7);
+
+    // The record holds the winner's signature with the winner's key version.
+    let recorded_request = svc
+        .get_duplicate_request(addr, "same")
+        .await
+        .unwrap()
+        .unwrap();
+    let key_version = recorded_request.key_version.unwrap();
+    assert_eq!(
+        recorded_request.signature,
+        format!("sig-same-v{key_version}")
+    );
+    assert_eq!(svc.get_used_quota(addr).await.unwrap(), 1);
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn concurrent_distinct_requests_cannot_overrun_quota() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = Arc::new(
+        PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+            .await
+            .unwrap(),
+    );
+    let addr: Address = TEST_ADDRESS.parse().unwrap();
+
+    let queries: Vec<String> = (0..10).map(|i| format!("query{i}")).collect();
+    let outcomes = record_concurrently(&svc, addr, queries, 3).await;
+
+    let recorded = outcomes
+        .iter()
+        .filter(|o| matches!(o, RecordOutcome::Recorded { .. }))
+        .count();
+    let rejected = outcomes
+        .iter()
+        .filter(|o| matches!(o, RecordOutcome::QuotaExceeded { .. }))
+        .count();
+
+    assert_eq!(recorded, 3, "quota bound must hold under concurrency");
+    assert_eq!(rejected, 7);
+    assert_eq!(svc.get_used_quota(addr).await.unwrap(), 3);
+
+    // Rejected requests leave no rows behind.
+    let pool = PgPoolOptions::new().connect(&url).await.unwrap();
+    let (rows,): (i64,) = sqlx::query_as("SELECT COUNT(*) FROM requests")
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+    assert_eq!(rows, 3);
+}
+
+#[tokio::test]
+async fn legacy_migration_normalizes_and_dedups() {
+    init_logging();
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    let report = svc.run_legacy_migration().await.unwrap();
+
+    assert!(report.legacy_tables_present);
+    assert!(!report.already_migrated);
+    // Two Vitalik rows (mixed + lower case) plus the NULL-lookup account; the
+    // unparseable address is skipped.
+    assert_eq!(report.accounts_imported, 3);
+    assert_eq!(report.accounts_skipped_unparseable, 1);
+    // Two q1 rows import (deduped to one canonical row); NULL signature and
+    // unparseable address are skipped.
+    assert_eq!(report.requests_imported, 2);
+    assert_eq!(report.requests_skipped_null_signature, 1);
+    assert_eq!(report.requests_skipped_unparseable, 1);
+
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    let test_addr: Address = TEST_ADDRESS.parse().unwrap();
+
+    // Mixed + lower casings collapse to one checksummed account with summed quota.
+    assert_eq!(svc.get_used_quota(vitalik).await.unwrap(), 7);
+    // NULL num_lookups coalesces to 0.
+    assert_eq!(svc.get_used_quota(test_addr).await.unwrap(), 0);
+    // Duplicate (address, query) keeps the most recent signature. The TS signer
+    // did not store which key made it, so its version is unknown.
+    assert_eq!(
+        svc.get_duplicate_request(vitalik, "q1").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "sigB".to_string(),
+            key_version: None,
+        })
+    );
+    // The NULL-signature request was dropped.
+    assert_eq!(
+        svc.get_duplicate_request(test_addr, "q2").await.unwrap(),
+        None
+    );
+
+    // Idempotent: a second run is a no-op thanks to the marker.
+    let report2 = svc.run_legacy_migration().await.unwrap();
+    assert!(report2.already_migrated);
+    assert_eq!(report2.accounts_imported, 0);
+    assert_eq!(report2.requests_imported, 0);
+}
+
+/// The import replaces a request row that the Rust signer wrote when the TS
+/// signer's row for the same query is newer. The key version on record belongs
+/// to the replaced signature, so it must go with it.
+#[tokio::test]
+async fn legacy_migration_forgets_the_key_version_of_a_signature_it_replaces() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    svc.record_request(vitalik, "q9", "rust-sig", 2, 10)
+        .await
+        .unwrap();
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature)
+           VALUES ($1, now() + interval '1 hour', 'q9', 'ts-sig')"#,
+    )
+    .bind(VITALIK_LOWERCASE)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+
+    svc.run_legacy_migration().await.unwrap();
+
+    assert_eq!(
+        svc.get_duplicate_request(vitalik, "q9").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "ts-sig".to_string(),
+            key_version: None,
+        })
+    );
+}
+
+#[tokio::test]
+async fn legacy_migration_no_op_without_legacy_tables() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    let report = svc.run_legacy_migration().await.unwrap();
+    assert!(!report.legacy_tables_present);
+    assert!(!report.already_migrated);
+    assert_eq!(report.accounts_imported, 0);
+    assert_eq!(report.requests_imported, 0);
+}
+
+#[tokio::test]
+async fn full_stack_serves_migrated_quota() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+
+    // Building the router with migrate_legacy_data runs the ETL on startup.
+    let account_service = Arc::new(MockAccountService::new(None, 100));
+    let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+    let app = build_router_with_services(pg_config(&url, true), account_service, key_provider)
+        .await
+        .unwrap();
+
+    let response = app
+        .oneshot(
+            Request::builder()
+                .method("POST")
+                .uri("/quotaStatus")
+                .header("content-type", "application/json")
+                .body(Body::from(format!(
+                    r#"{{"account":"{VITALIK_CHECKSUMMED}"}}"#
+                )))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    // Quota was migrated from the legacy tables and is served from Postgres.
+    assert_eq!(json["performedQueryCount"], 7);
+    assert_eq!(json["totalQuota"], 100);
+}
+
+const BLINDED_PHONE_NUMBER: &str =
+    "n/I9srniwEHm5o6t3y0tTUB5fn7xjxRrLP1F/i8ORCdqV++WWiaAzUo3GA2UNHiB";
+/// What key versions 1 and 2 of the mock key store sign `BLINDED_PHONE_NUMBER` to.
+const EXPECTED_SIG_V1: &str =
+    "MAAAAAAAAACEVdw1ULDwAiTcZuPnZxHHh38PNa+/g997JgV10QnEq9yeuLxbM9l7vk0EAicV7IAAAAAA";
+const EXPECTED_SIG_V2: &str =
+    "MAAAAAAAAAAmUJY0s9p7fMfs7GIoSiGJoObAN8ZpA7kRqeC9j/Q23TBrG3Jtxc8xWibhNVZhbYEAAAAA";
+const DUPLICATE_WARNING: &str =
+    "CELO_ODIS_WARN_04 BAD_INPUT Attempt to replay partial signature request";
+
+/// A /sign request for `BLINDED_PHONE_NUMBER`, with the `odis-key-version`
+/// header when `key_version` is given.
+fn sign_request(account: &str, key_version: Option<&str>) -> Request<Body> {
+    let mut request = Request::builder()
+        .method("POST")
+        .uri("/sign")
+        .header("content-type", "application/json");
+    if let Some(key_version) = key_version {
+        request = request.header("odis-key-version", key_version);
+    }
+    let body = serde_json::json!({
+        "account": account,
+        "blindedQueryPhoneNumber": BLINDED_PHONE_NUMBER,
+    });
+    request.body(Body::from(body.to_string())).unwrap()
+}
+
+async fn response_json(response: axum::response::Response) -> serde_json::Value {
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    serde_json::from_slice(&body).unwrap()
+}
+
+/// The TS signer did not store which key made a signature, so the signature of
+/// an imported request is never served. A replay is signed again with the key
+/// it asks for, and the charge the TS signer made is the only one.
+#[tokio::test]
+async fn replay_of_an_imported_request_is_signed_again_and_not_charged() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+    // Recent, so that the pruning at startup keeps it.
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature)
+           VALUES ($1, now(), $2, 'signature from the TS signer')"#,
+    )
+    .bind(VITALIK_LOWERCASE)
+    .bind(BLINDED_PHONE_NUMBER)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+
+    let account_service = Arc::new(MockAccountService::new(None, 100));
+    let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+    let app = build_router_with_services(pg_config(&url, true), account_service, key_provider)
+        .await
+        .unwrap();
+
+    // The second and third request find the record still without a version:
+    // a replay never rewrites it.
+    for (header, version, expected_sig) in [
+        (Some("2"), "2", EXPECTED_SIG_V2),
+        (None, "1", EXPECTED_SIG_V1),
+        (Some("2"), "2", EXPECTED_SIG_V2),
+    ] {
+        let response = app
+            .clone()
+            .oneshot(sign_request(VITALIK_CHECKSUMMED, header))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        assert_eq!(
+            response_json(response).await,
+            serde_json::json!({
+                "success": true,
+                "version": env!("CARGO_PKG_VERSION"),
+                "signature": expected_sig,
+                "performedQueryCount": 7,
+                "totalQuota": 100,
+                "warnings": [DUPLICATE_WARNING],
+            })
+        );
+    }
+
+    // A key version the signer does not hold fails as it does for a new request.
+    let response = app
+        .clone()
+        .oneshot(sign_request(VITALIK_CHECKSUMMED, Some("99")))
+        .await
+        .unwrap();
+    assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    assert_eq!(
+        response_json(response).await,
+        serde_json::json!({
+            "success": false,
+            "version": env!("CARGO_PKG_VERSION"),
+            "error": "CELO_ODIS_ERR_05 SIG_ERR Failed to compute BLS signature",
+            "performedQueryCount": 7,
+            "totalQuota": 100,
+        })
+    );
+
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    assert_eq!(svc.get_used_quota(vitalik).await.unwrap(), 7);
+}
+
+/// The same query under key versions 1, 2, 1 and then, at once, four times
+/// under each: every answer carries the partial signature of its version and
+/// the account is charged once.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn sign_under_several_key_versions_is_signed_per_version_and_charged_once() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let build_app = || async {
+        let account_service = Arc::new(MockAccountService::new(None, 100));
+        let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+        build_router_with_services(pg_config(&url, false), account_service, key_provider)
+            .await
+            .unwrap()
+    };
+    let expected_sig = |version: &str| match version {
+        "1" => EXPECTED_SIG_V1,
+        _ => EXPECTED_SIG_V2,
+    };
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    // One after the other. Only the first request is new.
+    let app = build_app().await;
+    for (step, version) in ["1", "2", "1"].into_iter().enumerate() {
+        let response = app
+            .clone()
+            .oneshot(sign_request(TEST_ADDRESS, Some(version)))
+            .await
+            .unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        let warnings = if step == 0 {
+            serde_json::json!([])
+        } else {
+            serde_json::json!([DUPLICATE_WARNING])
+        };
+        assert_eq!(
+            response_json(response).await,
+            serde_json::json!({
+                "success": true,
+                "version": env!("CARGO_PKG_VERSION"),
+                "signature": expected_sig(version),
+                "performedQueryCount": 1,
+                "totalQuota": 100,
+                "warnings": warnings,
+            })
+        );
+    }
+
+    // All at once, for an account with nothing on record.
+    let handles: Vec<_> = (0..8)
+        .map(|i| {
+            let app = app.clone();
+            let version = if i % 2 == 0 { "1" } else { "2" };
+            tokio::spawn(async move {
+                let response = app
+                    .oneshot(sign_request(VITALIK_CHECKSUMMED, Some(version)))
+                    .await
+                    .unwrap();
+                (response, version)
+            })
+        })
+        .collect();
+    for handle in handles {
+        let (response, version) = handle.await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get("odis-key-version").unwrap(), version);
+        let json = response_json(response).await;
+        assert_eq!(
+            json["signature"],
+            expected_sig(version),
+            "version {version}"
+        );
+        assert_eq!(json["performedQueryCount"], 1);
+    }
+
+    for account in [TEST_ADDRESS, VITALIK_CHECKSUMMED] {
+        let address: Address = account.parse().unwrap();
+        assert_eq!(svc.get_used_quota(address).await.unwrap(), 1);
+    }
+}
+
+/// A statement that waits on a lock must fail after the timeout, and its
+/// connection must be usable again once the lock is gone.
+#[tokio::test]
+async fn stalled_statement_fails_after_the_timeout() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, Duration::from_millis(200))
+        .await
+        .unwrap();
+    let addr: Address = TEST_ADDRESS.parse().unwrap();
+
+    let other = PgPoolOptions::new()
+        .max_connections(1)
+        .connect(&url)
+        .await
+        .unwrap();
+    let mut lock = other.begin().await.unwrap();
+    sqlx::query("LOCK TABLE accounts IN ACCESS EXCLUSIVE MODE")
+        .execute(&mut *lock)
+        .await
+        .unwrap();
+
+    let started = Instant::now();
+    assert_eq!(
+        svc.get_used_quota(addr).await,
+        Err(OdisError::DatabaseError)
+    );
+    assert!(started.elapsed() < Duration::from_secs(3));
+
+    lock.rollback().await.unwrap();
+    assert_eq!(svc.get_used_quota(addr).await, Ok(0));
+}
+
+/// Pruning may run longer than the statement timeout.
+#[tokio::test]
+async fn pruning_is_not_limited_by_the_statement_timeout() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, Duration::from_millis(200))
+        .await
+        .unwrap();
+
+    let other = PgPoolOptions::new()
+        .max_connections(1)
+        .connect(&url)
+        .await
+        .unwrap();
+    let mut lock = other.begin().await.unwrap();
+    sqlx::query("LOCK TABLE requests IN ACCESS EXCLUSIVE MODE")
+        .execute(&mut *lock)
+        .await
+        .unwrap();
+
+    // The delete waits on the lock for longer than the timeout, then succeeds.
+    let pruning = tokio::spawn(async move { svc.delete_old_requests(7).await });
+    tokio::time::sleep(Duration::from_millis(600)).await;
+    lock.rollback().await.unwrap();
+
+    assert_eq!(pruning.await.unwrap(), Ok(0));
+}
+
+#[tokio::test]
+async fn startup_requires_the_import_when_legacy_tables_exist() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+
+    let start = |migrate_legacy_data: bool| {
+        let account_service = Arc::new(MockAccountService::new(None, 100));
+        let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+        build_router_with_services(
+            pg_config(&url, migrate_legacy_data),
+            account_service,
+            key_provider,
+        )
+    };
+
+    // A database without TS tables needs no import.
+    assert!(start(false).await.is_ok());
+
+    seed_legacy(&setup_pool).await;
+
+    // TS tables that were never imported stop the signer.
+    assert!(matches!(start(false).await, Err(OdisError::DatabaseError)));
+
+    // The import runs with the flag set; after that the flag is not needed.
+    assert!(start(true).await.is_ok());
+    assert!(start(false).await.is_ok());
+}
+
+#[tokio::test]
+async fn legacy_migration_paginates_across_pages() {
+    init_logging();
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+
+    sqlx::query(
+        r#"CREATE TABLE "accountsOnChain" (
+            address varchar(255) NOT NULL PRIMARY KEY,
+            created_at timestamptz NOT NULL,
+            num_lookups integer
+        )"#,
+    )
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    sqlx::query(
+        r#"CREATE TABLE "requestsOnChain" (
+            caller_address varchar(255) NOT NULL,
+            timestamp timestamptz NOT NULL,
+            blinded_query varchar(255) NOT NULL,
+            signature varchar(255),
+            PRIMARY KEY (caller_address, blinded_query, timestamp)
+        )"#,
+    )
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+
+    // Seed more rows than PAGE_SIZE (1000) so keyset pagination spans several
+    // pages. Distinct zero-padded hex addresses keep string and numeric order
+    // aligned, and are valid (lowercase) addresses that re-checksum cleanly.
+    let rows: i64 = 2500;
+    sqlx::query(
+        r#"INSERT INTO "accountsOnChain" (address, created_at, num_lookups)
+           SELECT '0x' || lpad(to_hex(g), 40, '0'), now(), 1
+           FROM generate_series(1, $1) AS g"#,
+    )
+    .bind(rows)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature)
+           SELECT '0x' || lpad(to_hex(g), 40, '0'), now(), 'q', 'sig'
+           FROM generate_series(1, $1) AS g"#,
+    )
+    .bind(rows)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    let report = svc.run_legacy_migration().await.unwrap();
+
+    assert_eq!(report.accounts_imported, rows as u64);
+    assert_eq!(report.requests_imported, rows as u64);
+    assert_eq!(report.accounts_skipped_unparseable, 0);
+    assert_eq!(report.requests_skipped_unparseable, 0);
+
+    // Spot-check a row from the last page (g = 2500 -> 0x...09c4).
+    let last: Address = format!("0x{:040x}", 2500u64).parse().unwrap();
+    assert_eq!(svc.get_used_quota(last).await.unwrap(), 1);
+    assert_eq!(
+        svc.get_duplicate_request(last, "q").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "sig".to_string(),
+            key_version: None,
+        })
+    );
+}
