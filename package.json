@@ -83,5 +83,10 @@
     "body-parser@npm:^1.19.0": "1.20.9",
     "body-parser@npm:^2.2.0": "2.4.0"
   },
+  "dependenciesMeta": {
+    "re2": {
+      "built": false
+    }
+  },
   "packageManager": "yarn@4.10.3"
 }

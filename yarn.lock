@@ -15291,6 +15291,9 @@ __metadata:
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.9.2"
     viem: "npm:^2.37.3"
+  dependenciesMeta:
+    re2:
+      built: false
   languageName: unknown
   linkType: soft
 
