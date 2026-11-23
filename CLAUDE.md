@@ -195,3 +195,78 @@ A combiner uses Rust and TS signers side by side, so a request the combiner forw
 - `tests/data/bls_vectors.json` holds what the TS signer's BLS library answers. Do not edit it by hand; regenerate it with `node rust/signer/tests/data/generate_bls_vectors.js`. A change to the `threshold-bls` pin must keep `signatures_equal_the_ts_library` and `edge_inputs_are_answered_as_by_the_ts_library` passing; the one known difference is named in the second test.
 - `tests/data/wallet_key_vectors.json` holds wallet-key signatures made by `@celo/utils` and by viem, and what the TS services answer for each. Do not edit it by hand; regenerate it with `node rust/signer/tests/data/generate_wallet_key_vectors.js`. The wallet-key hash counts the body length in UTF-16 code units, as `@celo/utils` does, not in bytes as EIP-191 says.
 - Make sure linting and tests pass, add common tasks to the justfile
+
+## Rust Combiner Port
+
+The Rust combiner (`rust/combiner`, crate name `odis-combiner`) is a port of the TypeScript combiner's PNP endpoints. It depends on `odis-signer` for authentication, logging, env helpers and request types (`AuthenticationMethod`, `KEY_VERSION_HEADER`, `is_valid_blinded_phone_number`). The domain endpoints return 503 stubs. The crate is both a binary (`main.rs`) and a library (`lib.rs` re-exports all modules).
+
+### Structure
+
+```
+rust/combiner/src/
+  main.rs                 # Startup: config → recorder → router → TCP bind → serve
+  server.rs               # Router construction, CORS, body limit, startup check, panic handler
+  config.rs               # Config from env vars; every setting that would run wrong stops the start
+  handlers.rs             # HTTP handlers (status, domain stubs, /sign, /quotaStatus)
+  body.rs                 # Request body parsed and written back as JSON.stringify writes it
+  request.rs              # Request field checks and key version resolution, as TS does them
+  auth.rs                 # Wallet key + DEK authentication over the canonical body
+  dek.rs                  # DEK lookup from the Accounts contract, with a short cache
+  signers.rs              # Concurrent signer calls under one deadline, answer classification
+  signature.rs            # BLS combine and verify, key versions, share index binding
+  quota.rs                # Quota state and discrepancy warnings over the signers' answers
+  errors.rs               # TS error and warning strings, byte for byte
+  metrics.rs              # Metric names, Prometheus recorder, request metrics layer
+rust/combiner/tests/
+  sign.rs                 # /sign in front of real Rust signers
+  quota.rs                # /quotaStatus in front of real Rust signers
+  server.rs               # Routes, CORS, transport answers, startup check
+  metrics.rs              # Metric names, labels and buckets against the TS combiner's
+  recorder.rs             # The global recorder, in a process of its own
+  startup.rs              # The built binary's refusals to start, as the operator reads them
+  proxy.rs                # Signer calls and full node lookups go through the proxy, as one test
+  common/                 # Shared test helpers
+  data/                   # BLS combine and canonical body vectors, and the scripts that write them
+apps/combiner/test/differential/  # Jest: Rust and TS combiners compared on the same requests
+```
+
+### Endpoints
+
+| Route | Status |
+|---|---|
+| `GET /status` | Implemented |
+| `POST /sign` | Implemented |
+| `POST /quotaStatus` | Implemented |
+| `POST /domain/sign` | Stub (503) |
+| `POST /domain/quotaStatus` | Stub (503) |
+| `POST /domain/disable` | Stub (503) |
+| `GET /metrics` | Implemented (Prometheus) |
+
+### Build & Test Commands
+
+The signer's recipes cover the combiner too (`just`, `just test`, `just clippy`, `just fmt`, since they run on the workspace). In addition:
+
+```bash
+just check-tls                                   # fail if Cargo.lock holds a TLS stack other than rustls
+just test-differential                           # compare with the TS combiner on the same requests; needs `yarn build` first
+just test-e2e-combiner <url> <version>           # TS end-to-end suite against the combiner at <url> that reports <version>
+```
+
+`test-e2e-combiner` runs `yarn --cwd=apps/combiner test:e2e:pnp` on Celo Sepolia, with `ODIS_COMBINER_SERVICE_URL` and `DEPLOYED_COMBINER_SERVICE_VERSION` set from the arguments. It spends quota of a shared test account.
+
+### Docker
+
+`dockerfiles/Dockerfile-combiner-rs` is built like the signer's image: multi-stage (`rust:1.100.0-trixie` → `debian:trixie-slim`), both base images pinned by digest, runs as `nobody`. The signer's rules for bumping the Rust version apply to it as well.
+
+### Parity with the TS combiner
+
+A client and an operator must see the TS combiner's answers: status, body, error strings, metric names. Every difference they can see goes into `rust/combiner/CHANGELOG.md`, which is also the migration guide for a deployment; update it in the same change.
+
+### Design Decisions
+- The signed body is the canonical one: the combiner parses the client's JSON and writes it back as `JSON.stringify` does, and the signature check, the length limit and the signer calls all use that text. A body the writer cannot reproduce exactly as JavaScript would (non-integer numbers, duplicate or digit-only keys, lone surrogates, a BOM, deep nesting) is refused with 400 `WARN_01`. Otherwise signers would check the signature over a different string than the combiner did, and some would charge a request that then fails.
+- A signer entry may carry a `shareIndex`. A partial signature whose index differs from it is dropped before it counts, and the log and `combiner_bls_compute_errors_total` name that signer. The field is optional, and one index applies to every key version. A wrong index makes signers charge for requests whose partials the combiner drops, and no startup check can catch it, so the changelog says how to read an index from a signer's own answers.
+- The combiner refuses to start instead of running wrong, as the signer does. Add a new precondition as a startup check, not as a failure on the first request.
+- The checks the TS combiner makes and the Rust signer does not carry the marker `TODO(all-rust-signers):` with a line on why, so they can all be found and removed once every signer makes them. `rg 'TODO\(all-rust-signers'`.
+- Metric names are the TS combiner's, label names snake_case. The recorder is global to the process. Outside tests, only `main.rs` installs it, and the router takes the handle. A test installs the combiner's recorder only in a process with no in-process Rust signer: its own test binary (`tests/recorder.rs`, `tests/metrics.rs`) or once per process through a `OnceLock` (`tests/server.rs`). Tests that run Rust signers in-process use `odis_signer::metrics::install_recorder()` (`tests/common/mod.rs`).
+- Tests run the combiner in front of real `odis-signer` routers on real ports; misbehaving signers are small axum servers. Assert the exact error string or the whole body.
+- `tests/data/canonical_body_vectors.json` and `tests/data/combine_vectors.json` hold what the TS code answers. Do not edit them by hand; regenerate with `node rust/combiner/tests/data/generate_canonical_body_vectors.js` and `node rust/combiner/tests/data/generate_combine_vectors.js`.
