@@ -117,3 +117,8 @@ Transport differences, none of which touch a client that uses the SDK:
   `Number()` reads it as `Infinity`.
 - An explicit `null` for `authenticationMethod`, `sessionID` or `version` is refused with 400
   `WARN_01`, as in TS. The Rust signer accepts it.
+
+## Quota state
+
+- When the signers' total quota disagrees, `combiner_warnings_total` counts `WARN_06`. The TS
+  combiner counts `WARN_18` there, which is the label for a disagreement in the query count.
