@@ -14,7 +14,7 @@
 The Celo community asks that all suspected vulnerabilities be privately and responsibly disclosed.
 
 ## Creating a report:
-Email the [security@clabs.co](mailto:security@clabs.co) list with the details of reproducing the vulnerability as well as the usual details expected for all bug reports.
+Email the [security.reports@clabs.co](mailto:security.reports@clabs.co) list with the details of reproducing the vulnerability as well as the usual details expected for all bug reports.
 
 ## Primary Focus 
 - Celo protocol, but the team may be able to assist in coordinating a response to a vulnerability in the third-party apps or tools in the Celo ecosystem.
