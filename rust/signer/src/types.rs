@@ -114,7 +114,7 @@ pub struct PnpQuotaResponseSuccess {
 
 /// Validates a blinded phone number: must be exactly 64 characters long
 /// and valid base64. Matches TS `hasValidBlindedPhoneNumberParam`.
-fn is_valid_blinded_phone_number(value: &str) -> bool {
+pub fn is_valid_blinded_phone_number(value: &str) -> bool {
     use base64::Engine;
     value.len() == 64
         && base64::engine::general_purpose::STANDARD
