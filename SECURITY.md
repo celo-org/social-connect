@@ -1,4 +1,4 @@
-![CELO Bug Bounty Program Intigriti](https://i.postimg.cc/SRvP51Vr/Celo-Notion-Banner-Forest.png)
+![CELO Bug Bounty Program](https://i.postimg.cc/SRvP51Vr/Celo-Notion-Banner-Forest.png)
 
 # Security
 
@@ -14,9 +14,7 @@
 The Celo community asks that all suspected vulnerabilities be privately and responsibly disclosed.
 
 ## Creating a report:
-1. Submit your vulnerability to [Celo on Intigriti](https://app.intigriti.com/programs/clabs/clabs/detail).
-	- This is currently a public program
-2. You can also email the [security@clabs.co](mailto:security@clabs.co) list with the details of reproducing the vulnerability as well as the usual details expected for all bug reports.
+Email the [security@clabs.co](mailto:security@clabs.co) list with the details of reproducing the vulnerability as well as the usual details expected for all bug reports.
 
 ## Primary Focus 
 - Celo protocol, but the team may be able to assist in coordinating a response to a vulnerability in the third-party apps or tools in the Celo ecosystem.
@@ -26,7 +24,6 @@ The Celo community asks that all suspected vulnerabilities be privately and resp
  https://celo.org                            
  https://\*.celo.org                          
  https://\*.clabs.co                          
- https://github.com/celo-org/*               
 
 # Out of Scope
 ----------------------------------------------------------------------------------------------------------------
