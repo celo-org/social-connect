@@ -1,6 +1,11 @@
 //! The TS combiner's error and warning strings, byte for byte
 //! (`packages/common/src/interfaces/errors.ts`).
 
+use axum::Json;
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
+use serde::Serialize;
+
 pub const UNKNOWN_ERROR: &str = "CELO_ODIS_ERR_00 Something went wrong";
 pub const VERIFY_PARTIAL_SIGNATURE_ERROR: &str =
     "CELO_ODIS_ERR_06 SIG_ERR BLS partial signature verification Failure";
@@ -36,3 +41,29 @@ pub const SIGNER_RESPONSE_DISCREPANCIES: &str =
     "CELO_ODIS_WARN_17 SIGNER Discrepancies detected in signer responses";
 pub const INCONSISTENT_SIGNER_QUERY_MEASUREMENTS: &str =
     "CELO_ODIS_WARN_18 SIGNER Discrepancy found in signers performed query count measurements";
+
+/// An error answer: a status and one of the strings above. The body is the TS
+/// combiner's failure body; field order is the TS key order.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Failure {
+    pub status: StatusCode,
+    pub error: &'static str,
+}
+
+#[derive(Serialize)]
+struct FailureBody {
+    success: bool,
+    version: &'static str,
+    error: &'static str,
+}
+
+impl IntoResponse for Failure {
+    fn into_response(self) -> Response {
+        let body = FailureBody {
+            success: false,
+            version: env!("CARGO_PKG_VERSION"),
+            error: self.error,
+        };
+        (self.status, Json(body)).into_response()
+    }
+}

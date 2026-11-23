@@ -1,9 +1,12 @@
 //! Metric names and the process-global Prometheus recorder. Names are the TS
 //! combiner's (`apps/combiner/src/common/metrics.ts`); labels are snake_case.
 
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
-use ::metrics::counter;
+use ::metrics::{counter, histogram};
+use axum::extract::{MatchedPath, Request};
+use axum::middleware::Next;
+use axum::response::Response;
 use metrics_exporter_prometheus::{BuildError, PrometheusBuilder, PrometheusHandle};
 
 // -- Counters --
@@ -64,4 +67,58 @@ pub fn spawn_upkeep_task(handle: PrometheusHandle) {
             handle.run_upkeep();
         }
     });
+}
+
+/// The routes the request metrics count, as the TS combiner counts only its API
+/// endpoints. Scrapes, probes and unknown paths would otherwise fill the request
+/// and error panels.
+const COUNTED_ROUTES: &[&str] = &[
+    "/sign",
+    "/quotaStatus",
+    "/domain/sign",
+    "/domain/quotaStatus",
+    "/domain/disable",
+];
+
+/// Counts a request that ends without a response. The server drops a request's
+/// future when its caller closes the connection, so a guard that is dropped
+/// before the response is ready means the caller has gone.
+struct ConnectionClosedGuard {
+    answered: bool,
+}
+
+impl Drop for ConnectionClosedGuard {
+    fn drop(&mut self) {
+        if !self.answered {
+            counter!(CONNECTION_CLOSED).increment(1);
+        }
+    }
+}
+
+/// Axum middleware that records per-request metrics: `REQUESTS`, `RESPONSES`
+/// (with the status code), `ENDPOINT_LATENCY` and `CONNECTION_CLOSED`, all
+/// labelled with the route.
+pub async fn http_metrics_layer(request: Request, next: Next) -> Response {
+    let Some(path) = request
+        .extensions()
+        .get::<MatchedPath>()
+        .map(|p| p.as_str().to_owned())
+        .filter(|path| COUNTED_ROUTES.contains(&path.as_str()))
+    else {
+        return next.run(request).await;
+    };
+
+    counter!(REQUESTS, "endpoint" => path.clone()).increment(1);
+
+    let mut guard = ConnectionClosedGuard { answered: false };
+    let start = Instant::now();
+    let response = next.run(request).await;
+    let elapsed = start.elapsed().as_secs_f64();
+    guard.answered = true;
+
+    let status = response.status().as_u16().to_string();
+    counter!(RESPONSES, "endpoint" => path.clone(), "status_code" => status).increment(1);
+    histogram!(ENDPOINT_LATENCY, "endpoint" => path).record(elapsed);
+
+    response
 }
