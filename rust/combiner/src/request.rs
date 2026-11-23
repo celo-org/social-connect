@@ -113,27 +113,30 @@ pub struct UnsupportedKeyVersion;
 
 /// The version in the `odis-key-version` header if it is plain decimal digits after trimming,
 /// else `current`. Digits beyond `u32` name a version no one configures, so they are refused.
-///
-/// TS reads the header with `Number()`, which turns other spellings (`1.0`, `0x1`, `+1`) into a
-/// version too; here they count as absent. A header sent twice joins to `1, 2` in Node, which
-/// `Number()` reads as NaN, so it also counts as absent.
 pub fn resolve_key_version(
     headers: &HeaderMap,
     current: u32,
 ) -> Result<u32, UnsupportedKeyVersion> {
+    key_version_header(headers).unwrap_or(Ok(current))
+}
+
+/// The `odis-key-version` header of a request or a signer's answer: `None` when it is absent or
+/// not plain decimal digits after trimming, an error for digits beyond `u32`.
+///
+/// TS reads the header with `Number()`, which turns other spellings (`1.0`, `0x1`, `+1`) into a
+/// version too; here they count as absent. A header sent twice joins to `1, 2` in Node, which
+/// `Number()` reads as NaN, so it also counts as absent.
+pub fn key_version_header(headers: &HeaderMap) -> Option<Result<u32, UnsupportedKeyVersion>> {
     let mut values = Vec::new();
     for value in headers.get_all(KEY_VERSION_HEADER) {
-        match value.to_str() {
-            Ok(value) => values.push(value),
-            Err(_) => return Ok(current),
-        }
+        values.push(value.to_str().ok()?);
     }
     let joined = values.join(", ");
     let trimmed = joined.trim();
     if trimmed.is_empty() || !trimmed.bytes().all(|b| b.is_ascii_digit()) {
-        return Ok(current);
+        return None;
     }
-    trimmed.parse().map_err(|_| UnsupportedKeyVersion)
+    Some(trimmed.parse().map_err(|_| UnsupportedKeyVersion))
 }
 
 #[cfg(test)]
