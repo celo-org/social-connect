@@ -1,4 +1,4 @@
-default: check fmt-check clippy test
+default: check fmt-check clippy check-tls test
 
 check:
     cargo check --workspace
@@ -18,6 +18,10 @@ fmt:
 
 fmt-check:
     cargo fmt --all -- --check
+
+# Fails if Cargo.lock holds a TLS stack other than rustls.
+check-tls:
+    awk '/^name = "(native-tls|openssl|hyper-tls)"$/ { print "forbidden TLS crate in Cargo.lock: " $3; found = 1 } END { exit found }' Cargo.lock
 
 build:
     cargo build --workspace
