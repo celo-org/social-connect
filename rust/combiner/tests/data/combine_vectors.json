@@ -1,0 +1,913 @@
+{
+  "source": "@celo/blind-threshold-bls 1.0.0-beta; partials are checked with partialVerifyBlindSignature, combined signatures with combine and verifyBlindSignature",
+  "keys": [
+    {
+      "name": "dev key version 1",
+      "keyVersion": 1,
+      "threshold": 2,
+      "polynomial": "0200000000000000eb569eb8701d831a0a9ffe5df325eed2ac7f5693c758c02aad5804009fcca42ece73f7f560b3e237b60a6b0f5e0d6501516b38b0f9fa20dd944c66edf798cfea73bc232983e0885b04e3632dc125b2ad63c13676723b931d5f686d2c83165d817aaff1f84d0b008ad218eff19db698f343168cf931ba8347640123a2f826f62b66ff084273f494d4647758e9a9f889009d573705824a0e74e1f49ed234462058e53bbb4fef370b55f78da89df070c661782a84239b8c7623d09e34b9f91f7781",
+      "pubKey": "61aeuHAdgxoKn/5d8yXu0qx/VpPHWMAqrVgEAJ/MpC7Oc/f1YLPiN7YKaw9eDWUBUWs4sPn6IN2UTGbt95jP6nO8IymD4IhbBONjLcElsq1jwTZ2cjuTHV9obSyDFl2B",
+      "shares": [
+        "000000000e7e1a2fad3b54deb2b1b32cf4c7b084842d50bbb5c6143b9d9577d16e050f03",
+        "01000000e43f10f7778e238e1ed58d5fad9363d7439d2b5a8eeda6073d68ba87c0b10011",
+        "02000000b90106bf4261e13389f867c267e86bd0015dcf9c48c784738695d0a3b3f8460c"
+      ]
+    },
+    {
+      "name": "dev key version 2",
+      "keyVersion": 2,
+      "threshold": 2,
+      "polynomial": "0200000000000000d9c90e58fdeaa61c9aa35478b3c5476d545d7a719c16c82c91087978232a030033889cd0019e96a3d0850f7d18861a00e81f754052106aa7c3bdd6e535e3ad303b2620a4c316dc598e0f9c659b50ceb0932d4da8c161046fc44f25cf05dde900ebf6f83c5cb94288347ebf437e99fbb7a7eaf0c9873467352c1a9113f5fc0974d96cbf25462def50c39224da757ed300ce12e0fa8c6e73387cb43c69764bed41d0a0c55981642650b07fad1107a27b27fc8c552da3edd64494e8acc4de9a2600",
+      "pubKey": "2ckOWP3qphyao1R4s8VHbVRdenGcFsgskQh5eCMqAwAziJzQAZ6Wo9CFD30YhhoA6B91QFIQaqfDvdblNeOtMDsmIKTDFtxZjg+cZZtQzrCTLU2owWEEb8RPJc8F3ekA",
+      "shares": [
+        "0000000087c722e1338395b942d8332328795a46c718baeb8fef9e5c63111d495469c50e",
+        "01000000e4efa9b60743f8188a68d35663d877143ad1726931eaa9af168fc86472eafd0d",
+        "020000004118318cdb025b78d1f8728a9e3795e2ac892be7d2e4b402ca0c7480906b360d"
+      ]
+    },
+    {
+      "name": "dev key version 3",
+      "keyVersion": 3,
+      "threshold": 2,
+      "polynomial": "0200000000000000e68f58e75e9dbf364bcbb13f49f3929b6915874dadd6b535b6426b939e7f1e3851499b721d18003a76e7bca26f423000d4e13bd0bb1896b28af0f18d54ea7b71576b15b9bdc5b91ec3e054ea174ee3bdea89eac3385e128ca40d4e8ca1e543813fae8439a057f8c17d4538afecf038624e552a8c226c9f82bfb7a072cff28fb7d26ab45801b67db270cec8037b8d7e016b1b78f7997160bd4ed1b54ab5d6be7663935992cd9c59ceb17010eccd708a9762df616c1fe45a220be634e21ba87581",
+      "pubKey": "5o9Y516dvzZLy7E/SfOSm2kVh02t1rU1tkJrk55/HjhRSZtyHRgAOnbnvKJvQjAA1OE70LsYlrKK8PGNVOp7cVdrFbm9xbkew+BU6hdO473qierDOF4SjKQNToyh5UOB",
+      "shares": [
+        "000000005b2c8089ead28a08233b6b16b2341542453523445950cfbd9bd2f1d09c8eee0c",
+        "01000000f6c10aa979a0c33a3af5b03c37ffdf1d4a8517a5f9e6058e1d863337eeb59904",
+        "02000000925795c808ee0d7752aff632bb40555350854362b8caf0bef5dea1379e42f00e"
+      ]
+    },
+    {
+      "name": "4 of 5",
+      "keyVersion": 4,
+      "threshold": 4,
+      "polynomial": "04000000000000003a6ba2b2599ea453974fc3a05f27625abf96d623ca1ffa043a552358ecfef2bbfb34200a9591d9776b2fe3e64b0d8301da7fabc507748669152832c042c36102e22fb711382ff5b5ec0ff40b99060a1ab8ea5d2eecd2ccd64ca61efc67535701e68cb1496406b127f62087a89ec4f2bdb81d930f5549da2f9400ccd150e6c3bfee01a020c6f4679909f43f3af71216002ef176ae78a11edbdeda8d3c7a7ab396ee5bf00156bcb63b87aa0bac2227b057ba7dac59b0e3d69a8eeaf332a84ccc800320caebc9521d1b2a7444b83cac470b025639c3ade6e98f928e5fc4b30ad33eba77d363174fa93d1d578ad21735ac004337241e97e5a7b5f02c396d0c5f76cbf3a691caa5e6bb0146e679db4e85f28ad8d559d8b330ff55c5cf18ab6edb0f01ca6a0fd178b2dd6fad8607f40e45c4c2b6d3a422e6c9ea98a5b99763c2f56078ce165a027a3733e29bd93c0ae76de5002e75da38aaee19b4c540973721e378666d759b1f51cc1a044c552145f550e7211a48f09dbfb73ff9e6009235e39c1b80",
+      "pubKey": "OmuislmepFOXT8OgXydiWr+W1iPKH/oEOlUjWOz+8rv7NCAKlZHZd2sv4+ZLDYMB2n+rxQd0hmkVKDLAQsNhAuIvtxE4L/W17A/0C5kGChq46l0u7NLM1kymHvxnU1cB",
+      "shares": [
+        "00000000920345583bb4d38e5fe1d18d7e65a865da2ba30326326900d7401a0920233c07",
+        "01000000fcc5798ed56298ca1868e8ca1425a9760b5a1f1f43aea90191280d0f8f563402",
+        "02000000341f3ffa3dadeede78fd4b3f3d8b998d549248bf7d653445c9e9a0aee0bfb211",
+        "030000009fa2425149f953a67d5184bfcf484e94ffd4886dd57027ce33562d6b67900e0f",
+        "04000000a5e33149cc2c7a1928141990a0739b815a32f1c7a4d0bdc1872f90969129a10b"
+      ]
+    }
+  ],
+  "messages": [
+    "d3f16a8ae13bfdb999f4359d4ec50b229c8829a1b8344f2f1c67052a48f8605fa3d8ebffb282b82c529ded609058d500",
+    "7f3549da310a67513f62034f9011e07ab47c6be07a534d8a3b41024aeb9bfb7be2bdd72f661a1e1c124f4e8f4cc08300",
+    "912bdf732230cd3f6f0504a00a83264c29aba216d7010f0fa54ba097c3d6487fdfa16bcc2e965636fef0dfbb5eb99881"
+  ],
+  "partials": [
+    {
+      "key": 0,
+      "share": 0,
+      "message": 0,
+      "partial": "30000000000000003b44a5a8697df246a80558c88b80c112993ab2fa3b83bcccef31878b643bb4dc741e07c2252282a1de583dbe275e588100000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 0,
+      "message": 1,
+      "partial": "3000000000000000032b143f46880aaf849963ff4d44d3b10dcc83fc957037ca442a081c8b9de9d242ba177c250cbda1077c990198f11c0000000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 0,
+      "message": 2,
+      "partial": "3000000000000000536cc21cc4f6539b34f5035e4a9b9e72edf5eda45a91a0eadc9c95d368bb212fc2cbf9fe3a755d5cd8517ba8f7400a8100000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 1,
+      "message": 0,
+      "partial": "3000000000000000d766dc8e316ef39d3823dad0a4d638b3aa391985f4100fa8a052e26635ba8e39623c5b602d37874a3b73f5a8e824378101000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 1,
+      "message": 1,
+      "partial": "3000000000000000172192017d8a48b0aa01b003d2cc4b8e54a4859989fcdd924d7103a395df6c4801453d4175936d12d98b8086dacc918101000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 1,
+      "message": 2,
+      "partial": "30000000000000008cc62d46c4651ed80b7c81df3dd8384ed62543cc00aa867ea6cee39ad5bc4a1622abfc9ea6cd70d088f9433a34f3898001000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 2,
+      "message": 0,
+      "partial": "3000000000000000d87480870dd48a811ddf595312067c4be59dff829904824dc58ee4c5ab15a77c80d8b79006ecb07dfc552cbbdeeebb8002000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 2,
+      "message": 1,
+      "partial": "30000000000000000758b192878eb273e1ec7a1cc4ee9b7c48fb5fd11fc07bb87dc8f3fe1842443d05024c912e2357969272a42d93d54c0002000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 2,
+      "message": 2,
+      "partial": "3000000000000000a2ba3b03f19c52351be5e79ff66715c6b4682dbebde927d19a97a15767fae298403de703e8202ec742ba48aa6a9c1b8002000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 0,
+      "message": 0,
+      "partial": "3000000000000000ad22083724ddb44617d10f3340d7af36a879188be9f50a44d3b90fc55484a5add9a3f393e7b657af5927f7ccaf2a8e0100000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 0,
+      "message": 1,
+      "partial": "3000000000000000141600a7f1d89ca36833c0b53d9d819b8822b0f0adfa645fc5332eb392c28d39a857c50772d15edc0ca9820b4b04268100000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 0,
+      "message": 2,
+      "partial": "3000000000000000b051e7296513e8363af40c56189ddb72bc3aad902091351bc4398f2667d2093fc1c34d1ee4566eeda7287372e7c9250100000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 1,
+      "message": 0,
+      "partial": "30000000000000000a25df05460b73279a1e8ad76acb3958a8ac4f7564d067a89fd13ad7990140e21f16138e7041fb3313431fe664088e8001000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 1,
+      "message": 1,
+      "partial": "3000000000000000eb7944af4572053fa50ab84406926f1b8c72139eea0497fa139b3a368276cc6e41d86b02201886f531808d8c7e98250101000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 1,
+      "message": 2,
+      "partial": "3000000000000000f497cc62c86db31fb572c6f776c147d6d99ad2f1468a59b0d309a70109cac28714ae77f428cb5d27438d8101c00c7c8101000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 2,
+      "message": 0,
+      "partial": "30000000000000005ae5402513569a3df479b81dfeee2ac49fc52643b9316ce8be6bc6372a8546865fa21306ca0e3a4314aa767927be790002000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 2,
+      "message": 1,
+      "partial": "30000000000000004209bef493470b267f582c60f6af2ccc34f8be50383e7a8ea229b8f220c70d4893f5011f959432891ffbd18d45eecf0002000000",
+      "valid": true
+    },
+    {
+      "key": 1,
+      "share": 2,
+      "message": 2,
+      "partial": "300000000000000071f0c20c96ed6fdc24d39c0cf79d04bceacd5f6c97432fbd2ae21227e6bda68f99021c8958f7349d9e2be39d78d1480102000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 0,
+      "message": 0,
+      "partial": "3000000000000000387d8bf9993081ea55a7c3a85169b4d567e80c81b4e6bcf26dd41ee67fe92be5c3cfbe16857cedf357ea7f49f0f7700000000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 0,
+      "message": 1,
+      "partial": "300000000000000008f90804f1423d7aea93bfa92101b45690d74d54cd92e0060bc238eb010692327d0b4068825fd5d70a3a3e5d51ea9c0100000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 0,
+      "message": 2,
+      "partial": "3000000000000000936657f82cc9d7851490c3320e01da27d49d1990dc78766eeebec290a8b0d9fc2a3f9610931b3d72e62811209a135a8000000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 1,
+      "message": 0,
+      "partial": "3000000000000000dde76b7fe2bd6a6a315e46c9c594f678ac7d172e3b3c9f592ad45d0db26d4e73aaabe287a5ceb2f192c0024346ba730001000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 1,
+      "message": 1,
+      "partial": "3000000000000000b36b784548f15dfc6d8b0135787b8cf84c8fa5b55a02f48f71221269ff26034d166ade6b8086c1f430bde0398daaa50101000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 1,
+      "message": 2,
+      "partial": "3000000000000000f0326a96f6267997da3642f3876ccbc334420aed70a839f5b1b400842c735939cc8b6af7cd4b7cee5b0905f73893a78101000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 2,
+      "message": 0,
+      "partial": "30000000000000007294232b6a87654d57c52241bea47d490e7b32da3168f018e743649fb5a3608bb7f7c77f316c491c7863cdce4aadd48002000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 2,
+      "message": 1,
+      "partial": "300000000000000074eb6d408c728fa1cfcdcbe95a9fbb7a5b9abab630dd21cb52a0528b07e63db4baf38f95d33d5f74a682e66ab14a518102000000",
+      "valid": true
+    },
+    {
+      "key": 2,
+      "share": 2,
+      "message": 2,
+      "partial": "300000000000000016eb2a85d9d8ae760b9ff81ecf3e33077143e3a502e1c4b984f9fdfcc410ce489ff71306b75e6d70534d1563571a3b8002000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 0,
+      "message": 0,
+      "partial": "3000000000000000f2583d9e63b52ee9380127af6fa9a6a63c8d5a32e4bb0f104d866b46ff88e57c91ad5a1f7b1b404e02387e66b5887c8000000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 0,
+      "message": 1,
+      "partial": "3000000000000000881bf521e751ba97cf3566a44c92d86c6966a2dd0e2f31d21784d1def853e1ed5e30690f68b541d0bd3bbce808bf140100000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 0,
+      "message": 2,
+      "partial": "30000000000000006db9a32a181d569625761afdc1b06d8810dd392c2aa03b0cf1b1fa91f0db77f6f3f305366507b78a2378de24e9084f8000000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 1,
+      "message": 0,
+      "partial": "3000000000000000bce019f103bae0b6f2f0d4b337d18b07fc262e84a12abc20bfef32b2daefec6fe51eeafe3f6b0f81c9d7fac757e9780001000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 1,
+      "message": 1,
+      "partial": "30000000000000009bd56e3fe492fdc7e374616b70a6404f6b0e152b56525f7ae4e16a8ff49929092fb0964598d42a4b94c1e0ab1171a50101000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 1,
+      "message": 2,
+      "partial": "30000000000000004b87cb2444eca62ade730c8e69dad81f9e685f13f9cab45ca6f4f4ae97070005237cdc264734cfcbcb3fc279ce232a0001000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 2,
+      "message": 0,
+      "partial": "300000000000000007f7508584fd4d74543554b4190ab15514824c399b5161ad9dce8fac739ee0e0daee3d161e1505f3e7b8d4e7c7a0728002000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 2,
+      "message": 1,
+      "partial": "300000000000000005a423fcda02f0865237b3db9331306d15fb12b04927a132c5ff9732d1821e88363cb5e060a4d4e9b69ad627910bc28002000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 2,
+      "message": 2,
+      "partial": "300000000000000037003d9fd5c5c36fb768b587a6531576b2c12f50f7826a18581391c2a4df05ca381b0c55f251d5c389f2ff958ecc9f8002000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 3,
+      "message": 0,
+      "partial": "30000000000000000a983d0b61b220517934c04cbdb382f61a270d9e9cec77f9c29d7fd832501afa3c53cb1cc3194b5475398e329d82740103000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 3,
+      "message": 1,
+      "partial": "3000000000000000ba4893c6d27f019e0e2b8869daf216d1939bbd89f84431d8789f33faeeff1a94536cd826ae1ecff9b6c2ec355f28858003000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 3,
+      "message": 2,
+      "partial": "300000000000000027de5b87dccc186874ff2fd9bfaadf24114ef068d09a988a5d17e58f0281e5bb55d5ff924b022c6c1c6d65de18b2190103000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 4,
+      "message": 0,
+      "partial": "3000000000000000788f8fbf9d60ece7149d90349d557868812955a91838015223895cbab2764d86b88b37954c3f3411ac9b7c65b036ad0104000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 4,
+      "message": 1,
+      "partial": "300000000000000007fae74b87ca01cad4144c7bfc8785ba8095e456b817de2daad0df71d2fa3af99ef8da03c5ce438d4b9fb6313fa8068004000000",
+      "valid": true
+    },
+    {
+      "key": 3,
+      "share": 4,
+      "message": 2,
+      "partial": "30000000000000007cddd56cfedc25e4e616ed4ca4afc8af3e7f849bc62aa606987172b4e07a64773288b664746cf732d8d1a3aa42b4a28004000000",
+      "valid": true
+    },
+    {
+      "key": 0,
+      "share": 0,
+      "message": 0,
+      "partial": "30000000000000003b44a5a8697df246a80558c88a80c112993ab2fa3b83bcccef31878b643bb4dc741e07c2252282a1de583dbe275e588100000000",
+      "valid": false
+    },
+    {
+      "key": 0,
+      "share": 0,
+      "message": 0,
+      "partial": "3000000000000000ad22083724ddb44617d10f3340d7af36a879188be9f50a44d3b90fc55484a5add9a3f393e7b657af5927f7ccaf2a8e0100000000",
+      "valid": false
+    },
+    {
+      "key": 0,
+      "share": 0,
+      "message": 0,
+      "partial": "30000000000000003b44a5a8697df246a80558c88b80c112993ab2fa3b83bcccef31878b643bb4dc741e07c2252282a1de583dbe275e588101000000",
+      "valid": false
+    }
+  ],
+  "combined": [
+    {
+      "key": 0,
+      "message": 0,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "c6014c42d72000c1c90045ff9bd078545a2962dc6a3c54b0d34db8b16cd162f403be7985aa15ce3dd9d10df6bc582100"
+    },
+    {
+      "key": 0,
+      "message": 1,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "b7a3c9208e3e1d5e8d4a4f26943e18ab0641495701c71dd45d2d98b16d94785eff5233fa280e01553902c1bd57ad8f00"
+    },
+    {
+      "key": 0,
+      "message": 2,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "6498bc30de92d088f30c5bf140ea911291825fb610e9f21fe9819215611c71b9f674aede40b1d7bb26d7029e8c12f080"
+    },
+    {
+      "key": 0,
+      "message": 0,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "c6014c42d72000c1c90045ff9bd078545a2962dc6a3c54b0d34db8b16cd162f403be7985aa15ce3dd9d10df6bc582100"
+    },
+    {
+      "key": 0,
+      "message": 1,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "b7a3c9208e3e1d5e8d4a4f26943e18ab0641495701c71dd45d2d98b16d94785eff5233fa280e01553902c1bd57ad8f00"
+    },
+    {
+      "key": 0,
+      "message": 2,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "6498bc30de92d088f30c5bf140ea911291825fb610e9f21fe9819215611c71b9f674aede40b1d7bb26d7029e8c12f080"
+    },
+    {
+      "key": 0,
+      "message": 0,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "c6014c42d72000c1c90045ff9bd078545a2962dc6a3c54b0d34db8b16cd162f403be7985aa15ce3dd9d10df6bc582100"
+    },
+    {
+      "key": 0,
+      "message": 1,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "b7a3c9208e3e1d5e8d4a4f26943e18ab0641495701c71dd45d2d98b16d94785eff5233fa280e01553902c1bd57ad8f00"
+    },
+    {
+      "key": 0,
+      "message": 2,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "6498bc30de92d088f30c5bf140ea911291825fb610e9f21fe9819215611c71b9f674aede40b1d7bb26d7029e8c12f080"
+    },
+    {
+      "key": 0,
+      "message": 0,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "c6014c42d72000c1c90045ff9bd078545a2962dc6a3c54b0d34db8b16cd162f403be7985aa15ce3dd9d10df6bc582100"
+    },
+    {
+      "key": 0,
+      "message": 1,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "b7a3c9208e3e1d5e8d4a4f26943e18ab0641495701c71dd45d2d98b16d94785eff5233fa280e01553902c1bd57ad8f00"
+    },
+    {
+      "key": 0,
+      "message": 2,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "6498bc30de92d088f30c5bf140ea911291825fb610e9f21fe9819215611c71b9f674aede40b1d7bb26d7029e8c12f080"
+    },
+    {
+      "key": 1,
+      "message": 0,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "c14b8557cc850571b213329bc968c10a11ba744476eb89f08ceb2a12b77f51989e54a134a0331970c0c6faa39bbb8401"
+    },
+    {
+      "key": 1,
+      "message": 1,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "eeb36dfed10a109f1e6821443d39fb7e27bbac9124e6b52eca645fec5ef274c19450810ef40ee24325c048c7b71fc680"
+    },
+    {
+      "key": 1,
+      "message": 2,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "6525a3c33a4fd04de1694ebb4ed4a66e07ec3fef1ca45b7d0b48e991c3a27fe695ae79a89917e3e40a1fc45d71333281"
+    },
+    {
+      "key": 1,
+      "message": 0,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "c14b8557cc850571b213329bc968c10a11ba744476eb89f08ceb2a12b77f51989e54a134a0331970c0c6faa39bbb8401"
+    },
+    {
+      "key": 1,
+      "message": 1,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "eeb36dfed10a109f1e6821443d39fb7e27bbac9124e6b52eca645fec5ef274c19450810ef40ee24325c048c7b71fc680"
+    },
+    {
+      "key": 1,
+      "message": 2,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "6525a3c33a4fd04de1694ebb4ed4a66e07ec3fef1ca45b7d0b48e991c3a27fe695ae79a89917e3e40a1fc45d71333281"
+    },
+    {
+      "key": 1,
+      "message": 0,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "c14b8557cc850571b213329bc968c10a11ba744476eb89f08ceb2a12b77f51989e54a134a0331970c0c6faa39bbb8401"
+    },
+    {
+      "key": 1,
+      "message": 1,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "eeb36dfed10a109f1e6821443d39fb7e27bbac9124e6b52eca645fec5ef274c19450810ef40ee24325c048c7b71fc680"
+    },
+    {
+      "key": 1,
+      "message": 2,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "6525a3c33a4fd04de1694ebb4ed4a66e07ec3fef1ca45b7d0b48e991c3a27fe695ae79a89917e3e40a1fc45d71333281"
+    },
+    {
+      "key": 1,
+      "message": 0,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "c14b8557cc850571b213329bc968c10a11ba744476eb89f08ceb2a12b77f51989e54a134a0331970c0c6faa39bbb8401"
+    },
+    {
+      "key": 1,
+      "message": 1,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "eeb36dfed10a109f1e6821443d39fb7e27bbac9124e6b52eca645fec5ef274c19450810ef40ee24325c048c7b71fc680"
+    },
+    {
+      "key": 1,
+      "message": 2,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "6525a3c33a4fd04de1694ebb4ed4a66e07ec3fef1ca45b7d0b48e991c3a27fe695ae79a89917e3e40a1fc45d71333281"
+    },
+    {
+      "key": 2,
+      "message": 0,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "3c91ea0466af7101b7346165de1891f06ca678336e9b16e5d439c22735b3f88939c823766690084c17b6e114d7d22300"
+    },
+    {
+      "key": 2,
+      "message": 1,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "8e7f5e9aa0c999c4a6b305025f6c5c3c5e5337b6eff5e237d73e8ae1bbe07355e75ac09371aefc735ec87fb74e432081"
+    },
+    {
+      "key": 2,
+      "message": 2,
+      "shares": [
+        0,
+        1
+      ],
+      "signature": "611a54cab3aa6ea868fb6db18765a7ef4a5462b6ca6b488d162663e084abb416137b169854d5236766b484e8cedd6d00"
+    },
+    {
+      "key": 2,
+      "message": 0,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "3c91ea0466af7101b7346165de1891f06ca678336e9b16e5d439c22735b3f88939c823766690084c17b6e114d7d22300"
+    },
+    {
+      "key": 2,
+      "message": 1,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "8e7f5e9aa0c999c4a6b305025f6c5c3c5e5337b6eff5e237d73e8ae1bbe07355e75ac09371aefc735ec87fb74e432081"
+    },
+    {
+      "key": 2,
+      "message": 2,
+      "shares": [
+        0,
+        2
+      ],
+      "signature": "611a54cab3aa6ea868fb6db18765a7ef4a5462b6ca6b488d162663e084abb416137b169854d5236766b484e8cedd6d00"
+    },
+    {
+      "key": 2,
+      "message": 0,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "3c91ea0466af7101b7346165de1891f06ca678336e9b16e5d439c22735b3f88939c823766690084c17b6e114d7d22300"
+    },
+    {
+      "key": 2,
+      "message": 1,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "8e7f5e9aa0c999c4a6b305025f6c5c3c5e5337b6eff5e237d73e8ae1bbe07355e75ac09371aefc735ec87fb74e432081"
+    },
+    {
+      "key": 2,
+      "message": 2,
+      "shares": [
+        1,
+        2
+      ],
+      "signature": "611a54cab3aa6ea868fb6db18765a7ef4a5462b6ca6b488d162663e084abb416137b169854d5236766b484e8cedd6d00"
+    },
+    {
+      "key": 2,
+      "message": 0,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "3c91ea0466af7101b7346165de1891f06ca678336e9b16e5d439c22735b3f88939c823766690084c17b6e114d7d22300"
+    },
+    {
+      "key": 2,
+      "message": 1,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "8e7f5e9aa0c999c4a6b305025f6c5c3c5e5337b6eff5e237d73e8ae1bbe07355e75ac09371aefc735ec87fb74e432081"
+    },
+    {
+      "key": 2,
+      "message": 2,
+      "shares": [
+        0,
+        1,
+        2
+      ],
+      "signature": "611a54cab3aa6ea868fb6db18765a7ef4a5462b6ca6b488d162663e084abb416137b169854d5236766b484e8cedd6d00"
+    },
+    {
+      "key": 3,
+      "message": 0,
+      "shares": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "signature": "dbfaef3c1dc2f995825a3a1cd861fec7b134ad28036488c45b084f9eeb046766d0a4ae7d669b05127bae0cfddfca7b01"
+    },
+    {
+      "key": 3,
+      "message": 1,
+      "shares": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "signature": "8ce1e2fed2f793baf6f699dab1a4f98ccf854b29b90ed437217a9e8056632cce58aa8227ac725234d1dc8754ede63d80"
+    },
+    {
+      "key": 3,
+      "message": 2,
+      "shares": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "signature": "29c9bccd912f44db6c6af1eed8e96a3f07c1144f06080643dcefe247970188ba96dd362613ce262064bc54075eebdb00"
+    },
+    {
+      "key": 3,
+      "message": 0,
+      "shares": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "signature": "dbfaef3c1dc2f995825a3a1cd861fec7b134ad28036488c45b084f9eeb046766d0a4ae7d669b05127bae0cfddfca7b01"
+    },
+    {
+      "key": 3,
+      "message": 1,
+      "shares": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "signature": "8ce1e2fed2f793baf6f699dab1a4f98ccf854b29b90ed437217a9e8056632cce58aa8227ac725234d1dc8754ede63d80"
+    },
+    {
+      "key": 3,
+      "message": 2,
+      "shares": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "signature": "29c9bccd912f44db6c6af1eed8e96a3f07c1144f06080643dcefe247970188ba96dd362613ce262064bc54075eebdb00"
+    },
+    {
+      "key": 3,
+      "message": 0,
+      "shares": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "signature": "dbfaef3c1dc2f995825a3a1cd861fec7b134ad28036488c45b084f9eeb046766d0a4ae7d669b05127bae0cfddfca7b01"
+    },
+    {
+      "key": 3,
+      "message": 1,
+      "shares": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "signature": "8ce1e2fed2f793baf6f699dab1a4f98ccf854b29b90ed437217a9e8056632cce58aa8227ac725234d1dc8754ede63d80"
+    },
+    {
+      "key": 3,
+      "message": 2,
+      "shares": [
+        0,
+        1,
+        3,
+        4
+      ],
+      "signature": "29c9bccd912f44db6c6af1eed8e96a3f07c1144f06080643dcefe247970188ba96dd362613ce262064bc54075eebdb00"
+    },
+    {
+      "key": 3,
+      "message": 0,
+      "shares": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "signature": "dbfaef3c1dc2f995825a3a1cd861fec7b134ad28036488c45b084f9eeb046766d0a4ae7d669b05127bae0cfddfca7b01"
+    },
+    {
+      "key": 3,
+      "message": 1,
+      "shares": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "signature": "8ce1e2fed2f793baf6f699dab1a4f98ccf854b29b90ed437217a9e8056632cce58aa8227ac725234d1dc8754ede63d80"
+    },
+    {
+      "key": 3,
+      "message": 2,
+      "shares": [
+        0,
+        2,
+        3,
+        4
+      ],
+      "signature": "29c9bccd912f44db6c6af1eed8e96a3f07c1144f06080643dcefe247970188ba96dd362613ce262064bc54075eebdb00"
+    },
+    {
+      "key": 3,
+      "message": 0,
+      "shares": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "signature": "dbfaef3c1dc2f995825a3a1cd861fec7b134ad28036488c45b084f9eeb046766d0a4ae7d669b05127bae0cfddfca7b01"
+    },
+    {
+      "key": 3,
+      "message": 1,
+      "shares": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "signature": "8ce1e2fed2f793baf6f699dab1a4f98ccf854b29b90ed437217a9e8056632cce58aa8227ac725234d1dc8754ede63d80"
+    },
+    {
+      "key": 3,
+      "message": 2,
+      "shares": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "signature": "29c9bccd912f44db6c6af1eed8e96a3f07c1144f06080643dcefe247970188ba96dd362613ce262064bc54075eebdb00"
+    },
+    {
+      "key": 3,
+      "message": 0,
+      "shares": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "signature": "dbfaef3c1dc2f995825a3a1cd861fec7b134ad28036488c45b084f9eeb046766d0a4ae7d669b05127bae0cfddfca7b01"
+    },
+    {
+      "key": 3,
+      "message": 1,
+      "shares": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "signature": "8ce1e2fed2f793baf6f699dab1a4f98ccf854b29b90ed437217a9e8056632cce58aa8227ac725234d1dc8754ede63d80"
+    },
+    {
+      "key": 3,
+      "message": 2,
+      "shares": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "signature": "29c9bccd912f44db6c6af1eed8e96a3f07c1144f06080643dcefe247970188ba96dd362613ce262064bc54075eebdb00"
+    }
+  ]
+}
