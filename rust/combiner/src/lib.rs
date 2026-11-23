@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod body;
 pub mod config;
 pub mod dek;

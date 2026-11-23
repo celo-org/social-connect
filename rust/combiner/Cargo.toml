@@ -30,6 +30,11 @@ tower-http = { workspace = true, features = ["limit", "trace"] }
 tracing = { workspace = true }
 
 [dev-dependencies]
+alloy-signer = { workspace = true }
+alloy-signer-local = { workspace = true }
 http-body-util = { workspace = true }
+k256 = { workspace = true, features = ["ecdsa"] }
+sha2 = { workspace = true }
+tempfile = { workspace = true }
 tower = { workspace = true, features = ["util"] }
 tracing-subscriber = { workspace = true }

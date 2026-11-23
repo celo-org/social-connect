@@ -19,7 +19,7 @@ use tower_http::trace::TraceLayer;
 use crate::config::Config;
 use crate::dek::{CachingDekLookup, DekLookup, FullNodeDekLookup, FullNodeError};
 use crate::errors::{Failure, UNKNOWN_ERROR};
-use crate::handlers::{domain_handler, pnp_pending_handler, status_handler};
+use crate::handlers::{domain_handler, pnp_pending_handler, pnp_quota_handler, status_handler};
 use crate::metrics::{self, ENDPOINT_HANDLER_ERRORS, ERRORS, UNKNOWN_ERRORS};
 use crate::signers::build_client;
 
@@ -89,7 +89,7 @@ pub fn build_router_with_services(
     Ok(Router::new()
         .route("/status", get(status_handler))
         .route("/sign", post(pnp_pending_handler))
-        .route("/quotaStatus", post(pnp_pending_handler))
+        .route("/quotaStatus", post(pnp_quota_handler))
         .route("/domain/sign", post(domain_handler))
         .route("/domain/quotaStatus", post(domain_handler))
         .route("/domain/disable", post(domain_handler))
@@ -134,7 +134,7 @@ pub async fn panic_layer(request: Request, next: Next) -> Response {
         Ok(response) => response,
         Err(panic) => {
             tracing::error!(
-                message = panic_message(panic.as_ref()),
+                panic = panic_message(panic.as_ref()),
                 endpoint,
                 "request handler panicked"
             );

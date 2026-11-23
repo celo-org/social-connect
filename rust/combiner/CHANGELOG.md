@@ -134,6 +134,32 @@ Transport differences, none of which touch a client that uses the SDK:
   `Number()` reads it as `Infinity`.
 - An explicit `null` for `authenticationMethod`, `sessionID` or `version` is refused with 400
   `WARN_01`, as in TS. The Rust signer accepts it.
+- `/quotaStatus` with a key version that is not configured answers 400 `WARN_12`, as `/sign` does.
+  The TS combiner answers 500 `ERR_00` there, because its lookup throws. As in TS, `/quotaStatus`
+  authenticates before it reads the key version, so a request that also has a bad signature gets
+  401 `WARN_02`.
+
+## Authentication
+
+The combiner checks the signature itself, over the body as `JSON.stringify` writes it (see "Request
+bodies"), before it calls any signer. The order is the TS order: a missing `Authorization` header,
+then the account, then the DEK lookup for `encryption_key` requests, then the signature. A failed
+DEK lookup is answered 401 `WARN_02`, as in TS.
+
+- A malformed wallet-key signature that the TS combiner accepts is refused with 401 `WARN_02`. TS
+  drops the first two characters of the signature whatever they are and reads r, s and v at fixed
+  positions, so it accepts a `0X` or any other two-character prefix, text after the signature, 66
+  bytes, and, when v is 28, a signature one hex character short. The Rust combiner wants a
+  lowercase `0x` and exactly 65 bytes of hex. The TS combiner forwards such a header unchanged, so
+  today TS signers sign and charge it while Rust signers refuse it.
+- A DEK signature is read only as a JSON array of DER bytes, the form the SDK writes
+  (`signWithRawKey`). TS hands the parsed header to elliptic, which also accepts the DER as a hex
+  string in quotes and an object of hex `r` and `s`. The Rust combiner answers those with 401
+  `WARN_02`, as the Rust signer does.
+- The Rust signer accepts some requests that the TS services refuse: an account without `0x`, with
+  `0X`, in upper case or with a wrong checksum, and a wallet-key signature without `0x`. Its
+  changelog lists them under "Authentication". The combiner refuses them with 401 `WARN_02`, as the
+  TS combiner does, so they never reach a signer. An account is refused before the DEK lookup.
 
 ## Calls to signers
 
@@ -172,6 +198,9 @@ Transport differences, none of which touch a client that uses the SDK:
   `error_type` `ERR_10`. The TS combiner means to do the same, but its HTTP client reports a
   deadline as a cancellation, so it counts `WARN_08` in `combiner_warnings_total`. Cancelled calls
   (an early stop) count `WARN_08` in both.
+- `combiner_warnings_total` labels the discrepancy warnings (`WARN_17`, `WARN_06`, `WARN_18`) with
+  the endpoint. The TS combiner writes `endpoint="undefined"` there, because it reads the URL from
+  Express's request prototype.
 - `combiner_sig_response_errors_total{status,signer,endpoint}` is new. It counts signer answers with
   a non-2xx status and a JSON body. The TS combiner increments it but never exports it.
 

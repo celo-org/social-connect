@@ -126,7 +126,7 @@ fn recovers_account(hash: B256, r_and_s: &[u8], v: u8, account: Address) -> bool
 /// - secp256k1 ECDSA with the signature encoded as a JSON array of DER bytes
 ///
 /// Matches TS `verifyDEKSignature` + `getMessageDigest` in authentication.ts.
-fn verify_dek_signature(body: &[u8], authorization: &str, dek: &str) -> bool {
+pub fn verify_dek_signature(body: &[u8], authorization: &str, dek: &str) -> bool {
     let dek_hex = dek.strip_prefix("0x").unwrap_or(dek);
     let dek_bytes = match hex::decode(dek_hex) {
         Ok(b) => b,

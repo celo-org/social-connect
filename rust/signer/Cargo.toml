@@ -16,10 +16,10 @@ bincode = { workspace = true }
 dotenvy = { workspace = true }
 google-cloud-secretmanager-v1 = "1"
 hex = { workspace = true }
-k256 = { version = "0.13", features = ["ecdsa"] }
+k256 = { workspace = true, features = ["ecdsa"] }
 moka = { workspace = true, features = ["future"] }
 serde = { workspace = true, features = ["derive"] }
-sha2 = "0.10"
+sha2 = { workspace = true }
 serde_json = { workspace = true }
 sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite", "postgres", "tls-rustls"] }
 thiserror = { workspace = true }
@@ -33,10 +33,10 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 
 [dev-dependencies]
-alloy-signer = "2.5"
-alloy-signer-local = "2.5"
+alloy-signer = { workspace = true }
+alloy-signer-local = { workspace = true }
 http-body-util = { workspace = true }
 rand_chacha = "0.3"
 rand_core = "0.6"
-tempfile = "3"
+tempfile = { workspace = true }
 testcontainers-modules = { version = "0.15", features = ["postgres"] }
