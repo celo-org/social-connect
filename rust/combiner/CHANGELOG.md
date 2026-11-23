@@ -79,3 +79,30 @@ which TS reads as unset and then takes Celo Sepolia. An empty `LOG_FORMAT` is th
 TS treats as unset (its default is `human`); the Rust combiner stops on it, and its default
 is `text`. `PNP_FULL_NODE_RETRY_COUNT` counts retries after the first try, where TS counts all tries.
 The whole full node lookup is capped at `PNP_FULL_NODE_TIMEOUT_MS`, as in the Rust signer.
+
+## Request bodies
+
+The combiner parses the client's JSON body and writes it back as `JSON.stringify` does: compact,
+keys in the order sent, unknown fields kept. The signature check, the 16,000 character limit (UTF-16
+code units of that form, so whitespace does not count) and the signer calls all use it. A body the
+Rust writer cannot reproduce exactly as JavaScript would is refused with 400 `CELO_ODIS_WARN_01`,
+where the TS combiner accepts it. Signers would otherwise check the signature over different
+strings, and some would charge a request that then fails. Refused:
+
+- A number that is not an integer from -(2^53 - 1) to 2^53 - 1, such as `1.0`, `1e2`, `-0`, `1e400`
+  (which JavaScript writes as `null`) or a 20-digit integer.
+- A key that appears twice in one object. JavaScript keeps the last value at the first key's place.
+- A key made only of ASCII digits, in any object. JavaScript moves integer-like keys to the front.
+  The combiner refuses every such key, a superset of those JavaScript moves.
+- A lone surrogate escape such as `"\ud83d"`, which JavaScript accepts and writes back.
+- A UTF-8 byte order mark before the body, an invalid UTF-8 byte (JavaScript reads it as U+FFFD),
+  and nesting of 128 or more levels.
+
+Transport differences, none of which touch a client that uses the SDK:
+
+| Request | TS combiner | Rust combiner |
+| --- | --- | --- |
+| `Content-Type` is not JSON, or missing | Express skips the body; the handler sees an empty object and answers 400 `WARN_01` | 400 `WARN_01` |
+| `charset` other than UTF-8 | `utf-*` is decoded and served; anything else gets 415 with an HTML body | 400 `WARN_01` |
+| body with a `Content-Encoding` | inflated | not decoded, so 400 `WARN_01` |
+| malformed JSON | 400 with an HTML body and no CORS headers | 400 `WARN_01` with the CORS headers |

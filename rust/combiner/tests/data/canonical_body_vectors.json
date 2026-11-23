@@ -1,0 +1,331 @@
+[
+  {
+    "description": "SDK sign body, compact",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c22626c696e646564517565727950686f6e654e756d626572223a225a6d3976596d4679596d4636222c2261757468656e7469636174696f6e4d6574686f64223a2277616c6c65745f6b6579222c2273657373696f6e4944223a2233653264386331612d306235662d346637652d396136322d316630633565376439623434227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"blindedQueryPhoneNumber\":\"Zm9vYmFyYmF6\",\"authenticationMethod\":\"wallet_key\",\"sessionID\":\"3e2d8c1a-0b5f-4f7e-9a62-1f0c5e7d9b44\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "SDK sign body, pretty-printed",
+    "bodyHex": "7b0a2020226163636f756e74223a2022307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c0a202022626c696e646564517565727950686f6e654e756d626572223a20225a6d3976596d4679596d4636222c0a20202261757468656e7469636174696f6e4d6574686f64223a202277616c6c65745f6b6579222c0a20202273657373696f6e4944223a202233653264386331612d306235662d346637652d396136322d316630633565376439623434220a7d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"blindedQueryPhoneNumber\":\"Zm9vYmFyYmF6\",\"authenticationMethod\":\"wallet_key\",\"sessionID\":\"3e2d8c1a-0b5f-4f7e-9a62-1f0c5e7d9b44\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "SDK sign body, CRLF whitespace",
+    "bodyHex": "7b0d0a2020226163636f756e74223a2022307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c0d0a202022626c696e646564517565727950686f6e654e756d626572223a20225a6d3976596d4679596d4636222c0d0a20202261757468656e7469636174696f6e4d6574686f64223a202277616c6c65745f6b6579222c0d0a20202273657373696f6e4944223a202233653264386331612d306235662d346637652d396136322d316630633565376439623434220d0a7d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"blindedQueryPhoneNumber\":\"Zm9vYmFyYmF6\",\"authenticationMethod\":\"wallet_key\",\"sessionID\":\"3e2d8c1a-0b5f-4f7e-9a62-1f0c5e7d9b44\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "SDK quota body, compact",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c2261757468656e7469636174696f6e4d6574686f64223a2277616c6c65745f6b6579222c2273657373696f6e4944223a2233653264386331612d306235662d346637652d396136322d316630633565376439623434227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"authenticationMethod\":\"wallet_key\",\"sessionID\":\"3e2d8c1a-0b5f-4f7e-9a62-1f0c5e7d9b44\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "SDK quota body, pretty-printed",
+    "bodyHex": "7b0a2020226163636f756e74223a2022307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c0a20202261757468656e7469636174696f6e4d6574686f64223a202277616c6c65745f6b6579222c0a20202273657373696f6e4944223a202233653264386331612d306235662d346637652d396136322d316630633565376439623434220a7d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"authenticationMethod\":\"wallet_key\",\"sessionID\":\"3e2d8c1a-0b5f-4f7e-9a62-1f0c5e7d9b44\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "SDK quota body, CRLF whitespace",
+    "bodyHex": "7b0d0a2020226163636f756e74223a2022307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c0d0a20202261757468656e7469636174696f6e4d6574686f64223a202277616c6c65745f6b6579222c0d0a20202273657373696f6e4944223a202233653264386331612d306235662d346637652d396136322d316630633565376439623434220d0a7d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"authenticationMethod\":\"wallet_key\",\"sessionID\":\"3e2d8c1a-0b5f-4f7e-9a62-1f0c5e7d9b44\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "emoji",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a2261f09f988062227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"a😀b\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "CJK",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a22e4b8ade69687227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"中文\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "escaped newline and tab",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a22615c6e625c7463227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"a\\nb\\tc\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "raw escapes \\u0001 and \\u001f",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a225c75303030315c7530303166227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"\\u0001\\u001f\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "escaped quote and backslash",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a225c225c5c227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"\\\"\\\\\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "escaped slash",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a22615c2f62227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"a/b\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "U+2028 and U+2029",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a22e280a8e280a9227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"  \"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "U+007F",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a227f227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "escaped \\b \\f \\r and \\u000b",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a225c625c665c725c7530303062227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"\\b\\f\\r\\u000b\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "upper case hex in \\u escape",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a225c75303045395c7530304142227d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":\"é«\"}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "empty key",
+    "bodyHex": "7b22223a312c2261223a327d",
+    "js": "{\"\":1,\"a\":2}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "__proto__ key",
+    "bodyHex": "7b225f5f70726f746f5f5f223a7b2278223a317d2c2261223a327d",
+    "js": "{\"__proto__\":{\"x\":1},\"a\":2}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "nested objects and arrays",
+    "bodyHex": "7b226163636f756e74223a22307831626533316139343336316133393162626166623261346363643730346635376463303464346262222c226578747261223a7b2262223a5b312c7b2263223a5b5d7d2c5b5b5d5d2c7b7d5d2c2261223a7b227a223a312c2279223a327d7d7d",
+    "js": "{\"account\":\"0x1be31a94361a391bbafb2a4ccd704f57dc04d4bb\",\"extra\":{\"b\":[1,{\"c\":[]},[[]],{}],\"a\":{\"z\":1,\"y\":2}}}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "true, false and null",
+    "bodyHex": "7b2261223a747275652c2262223a66616c73652c2263223a6e756c6c2c2264223a5b747275652c66616c73652c6e756c6c5d7d",
+    "js": "{\"a\":true,\"b\":false,\"c\":null,\"d\":[true,false,null]}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "largest safe integer",
+    "bodyHex": "7b226e223a393030373139393235343734303939317d",
+    "js": "{\"n\":9007199254740991}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "smallest safe integer",
+    "bodyHex": "7b226e223a2d393030373139393235343734303939317d",
+    "js": "{\"n\":-9007199254740991}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "zero and small integers",
+    "bodyHex": "7b2261223a302c2262223a2d312c2263223a31307d",
+    "js": "{\"a\":0,\"b\":-1,\"c\":10}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "127 levels of nesting",
+    "bodyHex": "7b2261223a5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d7d",
+    "js": "{\"a\":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "whitespace before and after",
+    "bodyHex": "20090d0a7b2261223a317d20090d0a",
+    "js": "{\"a\":1}",
+    "rustRefuses": false,
+    "reason": null
+  },
+  {
+    "description": "1.0",
+    "bodyHex": "7b226e223a312e307d",
+    "js": "{\"n\":1}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "1e2",
+    "bodyHex": "7b226e223a3165327d",
+    "js": "{\"n\":100}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "1E2",
+    "bodyHex": "7b226e223a3145327d",
+    "js": "{\"n\":100}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "-0",
+    "bodyHex": "7b226e223a2d307d",
+    "js": "{\"n\":0}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "1.5",
+    "bodyHex": "7b226e223a312e357d",
+    "js": "{\"n\":1.5}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "1e400",
+    "bodyHex": "7b226e223a31653430307d",
+    "js": "{\"n\":null}",
+    "rustRefuses": true,
+    "reason": "Json"
+  },
+  {
+    "description": "2^53",
+    "bodyHex": "7b226e223a393030373139393235343734303939327d",
+    "js": "{\"n\":9007199254740992}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "-(2^53)",
+    "bodyHex": "7b226e223a2d393030373139393235343734303939327d",
+    "js": "{\"n\":-9007199254740992}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "20-digit integer",
+    "bodyHex": "7b226e223a31323334353637383930313233343536373839307d",
+    "js": "{\"n\":12345678901234567000}",
+    "rustRefuses": true,
+    "reason": "UnsafeNumber"
+  },
+  {
+    "description": "duplicate key",
+    "bodyHex": "7b2261223a312c2262223a322c2261223a337d",
+    "js": "{\"a\":3,\"b\":2}",
+    "rustRefuses": true,
+    "reason": "DuplicateKey"
+  },
+  {
+    "description": "duplicate key in a nested object",
+    "bodyHex": "7b226f223a7b2261223a312c2261223a327d7d",
+    "js": "{\"o\":{\"a\":2}}",
+    "rustRefuses": true,
+    "reason": "DuplicateKey"
+  },
+  {
+    "description": "integer-like key \"1\"",
+    "bodyHex": "7b2262223a312c2231223a327d",
+    "js": "{\"1\":2,\"b\":1}",
+    "rustRefuses": true,
+    "reason": "IntegerKey"
+  },
+  {
+    "description": "integer-like key \"0\"",
+    "bodyHex": "7b2262223a312c2230223a327d",
+    "js": "{\"0\":2,\"b\":1}",
+    "rustRefuses": true,
+    "reason": "IntegerKey"
+  },
+  {
+    "description": "integer-like key in a nested object",
+    "bodyHex": "7b226f223a7b2237223a327d7d",
+    "js": "{\"o\":{\"7\":2}}",
+    "rustRefuses": true,
+    "reason": "IntegerKey"
+  },
+  {
+    "description": "lone surrogate escape",
+    "bodyHex": "7b2273657373696f6e4944223a225c7564383364227d",
+    "js": "{\"sessionID\":\"\\ud83d\"}",
+    "rustRefuses": true,
+    "reason": "Json"
+  },
+  {
+    "description": "UTF-8 byte order mark",
+    "bodyHex": "efbbbf7b2261223a317d",
+    "js": null,
+    "rustRefuses": true,
+    "reason": "Json"
+  },
+  {
+    "description": "invalid UTF-8 byte inside a string",
+    "bodyHex": "7b2261223a2278ff79227d",
+    "js": "{\"a\":\"x�y\"}",
+    "rustRefuses": true,
+    "reason": "Json"
+  },
+  {
+    "description": "128 levels of nesting",
+    "bodyHex": "7b2261223a5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5b5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d5d7d",
+    "js": "{\"a\":[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]}",
+    "rustRefuses": true,
+    "reason": "Json"
+  },
+  {
+    "description": "top-level array",
+    "bodyHex": "5b312c325d",
+    "js": "[1,2]",
+    "rustRefuses": true,
+    "reason": "NotAnObject"
+  },
+  {
+    "description": "top-level string",
+    "bodyHex": "2261626322",
+    "js": "\"abc\"",
+    "rustRefuses": true,
+    "reason": "NotAnObject"
+  },
+  {
+    "description": "malformed JSON",
+    "bodyHex": "7b2261223a",
+    "js": null,
+    "rustRefuses": true,
+    "reason": "Json"
+  },
+  {
+    "description": "empty body",
+    "bodyHex": "",
+    "js": null,
+    "rustRefuses": true,
+    "reason": "Json"
+  }
+]
