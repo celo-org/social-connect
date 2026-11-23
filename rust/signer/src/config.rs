@@ -162,7 +162,7 @@ impl Config {
     }
 }
 
-fn parse_env_string(name: &str, default: Option<&str>) -> Result<String, ConfigError> {
+pub fn parse_env_string(name: &str, default: Option<&str>) -> Result<String, ConfigError> {
     match env::var(name) {
         Ok(val) => Ok(val),
         Err(_) => default
@@ -171,7 +171,7 @@ fn parse_env_string(name: &str, default: Option<&str>) -> Result<String, ConfigE
     }
 }
 
-fn parse_env<T>(name: &str, default: Option<T>) -> Result<T, ConfigError>
+pub fn parse_env<T>(name: &str, default: Option<T>) -> Result<T, ConfigError>
 where
     T: std::str::FromStr,
     T::Err: std::error::Error + Send + Sync + 'static,
@@ -227,7 +227,7 @@ fn parse_keystore_type() -> Result<KeystoreType, ConfigError> {
     }
 }
 
-fn parse_log_format() -> Result<LogFormat, ConfigError> {
+pub fn parse_log_format() -> Result<LogFormat, ConfigError> {
     let val = parse_env_string("LOG_FORMAT", Some("text"))?;
     match val.to_lowercase().as_str() {
         "text" => Ok(LogFormat::Text),

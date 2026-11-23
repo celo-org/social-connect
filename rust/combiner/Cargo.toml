@@ -11,9 +11,8 @@ exclude.workspace = true
 base64 = { workspace = true }
 bincode = { workspace = true }
 hex = { workspace = true }
+odis-signer = { path = "../signer" }
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 thiserror = { workspace = true }
 threshold-bls = { workspace = true }
-
-[dev-dependencies]
-serde_json = { workspace = true }

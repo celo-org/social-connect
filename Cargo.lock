@@ -3633,6 +3633,7 @@ dependencies = [
  "base64 0.22.1",
  "bincode",
  "hex",
+ "odis-signer",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
