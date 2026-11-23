@@ -36,7 +36,7 @@ tracing-subscriber = { workspace = true, features = ["env-filter", "json"] }
 alloy-signer = { workspace = true }
 alloy-signer-local = { workspace = true }
 http-body-util = { workspace = true }
-rand_chacha = "0.3"
-rand_core = "0.6"
+rand_chacha = { workspace = true }
+rand_core = { workspace = true }
 tempfile = { workspace = true }
 testcontainers-modules = { version = "0.15", features = ["postgres"] }

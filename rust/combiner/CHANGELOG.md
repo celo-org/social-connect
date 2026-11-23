@@ -45,10 +45,8 @@ sets them keeps starting but no longer mocks anything.
 ### Signer entries
 
 `PNP_ODIS_SERVICES_SIGNERS` is a JSON list of objects with a string `url`. Other fields are
-ignored. An entry may carry a `shareIndex`, which the TS combiner does not read. A partial
-signature with another share index is then dropped. Indices count from 0, and one index applies to
-every configured key version. A signer's index is the last four bytes of the base64-decoded
-partial signature in its answer, which the TS combiner already logs.
+ignored. An entry may also carry a `shareIndex`, which the TS combiner does not read; see "Share
+indices".
 
 ### Refused at startup
 
@@ -185,6 +183,36 @@ DEK lookup is answered 401 `WARN_02`, as in TS.
   `Accept-Encoding: gzip,deflate`, and Node adds `Connection: keep-alive`. Signer operators can
   see the difference, for example in access logs.
 
+## Share indices
+
+A signer entry may name the share index its signer holds, as `{"url": "...", "shareIndex": 2}`.
+Before a signer's partial signature counts toward the threshold, the combiner compares the index
+the partial carries with the entry's `shareIndex`. On a mismatch it drops the partial: the log line
+`CELO_ODIS_ERR_06 SIG_ERR BLS partial signature verification Failure` names the signer's URL and
+the expected and received index, and `combiner_bls_compute_errors_total` counts it under the
+signer's URL. The signer's quota numbers still count. With an index on every entry, a signer that
+answers with another signer's share is named instead of the request failing with nobody to blame.
+
+The field is optional. The combiner names every entry without one in a warning at startup and does
+not check that signer's index; its partials are still verified when a combination fails.
+
+To find a signer's index, take the `signature` from one of its `/sign` answers, base64-decode it
+and read the last four bytes as a little-endian unsigned integer. The TS combiner logs the answer
+as `received 'OK' response from signer`; the Rust combiner logs the partial as `Received a partial
+signature`. On a little-endian machine (x86 or ARM):
+
+```sh
+echo '<signature>' | base64 -d | tail -c 4 | od -An -t u4
+```
+
+Indices count from 0: the dev keys' share 1 has index 0. One index applies to every key version in
+`PNP_KEYS_VERSIONS`. If a signer's index differs between key versions, leave `shareIndex` out of
+its entry.
+
+A wrong `shareIndex` is costly and no startup check catches it: the signer signs and charges every
+request, and the combiner then drops its partial. Read each index from the signer's own answers
+before you set it.
+
 ## Quota state
 
 - A signer's non-2xx answer never counts toward the quota numbers. The TS combiner lets one in if
@@ -203,6 +231,39 @@ DEK lookup is answered 401 `WARN_02`, as in TS.
   Express's request prototype.
 - `combiner_sig_response_errors_total{status,signer,endpoint}` is new. It counts signer answers with
   a non-2xx status and a JSON body. The TS combiner increments it but never exports it.
+- `combiner_bls_compute_errors_total` carries the signer's URL in `signer`. The TS combiner writes
+  the request path there (`signer="/sign"`), and its log line for a dropped partial signature names
+  the request path too; the Rust combiner's names the signer's URL.
+- A `/sign` that fails with 403 counts `CELO_ODIS_WARN_03` in `combiner_warnings_total`. The TS
+  combiner means to and never does: it tests whether the error is a key of its warning enum, not a
+  value.
+- `signer_tail_latency` gets one sample per `/sign` request that collects enough partial
+  signatures, from the first kept partial to the first combination.
+  `combiner_signature_aggregation_latency` gets one sample per combination attempt, failed ones
+  included. The TS combiner samples the tail latency at every attempt and the aggregation at every
+  successful one, and combines once more after the signer calls end, so a request that combines on
+  its first attempt gives two samples of each.
+- `combiner_connection_closed_total` is new. It counts requests whose client closed the connection
+  before the answer, and is exported at 0 from startup.
+- `combiner_requests_total` and `combiner_responses_total` count every answer on `/sign` and
+  `/quotaStatus`, including those the TS combiner never counts. A body that Express answers with its
+  own error page (see "Request bodies"), such as malformed JSON, gets 400 here and also counts
+  `WARN_01` in `combiner_warnings_total`. A body above the size limit counts as a 413, whether or
+  not it declares its length. A handler panic counts as a 500; when a TS handler throws, the request
+  counts and the response does not.
+- Not exported: `combiner_event_loop_lag` and Node's default metrics (`process_*`, `nodejs_*`).
+
+Label names are snake_case, the Prometheus convention. The TS combiner uses camelCase for two
+labels, so alert rules and dashboard queries that filter on them must be changed before the swap.
+A query on the old names matches nothing and gives no error.
+
+| Metric                       | TS combiner label | Rust combiner label |
+| ---------------------------- | ----------------- | ------------------- |
+| `combiner_responses_total`   | `statusCode`      | `status_code`       |
+| `combiner_full_node_latency` | `codeSegment`     | `code_segment`      |
+
+Other names, label names, the `app` label (`SERVICE_NAME`) and the histogram buckets (0.001, 0.01,
+0.1, 0.5, 1, 2, 5 and 10 seconds) are the TS combiner's.
 
 ## Routes and transport
 

@@ -143,12 +143,14 @@ pub fn key_version_header(headers: &HeaderMap) -> Option<Result<u32, Unsupported
 mod tests {
     use super::*;
     use axum::http::HeaderValue;
+    use axum::http::header::CONTENT_TYPE;
 
     const LOWER: &str = "0xd3cbed9a5e1e3c9bd5eb3e9a8b0a4a0ab3d7c0de";
 
     fn body(json: &str) -> CanonicalBody {
-        let content_type = HeaderValue::from_static("application/json");
-        CanonicalBody::parse(Some(&content_type), json.as_bytes()).unwrap()
+        let headers =
+            HeaderMap::from_iter([(CONTENT_TYPE, HeaderValue::from_static("application/json"))]);
+        CanonicalBody::parse(&headers, json.as_bytes()).unwrap()
     }
 
     fn checksummed() -> String {

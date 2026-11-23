@@ -72,14 +72,76 @@ pub struct DevKey {
 }
 
 #[derive(Deserialize)]
+struct PartialVector {
+    key: usize,
+    share: usize,
+    message: usize,
+    partial: String,
+    valid: bool,
+}
+
+#[derive(Deserialize)]
+struct CombinedVector {
+    key: usize,
+    message: usize,
+    signature: String,
+}
+
+#[derive(Deserialize)]
 struct Vectors {
     keys: Vec<DevKey>,
+    messages: Vec<String>,
+    partials: Vec<PartialVector>,
+    combined: Vec<CombinedVector>,
+}
+
+fn vectors() -> Vectors {
+    serde_json::from_str(include_str!("../data/combine_vectors.json")).unwrap()
 }
 
 fn vector_keys() -> Vec<DevKey> {
-    let vectors: Vectors =
-        serde_json::from_str(include_str!("../data/combine_vectors.json")).unwrap();
-    vectors.keys
+    vectors().keys
+}
+
+/// The position of `key_version` in the vectors' key list.
+fn key_index(vectors: &Vectors, key_version: u32) -> usize {
+    vectors
+        .keys
+        .iter()
+        .position(|key| key.key_version == key_version)
+        .unwrap()
+}
+
+/// Blinded message `index` of the vectors. Message 0 is the TS suite's: `test message`
+/// blinded with the seed 0, 1, …, 30, 0.
+pub fn vector_message(index: usize) -> Vec<u8> {
+    hex::decode(&vectors().messages[index]).unwrap()
+}
+
+/// The TS library's partial signature of share `share` (from 0) of `key_version` on vector
+/// message `message`, in base64.
+pub fn vector_partial(key_version: u32, share: usize, message: usize) -> String {
+    let vectors = vectors();
+    let key = key_index(&vectors, key_version);
+    let partial = vectors
+        .partials
+        .iter()
+        .find(|p| p.key == key && p.share == share && p.message == message && p.valid)
+        .unwrap();
+    BASE64.encode(hex::decode(&partial.partial).unwrap())
+}
+
+/// The TS library's combined signature of `key_version` on vector message `message`, in
+/// base64. Every subset of shares gives the same signature.
+pub fn vector_signature(key_version: u32, message: usize) -> String {
+    let vectors = vectors();
+    let key = key_index(&vectors, key_version);
+    let combined = vectors
+        .combined
+        .iter()
+        .find(|c| c.key == key && c.message == message)
+        .unwrap();
+    BASE64.encode(hex::decode(&combined.signature).unwrap())
 }
 
 /// The 2-of-3 dev keys, versions 1 to 3.
@@ -256,6 +318,20 @@ pub async fn fake_signer(
     answering_signer(status, None, body.to_string(), delay).await
 }
 
+/// A signer's success for message 0 under key version 1, with the vector partial of `share`.
+pub fn partial_answer(share: usize) -> String {
+    format!(
+        r#"{{"success":true,"version":"1.0.0","signature":"{}","performedQueryCount":1,"totalQuota":1000}}"#,
+        vector_partial(1, share, 0)
+    )
+}
+
+/// A test signer that answers `/sign` for message 0 under key version 1 with the vector
+/// partial of `share`, after `delay`.
+pub async fn partial_signer(share: usize, delay: Duration) -> (String, Arc<AtomicUsize>) {
+    answering_signer(StatusCode::OK, Some(1), partial_answer(share), delay).await
+}
+
 /// A signer whose PNP API is off, as the TS suite takes a signer down. The Rust signer has no
 /// such switch, so a test server answers as a disabled TS signer does.
 pub async fn disabled_signer() -> String {
@@ -406,16 +482,23 @@ pub struct Fleet {
 }
 
 pub async fn fleet_of(setups: Vec<SignerSetup>, dek: Arc<FixedDek>) -> Fleet {
+    fleet_with(setups, |setup| CombinerSetup { dek, ..setup }).await
+}
+
+/// The combiner in front of real signers made from `setups`, set up by `configure` from
+/// `CombinerSetup::over` the signers.
+pub async fn fleet_with(
+    setups: Vec<SignerSetup>,
+    configure: impl FnOnce(CombinerSetup) -> CombinerSetup,
+) -> Fleet {
     let mut signers = Vec::new();
     for setup in setups {
         signers.push(spawn_signer(setup).await);
     }
     let urls: Vec<&str> = signers.iter().map(|s| s.url.as_str()).collect();
-    let combiner = spawn_combiner(CombinerSetup {
-        dek: dek.clone(),
-        ..CombinerSetup::over(&urls)
-    })
-    .await;
+    let setup = configure(CombinerSetup::over(&urls));
+    let dek = setup.dek.clone();
+    let combiner = spawn_combiner(setup).await;
     Fleet {
         combiner,
         signers,
@@ -451,7 +534,12 @@ pub async fn wallet_auth_by(private_key: &str, body: &str) -> String {
 /// A DEK signature of `body` by `DEK_PRIVATE_KEY`, as `signWithRawKey` writes it: the DER
 /// bytes of a signature over SHA-256 of `JSON.stringify(body)`, as a JSON array.
 pub fn dek_auth(body: &str) -> String {
-    let key = SigningKey::from_slice(&hex::decode(&DEK_PRIVATE_KEY[2..]).unwrap()).unwrap();
+    dek_auth_by(DEK_PRIVATE_KEY, body)
+}
+
+/// A DEK signature of `body` by `private_key`, as `dek_auth` writes it.
+pub fn dek_auth_by(private_key: &str, body: &str) -> String {
+    let key = SigningKey::from_slice(&hex::decode(&private_key[2..]).unwrap()).unwrap();
     let digest = Sha256::digest(serde_json::to_string(body).unwrap().as_bytes());
     let signature: Signature = key.sign_prehash(&digest).unwrap();
     serde_json::to_string(signature.to_der().as_bytes()).unwrap()

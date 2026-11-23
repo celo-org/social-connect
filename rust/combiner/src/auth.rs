@@ -79,7 +79,8 @@ mod tests {
     use alloy_signer::SignerSync;
     use alloy_signer_local::PrivateKeySigner;
     use async_trait::async_trait;
-    use axum::http::HeaderValue;
+    use axum::http::header::CONTENT_TYPE;
+    use axum::http::{HeaderMap, HeaderValue};
     use k256::ecdsa::signature::hazmat::PrehashSigner;
     use k256::ecdsa::{Signature, SigningKey};
     use sha2::{Digest, Sha256};
@@ -135,8 +136,9 @@ mod tests {
                 format!(r#"{{"account":"{account}","authenticationMethod":"{method}"}}"#)
             }
         };
-        let content_type = HeaderValue::from_static("application/json");
-        CanonicalBody::parse(Some(&content_type), json.as_bytes()).unwrap()
+        let headers =
+            HeaderMap::from_iter([(CONTENT_TYPE, HeaderValue::from_static("application/json"))]);
+        CanonicalBody::parse(&headers, json.as_bytes()).unwrap()
     }
 
     /// `0x` and r, s, v in hex.
@@ -308,9 +310,10 @@ mod tests {
 
     #[tokio::test]
     async fn the_signature_covers_the_canonical_body() {
-        let content_type = HeaderValue::from_static("application/json");
+        let headers =
+            HeaderMap::from_iter([(CONTENT_TYPE, HeaderValue::from_static("application/json"))]);
         let sent = format!("{{ \"account\" : \"{}\" }}", account());
-        let body = CanonicalBody::parse(Some(&content_type), sent.as_bytes()).unwrap();
+        let body = CanonicalBody::parse(&headers, sent.as_bytes()).unwrap();
         let lookup = Lookup::new(Ok(DEK_PUBLIC_KEY));
 
         let over_compact = wallet_signature(WALLET_KEY, &body);

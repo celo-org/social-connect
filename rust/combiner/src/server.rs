@@ -19,7 +19,7 @@ use tower_http::trace::TraceLayer;
 use crate::config::Config;
 use crate::dek::{CachingDekLookup, DekLookup, FullNodeDekLookup, FullNodeError};
 use crate::errors::{Failure, UNKNOWN_ERROR};
-use crate::handlers::{domain_handler, pnp_pending_handler, pnp_quota_handler, status_handler};
+use crate::handlers::{domain_handler, pnp_quota_handler, pnp_sign_handler, status_handler};
 use crate::metrics::{self, ENDPOINT_HANDLER_ERRORS, ERRORS, UNKNOWN_ERRORS};
 use crate::signers::build_client;
 
@@ -84,11 +84,12 @@ pub fn build_router_with_services(
         dek,
     };
 
-    // Layers run from the bottom up, so the panic layer sits inside the metrics
-    // layer, and a request that panics is counted like any other response.
+    // Layers run from the bottom up, so the panic layer and the body limit sit
+    // inside the metrics layer: a request that panics is counted like any other
+    // response, and a 413 is counted whether or not the body declared its length.
     Ok(Router::new()
         .route("/status", get(status_handler))
-        .route("/sign", post(pnp_pending_handler))
+        .route("/sign", post(pnp_sign_handler))
         .route("/quotaStatus", post(pnp_quota_handler))
         .route("/domain/sign", post(domain_handler))
         .route("/domain/quotaStatus", post(domain_handler))
@@ -98,9 +99,9 @@ pub fn build_router_with_services(
             get(move || std::future::ready(metrics.render())),
         )
         .layer(middleware::from_fn(panic_layer))
+        .layer(RequestBodyLimitLayer::new(TRANSPORT_BODY_LIMIT_BYTES))
         .layer(middleware::from_fn(metrics::http_metrics_layer))
         .layer(TraceLayer::new_for_http())
-        .layer(RequestBodyLimitLayer::new(TRANSPORT_BODY_LIMIT_BYTES))
         .layer(middleware::from_fn(cors_layer))
         .with_state(state))
 }

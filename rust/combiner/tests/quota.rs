@@ -577,7 +577,7 @@ async fn sdk_quota_body_passes_with_wallet_key_and_dek() {
 /// The JSON failure arrives first. The two 502s come later, so the request ends early on the
 /// second failure while the first is already counted. Only the first has a JSON body, so it is
 /// the majority. A tie goes to the lower status, so only the 503 case would show a 502 that
-/// entered the majority; the 403 case is the brief's.
+/// entered the majority. The 403 case is the refusal a client meets most often, out of quota.
 #[tokio::test]
 async fn html_and_empty_failures_do_not_enter_the_majority() {
     let late = Duration::from_millis(300);
