@@ -52,12 +52,15 @@ partial signature in its answer, which the TS combiner already logs.
 
 ### Refused at startup
 
+Each refusal names the variable and says what to change.
+
 - A `CHAIN_ID` other than 42220 (Celo mainnet) or 11142220 (Celo Sepolia). The combiner knows the
   Accounts contract address only for these two chains, and the TS combiner has no variable to set it.
 - A full node that does not answer `eth_chainId`, or that reports a chain other than `CHAIN_ID`.
-
-Each refusal names the variable and says what to change.
-
+- A signer `url` that does not parse as an `http://` or `https://` URL once the endpoint is
+  appended, such as an empty string, a host name without a scheme or a URL that ends in a space.
+  The TS combiner starts, and every call to that signer fails unless its entry has a `fallbackUrl`.
+  The combiner calls the URL as written, trailing slash included.
 - Two signer entries with the same `shareIndex`.
 - A signer list or key version list that is not valid JSON of the expected shape.
 - `PNP_ODIS_SERVICES_TIMEOUT_MILLISECONDS` or `PNP_FULL_NODE_TIMEOUT_MS` of 0.
@@ -132,7 +135,42 @@ Transport differences, none of which touch a client that uses the SDK:
 - An explicit `null` for `authenticationMethod`, `sessionID` or `version` is refused with 400
   `WARN_01`, as in TS. The Rust signer accepts it.
 
+## Calls to signers
+
+- A signer's answer above 64 KiB (65,536 bytes) is refused, whether or not it declares its length
+  and whatever its status. It counts as a failure without a status (`ERR_09`), so an oversized
+  error answer does not enter the majority status. The TS combiner reads answers of any length.
+- Calls to signers and full node lookups go through the proxy that `HTTP_PROXY`, `HTTPS_PROXY`
+  or `ALL_PROXY` names (or its lower-case form), except to hosts that `NO_PROXY` lists. With
+  `REQUEST_METHOD` set, `HTTP_PROXY` is ignored, as in CGI. The combiner reads the variables once,
+  at startup. The TS combiner's calls ignore them: node-fetch, which calls the signers, never reads
+  them, and Node's `fetch`, which the TS full node client uses, reads them only with
+  `NODE_USE_ENV_PROXY=1`, which neither TS image nor its `.env` sets. A deployment that sets a
+  proxy variable for other reasons must list the signers and the full node in `NO_PROXY`.
+- The `odis-key-version` header of a `/sign` answer is read as in a request (see "Request fields"):
+  plain decimal digits after trimming. TS also takes other spellings that `Number()` reads as the
+  same version, such as `1.0`. Signers write plain digits.
+- `performedQueryCount` and `totalQuota` in a signer's success must be integers from 0 to
+  2^64 − 1, written without a fraction, an exponent or a minus sign: `2.0`, `1e2` and `-0` are
+  refused. TS takes any number. Signers write plain integers.
+- Requests to signers carry `Accept`, `Content-Type`, `Authorization`, `odis-key-version`, `Host`
+  and `Content-Length`, and nothing else. The TS combiner's node-fetch 2.7.0 also sends
+  `User-Agent: node-fetch/1.0 (+https://github.com/bitinn/node-fetch)` and
+  `Accept-Encoding: gzip,deflate`, and Node adds `Connection: keep-alive`. Signer operators can
+  see the difference, for example in access logs.
+
 ## Quota state
 
+- A signer's non-2xx answer never counts toward the quota numbers. The TS combiner lets one in if
+  its body says `success: true`.
 - When the signers' total quota disagrees, `combiner_warnings_total` counts `WARN_06`. The TS
   combiner counts `WARN_18` there, which is the label for a disagreement in the query count.
+
+## Metrics
+
+- A signer call cut off at the deadline counts in `combiner_sig_request_errors_total` with
+  `error_type` `ERR_10`. The TS combiner means to do the same, but its HTTP client reports a
+  deadline as a cancellation, so it counts `WARN_08` in `combiner_warnings_total`. Cancelled calls
+  (an early stop) count `WARN_08` in both.
+- `combiner_sig_response_errors_total{status,signer,endpoint}` is new. It counts signer answers with
+  a non-2xx status and a JSON body. The TS combiner increments it but never exports it.

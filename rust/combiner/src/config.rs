@@ -3,6 +3,7 @@
 //! run wrong stops the start with a message that says what to change.
 
 use crate::signature::{KeyVersion, KeyVersionError};
+use crate::signers::SignerEndpoint;
 use odis_signer::config::{ConfigError, LogFormat, parse_env, parse_env_string, parse_log_format};
 use serde::{Deserialize, de::DeserializeOwned};
 use std::{env, time::Duration};
@@ -89,6 +90,26 @@ fn parse_signers() -> Result<Vec<SignerEntry>, ConfigError> {
             share_index: s.share_index,
         })
         .collect();
+
+    // Only checked: the call appends the endpoint to the URL as written, as TS does. The check
+    // parses that string, because the parser drops trailing spaces from the URL alone and the
+    // call would then fail on a space inside the host.
+    for (i, signer) in signers.iter().enumerate() {
+        let is_http =
+            reqwest::Url::parse(&format!("{}{}", signer.url, SignerEndpoint::Sign.path()))
+                .is_ok_and(|url| matches!(url.scheme(), "http" | "https"));
+        if !is_http {
+            return Err(invalid(
+                NAME,
+                format!(
+                    "signer {} has url {:?}, which is not an http:// or https:// URL; \
+                     set the signer's full URL, such as http://signer:8080",
+                    i + 1,
+                    signer.url
+                ),
+            ));
+        }
+    }
 
     for (i, signer) in signers.iter().enumerate() {
         let Some(index) = signer.share_index else {
@@ -416,7 +437,7 @@ mod tests {
         let config = from_env_with(&[(
             "PNP_ODIS_SERVICES_SIGNERS",
             Some(
-                r#"[{"url":"http://a","fallbackUrl":"http://b","shareIndex":2,"other":1},{"url":"http://c"}]"#,
+                r#"[{"url":"http://a","fallbackUrl":"http://b","shareIndex":2,"other":1},{"url":"https://c/"}]"#,
             ),
         )])
         .unwrap();
@@ -428,8 +449,9 @@ mod tests {
                     url: "http://a".to_string(),
                     share_index: Some(2)
                 },
+                // Kept as written, trailing slash included.
                 SignerEntry {
-                    url: "http://c".to_string(),
+                    url: "https://c/".to_string(),
                     share_index: None
                 },
             ]
@@ -481,11 +503,55 @@ mod tests {
                     .into(),
             ),
             (
+                "signer url empty",
+                vec![(
+                    "PNP_ODIS_SERVICES_SIGNERS",
+                    Some(r#"[{"url":"http://a"},{"url":""}]"#.into()),
+                )],
+                "invalid value for PNP_ODIS_SERVICES_SIGNERS: signer 2 has url \"\", which is \
+                 not an http:// or https:// URL; set the signer's full URL, such as \
+                 http://signer:8080"
+                    .into(),
+            ),
+            (
+                "signer url without a scheme",
+                vec![(
+                    "PNP_ODIS_SERVICES_SIGNERS",
+                    Some(r#"[{"url":"signer.example.com"}]"#.into()),
+                )],
+                "invalid value for PNP_ODIS_SERVICES_SIGNERS: signer 1 has url \
+                 \"signer.example.com\", which is not an http:// or https:// URL; set the \
+                 signer's full URL, such as http://signer:8080"
+                    .into(),
+            ),
+            (
+                "signer url with a trailing space",
+                vec![(
+                    "PNP_ODIS_SERVICES_SIGNERS",
+                    Some(r#"[{"url":"http://a"},{"url":"http://signer:8080 "}]"#.into()),
+                )],
+                "invalid value for PNP_ODIS_SERVICES_SIGNERS: signer 2 has url \
+                 \"http://signer:8080 \", which is not an http:// or https:// URL; set the \
+                 signer's full URL, such as http://signer:8080"
+                    .into(),
+            ),
+            (
+                "signer url with another scheme",
+                vec![(
+                    "PNP_ODIS_SERVICES_SIGNERS",
+                    Some(r#"[{"url":"ftp://signer"}]"#.into()),
+                )],
+                "invalid value for PNP_ODIS_SERVICES_SIGNERS: signer 1 has url \
+                 \"ftp://signer\", which is not an http:// or https:// URL; set the signer's \
+                 full URL, such as http://signer:8080"
+                    .into(),
+            ),
+            (
                 "share index used twice",
                 vec![(
                     "PNP_ODIS_SERVICES_SIGNERS",
                     Some(
-                        r#"[{"url":"a","shareIndex":1},{"url":"b"},{"url":"c","shareIndex":1}]"#
+                        r#"[{"url":"http://a","shareIndex":1},{"url":"http://b"},{"url":"http://c","shareIndex":1}]"#
                             .into(),
                     ),
                 )],

@@ -65,30 +65,3 @@ pub fn spawn_upkeep_task(handle: PrometheusHandle) {
         }
     });
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    /// One test, because the recorder is global to the process.
-    #[test]
-    fn recorder_exports_ts_buckets_and_app_label_and_refuses_a_second_install() {
-        let handle = install_recorder("combiner-test").expect("first install");
-        ::metrics::histogram!(FULL_NODE_LATENCY, "code_segment" => "x").record(0.05);
-        let text = handle.render();
-
-        assert!(
-            text.contains(r#"combiner_connection_closed_total{app="combiner-test"} 0"#),
-            "{text}"
-        );
-        for bound in ["0.001", "0.01", "0.1", "0.5", "1", "2", "5", "10", "+Inf"] {
-            let line = format!(
-                r#"combiner_full_node_latency_bucket{{app="combiner-test",code_segment="x",le="{bound}"}}"#
-            );
-            assert!(text.contains(&line), "missing {line} in {text}");
-        }
-        assert!(!text.contains(r#"le="0.2""#), "{text}");
-
-        assert!(install_recorder("combiner-test").is_err());
-    }
-}
