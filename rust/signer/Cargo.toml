@@ -10,7 +10,7 @@ exclude.workspace = true
 [dependencies]
 alloy = { version = "2.5", features = ["contract", "k256", "provider-http", "rpc-types", "sol-types"] }
 async-trait = "0.1"
-axum = "0.8"
+axum = { workspace = true }
 base64 = { workspace = true }
 bincode = { workspace = true }
 dotenvy = "0.15"
