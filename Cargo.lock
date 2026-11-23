@@ -3631,15 +3631,22 @@ name = "odis-combiner"
 version = "0.1.0"
 dependencies = [
  "alloy",
+ "async-trait",
  "axum",
  "base64 0.22.1",
  "bincode",
  "hex",
+ "metrics",
+ "metrics-exporter-prometheus",
+ "moka",
  "odis-signer",
  "serde",
  "serde_json",
  "thiserror 2.0.21",
  "threshold-bls",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

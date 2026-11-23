@@ -52,6 +52,10 @@ partial signature in its answer, which the TS combiner already logs.
 
 ### Refused at startup
 
+- A `CHAIN_ID` other than 42220 (Celo mainnet) or 11142220 (Celo Sepolia). The combiner knows the
+  Accounts contract address only for these two chains, and the TS combiner has no variable to set it.
+- A full node that does not answer `eth_chainId`, or that reports a chain other than `CHAIN_ID`.
+
 Each refusal names the variable and says what to change.
 
 - Two signer entries with the same `shareIndex`.
@@ -79,6 +83,16 @@ which TS reads as unset and then takes Celo Sepolia. An empty `LOG_FORMAT` is th
 TS treats as unset (its default is `human`); the Rust combiner stops on it, and its default
 is `text`. `PNP_FULL_NODE_RETRY_COUNT` counts retries after the first try, where TS counts all tries.
 The whole full node lookup is capped at `PNP_FULL_NODE_TIMEOUT_MS`, as in the Rust signer.
+
+TS's viem transport also retries inside each try: network errors, HTTP 403, 408, 413, 429, 500, 502,
+503 and 504, and JSON-RPC errors -1, -32005 and -32603, up to three times (viem 2.37.9). The Rust
+combiner does not, so one try is one request to the full node.
+
+## DEK cache
+
+The DEK cache drops an entry 5 seconds after it was stored. The TS cache hands the old entry to every
+caller while it fetches a new one, and deletes it if that fetch fails. A failed lookup is never
+kept; the next request asks the full node again.
 
 ## Request bodies
 
