@@ -34,6 +34,14 @@ test-differential:
     cargo build -p odis-combiner
     ODIS_RUST_COMBINER_BIN="$PWD/target/debug/odis-combiner" corepack yarn --cwd=apps/combiner test:differential
 
+# Run the PNP end-to-end tests against the combiner at `url`, which reports `version`.
+test-e2e-combiner url version:
+    CONTEXT_NAME=celo-sepolia \
+    ODIS_BLOCKCHAIN_PROVIDER=https://forno.celo-sepolia.celo-testnet.org \
+    ODIS_COMBINER_SERVICE_URL={{url}} \
+    DEPLOYED_COMBINER_SERVICE_VERSION={{version}} \
+    corepack yarn --cwd=apps/combiner test:e2e:pnp
+
 # Start signer locally with mock keys against Celo Sepolia for E2E testing
 run-e2e-signer:
     KEYSTORE_TYPE=Mock \

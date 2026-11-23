@@ -4,7 +4,31 @@ Changes an operator sees when moving from the TS combiner (`apps/combiner`) to t
 
 ## Migrating a deployment
 
-Filled in with the last change to the combiner, when the full list is known.
+A manifest written for the TS combiner needs these changes before it can run the Rust combiner. The
+sections below give the details.
+
+| Variable                    | Change                                                                                                                                                                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `BLOCKCHAIN_PROVIDER`       | Required. The TS combiner falls back to the chain's public RPC; the Rust combiner stops.                                                                                                                                                               |
+| `CHAIN_ID`                  | Set to 42220 on mainnet. The default is Celo Sepolia (11142220), so a mainnet manifest that omits it stops at startup: the full node reports 42220. The TS combiner instead runs with Celo Sepolia's settings, its Accounts contract address included. |
+| `LOG_FORMAT`                | Set to `json` or `text`. `stackdriver` and `human` stop the combiner.                                                                                                                                                                                  |
+| `PNP_ODIS_SERVICES_SIGNERS` | Optional `shareIndex` on each entry; see "Share indices". On mainnet, see the note below.                                                                                                                                                              |
+
+On mainnet, do not set `shareIndex` on any entry while version 2 is listed in `PNP_KEYS_VERSIONS`,
+until each share holder has confirmed that their version 2 index equals their version 1 index. One
+`shareIndex` applies to every key version, and a signer whose version 2 index differs would have its
+partial dropped after it charged for the request.
+
+The metric labels `statusCode` and `codeSegment` are now `status_code` and `code_segment`. Change
+dashboards and alert rules before the swap; see "Metrics".
+
+The TS variables that the Rust combiner does not read are listed under "Not supported" and
+"Variables without effect". The Rust combiner reads no boolean variables, but refuses to start on
+`PNP_SHOULD_MOCK_ACCOUNT_SERVICE=true`.
+
+A deployment that runs TS and Rust signers side by side sees `WARN_17` (the signers' answers
+differ) whenever the collected successes include both kinds, because they report different
+`version` strings. The TS combiner does the same today.
 
 ## Configuration
 
@@ -31,16 +55,12 @@ combiner stops.
 
 These are not read, whatever their value, and nothing stops the start.
 
-| Variable                           | Why it has no effect                                                                  |
-| ---------------------------------- | ------------------------------------------------------------------------------------- |
-| `PHONE_NUMBER_PRIVACY_API_ENABLED` | The PNP API is always on. Stop the combiner to take it down.                          |
-| `PNP_SHOULD_AUTHENTICATE`          | The combiner always authenticates, so it always needs a full node.                    |
-| `PNP_SHOULD_CHECK_QUOTA`           | There is no no-quota cache; see above.                                                |
-| `PNP_SHOULD_MOCK_ACCOUNT_SERVICE`  | There is no mock account service. DEKs always come from the full node.                |
-| `PNP_MOCK_DEK`                     | Same as above.                                                                        |
-
-The Rust signer differs: it stops on its mock switches. The combiner does not, so a manifest that
-sets them keeps starting but no longer mocks anything.
+| Variable                           | Why it has no effect                                                   |
+| ---------------------------------- | ---------------------------------------------------------------------- |
+| `PHONE_NUMBER_PRIVACY_API_ENABLED` | The PNP API is always on. Stop the combiner to take it down.           |
+| `PNP_SHOULD_AUTHENTICATE`          | The combiner always authenticates, so it always needs a full node.     |
+| `PNP_SHOULD_CHECK_QUOTA`           | There is no no-quota cache; see above.                                 |
+| `PNP_MOCK_DEK`                     | Only the TS mock account service reads it; see "Refused at startup".   |
 
 ### Signer entries
 
@@ -52,6 +72,10 @@ indices".
 
 Each refusal names the variable and says what to change.
 
+- `PNP_SHOULD_MOCK_ACCOUNT_SERVICE` set to `true`, in any case. The TS combiner then answers every
+  DEK lookup with `PNP_MOCK_DEK`; the Rust combiner has no mock account service and would query the
+  full node instead. Any other value is ignored, as TS ignores it. The Rust signer stops on its
+  mock switches in the same way.
 - A `CHAIN_ID` other than 42220 (Celo mainnet) or 11142220 (Celo Sepolia). The combiner knows the
   Accounts contract address only for these two chains, and the TS combiner has no variable to set it.
 - A full node that does not answer `eth_chainId`, or that reports a chain other than `CHAIN_ID`.
@@ -247,7 +271,8 @@ before you set it.
   combiner means to and never does: it tests whether the error is a key of its warning enum, not a
   value.
 - `signer_tail_latency` gets one sample per `/sign` request that collects enough partial
-  signatures, from the first kept partial to the first combination.
+  signatures, from the first kept partial to the start of the first combination attempt, failed
+  or not.
   `combiner_signature_aggregation_latency` gets one sample per combination attempt, failed ones
   included. The TS combiner samples the tail latency at every attempt and the aggregation at every
   successful one, and combines once more after the signer calls end, so a request that combines on
@@ -290,6 +315,11 @@ Other names, label names, the `app` label (`SERVICE_NAME`) and the histogram buc
 - Request metrics are labelled with the route (`/sign`), where the TS combiner labels with the raw URL,
   query string included. A `GET /sign` is counted under `/sign`; TS counts only requests that reach the
   POST handler. Unknown paths, `/status` and `/metrics` are not counted.
+- The combiner sets no time limit on reading a request's headers or body, so a client that sends
+  slowly holds its connection open. The TS combiner runs on Node 24's HTTP server, which answers
+  408 and closes the connection when the headers take longer than 60 seconds (`headersTimeout`) or
+  the whole request longer than 300 seconds (`requestTimeout`). Node checks every 30 seconds, so the
+  cut can come up to 30 seconds later.
 
 Routing and transport answers come from axum, not Express. None of these touch a client that uses
 the SDK's paths and headers. Answers to bodies that Express refuses or skips are under "Request

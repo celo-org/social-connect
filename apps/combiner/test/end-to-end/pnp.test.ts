@@ -37,11 +37,17 @@ require('dotenv').config()
 
 jest.setTimeout(60000)
 
-const SERVICE_CONTEXT = getServiceContext(getTestContextName(), OdisAPI.PNP)
+const DEFAULT_SERVICE_CONTEXT = getServiceContext(getTestContextName(), OdisAPI.PNP)
+// ODIS_COMBINER_SERVICE_URL points the suite at another combiner, such as the Rust one, and keeps
+// the context's public key.
+const SERVICE_CONTEXT = {
+  ...DEFAULT_SERVICE_CONTEXT,
+  odisUrl: process.env.ODIS_COMBINER_SERVICE_URL ?? DEFAULT_SERVICE_CONTEXT.odisUrl,
+}
 const combinerUrl = SERVICE_CONTEXT.odisUrl
 const fullNodeUrl = process.env.ODIS_BLOCKCHAIN_PROVIDER
 
-const expectedVersion = getCombinerVersion()
+const expectedVersion = process.env.DEPLOYED_COMBINER_SERVICE_VERSION ?? getCombinerVersion()
 
 describe(`Running against service deployed at ${combinerUrl} w/ blockchain provider ${fullNodeUrl}`, () => {
   beforeAll(async () => {
