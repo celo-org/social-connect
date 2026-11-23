@@ -1,4 +1,4 @@
-name: Rust Signer CI
+name: Rust CI
 
 on:
   push:
@@ -48,6 +48,7 @@ jobs:
       - run: just build
       - run: just fmt-check
       - run: just clippy
+      - run: just check-tls
       # Docker is available on ubuntu-latest, so the Postgres/ETL testcontainers
       # tests run for real. Require them so they can never silently skip.
       - run: just test
