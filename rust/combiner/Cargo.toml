@@ -1,0 +1,19 @@
+[package]
+name = "odis-combiner"
+edition.workspace = true
+authors.workspace = true
+version.workspace = true
+license.workspace = true
+rust-version.workspace = true
+exclude.workspace = true
+
+[dependencies]
+base64 = { workspace = true }
+bincode = { workspace = true }
+hex = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
+threshold-bls = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }

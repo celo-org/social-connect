@@ -1,29 +1,29 @@
 default: check fmt-check clippy test
 
 check:
-    cargo check -p odis-signer
+    cargo check --workspace
 
 test:
-    cargo nextest run -p odis-signer
+    cargo nextest run --workspace
 
 # Run the Postgres/ETL integration tests, requiring Docker (fails if unavailable)
 test-postgres:
     ODIS_REQUIRE_POSTGRES_TESTS=1 cargo nextest run -p odis-signer --test postgres_integration
 
 clippy:
-    cargo clippy -p odis-signer --all-targets -- -D warnings
+    cargo clippy --workspace --all-targets -- -D warnings
 
 fmt:
-    cargo fmt -p odis-signer
+    cargo fmt --all
 
 fmt-check:
-    cargo fmt -p odis-signer -- --check
+    cargo fmt --all -- --check
 
 build:
-    cargo build -p odis-signer
+    cargo build --workspace
 
 build-release:
-    cargo build --release -p odis-signer
+    cargo build --release --workspace
 
 # Start signer locally with mock keys against Celo Sepolia for E2E testing
 run-e2e-signer:
