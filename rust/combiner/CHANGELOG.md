@@ -106,3 +106,14 @@ Transport differences, none of which touch a client that uses the SDK:
 | `charset` other than UTF-8 | `utf-*` is decoded and served; anything else gets 415 with an HTML body | 400 `WARN_01` |
 | body with a `Content-Encoding` | inflated | not decoded, so 400 `WARN_01` |
 | malformed JSON | 400 with an HTML body and no CORS headers | 400 `WARN_01` with the CORS headers |
+
+## Request fields
+
+- The `odis-key-version` header counts only when, after trimming whitespace, it is plain decimal
+  digits. `1.0`, `0x1`, `0b1`, `0o1`, `1e0` and `+1`, which JavaScript's `Number()` reads as a
+  version, count as absent, so the current version is used. A header sent twice counts as absent,
+  as in TS, where Node joins the values and `Number()` reads NaN. A digit string beyond `u32` is an
+  unsupported version (400 `WARN_12`); TS counts one above about 1.8e308 as absent, because
+  `Number()` reads it as `Infinity`.
+- An explicit `null` for `authenticationMethod`, `sessionID` or `version` is refused with 400
+  `WARN_01`, as in TS. The Rust signer accepts it.
