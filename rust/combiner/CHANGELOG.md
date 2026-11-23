@@ -115,12 +115,16 @@ strings, and some would charge a request that then fails. Refused:
 
 Transport differences, none of which touch a client that uses the SDK:
 
-| Request | TS combiner | Rust combiner |
-| --- | --- | --- |
-| `Content-Type` is not JSON, or missing | Express skips the body; the handler sees an empty object and answers 400 `WARN_01` | 400 `WARN_01` |
-| `charset` other than UTF-8 | `utf-*` is decoded and served; anything else gets 415 with an HTML body | 400 `WARN_01` |
-| body with a `Content-Encoding` | inflated | not decoded, so 400 `WARN_01` |
-| malformed JSON | 400 with an HTML body and no CORS headers | 400 `WARN_01` with the CORS headers |
+| Request                                                                                                       | TS combiner                                                                        | Rust combiner                       |
+| ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------- |
+| `Content-Type` is not JSON, does not parse (such as a parameter without `=` or a trailing `;`), or is missing | Express skips the body; the handler sees an empty object and answers 400 `WARN_01` | 400 `WARN_01`                       |
+| `charset` other than UTF-8                                                                                    | `utf-*` is decoded and served; anything else gets 415 with an HTML body            | 400 `WARN_01`                       |
+| `Content-Encoding` `gzip` or `deflate`                                                                        | inflated; a body that does not inflate gets 400 with an HTML body                  | 400 `WARN_01`; nothing is decoded   |
+| any other `Content-Encoding` but `identity`, or the header sent twice                                         | 415 with an HTML body                                                              | 400 `WARN_01`                       |
+| malformed JSON                                                                                                | 400 with an HTML body and no CORS headers                                          | 400 `WARN_01` with the CORS headers |
+
+Both read the body as is when `Content-Encoding` is `identity`, in any case, or empty. When
+`charset` appears twice, both use the last one, and both read an empty `charset=""` as UTF-8.
 
 ## Request fields
 
@@ -130,6 +134,11 @@ Transport differences, none of which touch a client that uses the SDK:
   as in TS, where Node joins the values and `Number()` reads NaN. A digit string beyond `u32` is an
   unsupported version (400 `WARN_12`); TS counts one above about 1.8e308 as absent, because
   `Number()` reads it as `Infinity`.
+- The blinded query must be 64 characters of strict base64, whose unused padding bits are zero.
+  TS's `is-base64` also accepts padding bits that are not zero, as in a query ending in `B==`: the
+  TS combiner forwards it, every signer fails to compute the BLS signature and answers 500 `ERR_05`,
+  and the request ends in 500 `ERR_07`. The Rust combiner answers 400 `WARN_01` and calls no
+  signer.
 - An explicit `null` for `authenticationMethod`, `sessionID` or `version` is refused with 400
   `WARN_01`, as in TS. The Rust signer accepts it.
 - `/quotaStatus` with a key version that is not configured answers 400 `WARN_12`, as `/sign` does.
@@ -283,16 +292,16 @@ Other names, label names, the `app` label (`SERVICE_NAME`) and the histogram buc
   POST handler. Unknown paths, `/status` and `/metrics` are not counted.
 
 Routing and transport answers come from axum, not Express. None of these touch a client that uses
-the SDK's paths and headers:
+the SDK's paths and headers. Answers to bodies that Express refuses or skips are under "Request
+bodies".
 
-| Request | TS combiner | Rust combiner |
-| --- | --- | --- |
-| `/SIGN`, `/quotastatus` | served; Express ignores case | 404 |
-| `/sign/` | served | 404 |
-| `GET /sign` | 404 with an HTML body | 405 with `Allow: POST` and an empty body |
-| unknown path | 404 with an HTML body | 404 with an empty body |
-| `OPTIONS` on an unknown path | 404 | 200 |
-| body with a `Content-Encoding` | inflated | not decoded, so 400 `WARN_01` |
-| malformed JSON | 400 with an HTML body | 400 `WARN_01` |
-| `charset` other than UTF-8 | `utf-*` is decoded and served; anything else gets 415 with an HTML body | 400 `WARN_01` |
-| 413 and 415 answers, and the 400 for malformed JSON | no CORS headers | CORS headers |
+| Request                                 | TS combiner                                               | Rust combiner                                                                                                                                                              |
+| --------------------------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/SIGN`, `/quotastatus`                 | served; Express ignores case                              | 404                                                                                                                                                                        |
+| `/sign/`                                | served                                                    | 404                                                                                                                                                                        |
+| `GET /sign`                             | 404 with an HTML body                                     | 405 with `Allow: POST` and an empty body                                                                                                                                   |
+| unknown path                            | 404 with an HTML body                                     | 404 with an empty body                                                                                                                                                     |
+| `OPTIONS` on an unknown path            | 404                                                       | 200                                                                                                                                                                        |
+| `OPTIONS /sign`, `OPTIONS /quotaStatus` | 200 with `Allow: POST` and the body `POST` as `text/html` | 200 with `Allow: POST` and an empty body                                                                                                                                   |
+| body above 209,715 bytes                | 413 with an HTML body                                     | 413 as `text/plain`: `length limit exceeded` when the request declares its `Content-Length`, `Failed to buffer the request body: length limit exceeded` for a chunked body |
+| Express's 400, 413 and 415 error pages  | no CORS headers                                           | CORS headers                                                                                                                                                               |

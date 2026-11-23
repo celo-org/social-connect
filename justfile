@@ -25,6 +25,11 @@ build:
 build-release:
     cargo build --release --workspace
 
+# Compare the Rust combiner with the TS combiner on the same requests. Needs `yarn build` first.
+test-differential:
+    cargo build -p odis-combiner
+    ODIS_RUST_COMBINER_BIN="$PWD/target/debug/odis-combiner" corepack yarn --cwd=apps/combiner test:differential
+
 # Start signer locally with mock keys against Celo Sepolia for E2E testing
 run-e2e-signer:
     KEYSTORE_TYPE=Mock \

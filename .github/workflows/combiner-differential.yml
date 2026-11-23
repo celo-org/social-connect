@@ -1,0 +1,72 @@
+name: Combiner Differential Test
+
+# Sends the same requests to the TS combiner and the Rust combiner, each in front of three TS
+# signers, and compares the answers (apps/combiner/test/differential).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - "apps/combiner/**"
+      - "apps/signer/**"
+      - "packages/common/**"
+      - "yarn.lock"
+      - "package.json"
+      - ".nvmrc"
+      - "justfile"
+      - ".github/workflows/combiner-differential.yml"
+  pull_request:
+    paths:
+      - "rust/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rust-toolchain.toml"
+      - "apps/combiner/**"
+      - "apps/signer/**"
+      - "packages/common/**"
+      - "yarn.lock"
+      - "package.json"
+      - ".nvmrc"
+      - "justfile"
+      - ".github/workflows/combiner-differential.yml"
+
+concurrency:
+  group: combiner-differential-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  differential:
+    name: Rust and TS combiners on the same requests
+    runs-on: ubuntu-latest
+    # A cold run (install, TS build, Rust build) is estimated at about 10 minutes.
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - run: corepack enable
+
+      # Skips the check that fails with YN0078: Invalid resolution
+      # @celo/odis-identifiers@npm:^1.0.0 → npm:1.0.0, as social-connect.yml does.
+      - run: yarn install --immutable --no-check-resolutions
+
+      # The harness imports the TS signer from its dist/ directory.
+      - run: yarn build
+
+      - uses: dtolnay/rust-toolchain@1.100.0
+
+      - uses: extractions/setup-just@v2
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: just test-differential
