@@ -301,6 +301,59 @@ async fn only_the_api_routes_are_counted() {
     }
 }
 
+/// The TS combiner counts none of these: Express answers them before its metering handler runs.
+#[tokio::test]
+async fn refused_bodies_on_api_routes_are_counted() {
+    let series = [
+        r#"combiner_requests_total{app="combiner-test",endpoint="/sign"} "#,
+        r#"combiner_responses_total{app="combiner-test",endpoint="/sign",status_code="400"} "#,
+        r#"combiner_responses_total{app="combiner-test",endpoint="/sign",status_code="413"} "#,
+        r#"combiner_warnings_total{app="combiner-test",endpoint="/sign",warning_type="CELO_ODIS_WARN_01 BAD_INPUT Invalid input parameters"} "#,
+    ];
+    let before = series.map(counter_value);
+
+    let malformed = send(
+        Method::POST,
+        "/sign",
+        &[("content-type", "application/json")],
+        b"{".to_vec(),
+    )
+    .await;
+    let declared = send(
+        Method::POST,
+        "/sign",
+        &[("content-length", "300000")],
+        vec![b'a'; 300_000],
+    )
+    .await;
+    let chunks = (0..30).map(|_| Ok::<_, std::io::Error>(vec![b' '; 10_000]));
+    let chunked = router()
+        .oneshot(
+            Request::builder()
+                .method(Method::POST)
+                .uri("/sign")
+                .header(header::CONTENT_TYPE, "application/json")
+                .body(Body::from_stream(futures::stream::iter(chunks)))
+                .unwrap(),
+        )
+        .await
+        .unwrap();
+
+    let statuses = [malformed.status(), declared.status(), chunked.status()];
+    assert_eq!(
+        statuses,
+        [
+            StatusCode::BAD_REQUEST,
+            StatusCode::PAYLOAD_TOO_LARGE,
+            StatusCode::PAYLOAD_TOO_LARGE
+        ]
+    );
+    assert_eq!(
+        series.map(counter_value),
+        [before[0] + 3, before[1] + 1, before[2] + 2, before[3] + 1]
+    );
+}
+
 #[tokio::test]
 async fn domain_routes_count_the_unavailable_warning() {
     let warning = r#"combiner_warnings_total{app="combiner-test",endpoint="/domain/sign",warning_type="CELO_ODIS_WARN_13 BAD_INPUT API is unavailable"} "#;

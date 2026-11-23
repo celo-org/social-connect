@@ -7,7 +7,8 @@ use std::cell::RefCell;
 use std::collections::HashSet;
 use std::fmt;
 
-use axum::http::HeaderValue;
+use axum::http::header::{CONTENT_ENCODING, CONTENT_TYPE};
+use axum::http::{HeaderMap, HeaderValue};
 use serde::de::{DeserializeSeed, MapAccess, SeqAccess, Visitor};
 
 /// The most UTF-16 code units the canonical body may have.
@@ -31,8 +32,12 @@ pub enum JsValue {
 pub enum BodyError {
     #[error("the Content-Type is not application/json")]
     MediaType,
+    #[error("a Content-Type parameter is not a name=value pair with a token or quoted value")]
+    ContentTypeParameter,
     #[error("the charset is not UTF-8")]
     Charset,
+    #[error("the body has a Content-Encoding other than identity")]
+    ContentEncoding,
     #[error("the body is not valid JSON: {0}")]
     Json(String),
     #[error("the body is not a JSON object")]
@@ -55,10 +60,11 @@ pub struct CanonicalBody {
 }
 
 impl CanonicalBody {
-    /// Checks the `Content-Type` as `express.json()` does, then parses `raw` and writes it back
-    /// in canonical form. The media type and charset are checked before the body is read.
-    pub fn parse(content_type: Option<&HeaderValue>, raw: &[u8]) -> Result<Self, BodyError> {
-        check_content_type(content_type)?;
+    /// Checks the `Content-Type` and `Content-Encoding` as `express.json()` does, then parses
+    /// `raw` and writes it back in canonical form. The headers are checked before the body is read.
+    pub fn parse(headers: &HeaderMap, raw: &[u8]) -> Result<Self, BodyError> {
+        check_content_type(headers.get(CONTENT_TYPE))?;
+        check_content_encoding(headers)?;
 
         let failure = RefCell::new(None);
         let mut deserializer = serde_json::Deserializer::from_slice(raw);
@@ -94,29 +100,114 @@ impl CanonicalBody {
     }
 }
 
-/// Accepts what Express's JSON parser accepts: `application/json` in any case, with an optional
-/// `charset` of `utf-8` (quoted or not, any case). Other parameters are ignored.
+/// Accepts what Express's JSON parser accepts. type-is must parse the header with media-typer
+/// 0.3.0, or Express skips the body: `application/json` in any case, then `; name=value`
+/// parameters whose value is a token or a quoted string, with spaces around `;` and `=`. As in
+/// body-parser, the last `charset` counts; it must be `utf-8` in any case, or empty, which
+/// body-parser reads as UTF-8.
 fn check_content_type(content_type: Option<&HeaderValue>) -> Result<(), BodyError> {
+    // Node strips spaces and tabs around a header value; inside it media-typer allows spaces only.
     let value = content_type
-        .and_then(|v| v.to_str().ok())
-        .ok_or(BodyError::MediaType)?;
-    let mut parts = value.split(';');
-    let media_type = parts.next().unwrap_or_default().trim();
-    if !media_type.eq_ignore_ascii_case("application/json") {
+        .ok_or(BodyError::MediaType)?
+        .as_bytes()
+        .trim_ascii();
+    let split = value.iter().position(|&byte| byte == b';');
+    let (media_type, mut parameters) = value.split_at(split.unwrap_or(value.len()));
+    if !trim_spaces(media_type).eq_ignore_ascii_case(b"application/json") {
         return Err(BodyError::MediaType);
     }
-    for parameter in parts {
-        let Some((name, parameter_value)) = parameter.split_once('=') else {
-            continue;
+    let mut charset = None;
+    while let [b';', rest @ ..] = parameters {
+        let (name, rest) = token(trim_spaces(rest)).ok_or(BodyError::ContentTypeParameter)?;
+        let [b'=', rest @ ..] = trim_spaces(rest) else {
+            return Err(BodyError::ContentTypeParameter);
         };
-        if name.trim().eq_ignore_ascii_case("charset") {
-            let charset = parameter_value.trim().trim_matches('"');
-            if !charset.eq_ignore_ascii_case("utf-8") {
-                return Err(BodyError::Charset);
+        let (value, rest) =
+            parameter_value(trim_spaces(rest)).ok_or(BodyError::ContentTypeParameter)?;
+        if name.eq_ignore_ascii_case(b"charset") {
+            charset = Some(value);
+        }
+        parameters = trim_spaces(rest);
+    }
+    if !parameters.is_empty() {
+        return Err(BodyError::ContentTypeParameter);
+    }
+    match charset {
+        Some(charset) if !charset.is_empty() && !charset.eq_ignore_ascii_case(b"utf-8") => {
+            Err(BodyError::Charset)
+        }
+        _ => Ok(()),
+    }
+}
+
+/// body-parser inflates `gzip` and `deflate` and refuses other encodings. The combiner decodes
+/// none, so it reads only a body sent without one: no header, an empty one, or `identity` in any
+/// case. Node joins a repeated header into one value, which is then never `identity`.
+fn check_content_encoding(headers: &HeaderMap) -> Result<(), BodyError> {
+    let mut values = headers.get_all(CONTENT_ENCODING).iter();
+    match (values.next(), values.next()) {
+        (None, _) => Ok(()),
+        (Some(value), None) => {
+            let value = value.as_bytes().trim_ascii();
+            if value.is_empty() || value.eq_ignore_ascii_case(b"identity") {
+                Ok(())
+            } else {
+                Err(BodyError::ContentEncoding)
             }
         }
+        (Some(_), Some(_)) => Err(BodyError::ContentEncoding),
     }
-    Ok(())
+}
+
+/// Removes leading and trailing spaces, not tabs, as media-typer's ` *` does.
+fn trim_spaces(mut bytes: &[u8]) -> &[u8] {
+    while let [b' ', rest @ ..] = bytes {
+        bytes = rest;
+    }
+    while let [rest @ .., b' '] = bytes {
+        bytes = rest;
+    }
+    bytes
+}
+
+/// A token as RFC 2616 and media-typer define it.
+fn is_token_byte(byte: u8) -> bool {
+    byte.is_ascii_alphanumeric() || b"!#$%&'*+-.^_`|~".contains(&byte)
+}
+
+/// Splits a non-empty token off the front of `bytes`.
+fn token(bytes: &[u8]) -> Option<(&[u8], &[u8])> {
+    let end = bytes
+        .iter()
+        .position(|&byte| !is_token_byte(byte))
+        .unwrap_or(bytes.len());
+    (end > 0).then(|| bytes.split_at(end))
+}
+
+/// Splits a parameter value off the front of `bytes`: a token, or a quoted string, which is
+/// returned without its quotes and escapes.
+fn parameter_value(bytes: &[u8]) -> Option<(Vec<u8>, &[u8])> {
+    let Some(mut rest) = bytes.strip_prefix(b"\"") else {
+        return token(bytes).map(|(value, rest)| (value.to_vec(), rest));
+    };
+    let mut value = Vec::new();
+    loop {
+        match rest {
+            [b'"', after @ ..] => return Some((value, after)),
+            [b'\\', escaped @ 0x20..=0x7e, after @ ..] => {
+                value.push(*escaped);
+                rest = after;
+            }
+            [
+                byte @ (b' ' | b'!' | 0x23..=0x5b | 0x5d..=0x7e | 0x80..=0xff),
+                after @ ..,
+            ] => {
+                value.push(*byte);
+                rest = after;
+            }
+            _ => return None,
+        }
+    }
 }
 
 /// Reads a JSON value into a `JsValue`, recording the reason for a refusal in `failure` because
@@ -254,10 +345,19 @@ fn write_string(value: &str, out: &mut String) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use axum::http::HeaderValue;
+    use axum::http::HeaderName;
 
-    fn json_type() -> HeaderValue {
-        HeaderValue::from_static("application/json")
+    /// A header map with each header as given, a header named twice sent twice.
+    fn headers(headers: &[(HeaderName, &[u8])]) -> HeaderMap {
+        let mut map = HeaderMap::new();
+        for (name, value) in headers {
+            map.append(name, HeaderValue::from_bytes(value).unwrap());
+        }
+        map
+    }
+
+    fn json_headers() -> HeaderMap {
+        headers(&[(CONTENT_TYPE, b"application/json")])
     }
 
     fn vectors() -> Vec<serde_json::Value> {
@@ -277,7 +377,7 @@ mod tests {
                 continue;
             }
             let description = vector["description"].as_str().unwrap();
-            let parsed = CanonicalBody::parse(Some(&json_type()), &body_of(&vector))
+            let parsed = CanonicalBody::parse(&json_headers(), &body_of(&vector))
                 .unwrap_or_else(|e| panic!("{description}: {e:?}"));
             assert_eq!(
                 parsed.as_str(),
@@ -297,7 +397,7 @@ mod tests {
                 continue;
             }
             let description = vector["description"].as_str().unwrap();
-            let error = CanonicalBody::parse(Some(&json_type()), &body_of(&vector))
+            let error = CanonicalBody::parse(&json_headers(), &body_of(&vector))
                 .map(|b| b.as_str().to_string())
                 .expect_err(description);
             match vector["reason"].as_str().unwrap() {
@@ -320,7 +420,7 @@ mod tests {
 
     #[test]
     fn refusals_name_the_offending_key() {
-        let parse = |s: &str| CanonicalBody::parse(Some(&json_type()), s.as_bytes()).err();
+        let parse = |s: &str| CanonicalBody::parse(&json_headers(), s.as_bytes()).err();
         assert_eq!(
             parse(r#"{"a":1,"a":2}"#),
             Some(BodyError::DuplicateKey("a".into()))
@@ -334,8 +434,8 @@ mod tests {
 
     #[test]
     fn fields_keep_their_values_and_order() {
-        let body = CanonicalBody::parse(Some(&json_type()), br#" { "b" : [1, null], "a" : "x" } "#)
-            .unwrap();
+        let body =
+            CanonicalBody::parse(&json_headers(), br#" { "b" : [1, null], "a" : "x" } "#).unwrap();
         assert_eq!(body.as_str(), r#"{"b":[1,null],"a":"x"}"#);
         assert_eq!(body.field("a"), Some(&JsValue::String("x".into())));
         assert_eq!(
@@ -345,34 +445,127 @@ mod tests {
         assert_eq!(body.field("c"), None);
     }
 
+    /// Content types whose body `express.json()` (Express 4.21.2) parses.
+    const SERVED_CONTENT_TYPES: [&[u8]; 12] = [
+        b"application/json",
+        b"application/json; charset=utf-8",
+        b"application/json;charset=UTF-8",
+        b"Application/JSON",
+        b"application/json; charset=\"utf-8\"",
+        b"application/json ; charset = utf-8 ",
+        b"\tapplication/json\t",
+        b"application/json; charset=\"\"",
+        b"application/json; charset=\"utf\\-8\"",
+        b"application/json; charset=latin1; charset=utf-8",
+        b"application/json; foo=bar",
+        b"application/json; foo=\"a;b \\\"c\\\" \xe9\"",
+    ];
+
+    /// Content types whose body `express.json()` skips, so the TS handler answers 400 WARN_01
+    /// (`MediaType`, `ContentTypeParameter`), or refuses with 415 or, for UTF-16, decodes
+    /// (`Charset`).
+    const REFUSED_CONTENT_TYPES: [(Option<&[u8]>, BodyError); 15] = [
+        (None, BodyError::MediaType),
+        (Some(b"text/plain"), BodyError::MediaType),
+        (Some(b"application/vnd.api+json"), BodyError::MediaType),
+        (
+            Some(b"application/json\t; charset=utf-8"),
+            BodyError::MediaType,
+        ),
+        (Some(b"application/json;"), BodyError::ContentTypeParameter),
+        (
+            Some(b"application/json; foo"),
+            BodyError::ContentTypeParameter,
+        ),
+        (
+            Some(b"application/json; charset=utf-8; foo"),
+            BodyError::ContentTypeParameter,
+        ),
+        (
+            Some(b"application/json; charset="),
+            BodyError::ContentTypeParameter,
+        ),
+        (
+            Some(b"application/json; charset=\"utf-8"),
+            BodyError::ContentTypeParameter,
+        ),
+        (
+            Some(b"application/json; charset=utf-8 x"),
+            BodyError::ContentTypeParameter,
+        ),
+        (
+            Some(b"application/json; =utf-8"),
+            BodyError::ContentTypeParameter,
+        ),
+        (
+            Some(b"application/json; charset=utf-16"),
+            BodyError::Charset,
+        ),
+        (
+            Some(b"application/json; charset=latin1"),
+            BodyError::Charset,
+        ),
+        (Some(b"application/json; charset=utf8"), BodyError::Charset),
+        (
+            Some(b"application/json; charset=utf-8; charset=latin1"),
+            BodyError::Charset,
+        ),
+    ];
+
     #[test]
     fn content_type_follows_express_json() {
         let body = br#"{"a":1}"#;
-        for accepted in [
-            "application/json",
-            "application/json; charset=utf-8",
-            "application/json;charset=UTF-8",
-            "Application/JSON",
-            "application/json; charset=\"utf-8\"",
-        ] {
-            let value = HeaderValue::from_str(accepted).unwrap();
-            let parsed = CanonicalBody::parse(Some(&value), body)
-                .unwrap_or_else(|e| panic!("{accepted}: {e:?}"));
-            assert_eq!(parsed.as_str(), r#"{"a":1}"#, "{accepted}");
+        for served in SERVED_CONTENT_TYPES {
+            let parsed = CanonicalBody::parse(&headers(&[(CONTENT_TYPE, served)]), body)
+                .unwrap_or_else(|e| panic!("{}: {e:?}", served.escape_ascii()));
+            assert_eq!(parsed.as_str(), r#"{"a":1}"#, "{}", served.escape_ascii());
         }
-        for (header, expected) in [
-            (None, BodyError::MediaType),
-            (Some("text/plain"), BodyError::MediaType),
-            (Some("application/vnd.api+json"), BodyError::MediaType),
-            (Some("application/json; charset=utf-16"), BodyError::Charset),
-            (Some("application/json; charset=latin1"), BodyError::Charset),
-            (Some("application/json; charset=utf8"), BodyError::Charset),
-        ] {
-            let value = header.map(|h| HeaderValue::from_str(h).unwrap());
+        for (header, expected) in REFUSED_CONTENT_TYPES {
+            let map = match header {
+                Some(value) => headers(&[(CONTENT_TYPE, value)]),
+                None => HeaderMap::new(),
+            };
             assert_eq!(
-                CanonicalBody::parse(value.as_ref(), body).err(),
+                CanonicalBody::parse(&map, body).err(),
                 Some(expected),
-                "{header:?}"
+                "{:?}",
+                header.map(|h| h.escape_ascii().to_string())
+            );
+        }
+    }
+
+    /// body-parser reads a body without an encoding as is, inflates gzip and deflate, and
+    /// refuses other encodings with 415. The combiner reads only a body without an encoding.
+    #[test]
+    fn content_encoding_other_than_identity_is_refused() {
+        let body = br#"{"a":1}"#;
+        let with_encodings = |encodings: &[&str]| {
+            let mut map = json_headers();
+            for encoding in encodings {
+                map.append(CONTENT_ENCODING, HeaderValue::from_str(encoding).unwrap());
+            }
+            CanonicalBody::parse(&map, body).map(|parsed| parsed.as_str().to_string())
+        };
+        let served: [&[&str]; 5] = [&[], &["identity"], &["IDENTITY"], &[""], &[" identity "]];
+        for encodings in served {
+            assert_eq!(
+                with_encodings(encodings),
+                Ok(r#"{"a":1}"#.to_string()),
+                "{encodings:?}"
+            );
+        }
+        let refused: [&[&str]; 5] = [
+            &["gzip"],
+            &["deflate"],
+            &["br"],
+            &["identity, gzip"],
+            &["identity", "identity"],
+        ];
+        for encodings in refused {
+            assert_eq!(
+                with_encodings(encodings),
+                Err(BodyError::ContentEncoding),
+                "{encodings:?}"
             );
         }
     }
@@ -381,7 +574,7 @@ mod tests {
     fn length_limit_counts_utf16_units_of_the_canonical_body() {
         // `{"a":"` and `"}` are 8 units around the string.
         let with_filler = |units: usize| format!(r#"{{"a":"{}"}}"#, "x".repeat(units - 8));
-        let parse = |s: &str| CanonicalBody::parse(Some(&json_type()), s.as_bytes());
+        let parse = |s: &str| CanonicalBody::parse(&json_headers(), s.as_bytes());
 
         let at_limit = parse(&with_filler(16_000)).unwrap();
         assert_eq!(at_limit.as_str().encode_utf16().count(), 16_000);
