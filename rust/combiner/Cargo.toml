@@ -13,6 +13,7 @@ async-trait = { workspace = true }
 axum = { workspace = true }
 base64 = { workspace = true }
 bincode = { workspace = true }
+dotenvy = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }
 metrics = { workspace = true }
@@ -24,8 +25,11 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 threshold-bls = { workspace = true }
-tokio = { workspace = true, features = ["macros", "net", "rt-multi-thread", "time"] }
+tokio = { workspace = true, features = ["macros", "net", "rt-multi-thread", "signal", "time"] }
+tower-http = { workspace = true, features = ["limit", "trace"] }
 tracing = { workspace = true }
 
 [dev-dependencies]
+http-body-util = { workspace = true }
+tower = { workspace = true, features = ["util"] }
 tracing-subscriber = { workspace = true }

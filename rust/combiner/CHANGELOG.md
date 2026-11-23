@@ -174,3 +174,35 @@ Transport differences, none of which touch a client that uses the SDK:
   (an early stop) count `WARN_08` in both.
 - `combiner_sig_response_errors_total{status,signer,endpoint}` is new. It counts signer answers with
   a non-2xx status and a JSON body. The TS combiner increments it but never exports it.
+
+## Routes and transport
+
+- `/status` answers `{"version":"<workspace version>"}`. The version is the Rust workspace version.
+- `/metrics` serves the Prometheus text.
+- The combiner listens on IPv4 only (`0.0.0.0`). The TS combiner calls `listen(port)`, so Node
+  listens on `::`, which on Linux takes IPv4 connections too, and on `0.0.0.0` only when the host
+  has no IPv6. A client or probe that reaches the pod over IPv6 gets its connection refused.
+- The three `/domain/*` routes answer 503 `CELO_ODIS_WARN_13` and count it in
+  `combiner_warnings_total`, as the TS combiner does with the domains API off.
+- Every response carries the three CORS headers, with the TS values. That includes 404, 405, 413 and
+  the answer to a malformed body. Every `OPTIONS` request gets 200 with the headers and an empty body.
+- Responses carry no `X-Powered-By` and no `ETag` header, and their `Content-Type` is
+  `application/json`, without `; charset=utf-8`.
+- Request metrics are labelled with the route (`/sign`), where the TS combiner labels with the raw URL,
+  query string included. A `GET /sign` is counted under `/sign`; TS counts only requests that reach the
+  POST handler. Unknown paths, `/status` and `/metrics` are not counted.
+
+Routing and transport answers come from axum, not Express. None of these touch a client that uses
+the SDK's paths and headers:
+
+| Request | TS combiner | Rust combiner |
+| --- | --- | --- |
+| `/SIGN`, `/quotastatus` | served; Express ignores case | 404 |
+| `/sign/` | served | 404 |
+| `GET /sign` | 404 with an HTML body | 405 with `Allow: POST` and an empty body |
+| unknown path | 404 with an HTML body | 404 with an empty body |
+| `OPTIONS` on an unknown path | 404 | 200 |
+| body with a `Content-Encoding` | inflated | not decoded, so 400 `WARN_01` |
+| malformed JSON | 400 with an HTML body | 400 `WARN_01` |
+| `charset` other than UTF-8 | `utf-*` is decoded and served; anything else gets 415 with an HTML body | 400 `WARN_01` |
+| 413 and 415 answers, and the 400 for malformed JSON | no CORS headers | CORS headers |
