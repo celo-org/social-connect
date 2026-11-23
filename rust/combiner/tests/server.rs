@@ -132,6 +132,52 @@ async fn every_answer_carries_the_cors_headers() {
     }
 }
 
+/// Without a `Content-Length` the limit is applied while the handler reads the body.
+#[tokio::test]
+async fn chunked_body_over_the_limit_gets_413_with_cors_headers() {
+    let chunks = (0..30).map(|_| Ok::<_, std::io::Error>(vec![b' '; 10_000]));
+    let request = Request::builder()
+        .method(Method::POST)
+        .uri("/quotaStatus")
+        .header(header::CONTENT_TYPE, "application/json")
+        .body(Body::from_stream(futures::stream::iter(chunks)))
+        .unwrap();
+    assert!(request.headers().get(header::CONTENT_LENGTH).is_none());
+
+    let response = router().oneshot(request).await.unwrap();
+
+    assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
+    assert_cors(response.headers(), "chunked 413 /quotaStatus");
+    assert_eq!(
+        response.headers()[header::CONTENT_TYPE],
+        "text/plain; charset=utf-8"
+    );
+    assert_eq!(
+        body_bytes(response).await,
+        b"Failed to buffer the request body: length limit exceeded"
+    );
+}
+
+/// With a `Content-Length` above the limit the body limit answers before the handler runs.
+#[tokio::test]
+async fn declared_body_over_the_limit_gets_413_with_cors_headers() {
+    let response = send(
+        Method::POST,
+        "/quotaStatus",
+        &[("content-length", "300000")],
+        vec![b'a'; 300_000],
+    )
+    .await;
+
+    assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
+    assert_cors(response.headers(), "declared 413 /quotaStatus");
+    assert_eq!(
+        response.headers()[header::CONTENT_TYPE],
+        "text/plain; charset=utf-8"
+    );
+    assert_eq!(body_bytes(response).await, b"length limit exceeded");
+}
+
 #[tokio::test]
 async fn preflight_is_answered_with_200_and_no_body() {
     for path in ["/sign", "/nope"] {
