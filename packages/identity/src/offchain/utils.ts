@@ -21,6 +21,20 @@ import {
 
 const KEY_LENGTH = 16
 
+/**
+ * Returns a public key as uncompressed hex without 0x, the form that ECIES and a wallet's
+ * computeSharedSecret take. An account's data encryption key comes as 0x-prefixed hex, either
+ * compressed (33 bytes), uncompressed (65 bytes) or as the 64 bytes of an uncompressed key
+ * without its 04 prefix.
+ *
+ * @param publicKey the public key in any of those forms
+ */
+export function uncompressedPublicKey(publicKey: string): string {
+  const noLeading0x = trimLeading0x(publicKey)
+  const withPrefix = noLeading0x.length === 128 ? `04${noLeading0x}` : noLeading0x
+  return Buffer.from(ensureUncompressed(withPrefix)).toString('hex')
+}
+
 // label = PRF(ECDH(A, B), A || B || data path)
 // ciphertext path = "/cosmetic path/" || base64(label)
 function getCiphertextLabel(
@@ -29,8 +43,14 @@ function getCiphertextLabel(
   senderPublicKey: string,
   receiverPublicKey: string,
 ) {
-  const senderPublicKeyBuffer = Buffer.from(ensureCompressed(senderPublicKey), 'hex')
-  const receiverPublicKeyBuffer = Buffer.from(ensureCompressed(receiverPublicKey), 'hex')
+  const senderPublicKeyBuffer = Buffer.from(
+    ensureCompressed(uncompressedPublicKey(senderPublicKey)),
+    'hex',
+  )
+  const receiverPublicKeyBuffer = Buffer.from(
+    ensureCompressed(uncompressedPublicKey(receiverPublicKey)),
+    'hex',
+  )
 
   const label = createHmac('sha256', Uint8Array.from(sharedSecret))
     .update(
@@ -79,12 +99,12 @@ const distributeSymmetricKey = async (
   const wallet = wrapper.kit.getWallet()!
   const sharedSecret = await wallet.computeSharedSecret(
     publicKeyToAddress(fromPubKey),
-    ensureUncompressed(toPubKey),
+    uncompressedPublicKey(toPubKey),
   )
 
   const computedDataPath = getCiphertextLabel(`${dataPath}.key`, sharedSecret, fromPubKey, toPubKey)
   const encryptedData = Encrypt(
-    Buffer.from(trimUncompressedPrefix(ensureUncompressed(toPubKey)), 'hex'),
+    Buffer.from(trimUncompressedPrefix(uncompressedPublicKey(toPubKey)), 'hex'),
     key,
   )
 
@@ -157,7 +177,7 @@ export const writeEncrypted = async (
   }
 
   const iv = randomBytes(16)
-  const payload = AES128Encrypt(fetchKey.result, iv, data)
+  const payload = Buffer.from(AES128Encrypt(fetchKey.result, iv, data))
   const signature = await signBuffer(wrapper, `${dataPath}.enc`, payload)
 
   const writeError = await wrapper.writeDataTo(
@@ -235,7 +255,7 @@ const readSymmetricKey = async (
 
   const sharedSecret = await wallet.computeSharedSecret(
     readerPublicKeyAddress,
-    ensureUncompressed(senderPubKey),
+    uncompressedPublicKey(senderPubKey),
   )
   const computedDataPath = getCiphertextLabel(
     `${dataPath}.key`,
@@ -287,7 +307,13 @@ export const readEncrypted = async (
   }
 
   return Ok(
-    AES128Decrypt(key.result, payload.result.slice(0, IV_LENGTH), payload.result.slice(IV_LENGTH)),
+    Buffer.from(
+      AES128Decrypt(
+        key.result,
+        payload.result.slice(0, IV_LENGTH),
+        payload.result.slice(IV_LENGTH),
+      ),
+    ),
   )
 }
 
