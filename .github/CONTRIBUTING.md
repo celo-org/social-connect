@@ -17,7 +17,6 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 ├── <a href="./docs">docs</a>: Documentation on how SocialConnect works and how to use it
 ├── <a href="./kubernetes-deployments">kubernetes-deployments</a>: YAML config files and instructions for ODIS deployment
 ├── <a href="./apps">apps</a>: Contains deployed componentes of Oblivious Decentralized Identifier Service (ODIS) for SocialConnect
-│   ├── <a href="./apps/combiner">combiner</a>: Orchestrates distributed BLS threshold signing with the set of ODIS signers - requests and combines partial signatures
 │   ├── <a href="./apps/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing
 │   ├── <a href="./apps/signer">signer</a>: Generates unique partial signatures for blinded messages
 ├── <a href="./packages">packages</a>: Contains all published SocialConnect components

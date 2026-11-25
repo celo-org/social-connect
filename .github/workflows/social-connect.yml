@@ -198,28 +198,6 @@ jobs:
         with:
           name: Jest Test Results
           path: test-results/jest
-  combiner-test:
-    name: Combiner test
-    runs-on: ['self-hosted', 'org', '8-cpu']
-    container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
-      options: --user root
-    timeout-minutes: 30
-    needs: install-dependencies
-    steps:
-      - uses: actions/cache/restore@v6
-        id: cache_git
-        with:
-          path: .git
-          key: git-${{ github.ref }}
-      - uses: actions/checkout@v7
-      - name: Sync workspace
-        uses: ./.github/actions/sync-workspace
-        with:
-          package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
-      - name: Run Tests for combiner
-        run: |
-          yarn --cwd=apps/combiner test:coverage
   odis-test:
     name: ODIS (signer + common) test
     needs: install-dependencies

@@ -1,13 +1,10 @@
 ---
 name: Build ODIS Rust combiner image
 
-# Builds only when an input of dockerfiles/Dockerfile-combiner-rs changes, so a
-# change to the TS combiner does not rebuild this image and a change to the Rust
-# combiner does not rebuild the TS one.
+# Builds only when an input of dockerfiles/Dockerfile-combiner-rs changes.
 #
 # A release is a git tag named odis-rs-combiner-<version>. The prefix must not
-# start with odis-combiner-, which is the TS combiner's release tag and would also
-# build the TS image.
+# start with odis-combiner-, which the TS combiner's release tags use.
 on:
   push:
     paths:

@@ -1,5 +1,4 @@
 ---
-"@celo/phone-number-privacy-combiner": patch
 "@celo/phone-number-privacy-signer": patch
 "@celo/phone-number-privacy-monitor": patch
 ---
