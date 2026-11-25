@@ -23,7 +23,7 @@ use odis_combiner::config::{Config, SignerEntry};
 use odis_combiner::dek::{DekLookup, DekLookupError};
 use odis_combiner::server::build_router_with_services;
 use odis_combiner::signature::KeyVersion;
-use odis_signer::account_service::MockAccountService;
+use odis_signer::account_service::{AccountService, MockAccountService};
 use odis_signer::config::{Config as SignerConfig, DatabaseConfig, KeystoreType, LogFormat};
 use odis_signer::errors::OdisError;
 use odis_signer::key_management::KeyProvider;
@@ -213,6 +213,19 @@ impl KeyProvider for TestKeys {
 /// Starts a real signer on 127.0.0.1. It authenticates requests, because a full node is
 /// configured, and takes its DEK and quota from `MockAccountService`.
 pub async fn spawn_signer(setup: SignerSetup) -> RunningSigner {
+    let accounts = Arc::new(MockAccountService::new(
+        setup.dek.clone(),
+        setup.total_quota,
+    ));
+    spawn_signer_with(setup, accounts).await
+}
+
+/// Starts a real signer on 127.0.0.1, as `spawn_signer` does, that takes the DEK and quota of
+/// each account from `accounts` instead of from `setup`.
+pub async fn spawn_signer_with(
+    setup: SignerSetup,
+    accounts: Arc<dyn AccountService>,
+) -> RunningSigner {
     let database = NamedTempFile::new().unwrap();
     let config = SignerConfig {
         server_port: 0,
@@ -247,13 +260,9 @@ pub async fn spawn_signer(setup: SignerSetup) -> RunningSigner {
             .collect(),
         delay: setup.key_delay,
     };
-    let router = odis_signer::server::build_router_with_services(
-        config,
-        Arc::new(MockAccountService::new(setup.dek, setup.total_quota)),
-        Arc::new(keys),
-    )
-    .await
-    .unwrap();
+    let router = odis_signer::server::build_router_with_services(config, accounts, Arc::new(keys))
+        .await
+        .unwrap();
     RunningSigner {
         url: spawn_test_server(router).await,
         _database: database,

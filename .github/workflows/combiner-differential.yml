@@ -69,4 +69,6 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - run: just test-differential
+      - run: cargo build -p odis-combiner
+
+      - run: ODIS_RUST_COMBINER_BIN="$PWD/target/debug/odis-combiner" corepack yarn --cwd=apps/combiner test:differential

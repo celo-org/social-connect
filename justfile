@@ -29,10 +29,9 @@ build:
 build-release:
     cargo build --release --workspace
 
-# Compare the Rust combiner with the TS combiner on the same requests. Needs `yarn build` first.
+# Compare the Rust combiner with the released TS combiner image on the same requests. Needs Docker.
 test-differential:
-    cargo build -p odis-combiner
-    ODIS_RUST_COMBINER_BIN="$PWD/target/debug/odis-combiner" corepack yarn --cwd=apps/combiner test:differential
+    cargo nextest run -p odis-combiner --test differential
 
 # Run the PNP end-to-end tests against the combiner at `url`, which reports `version`.
 test-e2e-combiner url version:
