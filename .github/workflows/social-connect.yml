@@ -199,7 +199,7 @@ jobs:
           name: Jest Test Results
           path: test-results/jest
   odis-test:
-    name: ODIS (signer + common) test
+    name: Common test
     needs: install-dependencies
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
@@ -220,6 +220,3 @@ jobs:
       - name: Run Tests for common package
         run: |
           yarn --cwd=packages/common test:coverage
-      - name: Run Tests for signer
-        run: |
-          yarn --cwd=apps/signer test:coverage

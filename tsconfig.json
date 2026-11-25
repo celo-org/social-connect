@@ -13,7 +13,6 @@
     {"path":"./docs/examples","name":"odis-example-scripts"},
     {"path":"./packages/common","name":"@celo/phone-number-privacy-common"},
     {"path":"./apps/monitor","name":"@celo/phone-number-privacy-monitor"},
-    {"path":"./apps/signer","name":"@celo/phone-number-privacy-signer"},
     {"path":"./packages/encrypted-backup","name":"@celo/encrypted-backup"},
     {"path":"./packages/identity","name":"@celo/identity"},
   ]

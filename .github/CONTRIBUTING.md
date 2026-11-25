@@ -18,7 +18,6 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 ├── <a href="./kubernetes-deployments">kubernetes-deployments</a>: YAML config files and instructions for ODIS deployment
 ├── <a href="./apps">apps</a>: Contains deployed componentes of Oblivious Decentralized Identifier Service (ODIS) for SocialConnect
 │   ├── <a href="./apps/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing
-│   ├── <a href="./apps/signer">signer</a>: Generates unique partial signatures for blinded messages
 ├── <a href="./packages">packages</a>: Contains all published SocialConnect components
 │   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS, including API schemas
 │   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS
@@ -85,11 +84,11 @@ yarn test
 ```
 
 
-To run ODIS e2e tests, navigate to the desired ODIS component subdirectory (either the Combiner or Signer) and run `yarn test:e2e`. You can specify the environment to run against as in the following example (see the relevant `package.json` file for all available test commands).
+To run ODIS e2e tests, navigate to the `e2e` directory, which holds the suites for both the Combiner and the Signer. You can specify the environment and the service to run against as in the following example (see `e2e/package.json` for all available test commands).
 
 ```bash
-cd apps/signer
-yarn test:e2e:celo-sepolia
+cd e2e
+yarn test:signer:celo-sepolia:0
 ```
 
 For load tests, checkout [apps/monitor](../apps/monitor/README.md)
