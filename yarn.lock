@@ -742,26 +742,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@celo/encrypted-backup@workspace:packages/encrypted-backup":
-  version: 0.0.0-use.local
-  resolution: "@celo/encrypted-backup@workspace:packages/encrypted-backup"
-  dependencies:
-    "@celo/base": "npm:^7.0.0"
-    "@celo/dev-utils": "npm:0.0.1-beta.1"
-    "@celo/identity": "npm:^5.1.2"
-    "@celo/phone-number-privacy-common": "npm:^3.1.2"
-    "@celo/poprf": "npm:^0.1.9"
-    "@celo/utils": "npm:^8.0.0"
-    "@celo/wallet-local": "npm:^6.0.4"
-    "@types/debug": "npm:^4.1.10"
-    debug: "npm:^4.1.1"
-    fetch-mock: "npm:9.11.0"
-    fp-ts: "npm:2.1.1"
-    io-ts: "npm:2.0.1"
-    jest: "npm:^29.7.0"
-  languageName: unknown
-  linkType: soft
-
 "@celo/identity@npm:^5.1.2, @celo/identity@workspace:^, @celo/identity@workspace:packages/identity":
   version: 0.0.0-use.local
   resolution: "@celo/identity@workspace:packages/identity"

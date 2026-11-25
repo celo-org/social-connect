@@ -166,7 +166,7 @@ jobs:
             echo "Changeset Found"
           fi
   general-test:
-    name: General (identity + encrypted-backup) test
+    name: General (identity + odis-identifiers) test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
@@ -186,9 +186,6 @@ jobs:
       - name: Run Odis Identifier Tests
         run: |
           yarn --cwd=packages/odis-identifiers test
-      - name: Run Encrypted Backup tests
-        run: |
-          yarn --cwd=packages/encrypted-backup test
       - name: Run Identity Tests
         run: |
           yarn --cwd=packages/identity test

@@ -20,7 +20,6 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 │   ├── <a href="./apps/monitor">monitor</a>: Monitoriing service that sends health checks to deployed ODIS instances. Also contains code for load testing
 ├── <a href="./packages">packages</a>: Contains all published SocialConnect components
 │   ├── <a href="./packages/common">common</a>: Contains common logic for ODIS, including API schemas
-│   ├── <a href="./packages/encrypted-backup">encrypted-backup</a>: PEAR account recovery SDK, powered by ODIS
 │   ├── <a href="./packages/identity">identity</a>: SDK for using SocialConnect
 │   ├── <a href="./packages/odis-identifiers">odis-identifiers</a>: Contains identifier prefixes and hashing functions for ODIS
 ├── <a href="./scripts">scripts</a>: Misc. deployment and release scripts
