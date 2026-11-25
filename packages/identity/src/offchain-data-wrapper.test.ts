@@ -11,10 +11,12 @@ import {
   privateKeyToPublicKey,
   publicKeyToAddress,
   toChecksumAddress,
+  trimLeading0x,
 } from '@celo/utils/lib/address'
 import { ensureCompressed } from '@celo/utils/lib/ecdh'
 import { NativeSigner, serializeSignature } from '@celo/utils/lib/signatureUtils'
 import { LocalWallet } from '@celo/wallet-local'
+import { secp256k1 } from '@noble/curves/secp256k1'
 import { randomBytes } from 'crypto'
 import fetchMock from './__mocks__/cross-fetch'
 import { BasicDataWrapper, OffchainDataWrapper, OffchainErrorTypes } from './offchain-data-wrapper'
@@ -73,7 +75,7 @@ testWithGanache('Offchain Data', (web3) => {
       await accounts
         .setAccountDataEncryptionKey(
           compressedDEK
-            ? ensureLeading0x(ensureCompressed(privateKeyToPublicKey(dek)))
+            ? ensureLeading0x(ensureCompressed(`04${trimLeading0x(privateKeyToPublicKey(dek))}`))
             : privateKeyToPublicKey(dek),
         )
         .sendAndWaitForReceipt({ from: address })
@@ -368,6 +370,44 @@ testWithGanache('Offchain Data', (web3) => {
 
       await writerNameAccessor.write(testPayload, [compressedReader.address])
       const receivedName = await readerNameAccessor.readAsResult(compressedWriter.address)
+      if (receivedName.ok) {
+        expect(receivedName.result.name).toEqual(testname)
+      } else {
+        console.error(receivedName.error)
+        throw new Error('should not get here')
+      }
+    })
+  })
+
+  // ECIES derives its keys from the 32-byte x coordinate of the shared point. When that starts
+  // with a zero byte, a writer that drops the byte derives other keys than the reader, and the
+  // reader's decrypt fails with "MAC mismatch". Random keys hit this once in 256 encryptions, so
+  // this test fixes the reader's key and the ephemeral key that encrypts the symmetric key to it.
+  describe('when the shared secret of a key encryption starts with a zero byte', () => {
+    const readerDEK = '164502b42c05a190a072f1f805f649dacf540524d634888bec3419c8f55777e8'
+    const ephemeralKey = 'e66cc83f95be54764ed7d75914f2741996428819a9f40740f44bac22e754c687'
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    it('the reader can decrypt the data', async () => {
+      const sharedPoint = secp256k1.getSharedSecret(ephemeralKey, secp256k1.getPublicKey(readerDEK))
+      expect(sharedPoint[1]).toEqual(0)
+
+      const readerPrivateKey = ACCOUNT_PRIVATE_KEYS[6]
+      const zeroReader = await setupAccount(readerPrivateKey, readerDEK, true)
+
+      const randomPrivateKey = jest
+        .spyOn(secp256k1.utils, 'randomPrivateKey')
+        .mockReturnValue(Buffer.from(ephemeralKey, 'hex'))
+      const writerNameAccessor = new PrivateNameAccessor(writer.wrapper)
+      await writerNameAccessor.write(testPayload, [zeroReader.address])
+      // One key encryption to the writer itself and one to the reader.
+      expect(randomPrivateKey).toHaveBeenCalledTimes(2)
+
+      const readerNameAccessor = new PrivateNameAccessor(zeroReader.wrapper)
+      const receivedName = await readerNameAccessor.readAsResult(writer.address)
       if (receivedName.ok) {
         expect(receivedName.result.name).toEqual(testname)
       } else {

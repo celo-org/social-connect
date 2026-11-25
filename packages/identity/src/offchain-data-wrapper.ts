@@ -3,7 +3,6 @@ import { Err, Ok, Result, RootError, makeAsyncThrowable } from '@celo/base/lib/r
 import type { ContractKit } from '@celo/contractkit'
 import { ClaimTypes, IdentityMetadataWrapper } from '@celo/metadata-claims'
 import { publicKeyToAddress } from '@celo/utils/lib/address'
-import { ensureUncompressed } from '@celo/utils/lib/ecdh'
 import {
   recoverEIP712TypedDataSignerRsv,
   recoverEIP712TypedDataSignerVrs,
@@ -14,7 +13,7 @@ import debugFactory from 'debug'
 import * as t from 'io-ts'
 import { AuthorizedSignerAccessor } from './offchain/accessors/authorized-signer'
 import { StorageWriter } from './offchain/storage-writers'
-import { buildEIP712TypedData, resolvePath } from './offchain/utils'
+import { buildEIP712TypedData, resolvePath, uncompressedPublicKey } from './offchain/utils'
 
 const debug = debugFactory('offchaindata')
 
@@ -188,7 +187,7 @@ class StorageRoot {
         accounts.getDataEncryptionKey(this.account),
       ])
 
-      const dekAddress = keys[3] ? publicKeyToAddress(ensureUncompressed(keys[3])) : '0x0'
+      const dekAddress = keys[3] ? publicKeyToAddress(uncompressedPublicKey(keys[3])) : '0x0'
       const signers = [keys[0], keys[1], keys[2], dekAddress]
 
       if (signers.some((signer) => verifyEIP712TypedDataSigner(typedData, signature, signer))) {
