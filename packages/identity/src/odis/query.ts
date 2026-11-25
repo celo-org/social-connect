@@ -1,4 +1,9 @@
 import { selectiveRetryAsyncWithBackOff } from '@celo/base/lib/async'
+import fetch from 'cross-fetch'
+import debugFactory from 'debug'
+import { isLeft } from 'fp-ts/lib/Either'
+import * as t from 'io-ts'
+import { Address, Hex, isAddress, SignableMessage } from 'viem'
 import {
   AuthenticationMethod,
   CombinerEndpoint,
@@ -7,12 +12,7 @@ import {
   OdisResponse,
   PhoneNumberPrivacyRequest,
   signWithRawKey,
-} from '@celo/phone-number-privacy-common'
-import fetch from 'cross-fetch'
-import debugFactory from 'debug'
-import { isLeft } from 'fp-ts/lib/Either'
-import * as t from 'io-ts'
-import { Address, Hex, isAddress, SignableMessage } from 'viem'
+} from './protocol'
 
 const debug = debugFactory('kit:odis:query')
 

@@ -752,7 +752,6 @@ __metadata:
     "@celo/dev-utils": "npm:0.0.1-beta.1"
     "@celo/metadata-claims": "npm:^1.0.0"
     "@celo/odis-identifiers": "npm:^1.0.1"
-    "@celo/phone-number-privacy-common": "npm:^3.1.2"
     "@celo/utils": "npm:^8.0.3"
     "@celo/wallet-local": "npm:^6.0.4"
     "@noble/curves": "npm:1.3.0"

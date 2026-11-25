@@ -1,9 +1,5 @@
 import { Address } from '@celo/base'
-import {
-  CombinerEndpoint,
-  PnpQuotaRequest,
-  PnpQuotaResponseSchema,
-} from '@celo/phone-number-privacy-common'
+import { CombinerEndpoint, PnpQuotaRequest, PnpQuotaResponseSchema } from './protocol'
 import { AuthSigner, getOdisPnpRequestAuth, queryOdis, ServiceContext } from './query'
 
 export interface PnpClientQuotaStatus {

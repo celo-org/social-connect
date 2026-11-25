@@ -1,4 +1,3 @@
-import { Endpoint } from '@celo/phone-number-privacy-common'
 import { WasmBlsBlindingClient } from './bls-blinding-client'
 import {
   getBlindedPhoneNumber,
@@ -7,6 +6,7 @@ import {
   getPhoneNumberIdentifierFromSignature,
   isBalanceSufficientForSigRetrieval,
 } from './phone-number-identifier'
+import { Endpoint } from './protocol'
 import { AuthenticationMethod, EncryptionKeySigner, ErrorMessages, ServiceContext } from './query'
 import fetchMock from '../__mocks__/cross-fetch'
 
