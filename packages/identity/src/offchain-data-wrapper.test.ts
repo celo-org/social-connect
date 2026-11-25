@@ -199,10 +199,13 @@ testWithGanache('Offchain Data', (web3) => {
   })
 
   describe('with a different key being authorized to sign off-chain', () => {
+    let proofOfPossession: string
+
     beforeEach(async () => {
       const pop = await accounts.generateProofOfKeyPossession(writer.address, signer.address)
+      proofOfPossession = serializeSignature(pop)
       const authorizedSignerAccessor = new AuthorizedSignerAccessor(writer.wrapper)
-      await authorizedSignerAccessor.write(signer.address, serializeSignature(pop), '.*')
+      await authorizedSignerAccessor.write(signer.address, proofOfPossession, '.*')
     })
 
     it('can read the authorization', async () => {
@@ -211,7 +214,14 @@ testWithGanache('Offchain Data', (web3) => {
         writer.address,
         signer.address,
       )
-      expect(authorization).toBeDefined()
+      expect(authorization).toEqual({
+        ok: true,
+        result: {
+          address: toChecksumAddress(signer.address),
+          proofOfPossession,
+          filteredDataPaths: '.*',
+        },
+      })
     })
 
     it('can write a name', async () => {
