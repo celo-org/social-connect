@@ -10,6 +10,8 @@ npm-debug.log
 .github
 dockerfiles
 .vscode
+# Cargo build output; locally it can hold tens of GB
+target
 
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json

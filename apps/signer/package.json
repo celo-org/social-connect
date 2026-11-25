@@ -9,8 +9,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "start": "yarn build && node -r dotenv/config dist/index.js",
-    "start:docker": "yarn build && node dist/index.js",
-    "start:docker:tracing": "yarn build && node --require ./dist/tracing.js dist/index.js",
+    "start:docker": "node dist/index.js",
+    "start:docker:tracing": "node --require ./dist/tracing.js dist/index.js",
     "clean": "yarn run --top-level tsc --build --clean",
     "build": "yarn run --top-level tsc ",
     "lint": "yarn run --top-level eslint .",
