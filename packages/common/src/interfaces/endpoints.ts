@@ -19,20 +19,13 @@ export enum CombinerEndpointPNP {
   STATUS = '/status',
 }
 
-export enum DomainEndpoint {
-  DOMAIN_SIGN = '/domain/sign',
-  DISABLE_DOMAIN = '/domain/disable',
-  DOMAIN_QUOTA_STATUS = '/domain/quotaStatus',
-}
+export type SignerEndpoint = SignerEndpointCommon | SignerEndpointPNP
+export const SignerEndpoint = { ...SignerEndpointCommon, ...SignerEndpointPNP }
 
-export type SignerEndpoint = SignerEndpointCommon | SignerEndpointPNP | DomainEndpoint
-export const SignerEndpoint = { ...SignerEndpointCommon, ...SignerEndpointPNP, ...DomainEndpoint }
-
-export type CombinerEndpoint = CombinerEndpointCommon | CombinerEndpointPNP | DomainEndpoint
+export type CombinerEndpoint = CombinerEndpointCommon | CombinerEndpointPNP
 export const CombinerEndpoint = {
   ...CombinerEndpointCommon,
   ...CombinerEndpointPNP,
-  ...DomainEndpoint,
 }
 
 export type Endpoint = SignerEndpoint | CombinerEndpoint
@@ -40,12 +33,6 @@ export const Endpoint = { ...SignerEndpoint, ...CombinerEndpoint }
 
 export function getSignerEndpoint(endpoint: CombinerEndpoint): SignerEndpoint {
   switch (endpoint) {
-    case CombinerEndpoint.DISABLE_DOMAIN:
-      return SignerEndpoint.DISABLE_DOMAIN
-    case CombinerEndpoint.DOMAIN_QUOTA_STATUS:
-      return SignerEndpoint.DOMAIN_QUOTA_STATUS
-    case CombinerEndpoint.DOMAIN_SIGN:
-      return SignerEndpoint.DOMAIN_SIGN
     case CombinerEndpoint.PNP_QUOTA:
       return SignerEndpoint.PNP_QUOTA
     case CombinerEndpoint.PNP_SIGN:
@@ -57,12 +44,6 @@ export function getSignerEndpoint(endpoint: CombinerEndpoint): SignerEndpoint {
 
 export function getCombinerEndpoint(endpoint: SignerEndpoint): CombinerEndpoint {
   switch (endpoint) {
-    case SignerEndpoint.DISABLE_DOMAIN:
-      return CombinerEndpoint.DISABLE_DOMAIN
-    case SignerEndpoint.DOMAIN_QUOTA_STATUS:
-      return CombinerEndpoint.DOMAIN_QUOTA_STATUS
-    case SignerEndpoint.DOMAIN_SIGN:
-      return CombinerEndpoint.DOMAIN_SIGN
     case SignerEndpoint.PNP_QUOTA:
       return CombinerEndpoint.PNP_QUOTA
     case SignerEndpoint.PNP_SIGN:

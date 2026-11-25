@@ -14,12 +14,6 @@ export enum ErrorMessage {
   FULL_NODE_ERROR = `CELO_ODIS_ERR_11 NODE_ERR Failed to read on-chain state`,
   FAILURE_TO_STORE_REQUEST = `CELO_ODIS_ERR_12 DB_ERR Failed to store partial sig request`,
   FAILURE_TO_INCREMENT_QUERY_COUNT = `CELO_ODIS_ERR_13 DB_ERR Failed to increment user query count`,
-  DOMAIN_ALREADY_DISABLED_FAILURE = `CELO_ODIS_ERR_14 DB_ERR Domain is already disabled`,
-  UNSUPPORTED_DOMAIN = `CELO_ODIS_ERR_15 DOMAIN Domain type is not supported`,
-  SIGNER_DISABLE_DOMAIN_FAILURE = `CELO_ODIS_ERR_16 DOMAIN Failed to disable domain on a signer`,
-  THRESHOLD_DISABLE_DOMAIN_FAILURE = `CELO_ODIS_ERR_17 DOMAIN Failed to disable domain on a threshold of signers`,
-  SIGNER_DOMAIN_QUOTA_STATUS_FAILURE = `CELO_ODIS_ERR_18 DOMAIN Failed to get domain status from signer`,
-  THRESHOLD_DOMAIN_QUOTA_STATUS_FAILURE = `CELO_ODIS_ERR_19 DOMAIN Failed to get domain quota status from a threshold of signers`,
   INVALID_KEY_VERSION_RESPONSE = `CELO_ODIS_ERR_20 SIG_ERR Signer response key version header is invalid`,
   INVALID_SIGNER_RESPONSE = `CELO_ODIS_ERR_21 SIG_ERR Signer response body is invalid`,
   SIGNER_RESPONSE_FAILED_WITH_OK_STATUS = `CELO_ODIS_ERR_22 SIG_ERR Signer response failed with 200 status`,
@@ -29,7 +23,6 @@ export enum ErrorMessage {
   FAILURE_TO_GET_DEK = `CELO_ODIS_ERR_27 NODE_ERR Failed to read user's DEK from full-node`,
   CAUGHT_ERROR_IN_ENDPOINT_HANDLER = `CELO_ODIS_ERR_30 Caught error in outer endpoint handler`,
   ERROR_AFTER_RESPONSE_SENT = `CELO_ODIS_ERR_31 Error in endpoint thrown after response was already sent`,
-  SIGNATURE_AGGREGATION_FAILURE = 'CELO_ODIS_ERR_32 SIG_ERR Failed to blind aggregate signature shares',
   DATABASE_REMOVE_FAILURE = 'CELO_ODIS_ERR_33 DB_ERR Failed to remove database entries',
 }
 
@@ -41,12 +34,8 @@ export enum WarningMessage {
   INCONSISTENT_SIGNER_QUOTA_MEASUREMENTS = `CELO_ODIS_WARN_06 SIGNER Discrepancy found in signers quota measurements`,
   MISSING_SESSION_ID = `CELO_ODIS_WARN_07 BAD_INPUT Client did not provide sessionID in request`,
   CANCELLED_REQUEST_TO_SIGNER = `CELO_ODIS_WARN_08 SIGNER Cancelled request to signer`,
-  UNKNOWN_DOMAIN = `CELO_ODIS_WARN_10 BAD_INPUT Provided domain name and version is not recognized`,
-  DISABLED_DOMAIN = `CELO_ODIS_WARN_11 BAD_INPUT Provided domain is disabled`,
   INVALID_KEY_VERSION_REQUEST = `CELO_ODIS_WARN_12 BAD_INPUT Request key version header is invalid`,
   API_UNAVAILABLE = `CELO_ODIS_WARN_13 BAD_INPUT API is unavailable`,
-  INCONSISTENT_SIGNER_DOMAIN_DISABLED_STATES = `CELO_ODIS_WARN_14 SIGNER Discrepency found in signer domain disabled states`,
-  INVALID_NONCE = `CELO_ODIS_WARN_16 BAD_INPUT SequentialDelayDomain nonce check failed on Signer request`,
   SIGNER_RESPONSE_DISCREPANCIES = `CELO_ODIS_WARN_17 SIGNER Discrepancies detected in signer responses`,
   INCONSISTENT_SIGNER_QUERY_MEASUREMENTS = `CELO_ODIS_WARN_18 SIGNER Discrepancy found in signers performed query count measurements`,
 }

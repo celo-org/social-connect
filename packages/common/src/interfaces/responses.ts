@@ -1,15 +1,5 @@
 import * as t from 'io-ts'
-import {
-  DisableDomainRequest,
-  DomainQuotaStatusRequest,
-  DomainRequest,
-  DomainRestrictedSignatureRequest,
-  OdisRequest,
-  PhoneNumberPrivacyRequest,
-  PnpQuotaRequest,
-  SignMessageRequest,
-} from '.'
-import { Domain, DomainState } from '../domains'
+import { OdisRequest, PhoneNumberPrivacyRequest, PnpQuotaRequest, SignMessageRequest } from '.'
 
 // Phone Number Privacy
 export interface PnpQuotaStatus {
@@ -109,128 +99,10 @@ export type PhoneNumberPrivacyResponse<
   | R extends SignMessageRequest ? SignMessageResponse : never
   | R extends PnpQuotaRequest ? PnpQuotaResponse : never
 
-// Domains
-
-export interface DomainRestrictedSignatureResponseSuccess<D extends Domain = Domain> {
-  success: true
-  version: string
-  signature: string
-  status: DomainState<D>
-}
-
-export interface DomainRestrictedSignatureResponseFailure<D extends Domain = Domain> {
-  success: false
-  version: string
-  error: string
-  status?: DomainState<D>
-}
-
-export type DomainRestrictedSignatureResponse<D extends Domain = Domain> =
-  | DomainRestrictedSignatureResponseSuccess<D>
-  | DomainRestrictedSignatureResponseFailure<D>
-
-export interface DomainQuotaStatusResponseSuccess<D extends Domain = Domain> {
-  success: true
-  version: string
-  status: DomainState<D>
-}
-
-export interface DomainQuotaStatusResponseFailure {
-  success: false
-  version: string
-  error: string
-}
-
-export type DomainQuotaStatusResponse<D extends Domain = Domain> =
-  | DomainQuotaStatusResponseSuccess<D>
-  | DomainQuotaStatusResponseFailure
-
-export interface DisableDomainResponseSuccess<D extends Domain = Domain> {
-  success: true
-  version: string
-  status: DomainState<D>
-}
-
-export interface DisableDomainResponseFailure {
-  success: false
-  version: string
-  error: string
-}
-
-export type DisableDomainResponse<D extends Domain = Domain> =
-  | DisableDomainResponseSuccess<D>
-  | DisableDomainResponseFailure
-
-// prettier-ignore
-export type DomainResponse<
-  R extends DomainRequest = DomainRequest
-> =
-  | R extends DomainRestrictedSignatureRequest<infer D> ? DomainRestrictedSignatureResponse<D> : never
-  | R extends DomainQuotaStatusRequest<infer D2> ? DomainQuotaStatusResponse<D2> : never
-  | R extends DisableDomainRequest<infer D3> ? DisableDomainResponse<D3> : never
-
-export function domainRestrictedSignatureResponseSchema<D extends Domain>(
-  state: t.Type<DomainState<D>>,
-): t.Type<DomainRestrictedSignatureResponse<D>> {
-  return t.union([
-    t.type({
-      success: t.literal(true),
-      version: t.string,
-      signature: t.string,
-      status: state,
-    }),
-    t.intersection([
-      t.type({
-        success: t.literal(false),
-        version: t.string,
-        error: t.string,
-      }),
-      t.partial({
-        status: t.union([state, t.undefined]),
-      }),
-    ]),
-  ])
-}
-
-export function domainQuotaStatusResponseSchema<D extends Domain>(
-  state: t.Type<DomainState<D>>,
-): t.Type<DomainQuotaStatusResponse<D>> {
-  return t.union([
-    t.type({
-      success: t.literal(true),
-      version: t.string,
-      status: state,
-    }),
-    t.type({
-      success: t.literal(false),
-      version: t.string,
-      error: t.string,
-    }),
-  ])
-}
-
-export function disableDomainResponseSchema<D extends Domain>(
-  state: t.Type<DomainState<D>>,
-): t.Type<DisableDomainResponse<D>> {
-  return t.union([
-    t.type({
-      success: t.literal(true),
-      version: t.string,
-      status: state,
-    }),
-    t.type({
-      success: t.literal(false),
-      version: t.string,
-      error: t.string,
-    }),
-  ])
-}
-
 // General
 
 // prettier-ignore
 export type OdisResponse<R extends OdisRequest = OdisRequest> =
-  | R extends DomainRequest ? DomainResponse<R> : never
   | R extends PhoneNumberPrivacyRequest ? PhoneNumberPrivacyResponse<R> : never
 
 export type SuccessResponse<R extends OdisRequest = OdisRequest> = OdisResponse<R> & {

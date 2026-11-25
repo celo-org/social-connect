@@ -814,9 +814,7 @@ __metadata:
   dependencies:
     "@celo/abis": "npm:^13.0.0"
     "@celo/base": "npm:^7.0.0"
-    "@celo/poprf": "npm:^0.1.9"
     "@celo/utils": "npm:^8.0.0"
-    "@celo/wallet-local": "npm:^6.0.4"
     "@types/bunyan": "npm:1.8.11"
     "@types/dotenv": "npm:^6.0.0"
     "@types/elliptic": "npm:^6.4.16"
@@ -862,13 +860,6 @@ __metadata:
     yargs: "npm:^14.0.0"
   languageName: unknown
   linkType: soft
-
-"@celo/poprf@npm:^0.1.9":
-  version: 0.1.9
-  resolution: "@celo/poprf@npm:0.1.9"
-  checksum: 10/90a5a629ac60c9ba3f10ae49398f8e4e77ec1848d089730115315ad60a283a613c3df9c38a536cfc0296bba760c7369d13bd13974fc4807712cd67622505fe61
-  languageName: node
-  linkType: hard
 
 "@celo/utils@npm:^5.0.4, @celo/utils@npm:^5.0.6":
   version: 5.0.6

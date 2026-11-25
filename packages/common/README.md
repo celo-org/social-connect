@@ -6,6 +6,5 @@ This package contains common code used across ODIS. It is depended on by the Com
 
 - The request and response type schemas for all ODIS APIs.
 - Error and Warning types used for monitoring and alerting in both the Combiner and Signer.
-- The PEAR Sequential Delay rate limiting algorithm.
 
 

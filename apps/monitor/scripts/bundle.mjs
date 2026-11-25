@@ -18,8 +18,8 @@ const require = createRequire(join(root, 'package.json'))
 
 // Kept out of the bundle:
 // - firebase-functions / firebase-admin: the Firebase CLI and runtime load them from node_modules.
-// - blind-threshold-bls / @celo/poprf: they read their .wasm file relative to __dirname.
-const EXTERNAL = ['firebase-functions', 'firebase-admin', 'blind-threshold-bls', '@celo/poprf']
+// - blind-threshold-bls: it reads its .wasm file relative to __dirname.
+const EXTERNAL = ['firebase-functions', 'firebase-admin', 'blind-threshold-bls']
 // Optional native addon that bunyan loads inside try/catch. Left out and not installed.
 const OPTIONAL_NOT_INSTALLED = ['dtrace-provider']
 

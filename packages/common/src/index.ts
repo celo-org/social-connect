@@ -1,14 +1,6 @@
 export { getAccountsContract, getCUSDContract, getOdisPaymentsContract } from './contracts'
-export * from './domains'
 export * from './interfaces'
 export { ErrorMessage, WarningMessage } from './interfaces/errors'
-export {
-  PoprfClient,
-  PoprfCombiner,
-  PoprfServer,
-  ThresholdPoprfClient,
-  ThresholdPoprfServer,
-} from './poprf'
 export { TestUtils } from './test/index'
 export * from './utils/authentication'
 export { fetchEnv, fetchEnvOrDefault, toBool, toNum } from './utils/config.utils'

@@ -1,6 +1,14 @@
 import { hexToBuffer, trimLeading0x } from '@celo/base/lib'
 import crypto from 'crypto'
-import { signWithRawKey } from './query'
+import {
+  getServiceContext,
+  OdisAPI,
+  OdisContextName,
+  ODIS_CELO_SEPOLIA_CONTEXT_PNP,
+  ODIS_MAINNET_CONTEXT_PNP,
+  ODIS_STAGING_CONTEXT,
+  signWithRawKey,
+} from './query'
 
 const rawKey = '41e8e8593108eeedcbded883b8af34d2f028710355c57f4c10a056b72486aa04'
 
@@ -63,5 +71,18 @@ describe(signWithRawKey, () => {
     expect(isValid(msgDigest2, sig2)).toBeTruthy()
     expect(isValid(msgDigest1, sig2)).toBeFalsy()
     expect(isValid(msgDigest2, sig1)).toBeFalsy()
+  })
+})
+
+describe('getServiceContext', () => {
+  it('answers the PNP context with and without the api argument', () => {
+    expect(getServiceContext(OdisContextName.CELO_SEPOLIA)).toBe(ODIS_CELO_SEPOLIA_CONTEXT_PNP)
+    expect(getServiceContext(OdisContextName.CELO_SEPOLIA, OdisAPI.PNP)).toBe(
+      ODIS_CELO_SEPOLIA_CONTEXT_PNP,
+    )
+    expect(getServiceContext(OdisContextName.MAINNET)).toBe(ODIS_MAINNET_CONTEXT_PNP)
+    expect(getServiceContext(OdisContextName.MAINNET, OdisAPI.PNP)).toBe(ODIS_MAINNET_CONTEXT_PNP)
+    expect(getServiceContext(OdisContextName.STAGING)).toBe(ODIS_STAGING_CONTEXT)
+    expect(getServiceContext(OdisContextName.STAGING, OdisAPI.PNP)).toBe(ODIS_STAGING_CONTEXT)
   })
 })
