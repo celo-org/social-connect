@@ -31,7 +31,8 @@
   "workspaces": [
     "packages/*",
     "apps/*",
-    "docs/examples"
+    "docs/examples",
+    "e2e"
   ],
   "dependencies": {
     "viem": "^2.37.3"

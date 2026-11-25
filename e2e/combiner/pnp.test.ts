@@ -12,13 +12,12 @@ import {
   SignMessageRequest,
   SignMessageResponseSchema,
 } from '@celo/phone-number-privacy-common'
-import { config as signerConfig } from '@celo/phone-number-privacy-signer/src/config'
 import { normalizeAddressWith0x } from '@celo/utils/lib/address'
 import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
 import fetch from 'node-fetch'
 import { Hex } from 'viem'
-import { getCombinerVersion } from '../../src'
+import { expectedServiceVersion, QUERY_PRICE_IN_CUSD } from '../settings'
 import {
   ACCOUNT_ADDRESS,
   ACCOUNT_ADDRESS_NO_QUOTA,
@@ -47,7 +46,7 @@ const SERVICE_CONTEXT = {
 const combinerUrl = SERVICE_CONTEXT.odisUrl
 const fullNodeUrl = process.env.ODIS_BLOCKCHAIN_PROVIDER
 
-const expectedVersion = process.env.DEPLOYED_COMBINER_SERVICE_VERSION ?? getCombinerVersion()
+const expectedVersion = expectedServiceVersion('DEPLOYED_COMBINER_SERVICE_VERSION')
 
 describe(`Running against service deployed at ${combinerUrl} w/ blockchain provider ${fullNodeUrl}`, () => {
   beforeAll(async () => {
@@ -66,7 +65,6 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
       method: 'GET',
     })
     const body = await response.json()
-    // This checks against local package.json version, change if necessary
     expect(body.version).toBe(expectedVersion)
   })
 
@@ -176,7 +174,7 @@ describe(`Running against service deployed at ${combinerUrl} w/ blockchain provi
         // If this fails, may be necessary to faucet ACCOUNT_ADDRESS more funds
         const numQueriesToReplenish = 100
         const amountInWei = BigInt(
-          signerConfig.quota.queryPriceInCUSD.times(1e18).times(numQueriesToReplenish).toString(),
+          QUERY_PRICE_IN_CUSD.times(1e18).times(numQueriesToReplenish).toString(),
         )
         const stableToken = getCUSDContract(client)
         const odisPayments = getOdisPaymentsContract(client)

@@ -20,7 +20,7 @@ import { randomBytes } from 'crypto'
 import { Account, Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
-import { config, getSignerVersion } from '../../src/config'
+import { expectedServiceVersion, QUERY_PRICE_IN_CUSD } from '../settings'
 import { getBlindedPhoneNumber, getTestParamsForContext } from './utils'
 
 require('dotenv').config()
@@ -45,7 +45,6 @@ const getViemChain = () => {
   switch (process.env.CONTEXT_NAME) {
     case 'mainnet':
       return celo
-    case 'staging':
     case 'celo-sepolia':
     case 'local':
       return celoSepolia
@@ -64,7 +63,7 @@ const client = createWalletClient({
 
 jest.setTimeout(60000)
 
-const expectedVersion = getSignerVersion()
+const expectedVersion = expectedServiceVersion('DEPLOYED_SIGNER_SERVICE_VERSION')
 
 describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
   beforeAll(async () => {
@@ -98,7 +97,6 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
     })
     expect(response.status).toBe(200)
     const body = (await response.json()) as any
-    // This checks against local package.json version, change if necessary
     expect(body.version).toBe(expectedVersion)
   })
 
@@ -145,7 +143,7 @@ describe(`Running against service deployed at ${ODIS_SIGNER_URL}`, () => {
       let paymentSucceeded = false
       try {
         // Make a payment to increase quota
-        const singleQueryCost = BigInt(config.quota.queryPriceInCUSD.times(1e18).toString(10))
+        const singleQueryCost = BigInt(QUERY_PRICE_IN_CUSD.times(1e18).toString(10))
         await sendCUSDToOdisPayments(singleQueryCost, ACCOUNT_ADDRESS2, account2)
         paymentSucceeded = true
         await sleep(10 * 1000) // sleep for cache ttl to ensure quota update is reflected

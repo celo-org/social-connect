@@ -1003,7 +1003,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/identity@npm:^5.1.2, @celo/identity@workspace:packages/identity":
+"@celo/identity@npm:^5.1.2, @celo/identity@workspace:^, @celo/identity@workspace:packages/identity":
   version: 0.0.0-use.local
   resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
@@ -1112,7 +1112,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@celo/phone-number-privacy-common@npm:^3.0.3, @celo/phone-number-privacy-common@npm:^3.1.2, @celo/phone-number-privacy-common@workspace:packages/common":
+"@celo/phone-number-privacy-common@npm:^3.0.3, @celo/phone-number-privacy-common@npm:^3.1.2, @celo/phone-number-privacy-common@workspace:^, @celo/phone-number-privacy-common@workspace:packages/common":
   version: 0.0.0-use.local
   resolution: "@celo/phone-number-privacy-common@workspace:packages/common"
   dependencies:
@@ -15254,6 +15254,23 @@ __metadata:
   checksum: 10/53ff4ab3a13cc33ba6c856cf281f2965c0aec9720967af450e8fd06cfd50aceeefc791986a16bcefa14e7898b3ca9acdfcf15b9d9a1b9c7e1366581a8ad6e65e
   languageName: node
   linkType: hard
+
+"odis-e2e@workspace:e2e":
+  version: 0.0.0-use.local
+  resolution: "odis-e2e@workspace:e2e"
+  dependencies:
+    "@celo/base": "npm:^7.0.0"
+    "@celo/identity": "workspace:^"
+    "@celo/phone-number-privacy-common": "workspace:^"
+    "@celo/utils": "npm:^8.0.0"
+    bignumber.js: "npm:^9.1.2"
+    blind-threshold-bls: "npm:@celo/blind-threshold-bls@1.0.0-beta"
+    dotenv: "npm:^8.2.0"
+    jest: "npm:^29.7.0"
+    node-fetch: "npm:^2.6.9"
+    viem: "npm:^2.37.3"
+  languageName: unknown
+  linkType: soft
 
 "odis-example-scripts@workspace:docs/examples":
   version: 0.0.0-use.local
