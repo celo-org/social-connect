@@ -1,8 +1,9 @@
+import { CombinerEndpointPNP } from '@celo/identity'
 import { OdisContextName } from '@celo/identity/lib/odis/query'
-import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
 import { Hex } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
 import yargs from 'yargs'
+import { rootLogger } from '../logger'
 import { ChainInfo } from '../query'
 import { concurrentRPSLoadTest } from '../test'
 

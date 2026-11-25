@@ -6,7 +6,6 @@ import {
   OdisAPI,
   OdisContextName,
 } from '@celo/identity/lib/odis/query'
-import { genSessionID, rootLogger } from '@celo/phone-number-privacy-common/lib/utils/logger'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,
@@ -15,6 +14,7 @@ import {
 import { defineString } from 'firebase-functions/params'
 import { Address } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
+import { genSessionID, rootLogger } from './logger'
 import { dekAuthSigner, generateRandomPhoneNumber, PRIVATE_KEY } from './resources'
 
 const getLogger = () => rootLogger('odis-monitor')

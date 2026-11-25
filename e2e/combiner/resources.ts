@@ -1,10 +1,9 @@
+import { AuthenticationMethod } from '@celo/identity'
 import {
   EncryptionKeySigner,
   OdisContextName,
   WalletKeySigner,
 } from '@celo/identity/lib/odis/query'
-import { AuthenticationMethod } from '@celo/phone-number-privacy-common'
-import { DEK_PRIVATE_KEY, DEK_PUBLIC_KEY } from '@celo/phone-number-privacy-common/lib/test/values'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,
@@ -13,6 +12,7 @@ import {
 import { Address, createWalletClient, http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { celo, celoSepolia } from 'viem/chains'
+import { DEK_PRIVATE_KEY, DEK_PUBLIC_KEY } from '../fixtures/values'
 
 require('dotenv').config()
 

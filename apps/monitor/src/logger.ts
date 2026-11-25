@@ -1,9 +1,6 @@
 import Logger, { createLogger, levelFromName, LogLevelString, stdSerializers } from 'bunyan'
 import bunyanDebugStream from 'bunyan-debug-stream'
 import { createStream } from 'bunyan-gke-stackdriver'
-import { NextFunction, Request, Response } from 'express'
-import { WarningMessage } from '../interfaces/errors'
-import { fetchEnvOrDefault } from './config.utils'
 
 let _rootLogger: Logger | undefined
 
@@ -12,8 +9,9 @@ export function rootLogger(serviceName: string): Logger {
     return _rootLogger
   }
 
-  const logLevel = fetchEnvOrDefault('LOG_LEVEL', 'info') as LogLevelString
-  const logFormat = fetchEnvOrDefault('LOG_FORMAT', 'human')
+  // `||` also falls back to the default when the variable is set but empty.
+  const logLevel = (process.env.LOG_LEVEL || 'info') as LogLevelString
+  const logFormat = process.env.LOG_FORMAT || 'human'
 
   let stream: any
   switch (logFormat) {
@@ -34,27 +32,6 @@ export function rootLogger(serviceName: string): Logger {
     streams: [stream],
   })
   return _rootLogger
-}
-
-export function loggerMiddleware(
-  serviceName: string,
-): (req: Request, res: Response, next?: NextFunction) => Logger {
-  return (req, res, next) => {
-    const requestLogger = rootLogger(serviceName).child({
-      endpoint: req.path,
-      sessionID: req.body.sessionID, // May be undefined
-    })
-    res.locals.logger = requestLogger
-
-    if (!req.body.sessionID && req.path !== '/metrics' && req.path !== '/status') {
-      requestLogger.info(WarningMessage.MISSING_SESSION_ID)
-    }
-
-    if (next) {
-      next()
-    }
-    return requestLogger
-  }
 }
 
 export function genSessionID() {

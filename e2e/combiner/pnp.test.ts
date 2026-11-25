@@ -1,22 +1,24 @@
 import { sleep } from '@celo/base'
-import { OdisUtils } from '@celo/identity'
-import { ErrorMessages, getServiceContext, OdisAPI } from '@celo/identity/lib/odis/query'
-import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
 import {
   CombinerEndpoint,
-  getAccountsContract,
-  getCUSDContract,
-  getOdisPaymentsContract,
+  OdisUtils,
   PnpQuotaRequest,
   PnpQuotaResponseSchema,
   SignMessageRequest,
   SignMessageResponseSchema,
-} from '@celo/phone-number-privacy-common'
+} from '@celo/identity'
+import { ErrorMessages, getServiceContext, OdisAPI } from '@celo/identity/lib/odis/query'
+import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
 import { normalizeAddressWith0x } from '@celo/utils/lib/address'
 import threshold_bls from 'blind-threshold-bls'
 import { randomBytes } from 'crypto'
 import fetch from 'node-fetch'
 import { Hex } from 'viem'
+import {
+  getAccountsContract,
+  getCUSDContract,
+  getOdisPaymentsContract,
+} from '../fixtures/contracts'
 import { expectedServiceVersion, QUERY_PRICE_IN_CUSD } from '../settings'
 import {
   ACCOUNT_ADDRESS,

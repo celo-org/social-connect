@@ -1,10 +1,11 @@
 import { sleep } from '@celo/base'
+import { CombinerEndpointPNP } from '@celo/identity'
 import { IdentifierHashDetails } from '@celo/identity/lib/odis/identifier'
 import { ErrorMessages, OdisContextName } from '@celo/identity/lib/odis/query'
 import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
-import { CombinerEndpointPNP, rootLogger } from '@celo/phone-number-privacy-common'
 import { performance } from 'perf_hooks'
 import { Hex } from 'viem'
+import { rootLogger } from './logger'
 import { ChainInfo, queryOdisForQuota, queryOdisForSalt } from './query'
 
 const getLogger = () => rootLogger('odis-monitor')

@@ -101,6 +101,9 @@ jobs:
           fi
       - name: Build packages
         run: yarn build
+      - name: Check that the monitor's load test starts
+        # ts-node type-checks every module the load test imports; --help stops before any request.
+        run: yarn workspace @celo/phone-number-privacy-monitor run loadTest --help
       - name: Check licenses
         if: steps.cache_node.outputs.cache-hit != 'true'
         run: |
@@ -195,25 +198,3 @@ jobs:
         with:
           name: Jest Test Results
           path: test-results/jest
-  odis-test:
-    name: Common test
-    needs: install-dependencies
-    runs-on: ['self-hosted', 'org', '8-cpu']
-    container:
-      image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
-      options: --user root
-    timeout-minutes: 30
-    steps:
-      - uses: actions/cache/restore@v6
-        id: cache_git
-        with:
-          path: .git
-          key: git-${{ github.ref }}
-      - uses: actions/checkout@v7
-      - name: Sync workspace
-        uses: ./.github/actions/sync-workspace
-        with:
-          package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
-      - name: Run Tests for common package
-        run: |
-          yarn --cwd=packages/common test:coverage

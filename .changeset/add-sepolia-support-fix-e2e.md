@@ -1,6 +1,5 @@
 ---
 "@celo/identity": minor
-"@celo/phone-number-privacy-common": minor
 "@celo/phone-number-privacy-monitor": minor
 ---
 

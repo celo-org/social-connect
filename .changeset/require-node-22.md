@@ -1,5 +1,4 @@
 ---
-'@celo/phone-number-privacy-common': major
 '@celo/identity': major
 '@celo/odis-identifiers': major
 ---

@@ -9,5 +9,8 @@
     "isolatedModules": true
   },
   "include": ["src", "index.d.ts"],
-  "compileOnSave": true
+  "compileOnSave": true,
+  "ts-node": {
+    "files": true
+  }
 }

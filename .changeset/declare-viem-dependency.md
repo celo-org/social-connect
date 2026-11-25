@@ -1,5 +1,4 @@
 ---
-'@celo/phone-number-privacy-common': patch
 '@celo/identity': patch
 ---
 
