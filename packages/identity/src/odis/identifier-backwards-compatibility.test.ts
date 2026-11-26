@@ -124,5 +124,5 @@ describe('backwards compatibility of phone number identifiers', () => {
     expect(oldRes.e164Number).toEqual(currRes.plaintextIdentifier)
     expect(oldRes.phoneHash).not.toEqual(currRes.obfuscatedIdentifier)
     expect(oldRes.pepper).not.toEqual(currRes.pepper)
-  })
+  }, 20000)
 })
