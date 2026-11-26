@@ -9,7 +9,7 @@ import { createHash } from 'crypto'
 import debugFactory from 'debug'
 import { BlsBlindingClient, WasmBlsBlindingClient } from './bls-blinding-client'
 import {
-  CombinerEndpointPNP,
+  CombinerEndpoint,
   KEY_VERSION_HEADER,
   SignMessageRequest,
   SignMessageResponseSchema,
@@ -222,7 +222,7 @@ export async function getBlindedIdentifierSignature(
   const response = await queryOdis(
     body,
     context,
-    CombinerEndpointPNP.PNP_SIGN,
+    CombinerEndpoint.PNP_SIGN,
     SignMessageResponseSchema,
     {
       [KEY_VERSION_HEADER]: keyVersion?.toString(),

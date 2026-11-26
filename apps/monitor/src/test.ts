@@ -1,5 +1,5 @@
 import { sleep } from '@celo/base'
-import { CombinerEndpointPNP } from '@celo/identity'
+import { CombinerEndpoint } from '@celo/identity'
 import { IdentifierHashDetails } from '@celo/identity/lib/odis/identifier'
 import { ErrorMessages, OdisContextName } from '@celo/identity/lib/odis/query'
 import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
@@ -55,7 +55,7 @@ export async function testPNPQuotaQuery(
   privateKey?: Hex,
   privateKeyPercentage: number = 100,
 ) {
-  getLogger().info(`Performing test PNP query for ${CombinerEndpointPNP.PNP_QUOTA}`)
+  getLogger().info(`Performing test PNP query for ${CombinerEndpoint.PNP_QUOTA}`)
   try {
     const odisResponse: PnpClientQuotaStatus = await queryOdisForQuota(
       blockchainProvider,
@@ -76,9 +76,7 @@ export async function concurrentRPSLoadTest(
   rps: number,
   blockchainProvider: ChainInfo,
   contextName: OdisContextName,
-  endpoint:
-    | CombinerEndpointPNP.PNP_QUOTA
-    | CombinerEndpointPNP.PNP_SIGN = CombinerEndpointPNP.PNP_SIGN,
+  endpoint: CombinerEndpoint.PNP_QUOTA | CombinerEndpoint.PNP_SIGN = CombinerEndpoint.PNP_SIGN,
   duration: number = 0,
   bypassQuota: boolean = false,
   useDEK: boolean = false,
@@ -123,7 +121,7 @@ export async function concurrentRPSLoadTest(
 
   const testFn = async () => {
     try {
-      await (endpoint === CombinerEndpointPNP.PNP_SIGN
+      await (endpoint === CombinerEndpoint.PNP_SIGN
         ? testPNPSignQuery(
             blockchainProvider,
             contextName,

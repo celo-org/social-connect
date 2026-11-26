@@ -1,4 +1,4 @@
-import { CombinerEndpointPNP } from '@celo/identity'
+import { CombinerEndpoint } from '@celo/identity'
 import { OdisContextName } from '@celo/identity/lib/odis/query'
 import { Hex } from 'viem'
 import { celo, celoSepolia } from 'viem/chains'
@@ -105,7 +105,7 @@ void yargs
         args.rps,
         blockchainProvider,
         contextName,
-        CombinerEndpointPNP.PNP_SIGN,
+        CombinerEndpoint.PNP_SIGN,
         args.duration,
         args.bypassQuota,
         args.useDEK,

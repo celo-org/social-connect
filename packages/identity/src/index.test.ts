@@ -3,9 +3,6 @@ describe('@celo/identity', () => {
     expect(Object.keys(require('./index')).sort()).toEqual([
       'AuthenticationMethod',
       'CombinerEndpoint',
-      'CombinerEndpointCommon',
-      'CombinerEndpointPNP',
-      'Endpoint',
       'ErrorMessage',
       'KEY_VERSION_HEADER',
       'OdisUtils',
@@ -14,8 +11,6 @@ describe('@celo/identity', () => {
       'SignMessageRequestSchema',
       'SignMessageResponseSchema',
       'SignerEndpoint',
-      'SignerEndpointCommon',
-      'SignerEndpointPNP',
       'WarningMessage',
       'getMessageDigest',
       'signWithRawKey',
