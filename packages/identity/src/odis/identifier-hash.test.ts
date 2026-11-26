@@ -1,5 +1,5 @@
-import { soliditySha3 } from 'web3-utils'
-import { getIdentifierHash, IdentifierPrefix } from './index'
+import { soliditySha3 } from '@celo/utils/lib/solidity'
+import { getIdentifierHash, IdentifierPrefix } from './identifier-hash'
 const sha3 = (v: string) => soliditySha3({ type: 'string', value: v })
 
 const TEST_SALT = 'abcdefg'

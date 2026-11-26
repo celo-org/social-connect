@@ -19,4 +19,4 @@ body:
     - type: markdown
       attributes:
           value: |
-              In order to add support for the requested identifier, you can add support for the identifier [here](https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.ts) and open a PR.
+              In order to add support for the requested identifier, you can add support for the identifier [here](https://github.com/celo-org/social-connect/tree/main/packages/identity/src/odis/identifier-hash.ts) and open a PR.

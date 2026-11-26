@@ -240,7 +240,7 @@ const attestations = await federatedAttestationsContract.lookupAttestations(
 console.log(attestations.accounts);
 ```
 
-> **Note:** `IdentifierPrefix.TWITTER` resolves to the string `"twit"`. The obfuscated identifier is derived as `sha3(sha3("twit://{twitterUserId}")__{pepper})`. See [`packages/odis-identifiers/src/identifier.ts`](packages/odis-identifiers/src/identifier.ts) for all supported prefixes.
+> **Note:** `IdentifierPrefix.TWITTER` resolves to the string `"twit"`. The obfuscated identifier is derived as `sha3(sha3("twit://{twitterUserId}")__{pepper})`. See [`packages/identity/src/odis/identifier-hash.ts`](packages/identity/src/odis/identifier-hash.ts) for all supported prefixes.
 
 ## 📄 Documentation
 
@@ -288,7 +288,7 @@ This where `prefix` comes into play, the `plainTextIdentifier alicecodes` can be
 
 Moreover, it also helps in composability if dApps follow a standard and use prefix then the corresponding `obsfuscatedIdentifier` will be the same thus making it easier for dApps to lookup identifier verified by other issuers.
 
-You can keep an eye on prefixes suggested by us [here](https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.ts#L25).
+You can keep an eye on prefixes suggested by us [here](https://github.com/celo-org/social-connect/tree/main/packages/identity/src/odis/identifier-hash.ts#L25).
 
 </details>
 

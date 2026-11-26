@@ -739,7 +739,6 @@ __metadata:
   resolution: "@celo/identity@workspace:packages/identity"
   dependencies:
     "@celo/base": "npm:^7.0.0"
-    "@celo/odis-identifiers": "npm:^1.0.1"
     "@celo/utils": "npm:^8.0.3"
     "@types/debug": "npm:^4.1.10"
     "@types/elliptic": "npm:^6.4.16"
@@ -764,14 +763,6 @@ __metadata:
   checksum: 10/e00b54199288257c0b7b4dc2c6b1edb82bf01175269e38862ba400bbf5d1a39e506e1faa6a6b55828450a959d2ca2bc18c6a51ab886e971e881f9b09c660a74e
   languageName: node
   linkType: hard
-
-"@celo/odis-identifiers@npm:^1.0.1, @celo/odis-identifiers@workspace:packages/odis-identifiers":
-  version: 0.0.0-use.local
-  resolution: "@celo/odis-identifiers@workspace:packages/odis-identifiers"
-  dependencies:
-    web3-utils: "npm:1.10.4"
-  languageName: unknown
-  linkType: soft
 
 "@celo/phone-number-privacy-common@npm:^3.0.3":
   version: 3.1.2

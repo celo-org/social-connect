@@ -45,7 +45,7 @@ Here is a concrete example:
 
 Each identifier type has a corresponding prefix that is appended before the blinding and hashing. This prevents identifiers from different sources from having the same pepper (ie. if you have the same handle for twitter and instagram, the obfuscated identifier should be different for each).
 
-These are the prefixes currently defined in the SDK. We are using [DID methods](https://w3c.github.io/did-spec-registries/#did-methods) as prefixes when they exist. We welcome PRs here and [in the SDK](https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.ts) if you'd like to add a new identifier type and prefix! You can also cast an arbitrary string as your prefix if you would like.
+These are the prefixes currently defined in the SDK. We are using [DID methods](https://w3c.github.io/did-spec-registries/#did-methods) as prefixes when they exist. We welcome PRs here and [in the SDK](https://github.com/celo-org/social-connect/tree/main/packages/identity/src/odis/identifier-hash.ts) if you'd like to add a new identifier type and prefix! You can also cast an arbitrary string as your prefix if you would like.
 
 | Type | Prefix |
 |---------|--------|
