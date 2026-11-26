@@ -1,11 +1,6 @@
 import { generateKeys, generateMnemonic, MnemonicStrength } from '@celo/cryptographic-utils'
 import { OdisUtils } from '@celo/identity'
-import {
-  AuthSigner,
-  getServiceContext,
-  OdisAPI,
-  OdisContextName,
-} from '@celo/identity/lib/odis/query'
+import { AuthSigner, getServiceContext, OdisContextName } from '@celo/identity/lib/odis/query'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,
@@ -40,7 +35,7 @@ export const queryOdisForSalt = async (
   privateKey?: string,
   privateKeyPercentage: number = 100,
 ) => {
-  const serviceContext = getServiceContext(contextName, OdisAPI.PNP)
+  const serviceContext = getServiceContext(contextName)
   getLogger().debug(
     {
       contextName,
@@ -98,7 +93,7 @@ export const queryOdisForQuota = async (
   privateKey?: string,
   privateKeyPercentage: number = 100,
 ) => {
-  const serviceContext = getServiceContext(contextName, OdisAPI.PNP)
+  const serviceContext = getServiceContext(contextName)
   getLogger().debug(
     {
       contextName,

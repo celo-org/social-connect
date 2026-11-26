@@ -69,10 +69,6 @@ export const ODIS_MAINNET_CONTEXT_PNP: ServiceContext = {
     'FvreHfLmhBjwxHxsxeyrcOLtSonC9j7K3WrS4QapYsQH6LdaDTaNGmnlQMfFY04Bp/K4wAvqQwO9/bqPVCKf8Ze8OZo8Frmog4JY4xAiwrsqOXxug11+htjEe1pj4uMA',
 }
 
-export enum OdisAPI {
-  PNP = 'pnp',
-}
-
 export enum OdisContextName {
   STAGING = 'staging',
   MAINNET = 'mainnet',
@@ -81,21 +77,14 @@ export enum OdisContextName {
 
 export function getServiceContext(
   contextName: OdisContextName = OdisContextName.MAINNET,
-  api: OdisAPI = OdisAPI.PNP,
-) {
+): ServiceContext {
   switch (contextName) {
     case OdisContextName.CELO_SEPOLIA:
-      return {
-        [OdisAPI.PNP]: ODIS_CELO_SEPOLIA_CONTEXT_PNP,
-      }[api]
+      return ODIS_CELO_SEPOLIA_CONTEXT_PNP
     case OdisContextName.STAGING:
-      return {
-        [OdisAPI.PNP]: ODIS_STAGING_CONTEXT,
-      }[api]
+      return ODIS_STAGING_CONTEXT
     case OdisContextName.MAINNET:
-      return {
-        [OdisAPI.PNP]: ODIS_MAINNET_CONTEXT_PNP,
-      }[api]
+      return ODIS_MAINNET_CONTEXT_PNP
     default:
       return ODIS_MAINNET_CONTEXT_PNP
   }

@@ -7,7 +7,7 @@ import {
   SignMessageRequest,
   SignMessageResponseSchema,
 } from '@celo/identity'
-import { ErrorMessages, getServiceContext, OdisAPI } from '@celo/identity/lib/odis/query'
+import { ErrorMessages, getServiceContext } from '@celo/identity/lib/odis/query'
 import { PnpClientQuotaStatus } from '@celo/identity/lib/odis/quota'
 import { normalizeAddressWith0x } from '@celo/utils/lib/address'
 import threshold_bls from 'blind-threshold-bls'
@@ -38,7 +38,7 @@ require('dotenv').config()
 
 jest.setTimeout(60000)
 
-const DEFAULT_SERVICE_CONTEXT = getServiceContext(getTestContextName(), OdisAPI.PNP)
+const DEFAULT_SERVICE_CONTEXT = getServiceContext(getTestContextName())
 // ODIS_COMBINER_SERVICE_URL points the suite at another combiner, such as the Rust one, and keeps
 // the context's public key.
 const SERVICE_CONTEXT = {
