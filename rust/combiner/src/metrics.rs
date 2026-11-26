@@ -1,5 +1,5 @@
 //! Metric names and the process-global Prometheus recorder. Names are the TS
-//! combiner's (`apps/combiner/src/common/metrics.ts`); labels are snake_case.
+//! combiner's (`odis-combiner-4.0.5:apps/combiner/src/common/metrics.ts`); labels are snake_case.
 
 use std::time::{Duration, Instant};
 

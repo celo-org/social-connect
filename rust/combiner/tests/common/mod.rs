@@ -36,7 +36,8 @@ use threshold_bls::curve::bls12377::{G1, Scalar};
 use threshold_bls::group::{Element, Scalar as _};
 use tokio::net::TcpListener;
 
-/// `PRIVATE_KEY1` of the TS test values (`packages/common/src/test/values.ts:8`).
+/// `PRIVATE_KEY1` of the TS test values
+/// (`odis-combiner-4.0.5:packages/common/src/test/values.ts:8`).
 pub const PRIVATE_KEY1: &str = "535029bfb19fe5440dbd549b88fbf5ee847b059485e4eafc2a3e3bdfbf9b31ac";
 /// `ACCOUNT_ADDRESS1`, the address of `PRIVATE_KEY1` in lower case (`values.ts:9`).
 pub const ACCOUNT: &str = "0x82c76935924be4dfbf58d4365071b02de267ba2e";

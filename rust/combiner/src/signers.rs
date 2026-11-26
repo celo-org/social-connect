@@ -1,6 +1,6 @@
 //! Calls to the signers: one request to every signer at once under one deadline, each answer
-//! classified as the TS combiner does (`apps/combiner/src/common/combine.ts`), and an early stop
-//! once the threshold is out of reach or the caller has what it needs.
+//! classified as the TS combiner does (`odis-combiner-4.0.5:apps/combiner/src/common/combine.ts`),
+//! and an early stop once the threshold is out of reach or the caller has what it needs.
 
 use std::collections::BTreeSet;
 use std::error::Error;

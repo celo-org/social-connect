@@ -1,6 +1,7 @@
 # Rust signer changelog
 
-Changes an operator sees when moving from the TS signer (`apps/signer`) to the Rust signer.
+Changes an operator sees when moving from the TS signer (`odis-signer-4.0.6:apps/signer`) to the
+Rust signer.
 
 ## Migrating a deployment
 

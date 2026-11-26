@@ -1,5 +1,5 @@
 //! The TS combiner's error and warning strings, byte for byte
-//! (`packages/common/src/interfaces/errors.ts`).
+//! (`odis-combiner-4.0.5:packages/common/src/interfaces/errors.ts`).
 
 use axum::Json;
 use axum::http::StatusCode;

@@ -41,7 +41,7 @@ pub const DB_OPS_LATENCY: &str = "db_ops_instrumentation";
 pub const USER_REMAINING_QUOTA: &str = "user_remaining_quota_at_request";
 
 /// Bucket bounds of every histogram, the same list as in the TS signer
-/// (`buckets` in `apps/signer/src/common/metrics.ts`).
+/// (`buckets` in `odis-signer-4.0.6:apps/signer/src/common/metrics.ts`).
 const HISTOGRAM_BUCKETS: &[f64] = &[
     0.001, 0.01, 0.1, 0.2, 0.3, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.3, 2.6,
     2.9, 3.5, 4.0, 5.0, 10.0,

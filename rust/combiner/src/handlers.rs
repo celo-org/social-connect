@@ -113,9 +113,9 @@ async fn run_to_end(
 }
 
 /// Checks the request, resolves the key version, then authenticates, in the TS order
-/// (`apps/combiner/src/pnp/endpoints/sign/action.ts:41-57`). Asks every signer for a partial
-/// signature and combines them as they arrive, stopping the calls once a combination verifies.
-/// A failure is an `Err`, so each check can end the request with `?`.
+/// (`odis-combiner-4.0.5:apps/combiner/src/pnp/endpoints/sign/action.ts:41-57`). Asks every signer
+/// for a partial signature and combines them as they arrive, stopping the calls once a combination
+/// verifies. A failure is an `Err`, so each check can end the request with `?`.
 async fn sign(state: AppState, headers: HeaderMap, raw: Bytes) -> Result<Response, Failure> {
     const ENDPOINT: SignerEndpoint = SignerEndpoint::Sign;
 
@@ -284,8 +284,8 @@ impl<'a> Combiner<'a> {
 }
 
 /// Checks the request, authenticates it, then resolves the key version, in the TS order
-/// (`apps/combiner/src/pnp/endpoints/quota/action.ts:37-73`), and asks every signer. A failure
-/// is an `Err`, so each check can end the request with `?`.
+/// (`odis-combiner-4.0.5:apps/combiner/src/pnp/endpoints/quota/action.ts:37-73`), and asks every
+/// signer. A failure is an `Err`, so each check can end the request with `?`.
 async fn quota_status(
     state: AppState,
     headers: HeaderMap,

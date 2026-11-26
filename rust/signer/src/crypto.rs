@@ -72,7 +72,7 @@ mod tests {
 
     #[test]
     fn sign_blinded_hello_world() {
-        // Mirrors apps/signer/test/signing/bls-signature.test.ts:
+        // Mirrors odis-signer-4.0.6:apps/signer/test/signing/bls-signature.test.ts:
         // blind("hello world", seed=[0,1,...,30,0]) then partial sign with dev key.
         use rand_chacha::ChaChaRng;
         use rand_core::SeedableRng;

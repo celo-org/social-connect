@@ -1,6 +1,6 @@
-//! The combiner's metric names, label names, `app` label and histogram buckets, checked against
-//! the TS combiner's (`apps/combiner/src/common/metrics.ts`). This binary installs the
-//! combiner's own recorder, so it builds no Rust signers, which install the signer's.
+//! The combiner's metric names, label names, `app` label and histogram buckets, checked against the
+//! TS combiner's (`odis-combiner-4.0.5:apps/combiner/src/common/metrics.ts`). This binary installs
+//! the combiner's own recorder, so it builds no Rust signers, which install the signer's.
 
 mod common;
 

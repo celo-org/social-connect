@@ -1,6 +1,7 @@
 # Rust combiner changelog
 
-Changes an operator sees when moving from the TS combiner (`apps/combiner`) to the Rust combiner.
+Changes an operator sees when moving from the TS combiner (`odis-combiner-4.0.5:apps/combiner`) to
+the Rust combiner.
 
 ## Migrating a deployment
 
