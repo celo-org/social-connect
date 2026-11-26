@@ -10,7 +10,6 @@ import {
   OdisRequest,
   OdisRequestHeader,
   OdisResponse,
-  PhoneNumberPrivacyRequest,
   signWithRawKey,
 } from './protocol'
 
@@ -34,7 +33,7 @@ export type AuthSigner = WalletKeySigner | EncryptionKeySigner
 
 // Re-export types and aliases to maintain backwards compatibility.
 export { AuthenticationMethod, signWithRawKey }
-export type { PhoneNumberPrivacyRequest }
+export type { OdisRequest }
 
 export enum ErrorMessages {
   ODIS_QUOTA_ERROR = 'odisQuotaError',
@@ -57,13 +56,13 @@ export const ODIS_STAGING_CONTEXT: ServiceContext = {
     '7FsWGsFnmVvRfMDpzz95Np76wf/1sPaK0Og9yiB+P8QbjiC8FV67NBans9hzZEkBaQMhiapzgMR6CkZIZPvgwQboAxl65JWRZecGe5V3XO4sdKeNemdAZ2TzQuWkuZoA',
 }
 
-export const ODIS_CELO_SEPOLIA_CONTEXT_PNP: ServiceContext = {
+export const ODIS_CELO_SEPOLIA_CONTEXT: ServiceContext = {
   odisUrl: 'https://odis-combiner.celo-sepolia.celo-testnet.org',
   odisPubKey:
     'kPoRxWdEdZ/Nd3uQnp3FJFs54zuiS+ksqvOm9x8vY6KHPG8jrfqysvIRU0wtqYsBKA7SoAsICMBv8C/Fb2ZpDOqhSqvr/sZbZoHmQfvbqrzbtDIPvUIrHgRS0ydJCMsA',
 }
 
-export const ODIS_MAINNET_CONTEXT_PNP: ServiceContext = {
+export const ODIS_MAINNET_CONTEXT: ServiceContext = {
   odisUrl: 'https://odis-combiner-mainnet.rc1-europe-west1.celo-testnet.org',
   odisPubKey:
     'FvreHfLmhBjwxHxsxeyrcOLtSonC9j7K3WrS4QapYsQH6LdaDTaNGmnlQMfFY04Bp/K4wAvqQwO9/bqPVCKf8Ze8OZo8Frmog4JY4xAiwrsqOXxug11+htjEe1pj4uMA',
@@ -80,13 +79,13 @@ export function getServiceContext(
 ): ServiceContext {
   switch (contextName) {
     case OdisContextName.CELO_SEPOLIA:
-      return ODIS_CELO_SEPOLIA_CONTEXT_PNP
+      return ODIS_CELO_SEPOLIA_CONTEXT
     case OdisContextName.STAGING:
       return ODIS_STAGING_CONTEXT
     case OdisContextName.MAINNET:
-      return ODIS_MAINNET_CONTEXT_PNP
+      return ODIS_MAINNET_CONTEXT
     default:
-      return ODIS_MAINNET_CONTEXT_PNP
+      return ODIS_MAINNET_CONTEXT
   }
 }
 
@@ -95,7 +94,7 @@ export function signWithDEK(msg: string, signer: EncryptionKeySigner) {
 }
 
 export async function getOdisPnpRequestAuth(
-  body: PhoneNumberPrivacyRequest,
+  body: OdisRequest,
   signer: AuthSigner,
 ): Promise<string> {
   // Sign payload using provided account and authentication method.

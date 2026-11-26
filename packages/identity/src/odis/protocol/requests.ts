@@ -52,9 +52,7 @@ export const PnpQuotaRequestSchema: t.Type<PnpQuotaRequest> = t.intersection([
   }),
 ])
 
-export type PhoneNumberPrivacyRequest = SignMessageRequest | PnpQuotaRequest
-
-export type OdisRequest = PhoneNumberPrivacyRequest
+export type OdisRequest = SignMessageRequest | PnpQuotaRequest
 
 interface PnpAuthHeader {
   Authorization: string
@@ -68,13 +66,8 @@ export type SignMessageRequestHeader = KeyVersionHeader & PnpAuthHeader
 
 export type PnpQuotaRequestHeader = PnpAuthHeader
 
-export type PhoneNumberPrivacyRequestHeader<R extends PhoneNumberPrivacyRequest> =
-  R extends SignMessageRequest
-    ? SignMessageRequestHeader
-    : never | R extends PnpQuotaRequest
-      ? PnpQuotaRequestHeader
-      : never
-
-export type OdisRequestHeader<R extends OdisRequest> = R extends PhoneNumberPrivacyRequest
-  ? PhoneNumberPrivacyRequestHeader<R>
-  : never
+export type OdisRequestHeader<R extends OdisRequest> = R extends SignMessageRequest
+  ? SignMessageRequestHeader
+  : R extends PnpQuotaRequest
+    ? PnpQuotaRequestHeader
+    : never

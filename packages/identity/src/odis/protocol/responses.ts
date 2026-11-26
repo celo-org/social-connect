@@ -1,12 +1,6 @@
 import * as t from 'io-ts'
-import {
-  OdisRequest,
-  PhoneNumberPrivacyRequest,
-  PnpQuotaRequest,
-  SignMessageRequest,
-} from './requests'
+import { OdisRequest, PnpQuotaRequest, SignMessageRequest } from './requests'
 
-// Phone Number Privacy
 export interface PnpQuotaStatus {
   performedQueryCount: number
   // all time total quota
@@ -97,22 +91,8 @@ export const PnpQuotaResponseSchema: t.Type<PnpQuotaResponse> = t.union([
   }),
 ])
 
-// prettier-ignore
-export type PhoneNumberPrivacyResponse<
-  R extends PhoneNumberPrivacyRequest = PhoneNumberPrivacyRequest
-> =
-  | R extends SignMessageRequest ? SignMessageResponse : never
-  | R extends PnpQuotaRequest ? PnpQuotaResponse : never
-
-// General
-
-// prettier-ignore
-export type OdisResponse<R extends OdisRequest = OdisRequest> =
-  | R extends PhoneNumberPrivacyRequest ? PhoneNumberPrivacyResponse<R> : never
-
-export type SuccessResponse<R extends OdisRequest = OdisRequest> = OdisResponse<R> & {
-  success: true
-}
-export type FailureResponse<R extends OdisRequest = OdisRequest> = OdisResponse<R> & {
-  success: false
-}
+export type OdisResponse<R extends OdisRequest = OdisRequest> = R extends SignMessageRequest
+  ? SignMessageResponse
+  : R extends PnpQuotaRequest
+    ? PnpQuotaResponse
+    : never
