@@ -22,6 +22,15 @@ run, the variable can be removed. The import does not pick up what a TS signer w
 the TS signer does not see what the Rust signer records, so stop the TS signer before the first start
 and do not switch back without accepting that loss.
 
+While it runs, the import locks the two TS tables against writes. A TS signer that is still running
+cannot record requests then: each write waits for the lock until the TS signer's `DB_TIMEOUT`
+passes, and the sign request fails. Only replays and quota queries, which do not write, still
+succeed. Stopping the TS signer first is still required, because what it writes after the import is
+not imported. The lock needs the `UPDATE`, `DELETE` or `TRUNCATE` privilege on those
+tables, which the role that created them has. The import also creates a temporary table, so the
+database role needs the `TEMPORARY` privilege on the database, which Postgres grants to every role
+by default.
+
 Request rows without a stored signature, which the TS signer wrote before August 2023, are not
 imported. The import logs their number as `requests_skipped_null_signature`. A replay of such a
 request is charged as a new one. The TS signer prunes requests older than 7 days by default, so the

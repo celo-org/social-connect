@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use alloy::primitives::Address;
 use async_trait::async_trait;
-use sqlx::PgPool;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
+use sqlx::{ConnectOptions, PgPool};
 
 use super::legacy_migration::{
     LegacyMigrationReport, ensure_legacy_data_imported, run_legacy_migration,
@@ -81,12 +81,17 @@ impl PostgresPnpRequestService {
     /// Run the one-time legacy TS -> canonical data migration. Idempotent:
     /// guarded by a marker table so a completed import never re-runs.
     ///
-    /// The import counts and reads whole tables, which can take longer than the
-    /// statement timeout, so it runs on its own connections without that limit.
+    /// The import counts and reads whole tables and waits for a lock on the TS
+    /// tables, either of which can take longer than the statement timeout, so
+    /// it runs on its own connections without that limit.
     pub async fn run_legacy_migration(&self) -> Result<LegacyMigrationReport, OdisError> {
+        // The import's statements are expected to be slow, and it logs its own
+        // elapsed time, so sqlx's statement log, which warns about every
+        // statement over a second, is off on these connections.
+        let options = self.untimed_options.clone().disable_statement_logging();
         let pool = PgPoolOptions::new()
             .max_connections(2)
-            .connect_with(self.untimed_options.clone())
+            .connect_with(options)
             .await
             .map_err(|e| {
                 tracing::error!("failed to connect to Postgres for the legacy import: {e}");
