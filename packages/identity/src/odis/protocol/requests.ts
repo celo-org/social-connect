@@ -1,4 +1,3 @@
-import * as t from 'io-ts'
 import { KEY_VERSION_HEADER } from './constants'
 
 export enum AuthenticationMethod {
@@ -19,18 +18,6 @@ export interface SignMessageRequest {
   version?: string
 }
 
-export const SignMessageRequestSchema: t.Type<SignMessageRequest> = t.intersection([
-  t.type({
-    account: t.string,
-    blindedQueryPhoneNumber: t.string,
-  }),
-  t.partial({
-    authenticationMethod: t.union([t.string, t.undefined]),
-    sessionID: t.union([t.string, t.undefined]),
-    version: t.union([t.string, t.undefined]),
-  }),
-])
-
 export interface PnpQuotaRequest {
   account: string
   /** Authentication method to use for verifying the signature in the Authorization header */
@@ -41,20 +28,7 @@ export interface PnpQuotaRequest {
   version?: string
 }
 
-export const PnpQuotaRequestSchema: t.Type<PnpQuotaRequest> = t.intersection([
-  t.type({
-    account: t.string,
-  }),
-  t.partial({
-    authenticationMethod: t.union([t.string, t.undefined]),
-    sessionID: t.union([t.string, t.undefined]),
-    version: t.union([t.string, t.undefined]),
-  }),
-])
-
-export type PhoneNumberPrivacyRequest = SignMessageRequest | PnpQuotaRequest
-
-export type OdisRequest = PhoneNumberPrivacyRequest
+export type OdisRequest = SignMessageRequest | PnpQuotaRequest
 
 interface PnpAuthHeader {
   Authorization: string
@@ -68,13 +42,8 @@ export type SignMessageRequestHeader = KeyVersionHeader & PnpAuthHeader
 
 export type PnpQuotaRequestHeader = PnpAuthHeader
 
-export type PhoneNumberPrivacyRequestHeader<R extends PhoneNumberPrivacyRequest> =
-  R extends SignMessageRequest
-    ? SignMessageRequestHeader
-    : never | R extends PnpQuotaRequest
-      ? PnpQuotaRequestHeader
-      : never
-
-export type OdisRequestHeader<R extends OdisRequest> = R extends PhoneNumberPrivacyRequest
-  ? PhoneNumberPrivacyRequestHeader<R>
-  : never
+export type OdisRequestHeader<R extends OdisRequest> = R extends SignMessageRequest
+  ? SignMessageRequestHeader
+  : R extends PnpQuotaRequest
+    ? PnpQuotaRequestHeader
+    : never

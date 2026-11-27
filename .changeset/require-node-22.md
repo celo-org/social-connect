@@ -1,6 +1,5 @@
 ---
 '@celo/identity': major
-'@celo/odis-identifiers': major
 ---
 
-Require Node.js 22 or later. Older Node lines are end-of-life, and the packages are compiled for ES2022.
+Require Node.js 22 or later. Older Node lines are end-of-life, and the package is compiled for ES2022.

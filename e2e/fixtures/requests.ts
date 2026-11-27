@@ -1,6 +1,6 @@
 import {
   AuthenticationMethod,
-  PhoneNumberPrivacyRequest,
+  OdisRequest,
   PnpQuotaRequest,
   SignMessageRequest,
   signWithRawKey,
@@ -32,7 +32,7 @@ export function getPnpSignRequest(
   }
 }
 
-export function getPnpRequestAuthorization(req: PhoneNumberPrivacyRequest, pk: string) {
+export function getPnpRequestAuthorization(req: OdisRequest, pk: string) {
   const msg = JSON.stringify(req)
   if (req.authenticationMethod === AuthenticationMethod.ENCRYPTION_KEY) {
     return signWithRawKey(JSON.stringify(req), pk)

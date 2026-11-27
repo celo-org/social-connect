@@ -1,6 +1,6 @@
 export const PEPPER_SEPARATOR = '__'
 
-// Docstring is duplicated in @celo/identity; make sure to update in both places.
+// Docstring is duplicated in identifier.ts; make sure to update in both places.
 /**
  * Standardized prefixes for ODIS identifiers.
  *
@@ -9,12 +9,12 @@ export const PEPPER_SEPARATOR = '__'
  * these prefixes prevent the ODIS identifers from being the same.
  *
  * If you would like to use a prefix that isn't included, please put up a PR
- * adding it to @celo/odis-identifiers (https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.ts)
+ * adding it to @celo/identity (https://github.com/celo-org/social-connect/tree/main/packages/identity/src/odis/identifier-hash.ts)
  * to ensure interoperability with other projects. When adding new prefixes,
  * please use either the full platform name in all lowercase (e.g. 'facebook')
  * or DID methods https://w3c.github.io/did-spec-registries/#did-methods.
  * Make sure to add the expected value for the unit test case in
- * `https://github.com/celo-org/social-connect/tree/main/packages/odis-identifiers/src/identifier.test.ts`,
+ * `https://github.com/celo-org/social-connect/tree/main/packages/identity/src/odis/identifier-hash.test.ts`,
  * otherwise the test will fail.
  *
  * The NULL prefix is included to allow projects to use the sdk without selecting
@@ -35,7 +35,7 @@ export enum IdentifierPrefix {
   GITHUB = 'github',
 }
 
-// Docstring is duplicated in @celo/identity; make sure to update in both places.
+// Docstring is duplicated in identifier.ts; make sure to update in both places.
 /**
  * Concatenates the identifierPrefix and plaintextIdentifier with the separator '://'
  *
@@ -48,8 +48,7 @@ export const getPrefixedIdentifier = (
 ): string => identifierPrefix + '://' + plaintextIdentifier
 
 /**
- * Helper function for getIdentifierHash in @celo/identity, so that this can
- * be used in protocol tests without dependency issues.
+ * Helper function for getIdentifierHash in identifier.ts, which supplies the hash function.
  *
  * @remarks
  * Concatenates the plaintext prefixed identifier with the pepper derived by hashing the unblinded

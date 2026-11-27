@@ -19,7 +19,6 @@ See the [community contribution guide](https://docs.celo.org/community/contribut
 │   ├── <a href="../apps/monitor">monitor</a>: Monitoring service that sends health checks to deployed ODIS instances. Also contains code for load testing
 ├── <a href="../packages">packages</a>: Contains all published SocialConnect components
 │   ├── <a href="../packages/identity">identity</a>: SDK for using SocialConnect
-│   ├── <a href="../packages/odis-identifiers">odis-identifiers</a>: Contains identifier prefixes and hashing functions for ODIS
 ├── <a href="../e2e">e2e</a>: End-to-end tests of the ODIS signer and combiner APIs against running services
 ├── <a href="../rust">rust</a>: The ODIS signer and combiner
 ├── <a href="../scripts">scripts</a>: Misc. deployment and release scripts
@@ -114,7 +113,7 @@ For load tests, checkout [apps/monitor](../apps/monitor/README.md)
 
 Subjects follow [Scoped Commits](https://scopedcommits.com): `<scope>: <description>`, for example `monitor: set CHAIN_ID for the mainnet deploy`. There is no type prefix such as `feat` or `fix`.
 
-* The scope names the component the commit changes. An app, package or workspace takes its directory name (`monitor`, `identity`, `odis-identifiers`, `e2e`). A Rust crate takes its directory name under `rust/` plus `-rs` (`signer-rs`, `combiner-rs`), which keeps it apart from the TS app of the same name on `release/odis-ts-4.x`. Changes outside the components use `ci`, `deps` or `docs`.
+* The scope names the component the commit changes. An app, package or workspace takes its directory name (`monitor`, `identity`, `e2e`). A Rust crate takes its directory name under `rust/` plus `-rs` (`signer-rs`, `combiner-rs`), which keeps it apart from the TS app of the same name on `release/odis-ts-4.x`. Changes outside the components use `ci`, `deps` or `docs`.
 * A commit that changes two components names both, separated by a comma. One that changes the whole repo uses `treewide`.
 * Merges and reverts keep Git's default subject.
 * The description is imperative, starts in lower case and has no full stop. It does not repeat the scope: `signer-rs: add JSON log output`, not `signer-rs: add JSON log output to the Rust signer`.

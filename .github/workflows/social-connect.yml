@@ -90,7 +90,9 @@ jobs:
       - name: "enable corepack"
         run : corepack enable yarn
       - name: Install yarn dependencies
-      # skip check due to YN0078: │ Invalid resolution @celo/odis-identifiers@npm:^1.0.0 → npm:1.0.0
+      # Skips the resolution check. It passes in a local yarn install --immutable --check-resolutions,
+      # but has not been tried in Yarn's hardened mode (on for pull_request runs in a public
+      # repository), which also adds --refresh-lockfile, so the flag stays until it has.
         run: yarn install --no-check-resolutions
       - name: Fail if any file changed on git
         run: |
@@ -169,7 +171,7 @@ jobs:
             echo "Changeset Found"
           fi
   general-test:
-    name: General (identity + odis-identifiers) test
+    name: Identity test
     runs-on: ['self-hosted', 'org', '8-cpu']
     container:
       image: us-west1-docker.pkg.dev/devopsre/actions-runner-controller/celo-monorepo:node22
@@ -186,9 +188,6 @@ jobs:
         uses: ./.github/actions/sync-workspace
         with:
           package-json-checksum: ${{ needs.install-dependencies.outputs.package-json-checksum }}
-      - name: Run Odis Identifier Tests
-        run: |
-          yarn --cwd=packages/odis-identifiers test
       - name: Run Identity Tests
         run: |
           yarn --cwd=packages/identity test
