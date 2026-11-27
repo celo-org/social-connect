@@ -25,7 +25,8 @@ use odis_signer::config::{Config, DatabaseConfig, KeystoreType, LogFormat};
 use odis_signer::errors::OdisError;
 use odis_signer::key_management::{KeyProvider, MockKeyProvider};
 use odis_signer::request_service::{
-    PnpRequestService, PostgresPnpRequestService, RecordOutcome, RecordedRequest,
+    LegacyMigrationReport, PnpRequestService, PostgresPnpRequestService, RecordOutcome,
+    RecordedRequest,
 };
 use odis_signer::server::build_router_with_services;
 
@@ -904,4 +905,492 @@ async fn legacy_migration_paginates_across_pages() {
             key_version: None,
         })
     );
+}
+
+/// Create both legacy TS tables, empty, with the DDL `seed_legacy` uses.
+async fn create_legacy_tables(pool: &PgPool) {
+    sqlx::query(
+        r#"CREATE TABLE "accountsOnChain" (
+            address varchar(255) NOT NULL PRIMARY KEY,
+            created_at timestamptz NOT NULL,
+            num_lookups integer
+        )"#,
+    )
+    .execute(pool)
+    .await
+    .unwrap();
+
+    sqlx::query(
+        r#"CREATE TABLE "requestsOnChain" (
+            caller_address varchar(255) NOT NULL,
+            timestamp timestamptz NOT NULL,
+            blinded_query varchar(255) NOT NULL,
+            signature varchar(255),
+            PRIMARY KEY (caller_address, blinded_query, timestamp)
+        )"#,
+    )
+    .execute(pool)
+    .await
+    .unwrap();
+}
+
+/// What the import of `seed_legacy`'s rows reports on an empty database.
+const SEEDED_REPORT: LegacyMigrationReport = LegacyMigrationReport {
+    already_migrated: false,
+    legacy_tables_present: true,
+    accounts_imported: 3,
+    accounts_skipped_unparseable: 1,
+    // Vitalik's two spellings make one row; the account with NULL lookups the other.
+    accounts_written: 2,
+    requests_imported: 2,
+    requests_skipped_null_signature: 1,
+    requests_skipped_unparseable: 1,
+    // Vitalik's two q1 rows make one.
+    requests_written: 1,
+};
+
+/// The report counts the rows written next to the legacy rows taken. A legacy
+/// request older than the Rust signer's row for the same query writes
+/// nothing, and a legacy account adds to the Rust signer's row.
+#[tokio::test]
+async fn legacy_migration_reports_the_rows_it_wrote() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    assert_eq!(svc.run_legacy_migration().await.unwrap(), SEEDED_REPORT);
+
+    // A second database, where the Rust signer has already charged Vitalik for q1.
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    assert_eq!(
+        svc.record_request(vitalik, "q1", "rust-sig", 2, 10)
+            .await
+            .unwrap(),
+        RecordOutcome::Recorded {
+            performed_query_count: 1
+        }
+    );
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+
+    // Both legacy q1 rows are from 2023, older than the Rust signer's row, so
+    // that row stays with its key version.
+    assert_eq!(
+        svc.run_legacy_migration().await.unwrap(),
+        LegacyMigrationReport {
+            requests_written: 0,
+            ..SEEDED_REPORT
+        }
+    );
+    assert_eq!(
+        svc.get_duplicate_request(vitalik, "q1").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "rust-sig".to_string(),
+            key_version: Some(2),
+        })
+    );
+    // The legacy lookups, 3 and 4, add to the one the Rust signer charged.
+    assert_eq!(svc.get_used_quota(vitalik).await.unwrap(), 8);
+}
+
+/// Either legacy table may be missing, and both may be empty. The import takes
+/// what is there and writes the marker.
+#[tokio::test]
+async fn legacy_migration_handles_tables_that_are_missing_or_empty() {
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    let test_addr: Address = TEST_ADDRESS.parse().unwrap();
+
+    // Only accountsOnChain, with a NULL created_at.
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    sqlx::query(
+        r#"CREATE TABLE "accountsOnChain" (
+            address varchar(255) NOT NULL PRIMARY KEY,
+            created_at timestamptz,
+            num_lookups integer
+        )"#,
+    )
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    sqlx::query(
+        r#"INSERT INTO "accountsOnChain" (address, created_at, num_lookups) VALUES ($1, NULL, 5)"#,
+    )
+    .bind(TEST_ADDRESS)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    assert_eq!(
+        svc.run_legacy_migration().await.unwrap(),
+        LegacyMigrationReport {
+            legacy_tables_present: true,
+            accounts_imported: 1,
+            accounts_written: 1,
+            ..Default::default()
+        }
+    );
+    assert_eq!(svc.get_used_quota(test_addr).await.unwrap(), 5);
+    // A NULL creation time counts as the time of the import, which is when the
+    // marker was written.
+    let (created_at, completed_at): (String, String) = sqlx::query_as(
+        "SELECT a.created_at::text, m.completed_at::text FROM accounts a, legacy_migration m",
+    )
+    .fetch_one(&setup_pool)
+    .await
+    .unwrap();
+    assert_eq!(created_at, completed_at);
+    assert_eq!(
+        svc.run_legacy_migration().await.unwrap(),
+        LegacyMigrationReport {
+            already_migrated: true,
+            ..Default::default()
+        }
+    );
+
+    // Both tables, empty.
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    create_legacy_tables(&setup_pool).await;
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    assert_eq!(
+        svc.run_legacy_migration().await.unwrap(),
+        LegacyMigrationReport {
+            legacy_tables_present: true,
+            ..Default::default()
+        }
+    );
+    let (markers,): (i64,) = sqlx::query_as("SELECT count(*) FROM legacy_migration")
+        .fetch_one(&setup_pool)
+        .await
+        .unwrap();
+    assert_eq!(markers, 1);
+    // The marker lets the signer start without the flag.
+    let account_service = Arc::new(MockAccountService::new(None, 100));
+    let key_provider: Arc<dyn KeyProvider> = Arc::new(MockKeyProvider::new());
+    let _app = build_router_with_services(pg_config(&url, false), account_service, key_provider)
+        .await
+        .unwrap();
+
+    // Only requestsOnChain, with two requests from one caller. Without the
+    // accounts table there is no UNION to remove the duplicate address.
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    sqlx::query(
+        r#"CREATE TABLE "requestsOnChain" (
+            caller_address varchar(255) NOT NULL,
+            timestamp timestamptz NOT NULL,
+            blinded_query varchar(255) NOT NULL,
+            signature varchar(255),
+            PRIMARY KEY (caller_address, blinded_query, timestamp)
+        )"#,
+    )
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature) VALUES
+            ($1, '2023-01-01 00:00:00+00', 'q1', 'sig1'),
+            ($1, '2023-01-01 00:00:00+00', 'q2', 'sig2')"#,
+    )
+    .bind(VITALIK_LOWERCASE)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    assert_eq!(
+        svc.run_legacy_migration().await.unwrap(),
+        LegacyMigrationReport {
+            legacy_tables_present: true,
+            requests_imported: 2,
+            requests_written: 2,
+            ..Default::default()
+        }
+    );
+    for (query, signature) in [("q1", "sig1"), ("q2", "sig2")] {
+        assert_eq!(
+            svc.get_duplicate_request(vitalik, query).await.unwrap(),
+            Some(RecordedRequest {
+                signature: signature.to_string(),
+                key_version: None,
+            })
+        );
+    }
+    let (markers,): (i64,) = sqlx::query_as("SELECT count(*) FROM legacy_migration")
+        .fetch_one(&setup_pool)
+        .await
+        .unwrap();
+    assert_eq!(markers, 1);
+}
+
+/// Two spellings of one caller that asked for the same query at the same time
+/// make one row. The import keeps the request of the spelling that sorts
+/// first.
+#[tokio::test]
+async fn legacy_migration_merges_requests_that_differ_only_in_casing() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    create_legacy_tables(&setup_pool).await;
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature) VALUES
+            ($1, '2023-01-01 00:00:00+00', 'q1', 'sigUpper'),
+            ($2, '2023-01-01 00:00:00+00', 'q1', 'sigLower')"#,
+    )
+    .bind(VITALIK_CHECKSUMMED)
+    .bind(VITALIK_LOWERCASE)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    assert_eq!(
+        svc.run_legacy_migration().await.unwrap(),
+        LegacyMigrationReport {
+            legacy_tables_present: true,
+            requests_imported: 2,
+            requests_written: 1,
+            ..Default::default()
+        }
+    );
+    // Which spelling sorts first depends on the database's collation.
+    let (first_signature,): (String,) = sqlx::query_as(
+        r#"SELECT signature FROM "requestsOnChain" ORDER BY caller_address LIMIT 1"#,
+    )
+    .fetch_one(&setup_pool)
+    .await
+    .unwrap();
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    assert_eq!(
+        svc.get_duplicate_request(vitalik, "q1").await.unwrap(),
+        Some(RecordedRequest {
+            signature: first_signature,
+            key_version: None,
+        })
+    );
+}
+
+/// An import that fails leaves the database as it was, so it can run again.
+/// Two spellings of one account whose lookups add up to more than an
+/// `integer` holds make it fail.
+#[tokio::test]
+async fn legacy_migration_that_fails_writes_nothing_and_can_run_again() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    create_legacy_tables(&setup_pool).await;
+    sqlx::query(
+        r#"INSERT INTO "accountsOnChain" (address, created_at, num_lookups) VALUES
+            ($1, '2020-01-01 00:00:00+00', 2000000000),
+            ($2, '2021-01-01 00:00:00+00', 2000000000)"#,
+    )
+    .bind(VITALIK_CHECKSUMMED)
+    .bind(VITALIK_LOWERCASE)
+    .execute(&setup_pool)
+    .await
+    .unwrap();
+    let svc = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    assert_eq!(
+        svc.run_legacy_migration().await,
+        Err(OdisError::DatabaseError)
+    );
+    let (accounts,): (i64,) = sqlx::query_as("SELECT count(*) FROM accounts")
+        .fetch_one(&setup_pool)
+        .await
+        .unwrap();
+    assert_eq!(accounts, 0);
+    // The marker table is created inside the transaction, so it is gone too.
+    let (no_marker_table,): (bool,) =
+        sqlx::query_as("SELECT to_regclass('legacy_migration') IS NULL")
+            .fetch_one(&setup_pool)
+            .await
+            .unwrap();
+    assert!(no_marker_table);
+
+    sqlx::query(r#"UPDATE "accountsOnChain" SET num_lookups = 1"#)
+        .execute(&setup_pool)
+        .await
+        .unwrap();
+    assert_eq!(
+        svc.run_legacy_migration().await.unwrap(),
+        LegacyMigrationReport {
+            legacy_tables_present: true,
+            accounts_imported: 2,
+            accounts_written: 1,
+            ..Default::default()
+        }
+    );
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    assert_eq!(svc.get_used_quota(vitalik).await.unwrap(), 2);
+}
+
+/// A TS signer that still runs may be recording a request when the import
+/// starts. The import waits for it and takes the row. The TS signer writes the
+/// request first and then the account, in one transaction; it must be able to
+/// finish while the import waits.
+///
+/// The TS transaction stays open for longer than `DB_TIMEOUT`, the statement
+/// timeout of the signer's own pool. The import must wait on connections
+/// without that timeout: on the signer's pool its lock would be cancelled and
+/// the import would fail.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn legacy_migration_waits_for_a_legacy_write_in_progress() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+
+    let mut ts_signer_write = setup_pool.begin().await.unwrap();
+    sqlx::query(
+        r#"INSERT INTO "requestsOnChain" (caller_address, timestamp, blinded_query, signature)
+           VALUES ($1, '2023-07-01 00:00:00+00', 'q7', 'sigLate')"#,
+    )
+    .bind(TEST_ADDRESS)
+    .execute(&mut *ts_signer_write)
+    .await
+    .unwrap();
+
+    let svc = Arc::new(
+        PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+            .await
+            .unwrap(),
+    );
+    let import = tokio::spawn({
+        let svc = Arc::clone(&svc);
+        async move { svc.run_legacy_migration().await }
+    });
+    tokio::time::sleep(DB_TIMEOUT + Duration::from_millis(200)).await;
+    assert!(!import.is_finished());
+
+    sqlx::query(
+        r#"UPDATE "accountsOnChain" SET num_lookups = COALESCE(num_lookups, 0) + 1
+           WHERE address = $1"#,
+    )
+    .bind(TEST_ADDRESS)
+    .execute(&mut *ts_signer_write)
+    .await
+    .unwrap();
+    ts_signer_write.commit().await.unwrap();
+
+    assert_eq!(
+        import.await.unwrap().unwrap(),
+        LegacyMigrationReport {
+            requests_imported: 3,
+            requests_written: 2,
+            ..SEEDED_REPORT
+        }
+    );
+    let test_addr: Address = TEST_ADDRESS.parse().unwrap();
+    assert_eq!(
+        svc.get_duplicate_request(test_addr, "q7").await.unwrap(),
+        Some(RecordedRequest {
+            signature: "sigLate".to_string(),
+            key_version: None,
+        })
+    );
+    assert_eq!(svc.get_used_quota(test_addr).await.unwrap(), 1);
+}
+
+/// Two signers that start together import once: one waits for the other and
+/// then finds the marker.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn legacy_migration_runs_once_when_two_signers_start_together() {
+    let Some((_node, url)) = start_postgres().await else {
+        return;
+    };
+    let setup_pool = PgPoolOptions::new()
+        .max_connections(2)
+        .connect(&url)
+        .await
+        .unwrap();
+    seed_legacy(&setup_pool).await;
+    let first = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+    let second = PostgresPnpRequestService::new(&url, DB_TIMEOUT)
+        .await
+        .unwrap();
+
+    let (first_report, second_report) =
+        tokio::join!(first.run_legacy_migration(), second.run_legacy_migration());
+    let mut reports = [first_report.unwrap(), second_report.unwrap()];
+    reports.sort_by_key(|report| report.already_migrated);
+    assert_eq!(
+        reports,
+        [
+            SEEDED_REPORT,
+            LegacyMigrationReport {
+                already_migrated: true,
+                ..Default::default()
+            }
+        ]
+    );
+    let vitalik: Address = VITALIK_CHECKSUMMED.parse().unwrap();
+    assert_eq!(first.get_used_quota(vitalik).await.unwrap(), 7);
 }
