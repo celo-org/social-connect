@@ -1,5 +1,48 @@
 # @celo/phone-number-privacy-signer
 
+## 5.0.0
+
+### Major Changes
+
+- cc5df33: Replace @celo/contractKit with viem
+
+  If you are just running the service no actual changes required except to use with same major version of combiner and monitor
+
+  ### Breaking Changes
+
+  `ContractKitAccountService` => `ClientAccountService`
+
+  ```diff
+  - new ContractKitAccountService(logger, contractKit)
+  + new ClientAccountService(logger, walletClient)
+
+  ```
+
+  `getAccount` now takes strongly typed 0x string
+
+- 1e7b82e: Remove Alfajores
+
+### Patch Changes
+
+- 49922d5: Add Celo Sepolia testnet support and fix E2E tests
+  - Add Celo Sepolia testnet support across ODIS components including combiner, signer, monitor, and identity packages
+  - Add Celo Sepolia contract addresses and RPC endpoints
+  - Add test commands for running E2E tests against Celo Sepolia
+  - Upgrade TypeScript to 5.4.5 in signer package to support @tsconfig/node22
+  - Fix type assertion issues in E2E tests by using proper `as Type` syntax
+  - Standardize DEK test values in common package to prevent conflicts between combiner and signer E2E tests
+  - Both test suites now reference the same DEK values to avoid overriding each other on shared blockchain
+
+- 31a7ca2: Resolve body-parser to patched versions 1.20.9 and 2.4.0 within their existing major lines to fix compressed-request denial of service (CVE-2026-111181).
+- b930831: Resolve critical Dependabot alerts in transitive dependencies (elliptic, pbkdf2, sha.js, cipher-base, form-data, proxy-addr, tar, websocket-driver, fast-xml-parser, basic-ftp, handlebars) via Yarn resolutions.
+- 7dc8154: `yarn start:docker` and `yarn start:docker:tracing`, which the images and the Helm charts run, no longer compile TypeScript before they start the service. The image build has already compiled it, so a pod no longer spends a minute or two and up to 1.5 GiB of memory on `tsc` at every start. The images now keep only production dependencies, without TypeScript. Outside the image, run `yarn build` before `yarn start:docker`.
+- Updated dependencies [49922d5]
+- Updated dependencies [fe06bbf]
+- Updated dependencies [d28d5fe]
+- Updated dependencies [cc5df33]
+- Updated dependencies [1e7b82e]
+  - @celo/phone-number-privacy-common@4.0.0
+
 ## 3.1.2
 
 ### Patch Changes
