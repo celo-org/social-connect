@@ -14,7 +14,7 @@ const { version } = require('blind-threshold-bls/package.json')
 const hex = (bytes) => Buffer.from(bytes).toString('hex')
 const sha256 = (label) => crypto.createHash('sha256').update(label).digest()
 
-// The dev key versions 1 to 3 from packages/common/src/test/values.ts
+// The dev key versions 1 to 3 from odis-combiner-4.0.5:packages/common/src/test/values.ts
 // (PNP_THRESHOLD_DEV_PK_SHARE_{1,2,3}_V{n}, PNP_THRESHOLD_DEV_POLYNOMIAL_V{n},
 // PNP_THRESHOLD_DEV_PUBKEY_V{n}).
 const DEV_KEYS = [
@@ -74,7 +74,8 @@ keys.push({
   shares: Array.from({ length: fresh.numShares() }, (_, i) => hex(fresh.getShare(i))),
 })
 
-// Message 0 is the blinded message of apps/combiner/test/integration/pnp.test.ts.
+// Message 0 is the blinded message of
+// odis-combiner-4.0.5:apps/combiner/test/integration/pnp.test.ts.
 const seed0 = new Uint8Array(32)
 for (let i = 0; i < 31; i++) seed0[i] = i
 const messages = [

@@ -1,5 +1,5 @@
 //! Authentication of a PNP request, in the TS combiner's order
-//! (`packages/common/src/utils/authentication.ts:50-98`).
+//! (`odis-combiner-4.0.5:packages/common/src/utils/authentication.ts:50-98`).
 
 use odis_signer::auth::{authenticate_user, verify_dek_signature};
 use odis_signer::types::AuthenticationMethod;

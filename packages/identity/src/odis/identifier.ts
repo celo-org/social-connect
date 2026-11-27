@@ -4,16 +4,16 @@ import {
   getIdentifierHash as baseGetIdentifierHash,
   getPrefixedIdentifier,
 } from '@celo/odis-identifiers'
+import { soliditySha3 } from '@celo/utils/lib/solidity'
+import { createHash } from 'crypto'
+import debugFactory from 'debug'
+import { BlsBlindingClient, WasmBlsBlindingClient } from './bls-blinding-client'
 import {
   CombinerEndpointPNP,
   KEY_VERSION_HEADER,
   SignMessageRequest,
   SignMessageResponseSchema,
-} from '@celo/phone-number-privacy-common'
-import { soliditySha3 } from '@celo/utils/lib/solidity'
-import { createHash } from 'crypto'
-import debugFactory from 'debug'
-import { BlsBlindingClient, WasmBlsBlindingClient } from './bls-blinding-client'
+} from './protocol'
 import {
   AuthSigner,
   AuthenticationMethod,

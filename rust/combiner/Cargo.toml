@@ -32,11 +32,15 @@ tracing = { workspace = true }
 [dev-dependencies]
 alloy-signer = { workspace = true }
 alloy-signer-local = { workspace = true }
+flate2 = "1"
 http-body-util = { workspace = true }
+hyper = { version = "1", features = ["client", "http1"] }
+hyper-util = { version = "0.1", features = ["tokio"] }
 k256 = { workspace = true, features = ["ecdsa"] }
 rand_chacha = { workspace = true }
 rand_core = { workspace = true }
 sha2 = { workspace = true }
 tempfile = { workspace = true }
+testcontainers = { version = "0.27.3", features = ["host-port-exposure"] }
 tower = { workspace = true, features = ["util"] }
 tracing-subscriber = { workspace = true }

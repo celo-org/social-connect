@@ -11,15 +11,17 @@ SocialConnect is an open-source protocol that maps off-chain personal identifier
 Yarn workspaces monorepo with packages and apps:
 
 **Packages** (`/packages`) - Published to NPM:
-- `@celo/phone-number-privacy-common` - Shared library for combiner/signer services
-- `@celo/identity` - Main SDK for consuming SocialConnect (identifier obfuscation, attestation lookup/registration)
+- `@celo/identity` - SDK for SocialConnect: identifier obfuscation through ODIS, attestation
+  lookup and registration, and the ODIS PNP request and response types
 - `@celo/odis-identifiers` - Identifier prefix definitions and hashing functions
-- `@celo/encrypted-backup` - Account recovery SDK powered by ODIS
 
-**Apps** (`/apps`) - Deployed services:
-- `signer` - Signs partial threshold BLS signatures for blinded messages
-- `combiner` - Orchestrates and combines threshold BLS signatures from signers
+**Apps** (`/apps`):
 - `monitor` - Firebase Cloud Functions for health checks and load testing
+
+**Services** (`/rust`): the ODIS signer and combiner, see the Rust sections below.
+
+**End-to-end suites** (`/e2e`, private workspace `odis-e2e`): PNP tests against a running signer
+or combiner, whichever implementation.
 
 ## Build Commands
 
@@ -39,17 +41,18 @@ yarn test:fast          # Test only modified packages
 yarn workspace @celo/identity run test
 yarn workspace @celo/identity run build
 yarn --cwd=packages/identity test
-yarn --cwd=apps/signer test:coverage
 ```
 
 ## Testing
 
 Jest is configured at root level. Tests are colocated with source in `*.test.ts` or `*.spec.ts` files.
 
-E2E tests run against deployed ODIS instances:
+E2E tests run against deployed ODIS instances. Set the version variable to the version the
+service under test reports at `/status`; the suite compares it with the version the service
+reports in its answers:
 ```bash
-yarn --cwd=apps/signer test:e2e:celo-sepolia:0-2
-yarn --cwd=apps/combiner test:e2e:celo-sepolia
+DEPLOYED_SIGNER_SERVICE_VERSION=<version> yarn --cwd=e2e test:signer:celo-sepolia:0   # also :1 and :2
+DEPLOYED_COMBINER_SERVICE_VERSION=<version> yarn --cwd=e2e test:combiner:celo-sepolia
 ```
 
 ## Code Quality
@@ -66,45 +69,52 @@ Uses changesets for versioning. Every PR impacting consumers needs a changeset:
 yarn cs                 # Create a changeset
 ```
 
+The TS signer and combiner are released from `release/odis-ts-4.x`; see RELEASE.md.
+
 ## Commit Messages
 
 Subjects follow [Scoped Commits](https://scopedcommits.com): `<scope>: <description>`, for example `monitor: set CHAIN_ID for the mainnet deploy`. There is no type prefix such as `feat` or `fix`.
 
-- The scope names the component the commit changes. An app or package takes its directory name (`signer`, `combiner`, `monitor`, `common`, `identity`, `odis-identifiers`, `encrypted-backup`). A Rust crate takes its directory name under `rust/` plus `-rs` (`signer-rs`), which keeps it apart from the TS app of the same name. Changes outside the components use `ci`, `deps` or `docs`.
+- The scope names the component the commit changes. An app, package or workspace takes its directory name (`monitor`, `identity`, `odis-identifiers`, `e2e`). A Rust crate takes its directory name under `rust/` plus `-rs` (`signer-rs`, `combiner-rs`), which keeps it apart from the TS app of the same name on `release/odis-ts-4.x`. Changes outside the components use `ci`, `deps` or `docs`.
 - A commit that changes two components names both, separated by a comma. One that changes the whole repo uses `treewide`.
 - Merges and reverts keep Git's default subject.
 - The description is imperative, starts in lower case and has no full stop. It does not repeat the scope: `signer-rs: add JSON log output`, not `signer-rs: add JSON log output to the Rust signer`.
 
 ## Architecture Notes
 
-**App structure** follows domain-driven design:
-```
-src/
-  ├── common/     # Shared utilities, database, key management
-  ├── domain/     # Business logic endpoints and services
-  └── pnp/        # Phone Number Privacy specific endpoints/services
-```
-
-**Database**: Apps use Knex.js with support for PostgreSQL, MySQL, MSSQL, SQLite. Migrations via `db:migrate` scripts.
-
-**Cryptography**: Blind threshold BLS signatures via `blind-threshold-bls` package. HSM support for Azure in signer app.
-
-**Observability**: Bunyan logging, OpenTelemetry tracing, Prometheus metrics.
+**Cryptography**: Blind threshold BLS signatures via `blind-threshold-bls`.
 
 ## Key Dependencies
 
 - `viem` - Modern Ethereum client for blockchain interaction
 - `blind-threshold-bls` - BLS threshold signatures (aliased from `@celo/blind-threshold-bls`)
 - `io-ts` / `fp-ts` - Runtime type validation and functional programming
-- `knex` - Database query builder and migrations
+
+## TS signer and combiner
+
+- The TS signer and combiner live on `release/odis-ts-4.x`, not on `main`. Fixes go to that
+  branch and are released from there with a tag (RELEASE.md). Never restore their code to `main`.
+- Refer to TS code by tag, which never moves: `git show odis-signer-4.0.6:apps/signer/...`,
+  `git show odis-combiner-4.0.5:apps/combiner/...`.
+- A fix that also applies to the Rust services gets ported to `main`.
+- Requests the SDK builds must be accepted unchanged by the TS signers that operators still run
+  and by the Rust services.
+
+## Libraries
+
+- `@celo/encrypted-backup`, `@celo/phone-number-privacy-common` and the ODIS domain API are
+  sunset. Don't bring them back, and don't add domain features.
+- Add a `resolutions` pin only for a security fix that the direct dependency hasn't picked up
+  yet, and remove it once it has. A pin freezes the version, so a later advisory against it
+  stays unfixed.
 
 ## Rust Signer Port
 
-The Rust signer (`rust/signer`, crate name `odis-signer`) is a near-complete port of the TypeScript signer. PNP endpoints are fully implemented and tested; domain endpoints return 503 stubs.
+The Rust signer (`rust/signer`, crate name `odis-signer`) replaces the TypeScript signer (last release: tag `odis-signer-4.0.6`). PNP endpoints are fully implemented and tested; domain endpoints return 503 stubs.
 
 ### Structure
 
-Cargo workspace with root `Cargo.toml` and single member `rust/signer`. The crate is both a binary (`main.rs`) and library (`lib.rs` re-exports all modules).
+Cargo workspace with root `Cargo.toml` and two members, `rust/signer` and `rust/combiner`. The crate is both a binary (`main.rs`) and library (`lib.rs` re-exports all modules).
 
 ```
 rust/signer/src/
@@ -154,7 +164,7 @@ just fmt-check      # fmt --check
 just build          # debug build
 just build-release  # release build (LTO + strip)
 just run-e2e-signer # start local signer with mock keys against Celo Sepolia
-just test-e2e       # run TS E2E tests against local signer
+just test-e2e       # run the PNP suite in `e2e/` against the local signer
 ```
 
 The default `just` target runs: check, fmt-check, clippy, test.
@@ -163,7 +173,7 @@ The default `just` target runs: check, fmt-check, clippy, test.
 
 `dockerfiles/Dockerfile-signer-rs` — multi-stage build (`rust:1.100.0-trixie` → `debian:trixie-slim`), runs as `nobody`.
 
-Both base images are pinned by digest, like the TS images. The build stage does not read `rust-toolchain.toml`, so the Rust version is set in two places: bump `rust-toolchain.toml` and the `rust:` tag and digest in the Dockerfile together. Keep both stages on the same Debian release, because a binary built on a newer release needs a newer glibc than an older runtime image has. Get a digest with `docker buildx imagetools inspect <image>:<tag>`.
+Both base images are pinned by digest. The build stage does not read `rust-toolchain.toml`, so the Rust version is set in two places: bump `rust-toolchain.toml` and the `rust:` tag and digest in the Dockerfile together. Keep both stages on the same Debian release, because a binary built on a newer release needs a newer glibc than an older runtime image has. Get a digest with `docker buildx imagetools inspect <image>:<tag>`.
 
 ### Parity with the TS signer
 
@@ -188,7 +198,7 @@ A combiner uses Rust and TS signers side by side, so a request the combiner forw
 - Repository pattern for DB access
 - Config via environment variables with `dotenvy` + manual parsing (no complex config frameworks)
 - Keep structs flat, derive Debug/Clone/Serialize/Deserialize where useful
-- Always add tests, make sure all test cases from the TS signer are covered
+- Always add tests, make sure all test cases from the TS signer (tag `odis-signer-4.0.6`) are covered
 - Assert the exact error or the whole response body, not `is_err()` or the status alone. A test that only checks for failure keeps passing when a new check fails first.
 - To test a database failure, break a real SQLite file from a second connection (see `database_failures_return_the_ts_error_strings`); do not fake the request service.
 - Tests that read a counter compare its value before and after. They are exact under `cargo nextest`, which runs each test in its own process; under plain `cargo test` all tests share one metrics recorder.
@@ -198,7 +208,7 @@ A combiner uses Rust and TS signers side by side, so a request the combiner forw
 
 ## Rust Combiner Port
 
-The Rust combiner (`rust/combiner`, crate name `odis-combiner`) is a port of the TypeScript combiner's PNP endpoints. It depends on `odis-signer` for authentication, logging, env helpers and request types (`AuthenticationMethod`, `KEY_VERSION_HEADER`, `is_valid_blinded_phone_number`). The domain endpoints return 503 stubs. The crate is both a binary (`main.rs`) and a library (`lib.rs` re-exports all modules).
+The Rust combiner (`rust/combiner`, crate name `odis-combiner`) is a port of the TypeScript combiner's PNP endpoints (last release: tag `odis-combiner-4.0.5`). It depends on `odis-signer` for authentication, logging, env helpers and request types (`AuthenticationMethod`, `KEY_VERSION_HEADER`, `is_valid_blinded_phone_number`). The domain endpoints return 503 stubs. The crate is both a binary (`main.rs`) and a library (`lib.rs` re-exports all modules).
 
 ### Structure
 
@@ -225,9 +235,9 @@ rust/combiner/tests/
   recorder.rs             # The global recorder, in a process of its own
   startup.rs              # The built binary's refusals to start, as the operator reads them
   proxy.rs                # Signer calls and full node lookups go through the proxy, as one test
+  differential/           # the released TS combiner image and this combiner on the same requests
   common/                 # Shared test helpers
   data/                   # BLS combine and canonical body vectors, and the scripts that write them
-apps/combiner/test/differential/  # Jest: Rust and TS combiners compared on the same requests
 ```
 
 ### Endpoints
@@ -248,11 +258,11 @@ The signer's recipes cover the combiner too (`just`, `just test`, `just clippy`,
 
 ```bash
 just check-tls                                   # fail if Cargo.lock holds a TLS stack other than rustls
-just test-differential                           # compare with the TS combiner on the same requests; needs `yarn build` first
+just test-differential                           # compare with the released TS combiner image on the same requests; needs Docker
 just test-e2e-combiner <url> <version>           # TS end-to-end suite against the combiner at <url> that reports <version>
 ```
 
-`test-e2e-combiner` runs `yarn --cwd=apps/combiner test:e2e:pnp` on Celo Sepolia, with `ODIS_COMBINER_SERVICE_URL` and `DEPLOYED_COMBINER_SERVICE_VERSION` set from the arguments. It spends quota of a shared test account.
+`test-e2e-combiner` runs `yarn --cwd=e2e test:combiner:celo-sepolia` on Celo Sepolia, with `ODIS_COMBINER_SERVICE_URL` and `DEPLOYED_COMBINER_SERVICE_VERSION` set from the arguments. It spends quota of a shared test account.
 
 ### Docker
 
@@ -270,3 +280,4 @@ A client and an operator must see the TS combiner's answers: status, body, error
 - Metric names are the TS combiner's, label names snake_case. The recorder is global to the process. Outside tests, only `main.rs` installs it, and the router takes the handle. A test installs the combiner's recorder only in a process with no in-process Rust signer: its own test binary (`tests/recorder.rs`, `tests/metrics.rs`) or once per process through a `OnceLock` (`tests/server.rs`). Tests that run Rust signers in-process use `odis_signer::metrics::install_recorder()` (`tests/common/mod.rs`).
 - Tests run the combiner in front of real `odis-signer` routers on real ports; misbehaving signers are small axum servers. Assert the exact error string or the whole body.
 - `tests/data/canonical_body_vectors.json` and `tests/data/combine_vectors.json` hold what the TS code answers. Do not edit them by hand; regenerate with `node rust/combiner/tests/data/generate_canonical_body_vectors.js` and `node rust/combiner/tests/data/generate_combine_vectors.js`.
+- The differential test runs the TS combiner from its released image, pinned by digest, in front of in-process Rust signers. It skips without Docker, and CI requires it.

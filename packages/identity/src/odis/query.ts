@@ -1,22 +1,18 @@
 import { selectiveRetryAsyncWithBackOff } from '@celo/base/lib/async'
-import {
-  AuthenticationMethod,
-  CombinerEndpoint,
-  DomainEndpoint,
-  DomainRequest,
-  DomainRequestHeader,
-  DomainResponse,
-  OdisRequest,
-  OdisRequestHeader,
-  OdisResponse,
-  PhoneNumberPrivacyRequest,
-  signWithRawKey,
-} from '@celo/phone-number-privacy-common'
 import fetch from 'cross-fetch'
 import debugFactory from 'debug'
 import { isLeft } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import { Address, Hex, isAddress, SignableMessage } from 'viem'
+import {
+  AuthenticationMethod,
+  CombinerEndpoint,
+  OdisRequest,
+  OdisRequestHeader,
+  OdisResponse,
+  PhoneNumberPrivacyRequest,
+  signWithRawKey,
+} from './protocol'
 
 const debug = debugFactory('kit:odis:query')
 
@@ -67,36 +63,14 @@ export const ODIS_CELO_SEPOLIA_CONTEXT_PNP: ServiceContext = {
     'kPoRxWdEdZ/Nd3uQnp3FJFs54zuiS+ksqvOm9x8vY6KHPG8jrfqysvIRU0wtqYsBKA7SoAsICMBv8C/Fb2ZpDOqhSqvr/sZbZoHmQfvbqrzbtDIPvUIrHgRS0ydJCMsA',
 }
 
-/**
- * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
- */
-export const ODIS_CELO_SEPOLIA_CONTEXT_DOMAINS: ServiceContext = {
-  odisUrl: 'https://odis-combiner.celo-sepolia.celo-testnet.org',
-  odisPubKey:
-    '+ZrxyPvLChWUX/DyPw6TuGwQH0glDJEbSrSxUARyP5PuqYyP/U4WZTV1e0bAUioBZ6QCJMiLpDwTaFvy8VnmM5RBbLQUMrMg5p4+CBCqj6HhsMfcyUj8V0LyuNdStlCB',
-}
-
 export const ODIS_MAINNET_CONTEXT_PNP: ServiceContext = {
   odisUrl: 'https://odis-combiner-mainnet.rc1-europe-west1.celo-testnet.org',
   odisPubKey:
     'FvreHfLmhBjwxHxsxeyrcOLtSonC9j7K3WrS4QapYsQH6LdaDTaNGmnlQMfFY04Bp/K4wAvqQwO9/bqPVCKf8Ze8OZo8Frmog4JY4xAiwrsqOXxug11+htjEe1pj4uMA',
 }
 
-/**
- * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
- */
-export const ODIS_MAINNET_CONTEXT_DOMAINS: ServiceContext = {
-  odisUrl: 'https://odis-combiner-mainnet.rc1-europe-west1.celo-testnet.org',
-  odisPubKey:
-    'LX4tLiuYm8geZ3ztmH7oIWz4ohXt3ePRTd9BbG9RO86NMrApflioiOzKYtIsyjEA0uarnX8Emo+luTY4bwEWpgZDyPYE6UMWAoBaZBdy6NDMgAxSbdNtaQEq51fBjCUA',
-}
-
 export enum OdisAPI {
   PNP = 'pnp',
-  /**
-   * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
-   */
-  DOMAIN = 'domain',
 }
 
 export enum OdisContextName {
@@ -113,18 +87,14 @@ export function getServiceContext(
     case OdisContextName.CELO_SEPOLIA:
       return {
         [OdisAPI.PNP]: ODIS_CELO_SEPOLIA_CONTEXT_PNP,
-        [OdisAPI.DOMAIN]: ODIS_CELO_SEPOLIA_CONTEXT_DOMAINS,
       }[api]
     case OdisContextName.STAGING:
       return {
-        // Intentionally the same on staging
         [OdisAPI.PNP]: ODIS_STAGING_CONTEXT,
-        [OdisAPI.DOMAIN]: ODIS_STAGING_CONTEXT,
       }[api]
     case OdisContextName.MAINNET:
       return {
         [OdisAPI.PNP]: ODIS_MAINNET_CONTEXT_PNP,
-        [OdisAPI.DOMAIN]: ODIS_MAINNET_CONTEXT_DOMAINS,
       }[api]
     default:
       return ODIS_MAINNET_CONTEXT_PNP
@@ -233,31 +203,4 @@ export async function queryOdis<R extends OdisRequest>(
     dontRetry,
     [],
   )
-}
-
-/**
- * Send the given domain request to ODIS (e.g. to get a POPRF evaluation or check quota).
- *
- * @deprecated The ODIS domains API is deprecated and will be switched off. See the notice in the README of @celo/encrypted-backup.
- *
- * @param body Request to send in the body of the HTTP request.
- * @param context Contains service URL and public to determine which instance to contact.
- * @param endpoint Endpoint to query (e.g. '/domain/sign', '/domain/quotaStatus').
- * @param responseSchema io-ts type for the expected response type. Provided to ensure type safety.
- * @param headers optional header fields relevant to the given request type (keyVersion, Authentication, etc.)
- */
-export async function sendOdisDomainRequest<R extends DomainRequest>(
-  body: R,
-  context: ServiceContext,
-  endpoint: DomainEndpoint,
-  responseSchema: t.Type<OdisResponse<R>>,
-  headers?: DomainRequestHeader<R>,
-): Promise<DomainResponse<R>> {
-  return queryOdis(
-    body,
-    context,
-    endpoint,
-    responseSchema,
-    headers as OdisRequestHeader<R>,
-  ) as Promise<DomainResponse<R>>
 }

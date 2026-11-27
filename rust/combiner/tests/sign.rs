@@ -1,7 +1,7 @@
 //! `/sign` through the combiner, in front of real Rust signers. The cases of the TS combiner's
-//! suite (`apps/combiner/test/integration/pnp.test.ts`) come first, with the same expected
-//! bodies, then cases the TS suite does not cover or where the Rust combiner differs from TS
-//! (CHANGELOG.md).
+//! suite (`odis-combiner-4.0.5:apps/combiner/test/integration/pnp.test.ts`) come first, with the
+//! same expected bodies, then cases the TS suite does not cover or where the Rust combiner differs
+//! from TS (CHANGELOG.md).
 
 mod common;
 

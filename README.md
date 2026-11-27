@@ -39,7 +39,7 @@ We've made a mini-series to explain you:
 
 ## 🧑‍💻 Quickstart
 
-The following steps use the  [Viem](https://viem.sh) to quickly set you up to play around with the protocol. If you would like to use a different library instead, please refer to the [example scripts](examples/).
+The following steps use the  [Viem](https://viem.sh) to quickly set you up to play around with the protocol. If you would like to use a different library instead, please refer to the [example scripts](docs/examples/).
 
 1. Add the [`@celo/identity`](https://www.npmjs.com/package/@celo/identity) package into your project.
 
@@ -47,7 +47,7 @@ The following steps use the  [Viem](https://viem.sh) to quickly set you up to pl
     npm install @celo/identity
     ```
 
-2. Set up your issuer (read "Authentication" section in [privacy.md](docs/docs/privacy.md#authentication)), which is the account registering attestations. When a user requests for the issuer to register an attestation, the issuer should [verify](docs/protocol.md#verification) somehow that the user owns their identifier (ex. SMS verification for phone number identifiers).
+2. Set up your issuer (read "Authentication" section in [privacy.md](docs/privacy.md#authentication)), which is the account registering attestations. When a user requests for the issuer to register an attestation, the issuer should [verify](docs/protocol.md#verification) somehow that the user owns their identifier (ex. SMS verification for phone number identifiers).
 
     ```ts
     import { createClient } from "viem";
@@ -168,7 +168,7 @@ The [Runtime Environments section](docs/privacy.md#runtime-environments) shows i
 
 - [NodeJS](https://nodejs.org) (see [Runtime Environments > Node](docs/privacy.md#node)),
 - [React Native](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwiK9paNjYH9AhUIesAKHQZ1CvYQFnoECA0QAQ&url=https%3A%2F%2Freactnative.dev%2F&usg=AOvVaw3N725EvNXK2_crezzoIs9d) (see [Runtime Environments > React Native](docs/privacy.md#react-native)), and
-- Web (see [Runtime Environments > Web](privacy.md#web))
+- Web (see [Runtime Environments > Web](docs/privacy.md#web))
 <!--
 The [emisianto web app](https://emisianto.vercel.app/) is a sample implementation of a phone number issuer. The code is hosted at [celo-org/emisianto](https://github.com/celo-org/emisianto). -->
 

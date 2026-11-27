@@ -42,3 +42,13 @@ Given a version number MAJOR.MINOR.PATCH, increment the:
 * PATCH version when you make backward compatible bug fixes
 
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
+
+## TS signer and combiner
+
+The TS signer and combiner are released from `release/odis-ts-4.x`, one branch for both. It takes security fixes, fixes for production bugs and Node 24 patch updates of the images: no features, and no dependency upgrades beyond security fixes. A fix that also applies to the Rust services in `rust/` gets ported to `main` too.
+
+To release one of them:
+
+1. Bump the version in `apps/{signer,combiner}/package.json` in a PR to `release/odis-ts-4.x`.
+2. After the PR merges, run `gh release create odis-signer-<version> --target release/odis-ts-4.x` (or `odis-combiner-<version>` for the combiner).
+3. The tag job builds the image.

@@ -1,5 +1,5 @@
+import { AuthenticationMethod } from '@celo/identity'
 import { EncryptionKeySigner } from '@celo/identity/lib/odis/query'
-import { AuthenticationMethod } from '@celo/phone-number-privacy-common'
 import {
   ensureLeading0x,
   normalizeAddressWith0x,

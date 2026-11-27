@@ -1,9 +1,6 @@
 ---
 "@celo/identity": minor
-"@celo/phone-number-privacy-common": minor
-"@celo/phone-number-privacy-combiner": minor
 "@celo/phone-number-privacy-monitor": minor
-"@celo/phone-number-privacy-signer": patch
 ---
 
 Add Celo Sepolia testnet support and fix E2E tests

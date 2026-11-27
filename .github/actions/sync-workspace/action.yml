@@ -19,9 +19,9 @@ runs:
         path: |
           ./.yarn/cache
           node_modules
-          app/**/node_modules
+          apps/**/node_modules
           packages/**/node_modules
-          examples/docs/node_modules
+          docs/examples/node_modules
         key: node-${{ runner.os }}-${{ runner.arch }}-${{ env.NODE_MODULE_CACHE_VERSION }}-${{ hashFiles('yarn.lock') }}-${{ inputs.package-json-checksum }}
         enableCrossOsArchive: true
         fail-on-cache-miss: "!${{ fromJSON(env.REBUILD_PACKAGE) }}"

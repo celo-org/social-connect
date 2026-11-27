@@ -1,0 +1,33 @@
+{
+  "name": "odis-e2e",
+  "private": true,
+  "description": "End-to-end tests of the ODIS signer and combiner APIs against running services",
+  "scripts": {
+    "build": "yarn run --top-level tsc --noEmit -p .",
+    "lint": "yarn run --top-level eslint .",
+    "test:signer": "jest --runInBand signer/pnp.test.ts",
+    "test:signer:celo-sepolia:0": "CONTEXT_NAME=celo-sepolia ODIS_SIGNER_SERVICE_URL=https://odis-signer0-celo-sepolia.celo-sepolia.celo-testnet.org yarn test:signer",
+    "test:signer:celo-sepolia:1": "CONTEXT_NAME=celo-sepolia ODIS_SIGNER_SERVICE_URL=https://odis-signer1-celo-sepolia.celo-sepolia.celo-testnet.org yarn test:signer",
+    "test:signer:celo-sepolia:2": "CONTEXT_NAME=celo-sepolia ODIS_SIGNER_SERVICE_URL=https://odis-signer2-celo-sepolia.celo-sepolia.celo-testnet.org yarn test:signer",
+    "test:signer:mainnet:0": "CONTEXT_NAME=mainnet ODIS_SIGNER_SERVICE_URL=https://odis-signer0-mainnet.rc1-europe-west1.celo-testnet.org yarn test:signer",
+    "test:signer:mainnet:1": "CONTEXT_NAME=mainnet ODIS_SIGNER_SERVICE_URL=https://odis-signer1-mainnet.rc1-europe-west1.celo-testnet.org yarn test:signer",
+    "test:combiner": "jest --runInBand combiner/pnp.test.ts --verbose",
+    "test:combiner:celo-sepolia": "CONTEXT_NAME=celo-sepolia ODIS_BLOCKCHAIN_PROVIDER=https://forno.celo-sepolia.celo-testnet.org yarn test:combiner",
+    "test:combiner:mainnet": "CONTEXT_NAME=mainnet yarn test:combiner"
+  },
+  "dependencies": {
+    "@celo/abis": "^13.0.0",
+    "@celo/base": "^7.0.0",
+    "@celo/identity": "workspace:^",
+    "@celo/utils": "^8.0.0",
+    "bignumber.js": "^9.1.2",
+    "blind-threshold-bls": "npm:@celo/blind-threshold-bls@1.0.0-beta",
+    "dotenv": "^8.2.0",
+    "node-fetch": "^2.6.9",
+    "viem": "^2.37.3"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.7",
+    "jest": "^29.7.0"
+  }
+}

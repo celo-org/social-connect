@@ -1,5 +1,5 @@
-import { AuthenticationMethod, CombinerEndpoint } from '@celo/phone-number-privacy-common'
 import fetchMock from '../__mocks__/cross-fetch'
+import { AuthenticationMethod, CombinerEndpoint } from './protocol'
 import { EncryptionKeySigner, ServiceContext } from './query'
 import { getPnpQuotaStatus, PnpClientQuotaStatus } from './quota'
 

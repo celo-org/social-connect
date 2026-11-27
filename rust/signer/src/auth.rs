@@ -30,7 +30,8 @@ impl<S: Send + Sync> FromRequestParts<S> for Authorization {
 /// Tries DEK verification first (when `authentication_method` is `EncryptionKey` and a DEK
 /// public key is available), then falls back to wallet key (EIP-191 personal_sign) verification.
 ///
-/// Matches the TS `authenticateUser` in `packages/common/src/utils/authentication.ts`.
+/// Matches the TS `authenticateUser` in
+/// `odis-signer-4.0.6:packages/common/src/utils/authentication.ts`.
 pub fn authenticate_user(
     body: &[u8],
     authorization: Option<&str>,

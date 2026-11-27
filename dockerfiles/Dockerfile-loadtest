@@ -6,8 +6,6 @@ FROM scratch AS packages
 # include all packages, or just the phone-number-privacy packages.
 WORKDIR /celo-phone-number-privacy/
 COPY apps/monitor apps/monitor
-COPY packages/common packages/common
-COPY packages/encrypted-backup packages/encrypted-backup
 COPY packages/identity packages/identity
 COPY packages/odis-identifiers packages/odis-identifiers
 

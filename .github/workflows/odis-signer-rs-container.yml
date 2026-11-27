@@ -1,13 +1,10 @@
 ---
 name: Build ODIS Rust signer image
 
-# Builds only when an input of dockerfiles/Dockerfile-signer-rs changes, so a
-# change to the TS signer does not rebuild this image and a change to the Rust
-# signer does not rebuild the TS one.
+# Builds only when an input of dockerfiles/Dockerfile-signer-rs changes.
 #
 # A release is a git tag named odis-rs-signer-<version>. The prefix must not
-# start with odis-signer-, which is the TS signer's release tag and would also
-# build the TS image.
+# start with odis-signer-, which the TS signer's release tags use.
 on:
   push:
     paths:
