@@ -1,5 +1,85 @@
 # @celo/phone-number-privacy-combiner
 
+## 5.0.0
+
+### Major Changes
+
+- cc5df33: Replace @celo/contractkit with viem
+
+  ### Breaking Changes
+
+  `startCombiner` now takes an optional WalletClient instance from viem instead of a ContractKit instance
+
+  config passed to `startCombiner` has a sub config `blockchain` which has the following changes.
+
+  ```diff
+  {
+    ...restOfConfig,
+    blockchain: {
+      - provider: "https://forno.celo.org"
+      + rpcURL: "https://forno.celo.org"
+      + chainID: 42220
+    }
+  }
+
+  ```
+
+  ***
+
+  `lib/common/web3` => `lib/common`
+
+  `getDEK` moved from
+
+  it now takes a WalletClient as its first param instead of a ContractKit.
+
+  third param is now typed to require address starts with 0x
+
+  ```diff
+  - export async function getDEK(kit: ContractKit, logger: Logger, account: string): Promise<string>
+  + export async function getDEK(client: Client, logger: Logger, account: Address): Promise<string>
+  ```
+
+  ***
+
+  lib/pnp/services/account-services`
+
+  `ContractKitAccountServiceOptions` => `ViemAccountServiceOptions`
+
+  `ContractKitAccountService` => `ViemAccountService`
+
+  addressed passed to `getAccount` now MUST start with `0x` in type
+
+- 1e7b82e: Remove Alfajores
+
+### Minor Changes
+
+- 49922d5: Add Celo Sepolia testnet support and fix E2E tests
+  - Add Celo Sepolia testnet support across ODIS components including combiner, signer, monitor, and identity packages
+  - Add Celo Sepolia contract addresses and RPC endpoints
+  - Add test commands for running E2E tests against Celo Sepolia
+  - Upgrade TypeScript to 5.4.5 in signer package to support @tsconfig/node22
+  - Fix type assertion issues in E2E tests by using proper `as Type` syntax
+  - Standardize DEK test values in common package to prevent conflicts between combiner and signer E2E tests
+  - Both test suites now reference the same DEK values to avoid overriding each other on shared blockchain
+
+### Patch Changes
+
+- 31a7ca2: Resolve body-parser to patched versions 1.20.9 and 2.4.0 within their existing major lines to fix compressed-request denial of service (CVE-2026-111181).
+- b930831: Resolve critical Dependabot alerts in transitive dependencies (elliptic, pbkdf2, sha.js, cipher-base, form-data, proxy-addr, tar, websocket-driver, fast-xml-parser, basic-ftp, handlebars) via Yarn resolutions.
+- 7dc8154: `yarn start:docker` and `yarn start:docker:tracing`, which the images and the Helm charts run, no longer compile TypeScript before they start the service. The image build has already compiled it, so a pod no longer spends a minute or two and up to 1.5 GiB of memory on `tsc` at every start. The images now keep only production dependencies, without TypeScript. Outside the image, run `yarn build` before `yarn start:docker`.
+- Updated dependencies [49922d5]
+- Updated dependencies [fe06bbf]
+- Updated dependencies [eeaa0a1]
+- Updated dependencies [6e8e6d6]
+- Updated dependencies [cc5df33]
+- Updated dependencies [6dada95]
+- Updated dependencies [d28d5fe]
+- Updated dependencies [cc5df33]
+- Updated dependencies [1e7b82e]
+  - @celo/identity@6.0.0
+  - @celo/phone-number-privacy-common@4.0.0
+  - @celo/encrypted-backup@6.0.0
+
 ## 3.3.3
 
 ### Patch Changes
